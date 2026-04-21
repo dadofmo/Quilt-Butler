@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { StepShell } from "@/components/StepShell";
 import { PatternDiagram } from "@/components/PatternDiagram";
 import { FABRIC_COLORS, FABRIC_LABELS, setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
-import { getPattern } from "@/lib/patterns";
+import { getPattern, fabricsForPattern } from "@/lib/patterns";
 
 export const Route = createFileRoute("/fabrics")({
   head: () => ({
@@ -29,6 +29,7 @@ function FabricsStep() {
 
   const hasBorder = planner.borderWidth > 0;
   const sections = pattern.sections.filter((s) => s.id !== "border" || hasBorder);
+  const availableFabrics = fabricsForPattern(pattern, hasBorder);
 
   const update = (sectionId: string, fab: FabricKey) => {
     setPlanner({ assignments: { ...planner.assignments, [sectionId]: fab } });
@@ -72,8 +73,11 @@ function FabricsStep() {
                 {s.hint && (
                   <div className="text-muted-foreground mb-3 text-xs leading-snug">{s.hint}</div>
                 )}
-                <div className="grid grid-cols-4 gap-2">
-                  {(["A", "B", "C", "D"] as FabricKey[]).map((f) => (
+                <div
+                  className="grid gap-2"
+                  style={{ gridTemplateColumns: `repeat(${availableFabrics.length}, minmax(0,1fr))` }}
+                >
+                  {availableFabrics.map((f) => (
                     <button
                       key={f}
                       onClick={() => update(s.id, f)}
