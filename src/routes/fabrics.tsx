@@ -73,8 +73,11 @@ function FabricsStep() {
                 {s.hint && (
                   <div className="text-muted-foreground mb-3 text-xs leading-snug">{s.hint}</div>
                 )}
-                <div className="grid grid-cols-4 gap-2">
-                  {(["A", "B", "C", "D"] as FabricKey[]).map((f) => (
+                <div
+                  className="grid gap-2"
+                  style={{ gridTemplateColumns: `repeat(${availableFabrics.length}, minmax(0,1fr))` }}
+                >
+                  {availableFabrics.map((f) => (
                     <button
                       key={f}
                       onClick={() => update(s.id, f)}
