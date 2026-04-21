@@ -19,9 +19,9 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     case "simple-squares":
       return (
         <svg {...common} aria-hidden>
-          {[0, 30, 60].flatMap((y) =>
-            [0, 30, 60].map((x) => (
-              <rect key={`${x}-${y}`} x={x + 1} y={y + 1} width={28} height={28} fill={(x + y) % 60 === 0 ? C.a : C.b} />
+          {[0, 22.5, 45, 67.5].flatMap((y) =>
+            [0, 22.5, 45, 67.5].map((x) => (
+              <rect key={`${x}-${y}`} x={x + 1} y={y + 1} width={20.5} height={20.5} fill={C.a} />
             )),
           )}
         </svg>
