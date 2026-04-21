@@ -42,12 +42,15 @@ function FabricsStep() {
       backTo="/size"
     >
       <div className="grid gap-6 sm:grid-cols-[auto_1fr] sm:gap-8">
-        <div className="flex justify-center">
+        <div className="flex flex-col items-center gap-2">
           <PatternDiagram
             pattern={pattern.id}
             assignments={planner.assignments}
             hasBorder={hasBorder}
           />
+          <p className="text-muted-foreground max-w-[280px] text-center text-xs">
+            Preview only — use the fabric buttons below to change colors.
+          </p>
         </div>
 
         <div className="space-y-4">
