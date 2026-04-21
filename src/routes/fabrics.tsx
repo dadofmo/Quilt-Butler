@@ -38,9 +38,19 @@ function FabricsStep() {
     <StepShell
       step={3}
       title={`Assign fabrics — ${pattern.name}`}
-      subtitle="Pick a fabric for each part. The diagram updates as you choose."
+      subtitle="Pick a fabric for each part of the block. The diagram updates as you choose."
       backTo="/size"
     >
+      <div className="bg-accent/60 border-primary/30 mb-6 rounded-xl border-2 p-4">
+        <div className="text-accent-foreground mb-1 text-sm font-semibold uppercase tracking-wide">
+          How {pattern.name} works
+        </div>
+        <p className="text-foreground text-sm leading-relaxed">{pattern.intro}</p>
+        <p className="text-muted-foreground mt-2 text-xs">
+          Tip: each "Fabric" (A / B / C / D) is one bolt you'll buy. Use the same letter for parts you want to look the same.
+        </p>
+      </div>
+
       <div className="grid gap-6 sm:grid-cols-[auto_1fr] sm:gap-8">
         <div className="flex flex-col items-center gap-2">
           <PatternDiagram
@@ -58,7 +68,10 @@ function FabricsStep() {
             const current = (planner.assignments[s.id] ?? s.defaultFabric) as FabricKey;
             return (
               <div key={s.id} className="bg-card rounded-xl border-2 border-border p-4">
-                <div className="text-foreground mb-3 text-base font-semibold">{s.label}</div>
+                <div className="text-foreground mb-1 text-base font-semibold">{s.label}</div>
+                {s.hint && (
+                  <div className="text-muted-foreground mb-3 text-xs leading-snug">{s.hint}</div>
+                )}
                 <div className="grid grid-cols-4 gap-2">
                   {(["A", "B", "C", "D"] as FabricKey[]).map((f) => (
                     <button
