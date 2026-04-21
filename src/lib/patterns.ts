@@ -151,3 +151,18 @@ export function getPattern(id: PatternId | null): PatternDef | null {
   if (!id) return null;
   return PATTERNS.find((p) => p.id === id) ?? null;
 }
+
+/**
+ * The fabrics a pattern actually uses = unique defaultFabric values across
+ * all its sections (border included only when the user picked a border).
+ * Returned in canonical order A, B, C, D.
+ */
+export function fabricsForPattern(pattern: PatternDef, includeBorder: boolean): FabricKey[] {
+  const order: FabricKey[] = ["A", "B", "C", "D"];
+  const used = new Set<FabricKey>();
+  pattern.sections.forEach((s) => {
+    if (s.id === "border" && !includeBorder) return;
+    used.add(s.defaultFabric);
+  });
+  return order.filter((f) => used.has(f));
+}
