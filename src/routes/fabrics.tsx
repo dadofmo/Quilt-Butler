@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { StepShell } from "@/components/StepShell";
 import { PatternDiagram } from "@/components/PatternDiagram";
 import { FABRIC_COLORS, FABRIC_LABELS, setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
-import { getPattern } from "@/lib/patterns";
+import { getPattern, fabricsForPattern } from "@/lib/patterns";
 
 export const Route = createFileRoute("/fabrics")({
   head: () => ({
@@ -29,6 +29,7 @@ function FabricsStep() {
 
   const hasBorder = planner.borderWidth > 0;
   const sections = pattern.sections.filter((s) => s.id !== "border" || hasBorder);
+  const availableFabrics = fabricsForPattern(pattern, hasBorder);
 
   const update = (sectionId: string, fab: FabricKey) => {
     setPlanner({ assignments: { ...planner.assignments, [sectionId]: fab } });
