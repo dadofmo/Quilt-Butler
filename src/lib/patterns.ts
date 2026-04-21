@@ -4,6 +4,7 @@ export interface PatternSection {
   id: string;
   label: string;
   defaultFabric: FabricKey;
+  hint?: string;
 }
 
 export interface PatternDef {
@@ -11,17 +12,24 @@ export interface PatternDef {
   name: string;
   sections: PatternSection[];
   hasMath: boolean;
+  intro: string;
 }
 
-const borderSection: PatternSection = { id: "border", label: "Border", defaultFabric: "C" };
+const borderSection: PatternSection = {
+  id: "border",
+  label: "Border",
+  defaultFabric: "C",
+  hint: "The frame around the whole quilt.",
+};
 
 export const PATTERNS: PatternDef[] = [
   {
     id: "simple-squares",
     name: "Simple Squares",
     hasMath: false,
+    intro: "A grid of identical squares. Pick one fabric for all the squares, plus an optional border fabric.",
     sections: [
-      { id: "squares", label: "Squares", defaultFabric: "A" },
+      { id: "squares", label: "Squares", defaultFabric: "A", hint: "Every square in the grid uses this fabric." },
       borderSection,
     ],
   },
@@ -29,9 +37,20 @@ export const PATTERNS: PatternDef[] = [
     id: "nine-patch",
     name: "Nine Patch",
     hasMath: true,
+    intro: "Each block is a 3×3 grid (9 small squares) using two fabrics in a checkerboard. Pick a fabric for the 5 corner+center squares and a contrasting fabric for the 4 squares between them.",
     sections: [
-      { id: "center", label: "Center & corner squares", defaultFabric: "A" },
-      { id: "outer", label: "Alternating squares", defaultFabric: "B" },
+      {
+        id: "center",
+        label: "Center & corner squares (5 per block)",
+        defaultFabric: "A",
+        hint: "The 4 corners + the middle square of each block — usually the bolder fabric.",
+      },
+      {
+        id: "outer",
+        label: "Alternating squares (4 per block)",
+        defaultFabric: "B",
+        hint: "The 4 squares between the corners — pick something that contrasts.",
+      },
       borderSection,
     ],
   },
@@ -39,9 +58,10 @@ export const PATTERNS: PatternDef[] = [
     id: "hst",
     name: "Half Square Triangles",
     hasMath: true,
+    intro: "Each block is a square split diagonally into two triangles of different fabrics. Pick a fabric for each triangle.",
     sections: [
-      { id: "tri1", label: "Triangle A", defaultFabric: "A" },
-      { id: "tri2", label: "Triangle B", defaultFabric: "B" },
+      { id: "tri1", label: "Triangle A", defaultFabric: "A", hint: "One half of every block." },
+      { id: "tri2", label: "Triangle B", defaultFabric: "B", hint: "The other half — pick a contrasting fabric." },
       borderSection,
     ],
   },
@@ -49,10 +69,11 @@ export const PATTERNS: PatternDef[] = [
     id: "rail-fence",
     name: "Rail Fence",
     hasMath: false,
+    intro: "Each block is three parallel strips (rails) stacked together. Pick a fabric for each rail.",
     sections: [
-      { id: "rail1", label: "Rail 1", defaultFabric: "A" },
-      { id: "rail2", label: "Rail 2", defaultFabric: "B" },
-      { id: "rail3", label: "Rail 3", defaultFabric: "D" },
+      { id: "rail1", label: "Top rail", defaultFabric: "A" },
+      { id: "rail2", label: "Middle rail", defaultFabric: "B" },
+      { id: "rail3", label: "Bottom rail", defaultFabric: "D" },
       borderSection,
     ],
   },
@@ -60,10 +81,11 @@ export const PATTERNS: PatternDef[] = [
     id: "log-cabin",
     name: "Log Cabin",
     hasMath: false,
+    intro: "A small center square framed by 'logs' that spiral outward — half light, half dark.",
     sections: [
-      { id: "center", label: "Center", defaultFabric: "D" },
-      { id: "light", label: "Light logs", defaultFabric: "B" },
-      { id: "dark", label: "Dark logs", defaultFabric: "A" },
+      { id: "center", label: "Center square", defaultFabric: "D", hint: "Traditionally red — the 'hearth'." },
+      { id: "light", label: "Light logs", defaultFabric: "B", hint: "Strips on one side of the block." },
+      { id: "dark", label: "Dark logs", defaultFabric: "A", hint: "Strips on the opposite side." },
       borderSection,
     ],
   },
@@ -71,10 +93,11 @@ export const PATTERNS: PatternDef[] = [
     id: "ohio-star",
     name: "Ohio Star",
     hasMath: false,
+    intro: "An 8-pointed star sitting on a background, with a small center square.",
     sections: [
-      { id: "star", label: "Star points", defaultFabric: "A" },
-      { id: "bg", label: "Background", defaultFabric: "B" },
-      { id: "center", label: "Center", defaultFabric: "D" },
+      { id: "star", label: "Star points", defaultFabric: "A", hint: "The triangles forming the star." },
+      { id: "bg", label: "Background", defaultFabric: "B", hint: "Around and between the star points." },
+      { id: "center", label: "Center square", defaultFabric: "D" },
       borderSection,
     ],
   },
@@ -82,9 +105,10 @@ export const PATTERNS: PatternDef[] = [
     id: "flying-geese",
     name: "Flying Geese",
     hasMath: false,
+    intro: "Rows of triangle 'geese' flying across a sky background.",
     sections: [
-      { id: "goose", label: "Goose", defaultFabric: "A" },
-      { id: "sky", label: "Sky", defaultFabric: "B" },
+      { id: "goose", label: "Geese (triangles)", defaultFabric: "A" },
+      { id: "sky", label: "Sky (background)", defaultFabric: "B" },
       borderSection,
     ],
   },
@@ -92,9 +116,10 @@ export const PATTERNS: PatternDef[] = [
     id: "disappearing-nine-patch",
     name: "Disappearing Nine Patch",
     hasMath: false,
+    intro: "Start with a nine-patch block, then cut it into quarters and rearrange — creates a more complex look from two fabrics.",
     sections: [
-      { id: "center", label: "Center squares", defaultFabric: "A" },
-      { id: "outer", label: "Outer squares", defaultFabric: "B" },
+      { id: "center", label: "Center & corner squares", defaultFabric: "A" },
+      { id: "outer", label: "Alternating squares", defaultFabric: "B" },
       borderSection,
     ],
   },
@@ -102,9 +127,10 @@ export const PATTERNS: PatternDef[] = [
     id: "squares-on-point",
     name: "Squares on Point",
     hasMath: false,
+    intro: "Squares rotated 45° (like diamonds) sitting on a background fabric.",
     sections: [
-      { id: "square", label: "On-point squares", defaultFabric: "A" },
-      { id: "bg", label: "Background", defaultFabric: "B" },
+      { id: "square", label: "On-point squares", defaultFabric: "A", hint: "The diamond shapes." },
+      { id: "bg", label: "Background", defaultFabric: "B", hint: "The fabric they sit on." },
       borderSection,
     ],
   },
@@ -112,8 +138,9 @@ export const PATTERNS: PatternDef[] = [
     id: "plus-block",
     name: "Plus Block",
     hasMath: false,
+    intro: "A simple plus/cross shape on a background.",
     sections: [
-      { id: "plus", label: "Plus", defaultFabric: "A" },
+      { id: "plus", label: "Plus shape", defaultFabric: "A" },
       { id: "bg", label: "Background", defaultFabric: "B" },
       borderSection,
     ],
