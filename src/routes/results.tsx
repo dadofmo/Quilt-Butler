@@ -114,19 +114,62 @@ function ResultsStep() {
 
           <Section title="Shopping list">
             <div className="bg-card rounded-xl border-2 border-border p-5">
+              <p className="text-muted-foreground mb-4 text-sm">
+                Bring this to the fabric store. Write the fabric name on each line as you pick it
+                — that way you'll know exactly which bolt is "Fabric A" when you start cutting.
+              </p>
               <ul className="divide-y divide-border">
-                {result.fabrics.map((f) => (
-                  <li key={f.fabric} className="flex items-center justify-between py-3">
-                    <div className="flex items-center gap-3">
-                      <span
-                        className="border-border inline-block h-6 w-6 rounded border"
-                        style={{ background: FABRIC_COLORS[f.fabric] }}
-                      />
-                      <span className="text-foreground font-medium">{FABRIC_LABELS[f.fabric]}</span>
-                    </div>
-                    <span className="text-foreground text-lg font-semibold">{f.yards} yd</span>
-                  </li>
-                ))}
+                {result.fabrics.map((f) => {
+                  const name = planner.fabricNames[f.fabric] ?? "";
+                  return (
+                    <li key={f.fabric} className="py-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <span
+                            className="border-border inline-block h-6 w-6 rounded border"
+                            style={{ background: FABRIC_COLORS[f.fabric] }}
+                          />
+                          <span className="text-foreground font-medium">
+                            {FABRIC_LABELS[f.fabric]}
+                          </span>
+                        </div>
+                        <span className="text-foreground text-lg font-semibold whitespace-nowrap">
+                          {f.yards} yd
+                        </span>
+                      </div>
+                      <div className="mt-2 flex items-baseline gap-2 pl-9">
+                        <label
+                          htmlFor={`name-${f.fabric}`}
+                          className="text-muted-foreground shrink-0 text-sm"
+                        >
+                          Name:
+                        </label>
+                        {/* On screen: editable input. When printed: shows the
+                            typed name, OR a blank underline to fill in by hand. */}
+                        <input
+                          id={`name-${f.fabric}`}
+                          type="text"
+                          value={name}
+                          onChange={(e) =>
+                            setPlanner({
+                              fabricNames: {
+                                ...planner.fabricNames,
+                                [f.fabric]: e.target.value,
+                              },
+                            })
+                          }
+                          placeholder="e.g. Moda Bella – Bluebird"
+                          className="no-print border-input bg-background placeholder:text-muted-foreground/60 focus-visible:ring-ring flex-1 border-b-2 px-1 py-1 text-sm focus-visible:outline-none focus-visible:ring-1"
+                        />
+                        {/* Print-only: shows the name if filled, otherwise a blank
+                            underline the user can write on. */}
+                        <span className="print-only flex-1 border-b border-foreground pb-0.5 text-sm">
+                          {name || "\u00a0"}
+                        </span>
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
               <div className="text-muted-foreground mt-3 text-sm">
                 {planner.safetyBuffer ? "Includes 10% safety buffer." : "No safety buffer."} Rounded up to ¼ yard.

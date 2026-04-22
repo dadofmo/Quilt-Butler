@@ -26,6 +26,7 @@ export interface PlannerState {
   borderWidth: number; // inches, 0 for none
   assignments: SectionAssignments;
   safetyBuffer: boolean;
+  fabricNames: Partial<Record<FabricKey, string>>;
 }
 
 const initial: PlannerState = {
@@ -38,6 +39,7 @@ const initial: PlannerState = {
   borderWidth: 3,
   assignments: {},
   safetyBuffer: true,
+  fabricNames: {},
 };
 
 let state: PlannerState = initial;
