@@ -157,16 +157,30 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return (
-    <button
-      role="switch"
-      aria-checked={on}
-      onClick={() => onChange(!on)}
-      className={`relative h-7 w-12 rounded-full transition-colors ${on ? "bg-primary" : "bg-muted-foreground/40"}`}
-    >
-      <span
-        className={`bg-card absolute top-0.5 h-6 w-6 rounded-full shadow transition-transform ${on ? "translate-x-5" : "translate-x-0.5"}`}
-      />
-    </button>
+    <div className="flex items-center gap-3">
+      <span className={`text-sm font-semibold ${on ? "text-muted-foreground" : "text-foreground"}`}>
+        Off
+      </span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-label="Toggle 10% safety buffer"
+        onClick={() => onChange(!on)}
+        className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full border-2 transition-colors ${
+          on ? "border-primary bg-primary" : "border-border bg-card"
+        }`}
+      >
+        <span
+          className={`inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform ${
+            on ? "translate-x-7" : "translate-x-1"
+          }`}
+        />
+      </button>
+      <span className={`text-sm font-semibold ${on ? "text-foreground" : "text-muted-foreground"}`}>
+        On
+      </span>
+    </div>
   );
 }
 
