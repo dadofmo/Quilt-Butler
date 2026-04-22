@@ -55,8 +55,8 @@ function ResultsStep() {
         </div>
       ) : (
         <div className="space-y-8">
-          <div className="no-print bg-card flex items-center justify-between rounded-xl border-2 border-border p-4">
-            <div>
+          <div className="no-print bg-card flex items-center justify-between gap-4 rounded-xl border-2 border-border p-4">
+            <div className="min-w-0">
               <div className="text-foreground text-base font-semibold">10% safety buffer</div>
               <div className="text-muted-foreground text-sm">Adds extra fabric for shrinkage & mistakes.</div>
             </div>
@@ -157,16 +157,30 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return (
-    <button
-      role="switch"
-      aria-checked={on}
-      onClick={() => onChange(!on)}
-      className={`relative h-7 w-12 rounded-full transition-colors ${on ? "bg-primary" : "bg-muted-foreground/40"}`}
-    >
-      <span
-        className={`bg-card absolute top-0.5 h-6 w-6 rounded-full shadow transition-transform ${on ? "translate-x-5" : "translate-x-0.5"}`}
-      />
-    </button>
+    <div className="flex items-center gap-3">
+      <span className={`text-sm font-semibold ${on ? "text-muted-foreground" : "text-foreground"}`}>
+        Off
+      </span>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-label="Toggle 10% safety buffer"
+        onClick={() => onChange(!on)}
+        className={`relative inline-flex h-8 w-14 shrink-0 items-center rounded-full border-2 transition-colors ${
+          on ? "border-primary bg-primary" : "border-border bg-card"
+        }`}
+      >
+        <span
+          className={`inline-block h-6 w-6 transform rounded-full bg-white shadow transition-transform ${
+            on ? "translate-x-7" : "translate-x-1"
+          }`}
+        />
+      </button>
+      <span className={`text-sm font-semibold ${on ? "text-foreground" : "text-muted-foreground"}`}>
+        On
+      </span>
+    </div>
   );
 }
 
@@ -237,9 +251,9 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
       </div>
 
       {/* How-to legend */}
-      <ol className="text-foreground mb-4 list-decimal space-y-1 pl-5 text-sm">
+      <ol className="text-foreground mb-2 list-decimal space-y-1 pl-5 text-sm">
         <li>
-          Lay your <strong>{req.yards} yd</strong> of fabric flat, selvages on the left & right.
+          Lay your <strong>{req.yards} yd</strong> of fabric flat, with the <strong>finished edges</strong> on the left & right.
         </li>
         <li>
           Cut <strong>horizontal strips</strong> across the full {fabricWidth}" width at the heights shown.
@@ -250,6 +264,9 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
           </li>
         )}
       </ol>
+      <p className="text-muted-foreground mb-4 text-xs italic">
+        Tip: the "finished edges" (also called the <em>selvage</em>) are the tightly-woven side edges of the fabric that don't fray.
+      </p>
 
       <div className="overflow-x-auto">
         <svg width={svgW} height={svgH} className="block">
@@ -293,7 +310,7 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
             transform={`rotate(-90 ${PAD_LEFT - 8} ${PAD_TOP + boltH / 2})`}
             className="fill-muted-foreground text-[10px]"
           >
-            selvage
+            finished edge
           </text>
           <text
             x={PAD_LEFT + boltW + 8}
@@ -302,7 +319,7 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
             transform={`rotate(90 ${PAD_LEFT + boltW + 8} ${PAD_TOP + boltH / 2})`}
             className="fill-muted-foreground text-[10px]"
           >
-            selvage
+            finished edge
           </text>
 
           {/* Bolt outline */}
