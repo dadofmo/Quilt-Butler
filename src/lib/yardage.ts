@@ -86,6 +86,12 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const outerFab = s.assignments["outer"] ?? "B";
     addSquares(reqs[centerFab], "Center & corner squares", centerCount, cut, s.fabricWidth);
     addSquares(reqs[outerFab], "Alternating squares", outerCount, cut, s.fabricWidth);
+    notes.push(
+      `Each block uses 5 corner/center squares + 4 alternating squares (${cut}" cut size including seam allowance).`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${centerCount} squares of Fabric ${centerFab} (5 × ${blockCount}) and ${outerCount} squares of Fabric ${outerFab} (4 × ${blockCount}).`,
+    );
   } else if (s.pattern === "hst") {
     // Each block = 1 HST. Cut size for two HSTs from one square pair = finished + 7/8.
     // Simpler: each block needs 1 square of each fabric at (blockSize + 7/8) -> yields 2 HSTs (we use 1, waste 1).
