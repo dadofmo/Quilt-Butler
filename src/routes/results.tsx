@@ -251,9 +251,9 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
       </div>
 
       {/* How-to legend */}
-      <ol className="text-foreground mb-4 list-decimal space-y-1 pl-5 text-sm">
+      <ol className="text-foreground mb-2 list-decimal space-y-1 pl-5 text-sm">
         <li>
-          Lay your <strong>{req.yards} yd</strong> of fabric flat, selvages on the left & right.
+          Lay your <strong>{req.yards} yd</strong> of fabric flat, with the <strong>finished edges</strong> on the left & right.
         </li>
         <li>
           Cut <strong>horizontal strips</strong> across the full {fabricWidth}" width at the heights shown.
@@ -264,6 +264,9 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
           </li>
         )}
       </ol>
+      <p className="text-muted-foreground mb-4 text-xs italic">
+        Tip: the "finished edges" (also called the <em>selvage</em>) are the tightly-woven side edges of the fabric that don't fray.
+      </p>
 
       <div className="overflow-x-auto">
         <svg width={svgW} height={svgH} className="block">
