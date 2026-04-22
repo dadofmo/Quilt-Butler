@@ -204,36 +204,46 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
   type Row = {
     yIn: number; // top in inches
     hIn: number; // height in inches
-    label: string;
     subCutWidth?: number; // inches per sub-piece
-    subCutCount?: number; // pieces per strip
+    subCutCount?: number; // squares actually cut from THIS strip
+    perStripMax?: number; // max squares this strip could fit
     isBorder: boolean;
     stripIndex: number; // 1-based across all strips
   };
   const rows: Row[] = [];
   let y = 0;
   let stripIdx = 0;
+  // Track totals per strip-group to know how many squares to cut from the LAST strip
   req.strips.forEach((strip) => {
     const piece = strip.pieces[0];
     const isBorder = piece?.w === fabricWidth;
     const usable = fabricWidth - 0.5;
-    const subCount = piece && !isBorder ? Math.floor(usable / piece.w) : undefined;
+    const perStripMax = piece && !isBorder ? Math.floor(usable / piece.w) : undefined;
+    const totalNeeded = piece && !isBorder ? piece.count : 0;
+    let cutSoFar = 0;
     for (let i = 0; i < strip.count; i++) {
       stripIdx += 1;
+      const remaining = totalNeeded - cutSoFar;
+      const thisStripCount =
+        piece && !isBorder ? Math.min(perStripMax!, remaining) : undefined;
+      if (thisStripCount !== undefined) cutSoFar += thisStripCount;
       rows.push({
         yIn: y,
         hIn: strip.stripWidth,
-        label: isBorder
-          ? `Border strip — ${strip.stripWidth.toFixed(2)}" × full width`
-          : `Strip ${strip.stripWidth.toFixed(2)}" tall`,
         subCutWidth: piece && !isBorder ? piece.w : undefined,
-        subCutCount: subCount,
+        subCutCount: thisStripCount,
+        perStripMax,
         isBorder,
         stripIndex: stripIdx,
       });
       y += strip.stripWidth;
     }
   });
+
+  // Total squares needed for this fabric (sum of non-border piece counts)
+  const totalSquares = req.pieces
+    .filter((p) => p.w !== fabricWidth)
+    .reduce((sum, p) => sum + p.count, 0);
 
   return (
     <div className="bg-card rounded-xl border-2 border-border p-4">
@@ -258,9 +268,11 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
         <li>
           Cut <strong>horizontal strips</strong> across the full {fabricWidth}" width at the heights shown.
         </li>
-        {rows.some((r) => !r.isBorder) && (
+        {totalSquares > 0 && (
           <li>
-            Then sub-cut each strip along the <span className="text-muted-foreground">dashed lines</span> into the squares you need.
+            Sub-cut along the <span className="text-muted-foreground">dashed lines</span> to get
+            {" "}
+            <strong>{totalSquares} squares total</strong> from this fabric. The shaded area on the right of each strip is leftover (you can't fit another full square there).
           </li>
         )}
       </ol>
@@ -338,18 +350,51 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
           {rows.map((r, i) => {
             const ry = PAD_TOP + r.yIn * SCALE;
             const rh = r.hIn * SCALE;
+            const usedWidthIn =
+              !r.isBorder && r.subCutWidth && r.subCutCount
+                ? r.subCutCount * r.subCutWidth
+                : fabricWidth;
+            const usedW = usedWidthIn * SCALE;
+            const wasteW = boltW - usedW;
             return (
               <g key={i}>
+                {/* Used (cuttable) portion of the strip */}
                 <rect
                   x={PAD_LEFT}
                   y={ry}
-                  width={boltW}
+                  width={usedW}
                   height={rh}
                   fill={stripFill}
                   stroke={fabricColor}
                   strokeWidth={1}
                 />
-                {/* Sub-cut dashed lines (skip the rightmost edge) */}
+                {/* Leftover / waste portion */}
+                {wasteW > 1 && (
+                  <>
+                    <rect
+                      x={PAD_LEFT + usedW}
+                      y={ry}
+                      width={wasteW}
+                      height={rh}
+                      fill="var(--muted)"
+                      stroke={fabricColor}
+                      strokeWidth={1}
+                      strokeDasharray="2 2"
+                      opacity={0.7}
+                    />
+                    {wasteW > 28 && (
+                      <text
+                        x={PAD_LEFT + usedW + wasteW / 2}
+                        y={ry + rh / 2 + 3}
+                        textAnchor="middle"
+                        className="fill-muted-foreground text-[9px] italic"
+                      >
+                        leftover {(fabricWidth - usedWidthIn).toFixed(1)}"
+                      </text>
+                    )}
+                  </>
+                )}
+                {/* Sub-cut dashed lines between squares */}
                 {!r.isBorder && r.subCutWidth && r.subCutCount
                   ? Array.from({ length: r.subCutCount - 1 }).map((_, k) => {
                       const x = PAD_LEFT + (k + 1) * r.subCutWidth! * SCALE;
@@ -380,16 +425,16 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
                   {r.stripIndex}
                 </text>
 
-                {/* Strip label */}
+                {/* Strip label — placed in the middle of the USED portion */}
                 <text
-                  x={PAD_LEFT + boltW / 2}
+                  x={PAD_LEFT + 28 + (usedW - 28) / 2}
                   y={ry + rh / 2 + 3}
                   textAnchor="middle"
                   className="fill-foreground text-[10px] font-medium"
                 >
                   {r.isBorder
                     ? `Border ${r.hIn.toFixed(2)}" × ${fabricWidth}" WOF`
-                    : `${r.hIn.toFixed(2)}" tall → ${r.subCutCount} pieces of ${r.subCutWidth?.toFixed(2)}"`}
+                    : `${r.hIn.toFixed(2)}" tall → cut ${r.subCutCount} square${r.subCutCount === 1 ? "" : "s"} of ${r.subCutWidth?.toFixed(2)}"`}
                 </text>
               </g>
             );
