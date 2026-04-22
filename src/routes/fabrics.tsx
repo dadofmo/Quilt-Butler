@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { StepShell } from "@/components/StepShell";
-import { PatternDiagram } from "@/components/PatternDiagram";
+import { QuiltLayoutPreview } from "@/components/QuiltLayoutPreview";
 import { FABRIC_COLORS, FABRIC_LABELS, setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
 import { getPattern, fabricsForPattern } from "@/lib/patterns";
 
