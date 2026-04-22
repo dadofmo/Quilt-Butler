@@ -55,8 +55,8 @@ function ResultsStep() {
         </div>
       ) : (
         <div className="space-y-8">
-          <div className="no-print bg-card flex items-center justify-between rounded-xl border-2 border-border p-4">
-            <div>
+          <div className="no-print bg-card flex items-center justify-between gap-4 rounded-xl border-2 border-border p-4">
+            <div className="min-w-0">
               <div className="text-foreground text-base font-semibold">10% safety buffer</div>
               <div className="text-muted-foreground text-sm">Adds extra fabric for shrinkage & mistakes.</div>
             </div>
