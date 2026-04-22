@@ -67,11 +67,11 @@ export function resetPlanner() {
 }
 
 export const SIZE_PRESETS: Record<string, { label: string; w: number; h: number }> = {
-  baby: { label: "Baby (36 × 48)", w: 36, h: 48 },
-  throw: { label: "Throw (50 × 65)", w: 50, h: 65 },
-  twin: { label: "Twin (60 × 80)", w: 60, h: 80 },
-  queen: { label: "Queen (80 × 95)", w: 80, h: 95 },
-  king: { label: "King (105 × 95)", w: 105, h: 95 },
+  baby: { label: 'Baby (36" × 48")', w: 36, h: 48 },
+  throw: { label: 'Throw (50" × 65")', w: 50, h: 65 },
+  twin: { label: 'Twin (60" × 80")', w: 60, h: 80 },
+  queen: { label: 'Queen (80" × 95")', w: 80, h: 95 },
+  king: { label: 'King (105" × 95")', w: 105, h: 95 },
   custom: { label: "Custom", w: 0, h: 0 },
 };
 
