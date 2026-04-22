@@ -56,19 +56,40 @@ function FabricsStep() {
         </p>
       </div>
 
-      <div className="grid gap-6 sm:grid-cols-[auto_1fr] sm:gap-8">
-        <div className="flex flex-col items-center gap-2">
-          <PatternDiagram
-            pattern={pattern.id}
-            assignments={planner.assignments}
-            hasBorder={hasBorder}
-          />
-          <p className="text-muted-foreground max-w-[280px] text-center text-xs">
-            Preview only — use the fabric buttons below to change colors.
-          </p>
-        </div>
+      {/* Block-vs-quilt visual: shows that the single block they're designing
+          repeats across the full quilt. Helps beginners understand scale. */}
+      <div className="bg-card mb-6 rounded-xl border-2 border-border p-4">
+        {(() => {
+          const innerW = planner.quiltWidth - 2 * planner.borderWidth;
+          const innerH = planner.quiltHeight - 2 * planner.borderWidth;
+          const blocksAcross = Math.max(1, Math.floor(innerW / planner.blockSize));
+          const blocksDown = Math.max(1, Math.floor(innerH / planner.blockSize));
+          const borderFabric = (planner.assignments["border"] ?? "C") as FabricKey;
+          return (
+            <>
+              <QuiltLayoutPreview
+                pattern={pattern.id}
+                assignments={planner.assignments}
+                hasBorder={hasBorder}
+                borderFabric={borderFabric}
+                blocksAcross={blocksAcross}
+                blocksDown={blocksDown}
+                quiltWidth={planner.quiltWidth}
+                quiltHeight={planner.quiltHeight}
+                borderWidth={planner.borderWidth}
+              />
+              <p className="text-muted-foreground mt-4 text-center text-xs leading-relaxed">
+                You're designing <strong>one block</strong>. That block will be sewn{" "}
+                <strong>{blocksAcross * blocksDown} times</strong> and arranged in a{" "}
+                {blocksAcross} × {blocksDown} grid to make your finished quilt.
+                {hasBorder && " The border wraps around the outside."}
+              </p>
+            </>
+          );
+        })()}
+      </div>
 
-        <div className="space-y-4">
+      <div className="space-y-4">
           {sections.map((s) => {
             const current = (planner.assignments[s.id] ?? s.defaultFabric) as FabricKey;
             return (
