@@ -350,18 +350,51 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
           {rows.map((r, i) => {
             const ry = PAD_TOP + r.yIn * SCALE;
             const rh = r.hIn * SCALE;
+            const usedWidthIn =
+              !r.isBorder && r.subCutWidth && r.subCutCount
+                ? r.subCutCount * r.subCutWidth
+                : fabricWidth;
+            const usedW = usedWidthIn * SCALE;
+            const wasteW = boltW - usedW;
             return (
               <g key={i}>
+                {/* Used (cuttable) portion of the strip */}
                 <rect
                   x={PAD_LEFT}
                   y={ry}
-                  width={boltW}
+                  width={usedW}
                   height={rh}
                   fill={stripFill}
                   stroke={fabricColor}
                   strokeWidth={1}
                 />
-                {/* Sub-cut dashed lines (skip the rightmost edge) */}
+                {/* Leftover / waste portion */}
+                {wasteW > 1 && (
+                  <>
+                    <rect
+                      x={PAD_LEFT + usedW}
+                      y={ry}
+                      width={wasteW}
+                      height={rh}
+                      fill="var(--muted)"
+                      stroke={fabricColor}
+                      strokeWidth={1}
+                      strokeDasharray="2 2"
+                      opacity={0.7}
+                    />
+                    {wasteW > 28 && (
+                      <text
+                        x={PAD_LEFT + usedW + wasteW / 2}
+                        y={ry + rh / 2 + 3}
+                        textAnchor="middle"
+                        className="fill-muted-foreground text-[9px] italic"
+                      >
+                        leftover {(fabricWidth - usedWidthIn).toFixed(1)}"
+                      </text>
+                    )}
+                  </>
+                )}
+                {/* Sub-cut dashed lines between squares */}
                 {!r.isBorder && r.subCutWidth && r.subCutCount
                   ? Array.from({ length: r.subCutCount - 1 }).map((_, k) => {
                       const x = PAD_LEFT + (k + 1) * r.subCutWidth! * SCALE;
@@ -392,16 +425,16 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
                   {r.stripIndex}
                 </text>
 
-                {/* Strip label */}
+                {/* Strip label — placed in the middle of the USED portion */}
                 <text
-                  x={PAD_LEFT + boltW / 2}
+                  x={PAD_LEFT + 28 + (usedW - 28) / 2}
                   y={ry + rh / 2 + 3}
                   textAnchor="middle"
                   className="fill-foreground text-[10px] font-medium"
                 >
                   {r.isBorder
                     ? `Border ${r.hIn.toFixed(2)}" × ${fabricWidth}" WOF`
-                    : `${r.hIn.toFixed(2)}" tall → ${r.subCutCount} pieces of ${r.subCutWidth?.toFixed(2)}"`}
+                    : `${r.hIn.toFixed(2)}" tall → cut ${r.subCutCount} square${r.subCutCount === 1 ? "" : "s"} of ${r.subCutWidth?.toFixed(2)}"`}
                 </text>
               </g>
             );
