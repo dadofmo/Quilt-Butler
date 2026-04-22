@@ -204,36 +204,46 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
   type Row = {
     yIn: number; // top in inches
     hIn: number; // height in inches
-    label: string;
     subCutWidth?: number; // inches per sub-piece
-    subCutCount?: number; // pieces per strip
+    subCutCount?: number; // squares actually cut from THIS strip
+    perStripMax?: number; // max squares this strip could fit
     isBorder: boolean;
     stripIndex: number; // 1-based across all strips
   };
   const rows: Row[] = [];
   let y = 0;
   let stripIdx = 0;
+  // Track totals per strip-group to know how many squares to cut from the LAST strip
   req.strips.forEach((strip) => {
     const piece = strip.pieces[0];
     const isBorder = piece?.w === fabricWidth;
     const usable = fabricWidth - 0.5;
-    const subCount = piece && !isBorder ? Math.floor(usable / piece.w) : undefined;
+    const perStripMax = piece && !isBorder ? Math.floor(usable / piece.w) : undefined;
+    const totalNeeded = piece && !isBorder ? piece.count : 0;
+    let cutSoFar = 0;
     for (let i = 0; i < strip.count; i++) {
       stripIdx += 1;
+      const remaining = totalNeeded - cutSoFar;
+      const thisStripCount =
+        piece && !isBorder ? Math.min(perStripMax!, remaining) : undefined;
+      if (thisStripCount !== undefined) cutSoFar += thisStripCount;
       rows.push({
         yIn: y,
         hIn: strip.stripWidth,
-        label: isBorder
-          ? `Border strip — ${strip.stripWidth.toFixed(2)}" × full width`
-          : `Strip ${strip.stripWidth.toFixed(2)}" tall`,
         subCutWidth: piece && !isBorder ? piece.w : undefined,
-        subCutCount: subCount,
+        subCutCount: thisStripCount,
+        perStripMax,
         isBorder,
         stripIndex: stripIdx,
       });
       y += strip.stripWidth;
     }
   });
+
+  // Total squares needed for this fabric (sum of non-border piece counts)
+  const totalSquares = req.pieces
+    .filter((p) => p.w !== fabricWidth)
+    .reduce((sum, p) => sum + p.count, 0);
 
   return (
     <div className="bg-card rounded-xl border-2 border-border p-4">
