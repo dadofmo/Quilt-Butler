@@ -268,13 +268,21 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
         <li>
           Cut <strong>horizontal strips</strong> across the full {fabricWidth}" width at the heights shown.
         </li>
-        {totalSquares > 0 && (
-          <li>
-            Sub-cut along the <span className="text-muted-foreground">dashed lines</span> to get
-            {" "}
-            <strong>{totalSquares} squares total</strong> from this fabric. The shaded area on the right of each strip is leftover (you can't fit another full square there).
-          </li>
-        )}
+        {totalSquares > 0 && (() => {
+          const sq = req.pieces.find((p) => p.w !== fabricWidth);
+          const size = sq ? sq.w.toFixed(2) : "";
+          return (
+            <li>
+              Sub-cut along the <span className="text-muted-foreground">dashed lines</span> to get
+              {" "}
+              <strong>
+                {totalSquares} squares total
+                {size && <> — each square {size}" × {size}"</>}
+              </strong>{" "}
+              from this fabric. The shaded area on the right of each strip is leftover (you can't fit another full square there).
+            </li>
+          );
+        })()}
       </ol>
       <p className="text-muted-foreground mb-4 text-xs italic">
         Tip: the "finished edges" (also called the <em>selvage</em>) are the tightly-woven side edges of the fabric that don't fray.
@@ -434,7 +442,7 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
                 >
                   {r.isBorder
                     ? `Border ${r.hIn.toFixed(2)}" × ${fabricWidth}" WOF`
-                    : `${r.hIn.toFixed(2)}" tall → cut ${r.subCutCount} square${r.subCutCount === 1 ? "" : "s"} of ${r.subCutWidth?.toFixed(2)}"`}
+                    : `${r.hIn.toFixed(2)}" tall → cut ${r.subCutCount} square${r.subCutCount === 1 ? "" : "s"} every ${r.subCutWidth?.toFixed(2)}" (${r.subCutWidth?.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`}
                 </text>
               </g>
             );
