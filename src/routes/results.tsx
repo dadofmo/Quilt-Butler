@@ -268,9 +268,11 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
         <li>
           Cut <strong>horizontal strips</strong> across the full {fabricWidth}" width at the heights shown.
         </li>
-        {rows.some((r) => !r.isBorder) && (
+        {totalSquares > 0 && (
           <li>
-            Then sub-cut each strip along the <span className="text-muted-foreground">dashed lines</span> into the squares you need.
+            Sub-cut along the <span className="text-muted-foreground">dashed lines</span> to get
+            {" "}
+            <strong>{totalSquares} squares total</strong> from this fabric. The shaded area on the right of each strip is leftover (you can't fit another full square there).
           </li>
         )}
       </ol>
