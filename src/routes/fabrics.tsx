@@ -48,7 +48,11 @@ function FabricsStep() {
         </div>
         <p className="text-foreground text-sm leading-relaxed">{pattern.intro}</p>
         <p className="text-muted-foreground mt-2 text-xs">
-          Tip: each "Fabric" (A / B / C / D) is one bolt you'll buy. Use the same letter for parts you want to look the same.
+          Tip: each "Fabric" ({availableFabrics.join(" / ")}) is one bolt you'll buy
+          {availableFabrics.length === 1
+            ? ""
+            : ". Use the same letter for parts you want to look the same"}
+          .
         </p>
       </div>
 
