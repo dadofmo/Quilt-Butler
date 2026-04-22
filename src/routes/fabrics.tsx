@@ -132,7 +132,6 @@ function FabricsStep() {
             Calculate yardage →
           </button>
         </div>
-      </div>
     </StepShell>
   );
 }
