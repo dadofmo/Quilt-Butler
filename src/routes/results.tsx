@@ -196,6 +196,7 @@ function ResultsStep() {
               </div>
             </div>
           </Section>
+          </div>
 
           <button
             onClick={() => window.print()}
