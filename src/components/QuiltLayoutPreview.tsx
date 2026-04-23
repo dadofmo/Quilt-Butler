@@ -128,16 +128,36 @@ export function QuiltLayoutPreview({
                     pattern={pattern}
                     assignments={assignments}
                   />
-                  <rect
-                    width={200}
-                    height={200}
-                    fill="none"
-                    stroke="rgba(255,255,255,0.4)"
-                    strokeWidth={1.5}
-                  />
                 </svg>
               )),
             )}
+            {/* Block boundary grid drawn in parent coords so strokes
+                stay crisp and uniform regardless of cell aspect ratio.
+                This is what visually separates one block from the next. */}
+            {Array.from({ length: blocksAcross + 1 }).map((_, i) => (
+              <line
+                key={`v-${i}`}
+                x1={i * cellW}
+                y1={0}
+                x2={i * cellW}
+                y2={innerH}
+                stroke="hsl(var(--background, 0 0% 100%))"
+                strokeWidth={2}
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
+            {Array.from({ length: blocksDown + 1 }).map((_, j) => (
+              <line
+                key={`h-${j}`}
+                x1={0}
+                y1={j * cellH}
+                x2={innerW}
+                y2={j * cellH}
+                stroke="hsl(var(--background, 0 0% 100%))"
+                strokeWidth={2}
+                vectorEffect="non-scaling-stroke"
+              />
+            ))}
           </svg>
         </div>
         <p className="text-muted-foreground max-w-[160px] text-center text-[11px]">
