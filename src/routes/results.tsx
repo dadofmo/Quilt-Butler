@@ -56,6 +56,16 @@ function ResultsStep() {
         </div>
       ) : (
         <div className="space-y-8">
+          {/* Print-only block legend just under the title in the printed/PDF
+              version so the quilter sees at a glance which fabric goes
+              where (A = center & corners, B = alternating, C = border). */}
+          <PrintBlockLegend
+            pattern={planner.pattern!}
+            assignments={planner.assignments}
+            hasBorder={planner.borderWidth > 0}
+            borderFabric={(planner.assignments.border ?? "C") as FabricKey}
+          />
+
           <div className="no-print bg-card flex items-center justify-between gap-4 rounded-xl border-2 border-border p-4">
             <div className="min-w-0">
               <div className="text-foreground text-base font-semibold">10% safety buffer</div>
