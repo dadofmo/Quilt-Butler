@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { StepShell } from "@/components/StepShell";
+import { PrintBlockLegend } from "@/components/PrintBlockLegend";
 import { FABRIC_COLORS, FABRIC_LABELS, setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
 import { getPattern } from "@/lib/patterns";
 import { calculateYardage, type FabricRequirement } from "@/lib/yardage";
