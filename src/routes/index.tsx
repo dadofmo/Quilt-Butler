@@ -7,9 +7,9 @@ import { setPlanner } from "@/lib/planner-store";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Quilt Planner — Fabric calculator for quilters" },
+      { title: "Quilt Fabric Planner — Fabric calculator for quilters" },
       { name: "description", content: "Pick a pattern, enter your quilt size, and get accurate fabric yardage with a printable cutting plan." },
-      { property: "og:title", content: "Quilt Planner — Fabric calculator for quilters" },
+      { property: "og:title", content: "Quilt Fabric Planner — Fabric calculator for quilters" },
       { property: "og:description", content: "Pick a pattern, enter your quilt size, and get accurate fabric yardage with a printable cutting plan." },
     ],
   }),
