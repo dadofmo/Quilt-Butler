@@ -130,9 +130,9 @@ function ResultsStep() {
             </div>
           </Section>
 
+          {/* Force the shopping list onto its own page (page 3) when printed. */}
+          <div className="print-page-break-before">
           <Section title="Shopping list">
-            {/* Force the shopping list onto its own page (page 3) when printed. */}
-            <div className="print-page-break"></div>
             <div className="bg-card rounded-xl border-2 border-border p-5">
               <p className="text-muted-foreground mb-4 text-sm">
                 Bring this to the fabric store. Write the fabric name on each line as you pick it
