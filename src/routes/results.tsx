@@ -477,18 +477,36 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
                 </text>
 
                 {/* Strip label — anchored just to the right of the strip-number
-                    badge so it never overlaps the number, even when the used
-                    portion is narrow (e.g. last partial strip with few squares). */}
-                <text
-                  x={PAD_LEFT + 28}
-                  y={ry + rh / 2 + 3}
-                  textAnchor="start"
-                  className="fill-foreground text-[10px] font-medium"
-                >
-                  {r.isBorder
+                    badge so it never overlaps the number. We also shorten the
+                    label when the used portion is narrow (e.g. last partial
+                    strip) so it doesn't bleed into the leftover area. */}
+                {(() => {
+                  const labelAvailW = usedW - 30; // px available to the right of the badge
+                  const fullLabel = r.isBorder
                     ? `Border ${r.hIn.toFixed(2)}" × ${fabricWidth}" WOF`
-                    : `${r.hIn.toFixed(2)}" tall → cut ${r.subCutCount} square${r.subCutCount === 1 ? "" : "s"} every ${r.subCutWidth?.toFixed(2)}" (${r.subCutWidth?.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`}
-                </text>
+                    : `${r.hIn.toFixed(2)}" tall → cut ${r.subCutCount} square${r.subCutCount === 1 ? "" : "s"} every ${r.subCutWidth?.toFixed(2)}" (${r.subCutWidth?.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`;
+                  const shortLabel = r.isBorder
+                    ? `Border ${r.hIn.toFixed(2)}"`
+                    : `cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
+                  // Roughly 5px per char at 10px font; pick the longest version that fits.
+                  const label =
+                    labelAvailW > fullLabel.length * 5
+                      ? fullLabel
+                      : labelAvailW > shortLabel.length * 5
+                        ? shortLabel
+                        : "";
+                  if (!label) return null;
+                  return (
+                    <text
+                      x={PAD_LEFT + 28}
+                      y={ry + rh / 2 + 3}
+                      textAnchor="start"
+                      className="fill-foreground text-[10px] font-medium"
+                    >
+                      {label}
+                    </text>
+                  );
+                })()}
               </g>
             );
           })}
