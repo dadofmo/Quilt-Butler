@@ -6,7 +6,7 @@ import { useState } from "react";
 export const Route = createFileRoute("/size")({
   head: () => ({
     meta: [
-      { title: "Quilt size — Quilt Planner" },
+      { title: "Quilt size — Quilt Fabric Planner" },
       { name: "description", content: "Set your finished quilt size, fabric width, block size and border." },
     ],
   }),
