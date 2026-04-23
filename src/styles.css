@@ -98,4 +98,15 @@
   .no-print { display: none !important; }
   .print-only { display: inline-block !important; }
   body { background: white !important; }
+
+  /* Force browsers to print background colors / images so the fabric
+     swatches (Fabric A/B/C color chips, cutting-diagram fills, etc.)
+     keep their colors instead of rendering as empty boxes. */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
 }
