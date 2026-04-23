@@ -141,7 +141,7 @@ export function QuiltLayoutPreview({
                 y1={0}
                 x2={i * cellW}
                 y2={innerH}
-                stroke="hsl(var(--background, 0 0% 100%))"
+                stroke="white"
                 strokeWidth={2}
                 vectorEffect="non-scaling-stroke"
               />
@@ -153,7 +153,7 @@ export function QuiltLayoutPreview({
                 y1={j * cellH}
                 x2={innerW}
                 y2={j * cellH}
-                stroke="hsl(var(--background, 0 0% 100%))"
+                stroke="white"
                 strokeWidth={2}
                 vectorEffect="non-scaling-stroke"
               />
