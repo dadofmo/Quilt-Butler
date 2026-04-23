@@ -93,11 +93,27 @@
 }
 
 .print-only { display: none; }
+.print-only-flex { display: none; }
 
 @media print {
   .no-print { display: none !important; }
   .print-only { display: inline-block !important; }
+  .print-only-flex { display: flex !important; }
   body { background: white !important; }
+
+  /* Page-break helpers for the printable yardage plan so each section
+     lands where the user expects:
+       page 1 = title + block legend + fabric summary + Fabric A diagram
+       page 2 = Fabric B + Fabric C cutting diagrams
+       page 3 = shopping list */
+  .print-page-break,
+  .print-page-break-before {
+    break-before: page !important;
+    page-break-before: always !important;
+  }
+
+  /* Avoid awkward splits inside a single cutting diagram or card. */
+  section, .bg-card { break-inside: avoid; page-break-inside: avoid; }
 
   /* Force browsers to print background colors / images so the fabric
      swatches (Fabric A/B/C color chips, cutting-diagram fills, etc.)

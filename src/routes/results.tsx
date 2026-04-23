@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { StepShell } from "@/components/StepShell";
+import { PrintBlockLegend } from "@/components/PrintBlockLegend";
 import { FABRIC_COLORS, FABRIC_LABELS, setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
 import { getPattern } from "@/lib/patterns";
 import { calculateYardage, type FabricRequirement } from "@/lib/yardage";
@@ -55,6 +56,16 @@ function ResultsStep() {
         </div>
       ) : (
         <div className="space-y-8">
+          {/* Print-only block legend just under the title in the printed/PDF
+              version so the quilter sees at a glance which fabric goes
+              where (A = center & corners, B = alternating, C = border). */}
+          <PrintBlockLegend
+            pattern={planner.pattern!}
+            assignments={planner.assignments}
+            hasBorder={planner.borderWidth > 0}
+            borderFabric={(planner.assignments.border ?? "C") as FabricKey}
+          />
+
           <div className="no-print bg-card flex items-center justify-between gap-4 rounded-xl border-2 border-border p-4">
             <div className="min-w-0">
               <div className="text-foreground text-base font-semibold">10% safety buffer</div>
@@ -106,12 +117,21 @@ function ResultsStep() {
 
           <Section title="Cutting diagrams">
             <div className="space-y-4">
-              {result.fabrics.map((f) => (
-                <CuttingDiagram key={f.fabric} req={f} fabricWidth={planner.fabricWidth} />
+              {result.fabrics.map((f, i) => (
+                <div
+                  key={f.fabric}
+                  /* In print: keep Fabric A on page 1 with the summary,
+                     then start a new page at Fabric B so B & C share page 2. */
+                  className={i === 1 ? "print-page-break" : undefined}
+                >
+                  <CuttingDiagram req={f} fabricWidth={planner.fabricWidth} />
+                </div>
               ))}
             </div>
           </Section>
 
+          {/* Force the shopping list onto its own page (page 3) when printed. */}
+          <div className="print-page-break-before">
           <Section title="Shopping list">
             <div className="bg-card rounded-xl border-2 border-border p-5">
               <p className="text-muted-foreground mb-4 text-sm">
@@ -176,6 +196,7 @@ function ResultsStep() {
               </div>
             </div>
           </Section>
+          </div>
 
           <button
             onClick={() => window.print()}
