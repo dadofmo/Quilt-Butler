@@ -117,13 +117,22 @@ function ResultsStep() {
 
           <Section title="Cutting diagrams">
             <div className="space-y-4">
-              {result.fabrics.map((f) => (
-                <CuttingDiagram key={f.fabric} req={f} fabricWidth={planner.fabricWidth} />
+              {result.fabrics.map((f, i) => (
+                <div
+                  key={f.fabric}
+                  /* In print: keep Fabric A on page 1 with the summary,
+                     then start a new page at Fabric B so B & C share page 2. */
+                  className={i === 1 ? "print-page-break" : undefined}
+                >
+                  <CuttingDiagram req={f} fabricWidth={planner.fabricWidth} />
+                </div>
               ))}
             </div>
           </Section>
 
           <Section title="Shopping list">
+            {/* Force the shopping list onto its own page (page 3) when printed. */}
+            <div className="print-page-break"></div>
             <div className="bg-card rounded-xl border-2 border-border p-5">
               <p className="text-muted-foreground mb-4 text-sm">
                 Bring this to the fabric store. Write the fabric name on each line as you pick it
