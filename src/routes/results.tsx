@@ -476,11 +476,13 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
                   {r.stripIndex}
                 </text>
 
-                {/* Strip label — placed in the middle of the USED portion */}
+                {/* Strip label — anchored just to the right of the strip-number
+                    badge so it never overlaps the number, even when the used
+                    portion is narrow (e.g. last partial strip with few squares). */}
                 <text
-                  x={PAD_LEFT + 28 + (usedW - 28) / 2}
+                  x={PAD_LEFT + 28}
                   y={ry + rh / 2 + 3}
-                  textAnchor="middle"
+                  textAnchor="start"
                   className="fill-foreground text-[10px] font-medium"
                 >
                   {r.isBorder
