@@ -39,20 +39,28 @@ function ResultsStep() {
       backTo="/fabrics"
     >
       {result.unsupported ? (
-        <div className="bg-accent text-accent-foreground rounded-2xl border-2 border-primary/30 p-6 text-center">
-          <div className="text-3xl">🧵</div>
-          <h2 className="text-foreground mt-3 text-xl font-semibold">
-            Yardage calculation for this pattern coming soon
-          </h2>
-          <p className="text-muted-foreground mt-2 text-base">
-            Check back shortly — we're adding accurate math for {pattern.name} in a future update.
-          </p>
-          <button
-            onClick={() => navigate({ to: "/" })}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 mt-5 inline-flex rounded-xl px-5 py-3 text-base font-semibold"
-          >
-            Try another pattern
-          </button>
+        <div className="space-y-6">
+          <div className="bg-accent text-accent-foreground rounded-2xl border-2 border-primary/30 p-6 text-center">
+            <div className="text-3xl">🧵</div>
+            <h2 className="text-foreground mt-3 text-xl font-semibold">
+              Yardage calculation for this pattern coming soon
+            </h2>
+            <p className="text-muted-foreground mt-2 text-base">
+              Check back shortly — we're adding accurate math for {pattern.name} in a future update.
+              In the meantime, here's what else you'll need regardless of pattern:
+            </p>
+            <button
+              onClick={() => navigate({ to: "/" })}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 mt-5 inline-flex rounded-xl px-5 py-3 text-base font-semibold"
+            >
+              Try another pattern
+            </button>
+          </div>
+          {result.materials && (
+            <Section title="Other materials you'll need">
+              <MaterialsCard m={result.materials} />
+            </Section>
+          )}
         </div>
       ) : (
         <div className="space-y-8">
