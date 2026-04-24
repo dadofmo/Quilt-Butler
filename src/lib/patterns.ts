@@ -58,8 +58,8 @@ export const PATTERNS: PatternDef[] = [
   {
     id: "simple-squares",
     name: "Simple Squares",
-    hasMath: false,
-    intro: "A grid of identical squares. Pick one fabric for all the squares, plus an optional border fabric.",
+    hasMath: true,
+    intro: "A grid of identical squares — the easiest pattern for beginners. Pick one fabric for all the squares, plus an optional border fabric.",
     sections: [
       { id: "squares", label: "Squares", defaultFabric: "A", hint: "Every square in the grid uses this fabric." },
       borderSection,
