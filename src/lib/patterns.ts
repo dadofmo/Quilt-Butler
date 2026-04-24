@@ -24,16 +24,6 @@ const borderSection: PatternSection = {
 
 export const PATTERNS: PatternDef[] = [
   {
-    id: "simple-squares",
-    name: "Simple Squares",
-    hasMath: false,
-    intro: "A grid of identical squares. Pick one fabric for all the squares, plus an optional border fabric.",
-    sections: [
-      { id: "squares", label: "Squares", defaultFabric: "A", hint: "Every square in the grid uses this fabric." },
-      borderSection,
-    ],
-  },
-  {
     id: "nine-patch",
     name: "Nine Patch",
     hasMath: true,
@@ -62,6 +52,16 @@ export const PATTERNS: PatternDef[] = [
     sections: [
       { id: "tri1", label: "Triangle A", defaultFabric: "A", hint: "One half of every block." },
       { id: "tri2", label: "Triangle B", defaultFabric: "B", hint: "The other half — pick a contrasting fabric." },
+      borderSection,
+    ],
+  },
+  {
+    id: "simple-squares",
+    name: "Simple Squares",
+    hasMath: false,
+    intro: "A grid of identical squares. Pick one fabric for all the squares, plus an optional border fabric.",
+    sections: [
+      { id: "squares", label: "Squares", defaultFabric: "A", hint: "Every square in the grid uses this fabric." },
       borderSection,
     ],
   },
