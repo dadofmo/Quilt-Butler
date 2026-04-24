@@ -3,7 +3,7 @@ import { StepShell } from "@/components/StepShell";
 import { PrintBlockLegend } from "@/components/PrintBlockLegend";
 import { FABRIC_COLORS, FABRIC_LABELS, setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
 import { getPattern } from "@/lib/patterns";
-import { calculateYardage, type FabricRequirement } from "@/lib/yardage";
+import { calculateYardage, type FabricRequirement, type MaterialsRequirement } from "@/lib/yardage";
 import { Printer } from "lucide-react";
 
 export const Route = createFileRoute("/results")({
@@ -39,20 +39,28 @@ function ResultsStep() {
       backTo="/fabrics"
     >
       {result.unsupported ? (
-        <div className="bg-accent text-accent-foreground rounded-2xl border-2 border-primary/30 p-6 text-center">
-          <div className="text-3xl">🧵</div>
-          <h2 className="text-foreground mt-3 text-xl font-semibold">
-            Yardage calculation for this pattern coming soon
-          </h2>
-          <p className="text-muted-foreground mt-2 text-base">
-            Check back shortly — we're adding accurate math for {pattern.name} in a future update.
-          </p>
-          <button
-            onClick={() => navigate({ to: "/" })}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 mt-5 inline-flex rounded-xl px-5 py-3 text-base font-semibold"
-          >
-            Try another pattern
-          </button>
+        <div className="space-y-6">
+          <div className="bg-accent text-accent-foreground rounded-2xl border-2 border-primary/30 p-6 text-center">
+            <div className="text-3xl">🧵</div>
+            <h2 className="text-foreground mt-3 text-xl font-semibold">
+              Yardage calculation for this pattern coming soon
+            </h2>
+            <p className="text-muted-foreground mt-2 text-base">
+              Check back shortly — we're adding accurate math for {pattern.name} in a future update.
+              In the meantime, here's what else you'll need regardless of pattern:
+            </p>
+            <button
+              onClick={() => navigate({ to: "/" })}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 mt-5 inline-flex rounded-xl px-5 py-3 text-base font-semibold"
+            >
+              Try another pattern
+            </button>
+          </div>
+          {result.materials && (
+            <Section title="Other materials you'll need">
+              <MaterialsCard m={result.materials} />
+            </Section>
+          )}
         </div>
       ) : (
         <div className="space-y-8">
@@ -130,6 +138,12 @@ function ResultsStep() {
             </div>
           </Section>
 
+          {result.materials && (
+            <Section title="Other materials you'll need">
+              <MaterialsCard m={result.materials} />
+            </Section>
+          )}
+
           {/* Force the shopping list onto its own page (page 3) when printed. */}
           <div className="print-page-break-before">
           <Section title="Shopping list">
@@ -190,9 +204,19 @@ function ResultsStep() {
                     </li>
                   );
                 })}
+                {result.materials && (
+                  <>
+                    <ShopMaterialLine label="Backing fabric" detail={`${result.materials.backing.widths} width${result.materials.backing.widths === 1 ? "" : "s"} × ${result.materials.backing.heightIn}" — pieces ${result.materials.backing.widthIn}" × ${result.materials.backing.heightIn}" (incl. ${result.materials.backing.overhang}" overhang each side)`} amount={`${result.materials.backing.yards} yd`} />
+                    <ShopMaterialLine label="Batting" detail={`${result.materials.batting.widthIn}" × ${result.materials.batting.heightIn}" — pre-cut: ${result.materials.batting.presetLabel}, or ${result.materials.batting.yards} yd off the roll`} amount={result.materials.batting.presetLabel.startsWith("Larger") ? `${result.materials.batting.yards} yd` : "1 pkg"} />
+                    <ShopMaterialLine label="Binding fabric" detail={`${result.materials.binding.stripCount} strips × ${result.materials.binding.stripWidthIn}" wide (WOF) — covers ${result.materials.binding.perimeterIn}" perimeter + 10" join`} amount={`${result.materials.binding.yards} yd`} />
+                    <li className="text-muted-foreground py-2 text-xs italic">
+                      Plus: piecing thread (neutral) and quilting thread (your choice).
+                    </li>
+                  </>
+                )}
               </ul>
               <div className="text-muted-foreground mt-3 text-sm">
-                {planner.safetyBuffer ? "Includes 10% safety buffer." : "No safety buffer."} Rounded up to ¼ yard.
+                {planner.safetyBuffer ? "Includes 10% safety buffer on top fabrics." : "No safety buffer."} Rounded up to ¼ yard.
               </div>
             </div>
           </Section>
@@ -218,6 +242,72 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </section>
   );
 }
+
+function MaterialsCard({ m }: { m: MaterialsRequirement }) {
+  return (
+    <div className="bg-card overflow-hidden rounded-xl border-2 border-border">
+      <table className="w-full text-base">
+        <thead className="bg-muted/60">
+          <tr className="text-left">
+            <th className="px-4 py-3 font-semibold">Material</th>
+            <th className="px-4 py-3 font-semibold">Details</th>
+            <th className="px-4 py-3 text-right font-semibold">Buy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-t border-border align-top">
+            <td className="px-4 py-3 font-semibold">Backing fabric</td>
+            <td className="text-muted-foreground px-4 py-3 text-sm">
+              Finished piece needed: <strong className="text-foreground">{m.backing.widthIn}" × {m.backing.heightIn}"</strong>
+              {" "}({m.backing.overhang}" overhang on every side).
+              {m.backing.widths > 1 && (
+                <> Seam <strong className="text-foreground">{m.backing.widths} widths</strong> of fabric together (each {m.backing.heightIn}" long) to get enough width.</>
+              )}
+            </td>
+            <td className="px-4 py-3 text-right font-semibold whitespace-nowrap">{m.backing.yards} yd</td>
+          </tr>
+          <tr className="border-t border-border align-top">
+            <td className="px-4 py-3 font-semibold">Batting</td>
+            <td className="text-muted-foreground px-4 py-3 text-sm">
+              Needs to be at least <strong className="text-foreground">{m.batting.widthIn}" × {m.batting.heightIn}"</strong>.
+              {" "}Easiest: grab a pre-cut <strong className="text-foreground">{m.batting.presetLabel}</strong> package.
+              {" "}Or buy <strong className="text-foreground">{m.batting.yards} yd</strong> off a wide roll (90"+ wide).
+            </td>
+            <td className="px-4 py-3 text-right font-semibold whitespace-nowrap">1 pkg</td>
+          </tr>
+          <tr className="border-t border-border align-top">
+            <td className="px-4 py-3 font-semibold">Binding fabric</td>
+            <td className="text-muted-foreground px-4 py-3 text-sm">
+              Cut <strong className="text-foreground">{m.binding.stripCount} strips at {m.binding.stripWidthIn}" wide</strong> across the width of fabric. Sew end-to-end to wrap the {m.binding.perimeterIn}" perimeter (+ ~10" for joining/corners).
+              {" "}You can use one of your top fabrics — but it'll need this much extra.
+            </td>
+            <td className="px-4 py-3 text-right font-semibold whitespace-nowrap">{m.binding.yards} yd</td>
+          </tr>
+          <tr className="border-t border-border align-top">
+            <td className="px-4 py-3 font-semibold">Thread</td>
+            <td className="text-muted-foreground px-4 py-3 text-sm">
+              One spool of <strong className="text-foreground">neutral piecing thread</strong> (cream/grey) and one spool of <strong className="text-foreground">quilting thread</strong> in your color of choice.
+            </td>
+            <td className="px-4 py-3 text-right font-semibold whitespace-nowrap">2 spools</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ShopMaterialLine({ label, detail, amount }: { label: string; detail: string; amount: string }) {
+  return (
+    <li className="py-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-foreground font-medium">{label}</span>
+        <span className="text-foreground text-lg font-semibold whitespace-nowrap">{amount}</span>
+      </div>
+      <div className="text-muted-foreground mt-1 text-sm">{detail}</div>
+    </li>
+  );
+}
+
 
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return (
