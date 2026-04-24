@@ -235,6 +235,72 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+function MaterialsCard({ m }: { m: MaterialsRequirement }) {
+  return (
+    <div className="bg-card overflow-hidden rounded-xl border-2 border-border">
+      <table className="w-full text-base">
+        <thead className="bg-muted/60">
+          <tr className="text-left">
+            <th className="px-4 py-3 font-semibold">Material</th>
+            <th className="px-4 py-3 font-semibold">Details</th>
+            <th className="px-4 py-3 text-right font-semibold">Buy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-t border-border align-top">
+            <td className="px-4 py-3 font-semibold">Backing fabric</td>
+            <td className="text-muted-foreground px-4 py-3 text-sm">
+              Finished piece needed: <strong className="text-foreground">{m.backing.widthIn}" × {m.backing.heightIn}"</strong>
+              {" "}({m.backing.overhang}" overhang on every side).
+              {m.backing.widths > 1 && (
+                <> Seam <strong className="text-foreground">{m.backing.widths} widths</strong> of fabric together (each {m.backing.heightIn}" long) to get enough width.</>
+              )}
+            </td>
+            <td className="px-4 py-3 text-right font-semibold whitespace-nowrap">{m.backing.yards} yd</td>
+          </tr>
+          <tr className="border-t border-border align-top">
+            <td className="px-4 py-3 font-semibold">Batting</td>
+            <td className="text-muted-foreground px-4 py-3 text-sm">
+              Needs to be at least <strong className="text-foreground">{m.batting.widthIn}" × {m.batting.heightIn}"</strong>.
+              {" "}Easiest: grab a pre-cut <strong className="text-foreground">{m.batting.presetLabel}</strong> package.
+              {" "}Or buy <strong className="text-foreground">{m.batting.yards} yd</strong> off a wide roll (90"+ wide).
+            </td>
+            <td className="px-4 py-3 text-right font-semibold whitespace-nowrap">1 pkg</td>
+          </tr>
+          <tr className="border-t border-border align-top">
+            <td className="px-4 py-3 font-semibold">Binding fabric</td>
+            <td className="text-muted-foreground px-4 py-3 text-sm">
+              Cut <strong className="text-foreground">{m.binding.stripCount} strips at {m.binding.stripWidthIn}" wide</strong> across the width of fabric. Sew end-to-end to wrap the {m.binding.perimeterIn}" perimeter (+ ~10" for joining/corners).
+              {" "}You can use one of your top fabrics — but it'll need this much extra.
+            </td>
+            <td className="px-4 py-3 text-right font-semibold whitespace-nowrap">{m.binding.yards} yd</td>
+          </tr>
+          <tr className="border-t border-border align-top">
+            <td className="px-4 py-3 font-semibold">Thread</td>
+            <td className="text-muted-foreground px-4 py-3 text-sm">
+              One spool of <strong className="text-foreground">neutral piecing thread</strong> (cream/grey) and one spool of <strong className="text-foreground">quilting thread</strong> in your color of choice.
+            </td>
+            <td className="px-4 py-3 text-right font-semibold whitespace-nowrap">2 spools</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function ShopMaterialLine({ label, detail, amount }: { label: string; detail: string; amount: string }) {
+  return (
+    <li className="py-3">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-foreground font-medium">{label}</span>
+        <span className="text-foreground text-lg font-semibold whitespace-nowrap">{amount}</span>
+      </div>
+      <div className="text-muted-foreground mt-1 text-sm">{detail}</div>
+    </li>
+  );
+}
+
+
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return (
     <div className="flex items-center gap-3">
