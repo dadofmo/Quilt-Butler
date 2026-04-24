@@ -130,6 +130,12 @@ function ResultsStep() {
             </div>
           </Section>
 
+          {result.materials && (
+            <Section title="Other materials you'll need">
+              <MaterialsCard m={result.materials} />
+            </Section>
+          )}
+
           {/* Force the shopping list onto its own page (page 3) when printed. */}
           <div className="print-page-break-before">
           <Section title="Shopping list">
