@@ -47,10 +47,33 @@ function borderInches(quiltW: number, quiltH: number, borderW: number, fabricWid
   return { stripWidth: borderW + SEAM, stripCount: stripsNeeded, inches: stripsNeeded * (borderW + SEAM) };
 }
 
+export interface MaterialsRequirement {
+  backing: {
+    widthIn: number;       // backing piece needed (with overhang)
+    heightIn: number;
+    widths: number;        // # of fabric widths to seam together
+    yards: number;         // yards to buy off the bolt
+    overhang: number;      // inches added per side
+  };
+  batting: {
+    widthIn: number;
+    heightIn: number;
+    presetLabel: string;   // closest standard pre-cut size
+    yards: number;         // by-the-yard alternative (off a 90"+ wide roll)
+  };
+  binding: {
+    perimeterIn: number;
+    stripWidthIn: number;  // typical 2.5"
+    stripCount: number;    // # of WOF strips needed
+    yards: number;         // yardage to buy
+  };
+}
+
 interface CalcResult {
   fabrics: FabricRequirement[];
   unsupported?: boolean;
   notes?: string[];
+  materials?: MaterialsRequirement;
 }
 
 export function calculateYardage(s: PlannerState): CalcResult {
@@ -131,7 +154,68 @@ export function calculateYardage(s: PlannerState): CalcResult {
     .filter((r) => r.totalInches > 0)
     .map((r) => ({ ...r, yards: inchesToYards(r.totalInches, s.safetyBuffer) }));
 
-  return { fabrics: out, notes };
+  const materials = calculateMaterials(s);
+  return { fabrics: out, notes, materials };
+}
+
+// Standard pre-cut batting sizes (inches)
+const BATTING_PRESETS: { label: string; w: number; h: number }[] = [
+  { label: "Craft (36\" × 45\")", w: 36, h: 45 },
+  { label: "Crib (45\" × 60\")", w: 45, h: 60 },
+  { label: "Throw (60\" × 60\")", w: 60, h: 60 },
+  { label: "Twin (72\" × 90\")", w: 72, h: 90 },
+  { label: "Full (81\" × 96\")", w: 81, h: 96 },
+  { label: "Queen (90\" × 108\")", w: 90, h: 108 },
+  { label: "King (120\" × 120\")", w: 120, h: 120 },
+];
+
+export function calculateMaterials(s: PlannerState): MaterialsRequirement {
+  const overhang = 4; // 4" of extra on each side -> +8" total
+  const backW = s.quiltWidth + overhang * 2;
+  const backH = s.quiltHeight + overhang * 2;
+
+  // Backing: how many fabric widths must be seamed together (vertically),
+  // each strip = quilt-height-with-overhang long.
+  const usableBackWidth = s.fabricWidth - 1; // ~0.5" selvage trim per side
+  const widths = Math.max(1, Math.ceil(backW / usableBackWidth));
+  const backingInches = widths * backH;
+  const backingYards = roundUpQuarter(backingInches / 36);
+
+  // Batting: pick the smallest preset that fits both dimensions.
+  const fits = BATTING_PRESETS.find((p) => p.w >= backW && p.h >= backH);
+  const battingPreset = fits ? fits.label : "Larger than King — buy by the yard";
+  // By-the-yard batting (rolls are ~90"+ wide, so usually 1 length suffices).
+  const battingYards = roundUpQuarter(backH / 36);
+
+  // Binding: 2.5" strips across WOF, total length = perimeter + 10" join allowance.
+  const stripWidthIn = 2.5;
+  const perimeter = 2 * (s.quiltWidth + s.quiltHeight) + 10;
+  const usableBinding = s.fabricWidth - 0.5;
+  const stripCount = Math.ceil(perimeter / usableBinding);
+  const bindingInches = stripCount * stripWidthIn;
+  const bindingYards = roundUpQuarter(bindingInches / 36);
+
+  return {
+    backing: {
+      widthIn: backW,
+      heightIn: backH,
+      widths,
+      yards: backingYards,
+      overhang,
+    },
+    batting: {
+      widthIn: backW,
+      heightIn: backH,
+      presetLabel: battingPreset,
+      yards: battingYards,
+    },
+    binding: {
+      perimeterIn: 2 * (s.quiltWidth + s.quiltHeight),
+      stripWidthIn,
+      stripCount,
+      yards: bindingYards,
+    },
+  };
 }
 
 function blank(fabric: FabricKey): FabricRequirement {
