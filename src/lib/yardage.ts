@@ -79,7 +79,7 @@ interface CalcResult {
 export function calculateYardage(s: PlannerState): CalcResult {
   const pattern = getPattern(s.pattern);
   if (!pattern) return { fabrics: [] };
-  if (!pattern.hasMath) return { fabrics: [], unsupported: true };
+  if (!pattern.hasMath) return { fabrics: [], unsupported: true, materials: calculateMaterials(s) };
 
   // Build per-fabric piece lists, then convert to strips.
   const reqs: Record<FabricKey, FabricRequirement> = {
