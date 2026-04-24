@@ -185,16 +185,10 @@ function MiniBlock({
 
   switch (pattern) {
     case "simple-squares": {
+      // Block = a single square. Mini block fills its cell so the white
+      // grid lines drawn by the parent show the block boundaries.
       const c = get("squares", "A");
-      return (
-        <>
-          {[0, 50, 100, 150].flatMap((y) =>
-            [0, 50, 100, 150].map((x) => (
-              <rect key={`${x}-${y}`} x={x} y={y} width={50} height={50} fill={c} />
-            )),
-          )}
-        </>
-      );
+      return <rect width={200} height={200} fill={c} />;
     }
     case "nine-patch":
     case "disappearing-nine-patch": {
