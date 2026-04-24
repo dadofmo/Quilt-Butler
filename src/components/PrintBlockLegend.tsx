@@ -1,5 +1,6 @@
 import { FABRIC_COLORS, type FabricKey } from "@/lib/planner-store";
 import type { PatternId, SectionAssignments } from "@/lib/planner-store";
+import { getPattern } from "@/lib/patterns";
 import { PatternDiagram } from "./PatternDiagram";
 
 interface Props {
@@ -11,11 +12,9 @@ interface Props {
 
 /**
  * Print-only legend that sits next to the page title in the printed
- * yardage plan. Shows a single block in color with A/B/C labels so the
- * quilter can quickly see which fabric goes where while cutting.
- *
- * Layout: a colored block diagram on the left, a small text key on the
- * right explaining what each letter means.
+ * yardage plan. Shows a single block in color with a key for each
+ * fabric the chosen pattern actually uses (so a 1-fabric pattern like
+ * Simple Squares doesn't show ghost A/B/C entries).
  */
 export function PrintBlockLegend({
   pattern,
@@ -23,17 +22,22 @@ export function PrintBlockLegend({
   hasBorder,
   borderFabric,
 }: Props) {
-  // Try to read the role assignments for nine-patch style blocks.
-  // Fall back to A / B / C when assignments aren't set.
-  const centerFabric = (assignments.center ?? "A") as FabricKey;
-  const outerFabric = (assignments.outer ?? "B") as FabricKey;
+  const def = getPattern(pattern);
+  if (!def) return null;
 
-  const items: Array<{ label: string; fabric: FabricKey; role: string }> = [
-    { label: "A", fabric: centerFabric, role: "Center & corner blocks" },
-    { label: "B", fabric: outerFabric, role: "Alternating blocks" },
-  ];
-  if (hasBorder) {
-    items.push({ label: "C", fabric: borderFabric, role: "Border" });
+  // Build one legend row per pattern section, deduped by fabric so a
+  // pattern with 1 top fabric shows 1 row (not 3).
+  const seen = new Set<FabricKey>();
+  const items: Array<{ fabric: FabricKey; role: string }> = [];
+  for (const section of def.sections) {
+    if (section.id === "border") continue;
+    const fabric = (assignments[section.id] ?? section.defaultFabric) as FabricKey;
+    if (seen.has(fabric)) continue;
+    seen.add(fabric);
+    items.push({ fabric, role: section.label });
+  }
+  if (hasBorder && !seen.has(borderFabric)) {
+    items.push({ fabric: borderFabric, role: "Border" });
   }
 
   return (
@@ -52,15 +56,15 @@ export function PrintBlockLegend({
         </div>
         <ul className="mt-2 space-y-1.5">
           {items.map((it) => (
-            <li key={it.label} className="flex items-center gap-2 text-xs">
+            <li key={it.fabric} className="flex items-center gap-2 text-xs">
               <span
                 className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border text-[11px] font-bold text-foreground"
                 style={{ background: FABRIC_COLORS[it.fabric] }}
               >
-                {it.label}
+                {it.fabric}
               </span>
               <span className="text-foreground">
-                <strong>Fabric {it.label}:</strong> {it.role}
+                <strong>Fabric {it.fabric}:</strong> {it.role}
               </span>
             </li>
           ))}

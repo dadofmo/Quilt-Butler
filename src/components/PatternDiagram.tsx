@@ -37,16 +37,10 @@ function renderInner(pattern: PatternId, a: SectionAssignments) {
   const get = (k: string, fb: FabricKey) => fill(a, k, fb);
   switch (pattern) {
     case "simple-squares": {
+      // Each block IS a single square — render as one solid square so the
+      // "1 block" diagram matches the quilt thumbnail (which tiles plain blocks).
       const c = get("squares", "A");
-      return (
-        <>
-          {[0, 50, 100, 150].flatMap((y) =>
-            [0, 50, 100, 150].map((x) => (
-              <rect key={`${x}-${y}`} x={x + 2} y={y + 2} width={46} height={46} fill={c} />
-            )),
-          )}
-        </>
-      );
+      return <rect x={0} y={0} width={200} height={200} fill={c} />;
     }
     case "nine-patch": {
       const center = get("center", "A");

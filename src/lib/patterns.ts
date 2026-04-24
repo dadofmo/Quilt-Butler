@@ -62,7 +62,9 @@ export const PATTERNS: PatternDef[] = [
     intro: "A grid of identical squares — the easiest pattern for beginners. Pick one fabric for all the squares, plus an optional border fabric.",
     sections: [
       { id: "squares", label: "Squares", defaultFabric: "A", hint: "Every square in the grid uses this fabric." },
-      borderSection,
+      // Simple Squares only uses one top fabric (A), so the border defaults
+      // to B (the next available) — keeps the labels A & B instead of A & C.
+      { id: "border", label: "Border", defaultFabric: "B", hint: "The frame around the whole quilt." },
     ],
   },
   {
