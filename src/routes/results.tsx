@@ -196,9 +196,19 @@ function ResultsStep() {
                     </li>
                   );
                 })}
+                {result.materials && (
+                  <>
+                    <ShopMaterialLine label="Backing fabric" detail={`${result.materials.backing.widths} width${result.materials.backing.widths === 1 ? "" : "s"} × ${result.materials.backing.heightIn}" — pieces ${result.materials.backing.widthIn}" × ${result.materials.backing.heightIn}" (incl. ${result.materials.backing.overhang}" overhang each side)`} amount={`${result.materials.backing.yards} yd`} />
+                    <ShopMaterialLine label="Batting" detail={`${result.materials.batting.widthIn}" × ${result.materials.batting.heightIn}" — pre-cut: ${result.materials.batting.presetLabel}, or ${result.materials.batting.yards} yd off the roll`} amount={result.materials.batting.presetLabel.startsWith("Larger") ? `${result.materials.batting.yards} yd` : "1 pkg"} />
+                    <ShopMaterialLine label="Binding fabric" detail={`${result.materials.stripCountText ?? `${result.materials.binding.stripCount} strips × ${result.materials.binding.stripWidthIn}" wide (WOF) — covers ${result.materials.binding.perimeterIn}" perimeter + 10" join`}`} amount={`${result.materials.binding.yards} yd`} />
+                    <li className="text-muted-foreground py-2 text-xs italic">
+                      Plus: piecing thread (neutral) and quilting thread (your choice).
+                    </li>
+                  </>
+                )}
               </ul>
               <div className="text-muted-foreground mt-3 text-sm">
-                {planner.safetyBuffer ? "Includes 10% safety buffer." : "No safety buffer."} Rounded up to ¼ yard.
+                {planner.safetyBuffer ? "Includes 10% safety buffer on top fabrics." : "No safety buffer."} Rounded up to ¼ yard.
               </div>
             </div>
           </Section>
