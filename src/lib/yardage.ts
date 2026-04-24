@@ -98,7 +98,15 @@ export function calculateYardage(s: PlannerState): CalcResult {
     `${blocksAcross} × ${blocksDown} = ${blockCount} blocks (${s.blockSize}" finished)`,
   ];
 
-  if (s.pattern === "nine-patch") {
+  if (s.pattern === "simple-squares") {
+    // 1 square per block at blockSize finished, cut size = blockSize + 0.5
+    const cut = s.blockSize + SEAM;
+    const squareFab = s.assignments["squares"] ?? "A";
+    addSquares(reqs[squareFab], "Squares", blockCount, cut, s.fabricWidth);
+    notes.push(
+      `Cut ${blockCount} squares of Fabric ${squareFab} at ${cut}" (finished ${s.blockSize}" + 1/2" seam allowance).`,
+    );
+  } else if (s.pattern === "nine-patch") {
     // 9 squares per block. Patch finished size = blockSize/3, cut size = +0.5
     const patchFinished = s.blockSize / 3;
     const cut = patchFinished + SEAM;
