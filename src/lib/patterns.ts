@@ -108,11 +108,12 @@ export const PATTERNS: PatternDef[] = [
   {
     id: "flying-geese",
     name: "Flying Geese",
-    hasMath: false,
-    intro: "Rows of triangle 'geese' flying across a sky background.",
+    hasMath: true,
+    intro:
+      "Rows of triangle 'geese' (2:1 wide rectangles) flying across a sky background. Each block stacks 4 geese vertically — pick a bold fabric for the geese and a quieter sky fabric for the corners.",
     sections: [
-      { id: "goose", label: "Geese (triangles)", defaultFabric: "A" },
-      { id: "sky", label: "Sky (background)", defaultFabric: "B" },
+      { id: "goose", label: "Geese (triangles)", defaultFabric: "A", hint: "The 4 large triangles per block — typically the boldest fabric so the 'geese' read clearly against the sky." },
+      { id: "sky", label: "Sky (background)", defaultFabric: "B", hint: "Fills the corners on either side of every goose — pick something calm/light that contrasts with the geese." },
       borderSection,
     ],
   },
