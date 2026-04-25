@@ -171,17 +171,27 @@ function FabricsStep() {
             // For patchwork patterns, only show border picker here (the squares
             // section is driven by the tap-to-cycle preview above).
             if (isPatchwork && s.id !== "border") return null;
+            // Border can be ANY of the 12 fabrics — it's a separate piece of
+            // yardage on the shopping list, so the user shouldn't be limited
+            // to fabrics already used in the block.
+            const isBorder = s.id === "border";
+            const choices = isBorder ? ALL_FABRIC_KEYS : availableFabrics;
             return (
               <div key={s.id} className="bg-card rounded-xl border-2 border-border p-4">
                 <div className="text-foreground mb-1 text-base font-semibold">{s.label}</div>
                 {s.hint && (
                   <div className="text-muted-foreground mb-3 text-xs leading-snug">{s.hint}</div>
                 )}
+                {isBorder && (
+                  <div className="text-muted-foreground mb-3 text-xs leading-snug">
+                    Pick the same fabric as one in your block to reuse a bolt, or choose a brand-new fabric for a distinct accent border — it&apos;ll be added to your shopping list automatically.
+                  </div>
+                )}
                 <div
                   className="grid gap-2"
-                  style={{ gridTemplateColumns: `repeat(${Math.min(availableFabrics.length, 6)}, minmax(0,1fr))` }}
+                  style={{ gridTemplateColumns: `repeat(${Math.min(choices.length, 6)}, minmax(0,1fr))` }}
                 >
-                  {availableFabrics.map((f) => (
+                  {choices.map((f) => (
                     <button
                       key={f}
                       onClick={() => update(s.id, f)}
