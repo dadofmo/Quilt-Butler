@@ -10,6 +10,32 @@ export interface FabricRequirement {
   yards: number; // rounded up to 0.25
 }
 
+/**
+ * Single source of truth for describing a sub-cut piece's shape.
+ *
+ * Any UI surface (cutting diagram, shopping list, print legend, future
+ * patterns) MUST use this helper instead of reimplementing the
+ * square-vs-rectangle check, so a Rail-Fence-style mismatch can't recur.
+ *
+ * Pass a piece's cut width and height in inches.
+ */
+export function describePieceShape(w: number, h: number) {
+  const isSquare = Math.abs(w - h) < 0.01;
+  const noun = isSquare ? "square" : "rectangle";
+  // For rectangles we show H × W (height first) because rails are typically
+  // cut from a strip H tall, sub-cut every W along the bolt — matching how
+  // the user actually cuts it.
+  const sizeLabel = isSquare
+    ? `${w.toFixed(2)}" × ${w.toFixed(2)}"`
+    : `${h.toFixed(2)}" × ${w.toFixed(2)}"`;
+  return {
+    isSquare,
+    noun,
+    nounPlural: isSquare ? "squares" : "rectangles",
+    sizeLabel,
+  };
+}
+
 const SEAM = 0.5; // 1/4" seam allowance per side -> +0.5" total
 const HST_EXTRA = 0.875; // extra for HST squares: finished + 7/8"
 /**
@@ -330,6 +356,13 @@ function blank(fabric: FabricKey): FabricRequirement {
   return { fabric, pieces: [], strips: [], totalInches: 0, yards: 0 };
 }
 
+/**
+ * Add a batch of square sub-cut pieces (w === h) to a fabric requirement.
+ *
+ * INVARIANT: width === height. The cutting diagram detects squares vs.
+ * rectangles by comparing piece.w and piece.h, so callers MUST NOT use this
+ * for rectangular pieces. Use addRails (or addRectangles) instead.
+ */
 function addSquares(
   req: FabricRequirement,
   label: string,
@@ -348,10 +381,16 @@ function addSquares(
 }
 
 /**
- * Pack rectangular rails (cutLength × cutHeight) cut from full-width strips.
- * Each fabric-width strip is cutHeight tall and yields floor(usable / cutLength)
- * rails. We need ceil(rails / railsPerStrip) such strips, contributing
- * stripCount × cutHeight inches down the bolt.
+ * Pack rectangular sub-cut pieces (cutLength × cutHeight) cut from full-width
+ * strips. Each fabric-width strip is cutHeight tall and yields
+ * floor(usable / cutLength) pieces. We need ceil(count / perStrip) such
+ * strips, contributing stripCount × cutHeight inches down the bolt.
+ *
+ * INVARIANT: width !== height. For square sub-cuts, use addSquares so the
+ * cutting diagram and shopping list correctly label the shape.
+ *
+ * Used by Rail Fence (rails) and any future pattern with rectangular cuts
+ * (e.g. Flying Geese, Brick, Bargello strips).
  */
 function addRails(
   req: FabricRequirement,
@@ -361,6 +400,12 @@ function addRails(
   cutHeight: number,
   fabricWidth: number,
 ) {
+  if (Math.abs(cutLength - cutHeight) < 0.01) {
+    // A square slipped in via addRails. Forward to addSquares so downstream
+    // diagrams keep their "square" wording correct.
+    addSquares(req, label, count, cutLength, fabricWidth);
+    return;
+  }
   const usable = fabricWidth - SELVAGE_TRIM;
   const perStrip = Math.max(1, Math.floor(usable / cutLength));
   const stripCount = Math.ceil(count / perStrip);
@@ -372,3 +417,4 @@ function addRails(
   });
   req.totalInches += stripCount * cutHeight;
 }
+

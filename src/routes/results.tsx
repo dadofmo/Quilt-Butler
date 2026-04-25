@@ -4,7 +4,7 @@ import { PrintBlockLegend } from "@/components/PrintBlockLegend";
 import { FABRIC_COLORS, FABRIC_LABELS, setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
-import { calculateYardage, type FabricRequirement, type MaterialsRequirement } from "@/lib/yardage";
+import { calculateYardage, describePieceShape, type FabricRequirement, type MaterialsRequirement } from "@/lib/yardage";
 import { Printer } from "lucide-react";
 
 export const Route = createFileRoute("/results")({
@@ -646,15 +646,18 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
   });
 
   // Total sub-cut pieces needed for this fabric (sum of non-border piece counts).
-  // These may be squares (Simple Squares, 9-Patch, HST) or rectangles (Rail Fence rails).
+  // These may be squares (Simple Squares, 9-Patch, HST) or rectangles (Rail
+  // Fence rails, future Flying Geese / Brick / Bargello, etc.). Shape
+  // detection is delegated to describePieceShape so every UI surface stays
+  // in sync with the yardage layer.
   const subCutPieces = req.pieces.filter((p) => p.w !== fabricWidth);
   const totalSquares = subCutPieces.reduce((sum, p) => sum + p.count, 0);
-  // Detect whether the sub-cuts are rectangles (rails) vs squares so the
-  // labels & legend describe the actual shape being cut.
   const firstSubCut = subCutPieces[0];
-  const isRectCut = !!firstSubCut && Math.abs(firstSubCut.w - firstSubCut.h) > 0.01;
-  const pieceNoun = isRectCut ? "rectangle" : "square";
-  const pieceNounPlural = isRectCut ? "rectangles" : "squares";
+  const shape = firstSubCut
+    ? describePieceShape(firstSubCut.w, firstSubCut.h)
+    : describePieceShape(0, 0);
+  const pieceNoun = shape.noun;
+  const pieceNounPlural = shape.nounPlural;
 
   return (
     <div className="bg-card rounded-xl border-2 border-border p-4">
@@ -681,11 +684,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
         </li>
         {totalSquares > 0 && (() => {
           const sq = firstSubCut;
-          const sizeLabel = sq
-            ? isRectCut
-              ? `${sq.h.toFixed(2)}" × ${sq.w.toFixed(2)}"`
-              : `${sq.w.toFixed(2)}" × ${sq.w.toFixed(2)}"`
-            : "";
+          const sizeLabel = sq ? shape.sizeLabel : "";
           return (
             <li>
               Sub-cut along the <span className="text-muted-foreground">dashed lines</span> to get
