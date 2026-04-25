@@ -169,6 +169,45 @@ function SizeStep() {
       comboSuggestions.sort((a, b) => a.score - b.score);
     }
 
+    // Diversify combo suggestions so the user sees a meaningful spread of
+    // options — a smaller block, a similar-size block, and a larger block —
+    // rather than 4 near-duplicates clustered around one size. We bucket by
+    // block size relative to the user's current choice and pick the
+    // best-scored option from each bucket.
+    const diversifiedCombos: ComboSuggestion[] = [];
+    if (comboSuggestions.length > 0) {
+      const smaller = comboSuggestions.filter((c) => c.block < blockSizeNum);
+      const larger = comboSuggestions.filter((c) => c.block > blockSizeNum);
+      // Already sorted by score (closeness). Take a few from each side.
+      const picks: ComboSuggestion[] = [];
+      // Closest overall first.
+      if (comboSuggestions[0]) picks.push(comboSuggestions[0]);
+      // Then alternate: smallest-block option, largest-block option, then
+      // additional close options to round out the list.
+      const smallestBlock = [...smaller].sort((a, b) => a.block - b.block)[0];
+      const largestBlock = [...larger].sort((a, b) => b.block - a.block)[0];
+      if (smallestBlock) picks.push(smallestBlock);
+      if (largestBlock) picks.push(largestBlock);
+      // Fill remaining slots with next-closest options not already picked.
+      for (const c of comboSuggestions) {
+        if (picks.length >= 5) break;
+        if (!picks.some((p) => p.block === c.block && p.border === c.border)) {
+          picks.push(c);
+        }
+      }
+      // De-dupe and re-sort by block size (ascending) so options read
+      // smallest → largest, which is easier to scan.
+      const seen = new Set<string>();
+      for (const p of picks) {
+        const key = `${p.block}-${p.border}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          diversifiedCombos.push(p);
+        }
+      }
+      diversifiedCombos.sort((a, b) => a.block - b.block);
+    }
+
     return {
       perfect,
       blocksAcross,
@@ -182,7 +221,7 @@ function SizeStep() {
       quiltH,
       blockSuggestions: blockSuggestions.slice(0, 4),
       borderSuggestions: borderSuggestions.slice(0, 3),
-      comboSuggestions: comboSuggestions.slice(0, 3),
+      comboSuggestions: diversifiedCombos.slice(0, 5),
     };
   }, [blockSizeValid, blockSizeNum, w, h, border]);
 
