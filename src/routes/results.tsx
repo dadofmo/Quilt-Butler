@@ -88,6 +88,19 @@ function ResultsStep() {
             photos={planner.fabricPhotos}
           />
 
+          {sizeMismatch && (
+            <div className="bg-accent/60 text-foreground rounded-xl border-2 border-primary/40 p-4 text-sm leading-relaxed">
+              <strong>Heads up:</strong> your finished quilt will be{" "}
+              <strong>{actualW}" × {actualH}"</strong> with a {planner.blockSize}" block and{" "}
+              {planner.borderWidth}" border — not the {planner.quiltWidth}" ×{" "}
+              {planner.quiltHeight}" you originally chose. All the math below is for the actual{" "}
+              {actualW}" × {actualH}" size.{" "}
+              <Link to="/size" className="text-primary font-semibold underline">
+                Return to Step 2 to adjust →
+              </Link>
+            </div>
+          )}
+
           <div className="no-print bg-card flex items-center justify-between gap-4 rounded-xl border-2 border-border p-4">
             <div className="min-w-0">
               <div className="text-foreground text-base font-semibold">10% safety buffer</div>
