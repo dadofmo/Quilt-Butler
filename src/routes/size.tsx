@@ -55,8 +55,10 @@ function SizeStep() {
 
   const fit = useMemo(() => {
     if (!blockSizeValid) return null;
-    const innerW = (Number(w) || 0) - 2 * border;
-    const innerH = (Number(h) || 0) - 2 * border;
+    const quiltW = Number(w) || 0;
+    const quiltH = Number(h) || 0;
+    const innerW = quiltW - 2 * border;
+    const innerH = quiltH - 2 * border;
     if (innerW <= 0 || innerH <= 0) return null;
     const acrossExact = innerW / blockSizeNum;
     const downExact = innerH / blockSizeNum;
@@ -65,8 +67,10 @@ function SizeStep() {
     const remW = +(innerW - blocksAcross * blockSizeNum).toFixed(2);
     const remH = +(innerH - blocksDown * blockSizeNum).toFixed(2);
     const perfect = remW === 0 && remH === 0;
-    // Suggest a few nearby block sizes that DO divide both inner dimensions evenly.
-    const suggestions: number[] = [];
+
+    // ----- Block-size suggestions: keep CURRENT border, find block sizes that
+    // divide both inner dimensions evenly.
+    const blockSuggestions: number[] = [];
     if (!perfect) {
       const candidates = [3, 3.5, 4, 4.5, 5, 6, 7, 7.5, 8, 9, 10, 12];
       for (const c of candidates) {
@@ -74,10 +78,47 @@ function SizeStep() {
         const aw = innerW / c;
         const ah = innerH / c;
         if (Math.abs(aw - Math.round(aw)) < 0.001 && Math.abs(ah - Math.round(ah)) < 0.001) {
-          suggestions.push(c);
+          blockSuggestions.push(c);
         }
       }
     }
+
+    // ----- Border suggestions: keep CURRENT block size, find a border width
+    // that makes the inner area divide evenly. We look for a border B such
+    // that (quiltW - 2B) and (quiltH - 2B) are both integer multiples of the
+    // block size. Search 0–10" in 0.25" steps.
+    type BorderSuggestion = { border: number; across: number; down: number; total: number };
+    const borderSuggestions: BorderSuggestion[] = [];
+    if (!perfect) {
+      const seen = new Set<number>();
+      for (let b2 = 0; b2 <= 40; b2++) {
+        const b = b2 / 4; // 0, 0.25, 0.5, ... 10
+        if (b === border) continue;
+        const iw = quiltW - 2 * b;
+        const ih = quiltH - 2 * b;
+        if (iw <= 0 || ih <= 0) continue;
+        const aw = iw / blockSizeNum;
+        const ah = ih / blockSizeNum;
+        if (
+          Math.abs(aw - Math.round(aw)) < 0.001 &&
+          Math.abs(ah - Math.round(ah)) < 0.001 &&
+          Math.round(aw) >= 1 &&
+          Math.round(ah) >= 1
+        ) {
+          if (seen.has(b)) continue;
+          seen.add(b);
+          borderSuggestions.push({
+            border: b,
+            across: Math.round(aw),
+            down: Math.round(ah),
+            total: Math.round(aw) * Math.round(ah),
+          });
+        }
+      }
+      // Sort by closeness to current border so the suggestions feel like small tweaks.
+      borderSuggestions.sort((a, b) => Math.abs(a.border - border) - Math.abs(b.border - border));
+    }
+
     return {
       perfect,
       blocksAcross,
@@ -87,7 +128,8 @@ function SizeStep() {
       remH,
       innerW,
       innerH,
-      suggestions: suggestions.slice(0, 4),
+      blockSuggestions: blockSuggestions.slice(0, 4),
+      borderSuggestions: borderSuggestions.slice(0, 3),
     };
   }, [blockSizeValid, blockSizeNum, w, h, border]);
 
@@ -198,20 +240,52 @@ function SizeStep() {
                 <strong>{fit.remH}&quot; top/bottom</strong>. You can continue —
                 you&apos;ll need to trim the extra or add a filler strip to absorb it.
               </p>
-              {fit.suggestions.length > 0 && (
-                <p className="text-muted-foreground mt-2 text-xs">
-                  Block sizes that divide evenly:{" "}
-                  {fit.suggestions.map((s, i) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setBlockSizeText(String(s))}
-                      className="text-primary mx-0.5 underline underline-offset-2 hover:opacity-80"
-                    >
-                      {s}&quot;{i < fit.suggestions.length - 1 ? "," : ""}
-                    </button>
-                  ))}
-                </p>
+              {(fit.borderSuggestions.length > 0 || fit.blockSuggestions.length > 0) && (
+                <div className="mt-3 space-y-2 border-t border-destructive/20 pt-3">
+                  <p className="text-foreground text-xs font-semibold">
+                    To fill the full {fit.innerW}&quot; × {fit.innerH}&quot; inner area perfectly, try one of these:
+                  </p>
+                  {fit.borderSuggestions.length > 0 && (
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      <span className="text-foreground font-medium">Keep your {blockSizeNum}&quot; block, change border to:</span>{" "}
+                      {fit.borderSuggestions.map((b, i) => (
+                        <button
+                          key={b.border}
+                          type="button"
+                          onClick={() => {
+                            const presetVals = ["0", "2", "3", "4", "5"];
+                            const asStr = String(b.border);
+                            if (presetVals.includes(asStr)) {
+                              setBorderPreset(asStr);
+                            } else {
+                              setBorderPreset("custom");
+                              setBorderCustom(b.border);
+                            }
+                          }}
+                          className="text-primary mx-0.5 underline underline-offset-2 hover:opacity-80"
+                        >
+                          {b.border}&quot; ({b.across}×{b.down}={b.total} blocks)
+                          {i < fit.borderSuggestions.length - 1 ? "," : ""}
+                        </button>
+                      ))}
+                    </p>
+                  )}
+                  {fit.blockSuggestions.length > 0 && (
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      <span className="text-foreground font-medium">Keep your {border}&quot; border, change block to:</span>{" "}
+                      {fit.blockSuggestions.map((s, i) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => setBlockSizeText(String(s))}
+                          className="text-primary mx-0.5 underline underline-offset-2 hover:opacity-80"
+                        >
+                          {s}&quot;{i < fit.blockSuggestions.length - 1 ? "," : ""}
+                        </button>
+                      ))}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
           )
