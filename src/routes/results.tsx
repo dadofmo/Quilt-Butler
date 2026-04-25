@@ -155,7 +155,7 @@ function ResultsStep() {
             <CostEstimator
               fabrics={result.fabrics}
               pricePerYard={planner.pricePerYard}
-              onChange={(v) => setPlanner({ pricePerYard: v })}
+              onChange={(v: string) => setPlanner({ pricePerYard: v })}
             />
 
             {result.notes && (
