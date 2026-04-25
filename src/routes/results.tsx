@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { StepShell } from "@/components/StepShell";
 import { PrintBlockLegend } from "@/components/PrintBlockLegend";
 import { FABRIC_COLORS, FABRIC_LABELS, setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
+import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
 import { calculateYardage, type FabricRequirement, type MaterialsRequirement } from "@/lib/yardage";
 import { Printer } from "lucide-react";
@@ -102,7 +103,7 @@ function ResultsStep() {
                         <div className="flex items-center gap-2">
                           <span
                             className="border-border inline-block h-5 w-5 rounded border"
-                            style={{ background: FABRIC_COLORS[f.fabric] }}
+                            style={fabricBackgroundStyle(f.fabric, planner.fabricPhotos)}
                           />
                           <span className="font-semibold">{f.fabric}</span>
                         </div>
@@ -161,7 +162,7 @@ function ResultsStep() {
                         <div className="flex items-center gap-3">
                           <span
                             className="border-border inline-block h-6 w-6 rounded border"
-                            style={{ background: FABRIC_COLORS[f.fabric] }}
+                            style={fabricBackgroundStyle(f.fabric, planner.fabricPhotos)}
                           />
                           <span className="text-foreground font-medium">
                             {FABRIC_LABELS[f.fabric]}
