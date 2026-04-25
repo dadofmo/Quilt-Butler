@@ -8,33 +8,34 @@ import {
 interface Props {
   /** Number of distinct fabrics to cycle through (2–12). */
   fabricCount: number;
-  /** Quilt aspect ratio used to shape the preview grid. */
+  /** Quilt size — used with blockSize/borderWidth to match real layout. */
   quiltWidth: number;
   quiltHeight: number;
+  /** Block size (inches) — drives how many blocks fit across/down. */
+  blockSize: number;
+  /** Border width (inches) — subtracted from quilt size before dividing. */
+  borderWidth: number;
   /** Per-cell assignments, keyed "r,c". */
   grid: Record<string, FabricKey>;
   onChange: (next: Record<string, FabricKey>) => void;
-  /** How many cells to render in total (defaults to ~36). */
-  targetCells?: number;
 }
 
 /**
- * Compute a rows × cols layout that:
- *   1. Roughly matches the quilt aspect ratio, AND
- *   2. Has ~targetCells squares total.
+ * Compute the grid shape based on the REAL block layout — how many whole
+ * blocks fit across and down inside the inner (un-bordered) area. That way
+ * the preview matches what the quilt will actually look like.
  */
 export function computeGridShape(
   quiltWidth: number,
   quiltHeight: number,
-  targetCells = 36,
+  blockSize: number,
+  borderWidth: number,
 ) {
-  const aspect = quiltWidth / quiltHeight; // >1 wide, <1 tall
-  // cols / rows ≈ aspect, and cols * rows ≈ targetCells
-  // → rows ≈ sqrt(targetCells / aspect), cols ≈ sqrt(targetCells * aspect)
-  let rows = Math.round(Math.sqrt(targetCells / aspect));
-  let cols = Math.round(Math.sqrt(targetCells * aspect));
-  rows = Math.max(3, Math.min(10, rows));
-  cols = Math.max(3, Math.min(10, cols));
+  const innerW = Math.max(0, quiltWidth - 2 * borderWidth);
+  const innerH = Math.max(0, quiltHeight - 2 * borderWidth);
+  const safeBlock = Math.max(0.0001, blockSize);
+  const cols = Math.max(1, Math.floor(innerW / safeBlock));
+  const rows = Math.max(1, Math.floor(innerH / safeBlock));
   return { rows, cols };
 }
 
@@ -43,21 +44,21 @@ export function computeGridShape(
  * fabric color; tapping cycles to the next fabric in the active palette
  * (A through the Nth fabric, wrapping back to A).
  *
- * The grid is shaped to roughly match the real quilt's aspect ratio with
- * ~36 squares total — big enough to show a pattern, small enough that
- * tap targets stay phone-friendly.
+ * The grid mirrors the actual quilt layout: blocks-across × blocks-down
+ * given the user's chosen block size and border width.
  */
 export function PatchworkPreview({
   fabricCount,
   quiltWidth,
   quiltHeight,
+  blockSize,
+  borderWidth,
   grid,
   onChange,
-  targetCells = 36,
 }: Props) {
   const { rows, cols } = useMemo(
-    () => computeGridShape(quiltWidth, quiltHeight, targetCells),
-    [quiltWidth, quiltHeight, targetCells],
+    () => computeGridShape(quiltWidth, quiltHeight, blockSize, borderWidth),
+    [quiltWidth, quiltHeight, blockSize, borderWidth],
   );
 
   const palette: FabricKey[] = ALL_FABRIC_KEYS.slice(
@@ -109,7 +110,8 @@ export function PatchworkPreview({
       </div>
       <p className="text-muted-foreground text-center text-xs">
         Tap any square to cycle through your {palette.length} fabric
-        {palette.length === 1 ? "" : "s"}. The preview matches your quilt&apos;s shape ({cols} × {rows}).
+        {palette.length === 1 ? "" : "s"}. This is your real layout:{" "}
+        <strong>{cols} × {rows} = {cols * rows} blocks</strong> at {blockSize}&quot; each.
       </p>
     </div>
   );
@@ -125,9 +127,15 @@ export function gridFabricMix(
   fabricCount: number,
   quiltWidth: number,
   quiltHeight: number,
-  targetCells = 36,
+  blockSize: number,
+  borderWidth: number,
 ): Record<FabricKey, number> {
-  const { rows, cols } = computeGridShape(quiltWidth, quiltHeight, targetCells);
+  const { rows, cols } = computeGridShape(
+    quiltWidth,
+    quiltHeight,
+    blockSize,
+    borderWidth,
+  );
   const palette: FabricKey[] = ALL_FABRIC_KEYS.slice(
     0,
     Math.max(2, Math.min(12, fabricCount)),
