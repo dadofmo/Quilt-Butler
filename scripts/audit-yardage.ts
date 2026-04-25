@@ -127,6 +127,63 @@ console.log("\n=== Rail Fence: rail1 & rail3 share fabric A ===");
 }
 
 // =========================================================================
+// LOG CABIN
+// =========================================================================
+console.log("\n=== Log Cabin: 50×65, 12\" block, no border ===");
+{
+  const s = { ...base(), pattern: "log-cabin" as const, blockSize: 12 };
+  // 4×5 = 20 blocks. centerFinished=3, logFinished=1.5, 3 rounds = 12 logs/block.
+  // Cuts (with +0.5 seam):
+  //   center cut = 3.5"
+  //   log cut width (height) = 2"
+  //   dark log lengths (cut): 3.5, 5, 6.5, 8, 9.5, 11
+  //   light log lengths (cut): 5, 6.5, 8, 9.5, 11, 12.5
+  // Per-strip math (44" bolt → 42.5" usable):
+  //   3.5  → floor(42.5/3.5)=12 → ceil(20/12)=2 strips × 2"   = 4"   (dark)
+  //   5    → floor(42.5/5)=8    → ceil(20/8)=3   × 2"   = 6"
+  //   6.5  → floor(42.5/6.5)=6  → ceil(20/6)=4   × 2"   = 8"
+  //   8    → floor(42.5/8)=5    → ceil(20/5)=4   × 2"   = 8"
+  //   9.5  → floor(42.5/9.5)=4  → ceil(20/4)=5   × 2"   = 10"
+  //   11   → floor(42.5/11)=3   → ceil(20/3)=7   × 2"   = 14"
+  //   12.5 → floor(42.5/12.5)=3 → ceil(20/3)=7   × 2"   = 14"  (light only)
+  // Dark inches  = 4+6+8+8+10+14 = 50
+  // Light inches = 6+8+8+10+14+14 = 60
+  // Center A (cut 3.5): per strip floor(42.5/3.5)=12, strips=ceil(20/12)=2, inches=2*3.5=7.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("LC center A inches", a.totalInches, 7);
+  check("LC center A pieces[0] count", a.pieces[0].count, 20);
+  check("LC center A cut size", a.pieces[0].w, 3.5);
+  check("LC light B inches", b.totalInches, 60);
+  check("LC dark C inches", c.totalInches, 50);
+  // 6 length buckets per log fabric (one per round-step).
+  check("LC light B bucket count", b.pieces.length, 6);
+  check("LC dark C bucket count", c.pieces.length, 6);
+  for (const bk of b.pieces) check(`LC light bucket ${bk.w}" count`, bk.count, 20);
+  for (const bk of c.pieces) check(`LC dark bucket ${bk.w}" count`, bk.count, 20);
+  // Log cut height = blockSize/8 + 0.5 = 2.0
+  check("LC log cut height", b.pieces[0].h, 2);
+}
+
+console.log("\n=== Log Cabin: light & dark share fabric A — buckets must merge ===");
+{
+  const s = {
+    ...base(), pattern: "log-cabin" as const, blockSize: 12,
+    assignments: { center: "D" as FabricKey, light: "A" as FabricKey, dark: "A" as FabricKey },
+  };
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  // Dark lengths: 3.5,5,6.5,8,9.5,11. Light lengths: 5,6.5,8,9.5,11,12.5.
+  // Merged unique: 3.5,5,6.5,8,9.5,11,12.5 (7 buckets).
+  check("LC merged A bucket count", a.pieces.length, 7);
+  const total = a.pieces.reduce((acc, p) => acc + p.count, 0);
+  // 12 logs/block × 20 blocks = 240
+  check("LC merged A total logs", total, 240);
+}
+
+// =========================================================================
 // BORDER MATH
 // =========================================================================
 console.log("\n=== Border: 60×80 inner, 4\" border, 9P pattern ===");

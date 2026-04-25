@@ -82,12 +82,13 @@ export const PATTERNS: PatternDef[] = [
   {
     id: "log-cabin",
     name: "Log Cabin",
-    hasMath: false,
-    intro: "A small center square framed by 'logs' that spiral outward — half light, half dark.",
+    hasMath: true,
+    intro:
+      "Each block has a small center square (traditionally red — the 'hearth') with skinny strips called 'logs' added in rounds around it. Two adjacent sides of the block are LIGHT logs, the opposite two sides are DARK logs — that's what gives Log Cabin its iconic diagonal split. The center is the same for every block; the light & dark fabrics are usually one each, though many quilters use a small palette.",
     sections: [
-      { id: "center", label: "Center square", defaultFabric: "D", hint: "Traditionally red — the 'hearth'." },
-      { id: "light", label: "Light logs", defaultFabric: "B", hint: "Strips on one side of the block." },
-      { id: "dark", label: "Dark logs", defaultFabric: "A", hint: "Strips on the opposite side." },
+      { id: "center", label: "Center square (hearth)", defaultFabric: "A", hint: "The small square in the middle of every block — traditionally red. One of these per block." },
+      { id: "light", label: "Light logs", defaultFabric: "B", hint: "The strips on two adjacent sides of every block — typically pale (cream/white/pastel) to read as 'light'." },
+      { id: "dark", label: "Dark logs", defaultFabric: "C", hint: "The strips on the OTHER two sides — typically saturated/dark so the diagonal split shows." },
       borderSection,
     ],
   },
