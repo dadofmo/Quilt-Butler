@@ -53,6 +53,7 @@ const initial: PlannerState = {
   assignments: {},
   safetyBuffer: true,
   fabricNames: {},
+  fabricPhotos: {},
   patchworkFabricCount: 4,
   patchworkGrid: {},
 };
