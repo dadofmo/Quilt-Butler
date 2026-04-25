@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useRef } from "react";
 import { StepShell } from "@/components/StepShell";
 import { QuiltLayoutPreview } from "@/components/QuiltLayoutPreview";
 import { PatchworkPreview } from "@/components/PatchworkPreview";
@@ -10,6 +11,7 @@ import {
   usePlanner,
   type FabricKey,
 } from "@/lib/planner-store";
+import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { getPattern, fabricsForPattern } from "@/lib/patterns";
 
 export const Route = createFileRoute("/fabrics")({
