@@ -452,6 +452,11 @@ function CuttingDiagram({ req, fabricWidth, pattern }: { req: FabricRequirement;
           );
         })()}
       </ol>
+      {pattern === "hst" && (
+        <p className="text-foreground mb-2 rounded-md border border-border bg-muted/40 px-3 py-2 text-xs">
+          <strong>Note:</strong> after cutting your squares, see the assembly instructions above ("Heads up before you start") to learn how to turn each pair of squares into two finished triangle blocks.
+        </p>
+      )}
       <p className="text-muted-foreground mb-4 text-xs italic">
         Tip: the "finished edges" (also called the <em>selvage</em>) are the tightly-woven side edges of the fabric that don't fray.
       </p>
