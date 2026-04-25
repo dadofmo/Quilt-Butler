@@ -169,6 +169,45 @@ function SizeStep() {
       comboSuggestions.sort((a, b) => a.score - b.score);
     }
 
+    // Diversify combo suggestions so the user sees a meaningful spread of
+    // options — a smaller block, a similar-size block, and a larger block —
+    // rather than 4 near-duplicates clustered around one size. We bucket by
+    // block size relative to the user's current choice and pick the
+    // best-scored option from each bucket.
+    const diversifiedCombos: ComboSuggestion[] = [];
+    if (comboSuggestions.length > 0) {
+      const smaller = comboSuggestions.filter((c) => c.block < blockSizeNum);
+      const larger = comboSuggestions.filter((c) => c.block > blockSizeNum);
+      // Already sorted by score (closeness). Take a few from each side.
+      const picks: ComboSuggestion[] = [];
+      // Closest overall first.
+      if (comboSuggestions[0]) picks.push(comboSuggestions[0]);
+      // Then alternate: smallest-block option, largest-block option, then
+      // additional close options to round out the list.
+      const smallestBlock = [...smaller].sort((a, b) => a.block - b.block)[0];
+      const largestBlock = [...larger].sort((a, b) => b.block - a.block)[0];
+      if (smallestBlock) picks.push(smallestBlock);
+      if (largestBlock) picks.push(largestBlock);
+      // Fill remaining slots with next-closest options not already picked.
+      for (const c of comboSuggestions) {
+        if (picks.length >= 5) break;
+        if (!picks.some((p) => p.block === c.block && p.border === c.border)) {
+          picks.push(c);
+        }
+      }
+      // De-dupe and re-sort by block size (ascending) so options read
+      // smallest → largest, which is easier to scan.
+      const seen = new Set<string>();
+      for (const p of picks) {
+        const key = `${p.block}-${p.border}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          diversifiedCombos.push(p);
+        }
+      }
+      diversifiedCombos.sort((a, b) => a.block - b.block);
+    }
+
     return {
       perfect,
       blocksAcross,
@@ -182,7 +221,7 @@ function SizeStep() {
       quiltH,
       blockSuggestions: blockSuggestions.slice(0, 4),
       borderSuggestions: borderSuggestions.slice(0, 3),
-      comboSuggestions: comboSuggestions.slice(0, 3),
+      comboSuggestions: diversifiedCombos.slice(0, 5),
     };
   }, [blockSizeValid, blockSizeNum, w, h, border]);
 
@@ -299,7 +338,7 @@ function SizeStep() {
           const matchesDesired = fit.perfect;
           const closestBorder = fit.borderSuggestions[0];
           const closestBlock = fit.blockSuggestions[0];
-          const closestCombo = fit.comboSuggestions[0];
+          const comboOptions = fit.comboSuggestions;
           return (
             <Field label="Finished quilt size">
               <div className="bg-card border-input rounded-xl border-2 p-4">
@@ -378,25 +417,35 @@ function SizeStep() {
                           </span>
                         )}
                       </li>
-                      {closestCombo && (
+                      {comboOptions.length > 0 && (
                         <li className="text-muted-foreground">
                           <span className="text-foreground">
-                            Adjust the <strong>block grid layout</strong> — use a{" "}
+                            Adjust the <strong>block grid layout</strong> — these
+                            combinations of block size + border give an exact{" "}
+                            {fit.quiltW}&quot; × {fit.quiltH}&quot; finish:
                           </span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setBlockSizeText(String(closestCombo.block));
-                              applyBorder(closestCombo.border);
-                            }}
-                            className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
-                          >
-                            {closestCombo.block}&quot; block with a {closestCombo.border}&quot; border
-                          </button>
-                          <span className="text-muted-foreground">
-                            {" "}(changes the layout to {closestCombo.across} × {closestCombo.down} ={" "}
-                            {closestCombo.total} blocks for an exact fit).
-                          </span>
+                          <ul className="mt-1.5 list-none space-y-1 pl-0">
+                            {comboOptions.map((c, i) => (
+                              <li key={`${c.block}-${c.border}`} className="text-muted-foreground">
+                                <span className="text-foreground font-semibold">
+                                  Option {i + 1}:{" "}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setBlockSizeText(String(c.block));
+                                    applyBorder(c.border);
+                                  }}
+                                  className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
+                                >
+                                  {c.block}&quot; block with a {c.border}&quot; border
+                                </button>
+                                <span className="text-muted-foreground">
+                                  {" "}({c.across} × {c.down} = {c.total} blocks)
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
                         </li>
                       )}
                     </ul>
