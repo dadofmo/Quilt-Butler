@@ -594,7 +594,7 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
                 {(() => {
                   const labelAvailW = usedW - 30; // px available to the right of the badge
                   const fullLabel = r.isBorder
-                    ? `Border ${r.hIn.toFixed(2)}" × ${fabricWidth}" WOF`
+                    ? `Border ${r.hIn.toFixed(2)}" × ${fabricWidth}" (full fabric width)`
                     : `${r.hIn.toFixed(2)}" tall → cut ${r.subCutCount} square${r.subCutCount === 1 ? "" : "s"} every ${r.subCutWidth?.toFixed(2)}" (${r.subCutWidth?.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`;
                   const shortLabel = r.isBorder
                     ? `Border ${r.hIn.toFixed(2)}"`
