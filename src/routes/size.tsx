@@ -68,45 +68,47 @@ function SizeStep() {
     const remH = +(innerH - blocksDown * blockSizeNum).toFixed(2);
     const perfect = remW === 0 && remH === 0;
 
+    const isInt = (x: number) => Math.abs(x - Math.round(x)) < 0.001;
+
     // ----- Block-size suggestions: keep CURRENT border, find block sizes that
-    // divide both inner dimensions evenly.
-    const blockSuggestions: number[] = [];
+    // divide both inner dimensions evenly. Search 2.0–15.0 in 0.25" steps so
+    // we always find something useful (not just from a tiny preset list).
+    type BlockSuggestion = { size: number; across: number; down: number; total: number };
+    const blockSuggestions: BlockSuggestion[] = [];
     if (!perfect) {
-      const candidates = [3, 3.5, 4, 4.5, 5, 6, 7, 7.5, 8, 9, 10, 12];
-      for (const c of candidates) {
-        if (c === blockSizeNum) continue;
-        const aw = innerW / c;
-        const ah = innerH / c;
-        if (Math.abs(aw - Math.round(aw)) < 0.001 && Math.abs(ah - Math.round(ah)) < 0.001) {
-          blockSuggestions.push(c);
+      for (let s4 = 8; s4 <= 60; s4++) {
+        const s = s4 / 4; // 2.0 .. 15.0
+        if (Math.abs(s - blockSizeNum) < 0.001) continue;
+        const aw = innerW / s;
+        const ah = innerH / s;
+        if (isInt(aw) && isInt(ah) && Math.round(aw) >= 1 && Math.round(ah) >= 1) {
+          blockSuggestions.push({
+            size: s,
+            across: Math.round(aw),
+            down: Math.round(ah),
+            total: Math.round(aw) * Math.round(ah),
+          });
         }
       }
+      // Closest to current block size first.
+      blockSuggestions.sort((a, b) => Math.abs(a.size - blockSizeNum) - Math.abs(b.size - blockSizeNum));
     }
 
     // ----- Border suggestions: keep CURRENT block size, find a border width
-    // that makes the inner area divide evenly. We look for a border B such
-    // that (quiltW - 2B) and (quiltH - 2B) are both integer multiples of the
-    // block size. Search 0–10" in 0.25" steps.
+    // that makes BOTH inner dimensions multiples of the block. Search 0–10"
+    // in 0.25" steps. May come up empty for some quilt sizes.
     type BorderSuggestion = { border: number; across: number; down: number; total: number };
     const borderSuggestions: BorderSuggestion[] = [];
     if (!perfect) {
-      const seen = new Set<number>();
       for (let b2 = 0; b2 <= 40; b2++) {
-        const b = b2 / 4; // 0, 0.25, 0.5, ... 10
-        if (b === border) continue;
+        const b = b2 / 4;
+        if (Math.abs(b - border) < 0.001) continue;
         const iw = quiltW - 2 * b;
         const ih = quiltH - 2 * b;
         if (iw <= 0 || ih <= 0) continue;
         const aw = iw / blockSizeNum;
         const ah = ih / blockSizeNum;
-        if (
-          Math.abs(aw - Math.round(aw)) < 0.001 &&
-          Math.abs(ah - Math.round(ah)) < 0.001 &&
-          Math.round(aw) >= 1 &&
-          Math.round(ah) >= 1
-        ) {
-          if (seen.has(b)) continue;
-          seen.add(b);
+        if (isInt(aw) && isInt(ah) && Math.round(aw) >= 1 && Math.round(ah) >= 1) {
           borderSuggestions.push({
             border: b,
             across: Math.round(aw),
@@ -115,8 +117,53 @@ function SizeStep() {
           });
         }
       }
-      // Sort by closeness to current border so the suggestions feel like small tweaks.
       borderSuggestions.sort((a, b) => Math.abs(a.border - border) - Math.abs(b.border - border));
+    }
+
+    // ----- Combo suggestions: when single-variable changes don't yield enough
+    // (or when the user's combo is unusual), find (block, border) pairs that
+    // both fit. Score by "closeness to user's current choices" so suggestions
+    // feel like small adjustments instead of starting from scratch.
+    type ComboSuggestion = {
+      block: number;
+      border: number;
+      across: number;
+      down: number;
+      total: number;
+      score: number;
+    };
+    const comboSuggestions: ComboSuggestion[] = [];
+    if (!perfect) {
+      for (let b2 = 0; b2 <= 40; b2++) {
+        const bd = b2 / 4;
+        const iw = quiltW - 2 * bd;
+        const ih = quiltH - 2 * bd;
+        if (iw <= 0 || ih <= 0) continue;
+        for (let s4 = 8; s4 <= 60; s4++) {
+          const s = s4 / 4;
+          const aw = iw / s;
+          const ah = ih / s;
+          if (isInt(aw) && isInt(ah) && Math.round(aw) >= 1 && Math.round(ah) >= 1) {
+            // Skip pairs already covered by single-variable lists.
+            const sameBlock = Math.abs(s - blockSizeNum) < 0.001;
+            const sameBorder = Math.abs(bd - border) < 0.001;
+            if (sameBlock || sameBorder) continue;
+            // Weight block changes a bit more than border changes — quilters
+            // are usually more attached to their block size than border width.
+            const score =
+              Math.abs(s - blockSizeNum) * 1.5 + Math.abs(bd - border) * 1.0;
+            comboSuggestions.push({
+              block: s,
+              border: bd,
+              across: Math.round(aw),
+              down: Math.round(ah),
+              total: Math.round(aw) * Math.round(ah),
+              score,
+            });
+          }
+        }
+      }
+      comboSuggestions.sort((a, b) => a.score - b.score);
     }
 
     return {
@@ -128,8 +175,11 @@ function SizeStep() {
       remH,
       innerW,
       innerH,
+      quiltW,
+      quiltH,
       blockSuggestions: blockSuggestions.slice(0, 4),
       borderSuggestions: borderSuggestions.slice(0, 3),
+      comboSuggestions: comboSuggestions.slice(0, 3),
     };
   }, [blockSizeValid, blockSizeNum, w, h, border]);
 
