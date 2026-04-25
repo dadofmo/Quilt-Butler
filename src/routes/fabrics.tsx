@@ -176,11 +176,14 @@ function FabricsStep() {
             if (isPatchwork && s.id !== "border") return null;
             // Border choices = every fabric used in the BLOCK, plus one extra
             // "accent" option (the next unused letter) for users who want a
-            // unique border fabric. Anything beyond that is noise.
+            // unique border fabric. For Simple Squares, the block fabrics are
+            // the user-chosen patchwork palette (A..N based on fabric count);
+            // for other patterns it's the fabrics the pattern defines.
             const isBorder = s.id === "border";
-            const nextAccent = ALL_FABRIC_KEYS.find((f) => !blockOnlyFabrics.includes(f));
+            const blockFabrics = isPatchwork ? palette : blockOnlyFabrics;
+            const nextAccent = ALL_FABRIC_KEYS.find((f) => !blockFabrics.includes(f));
             const choices = isBorder
-              ? (nextAccent ? [...blockOnlyFabrics, nextAccent] : blockOnlyFabrics)
+              ? (nextAccent ? [...blockFabrics, nextAccent] : blockFabrics)
               : availableFabrics;
             return (
               <div key={s.id} className="bg-card rounded-xl border-2 border-border p-4">
