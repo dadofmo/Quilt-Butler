@@ -680,17 +680,21 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
           Cut <strong>horizontal strips</strong> across the full {fabricWidth}" width at the heights shown.
         </li>
         {totalSquares > 0 && (() => {
-          const sq = req.pieces.find((p) => p.w !== fabricWidth);
-          const size = sq ? sq.w.toFixed(2) : "";
+          const sq = firstSubCut;
+          const sizeLabel = sq
+            ? isRectCut
+              ? `${sq.h.toFixed(2)}" × ${sq.w.toFixed(2)}"`
+              : `${sq.w.toFixed(2)}" × ${sq.w.toFixed(2)}"`
+            : "";
           return (
             <li>
               Sub-cut along the <span className="text-muted-foreground">dashed lines</span> to get
               {" "}
               <strong>
-                {totalSquares} squares total
-                {size && <> — each square {size}" × {size}"</>}
+                {totalSquares} {totalSquares === 1 ? pieceNoun : pieceNounPlural} total
+                {sizeLabel && <> — each {pieceNoun} {sizeLabel}</>}
               </strong>{" "}
-              from this fabric. The shaded area on the right of each strip is leftover (you can't fit another full square there).
+              from this fabric. The shaded area on the right of each strip is leftover (you can't fit another full {pieceNoun} there).
             </li>
           );
         })()}
