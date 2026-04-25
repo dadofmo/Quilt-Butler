@@ -801,17 +801,39 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
           {rows.map((r, i) => {
             const ry = PAD_TOP + r.yIn * SCALE;
             const rh = r.hIn * SCALE;
+            const usableW = usableFabricWidth(fabricWidth);
             const usedWidthIn =
               !r.isBorder && r.subCutWidth && r.subCutCount
                 ? r.subCutCount * r.subCutWidth
-                : fabricWidth;
+                : usableW;
             const usedW = usedWidthIn * SCALE;
-            const wasteW = boltW - usedW;
+            // Leftover lives WITHIN the usable width (selvages aren't cuttable
+            // fabric — they're already excluded from piecesPerStrip math). The
+            // ~0.75" selvage on each edge is rendered as separate shaded zones
+            // outside the cuttable region so the leftover number always ties
+            // back to the usable width arrow at the top of the diagram.
+            const leftoverIn = Math.max(0, usableW - usedWidthIn);
+            const leftoverW = leftoverIn * SCALE;
+            const selvageInPx = ((fabricWidth - usableW) / 2) * SCALE;
+            const cuttableX = PAD_LEFT + selvageInPx;
             return (
               <g key={i}>
+                {/* Left selvage zone (not cuttable) */}
+                {selvageInPx > 0.5 && (
+                  <rect
+                    x={PAD_LEFT}
+                    y={ry}
+                    width={selvageInPx}
+                    height={rh}
+                    fill="var(--muted)"
+                    stroke={fabricColor}
+                    strokeWidth={0.5}
+                    opacity={0.45}
+                  />
+                )}
                 {/* Used (cuttable) portion of the strip */}
                 <rect
-                  x={PAD_LEFT}
+                  x={cuttableX}
                   y={ry}
                   width={usedW}
                   height={rh}
@@ -819,13 +841,13 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   stroke={fabricColor}
                   strokeWidth={1}
                 />
-                {/* Leftover / waste portion */}
-                {wasteW > 1 && (
+                {/* Leftover / waste portion (within usable width) */}
+                {leftoverW > 1 && (
                   <>
                     <rect
-                      x={PAD_LEFT + usedW}
+                      x={cuttableX + usedW}
                       y={ry}
-                      width={wasteW}
+                      width={leftoverW}
                       height={rh}
                       fill="var(--muted)"
                       stroke={fabricColor}
@@ -833,22 +855,35 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                       strokeDasharray="2 2"
                       opacity={0.7}
                     />
-                    {wasteW > 28 && (
+                    {leftoverW > 28 && (
                       <text
-                        x={PAD_LEFT + usedW + wasteW / 2}
+                        x={cuttableX + usedW + leftoverW / 2}
                         y={ry + rh / 2 + 3}
                         textAnchor="middle"
                         className="fill-muted-foreground text-[9px] italic"
                       >
-                        leftover {(fabricWidth - usedWidthIn).toFixed(1)}"
+                        leftover {leftoverIn.toFixed(1)}"
                       </text>
                     )}
                   </>
                 )}
+                {/* Right selvage zone (not cuttable) */}
+                {selvageInPx > 0.5 && (
+                  <rect
+                    x={PAD_LEFT + boltW - selvageInPx}
+                    y={ry}
+                    width={selvageInPx}
+                    height={rh}
+                    fill="var(--muted)"
+                    stroke={fabricColor}
+                    strokeWidth={0.5}
+                    opacity={0.45}
+                  />
+                )}
                 {/* Sub-cut dashed lines between squares */}
                 {!r.isBorder && r.subCutWidth && r.subCutCount
                   ? Array.from({ length: r.subCutCount - 1 }).map((_, k) => {
-                      const x = PAD_LEFT + (k + 1) * r.subCutWidth! * SCALE;
+                      const x = cuttableX + (k + 1) * r.subCutWidth! * SCALE;
                       return (
                         <line
                           key={k}
@@ -865,6 +900,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                     })
                   : null}
 
+
                 {/* Per-strip height label, sitting in the left padding gutter
                     so it ALWAYS appears (even on narrow partial strips where
                     the in-strip label would be truncated). This guarantees
@@ -880,10 +916,12 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   {r.hIn.toFixed(2)}" tall
                 </text>
 
-                {/* Strip number badge */}
-                <circle cx={PAD_LEFT + 12} cy={ry + rh / 2} r={9} fill="var(--card)" stroke={fabricColor} strokeWidth={1.2} />
+                {/* Strip number badge — sits at the start of the cuttable
+                    area (just inside the left selvage) so it doesn't visually
+                    overlap the non-cuttable selvage zone. */}
+                <circle cx={cuttableX + 12} cy={ry + rh / 2} r={9} fill="var(--card)" stroke={fabricColor} strokeWidth={1.2} />
                 <text
-                  x={PAD_LEFT + 12}
+                  x={cuttableX + 12}
                   y={ry + rh / 2 + 3}
                   textAnchor="middle"
                   className="fill-foreground text-[10px] font-semibold"
@@ -905,7 +943,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                     : `sub-cut ${r.subCutCount} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`;
                   const shortLabel = r.isBorder
                     ? `Border (full width)`
-                    : `${r.subCutCount} × ${r.hIn.toFixed(2)}"×${r.subCutWidth?.toFixed(2)}"`;
+                    : `sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
                   // Roughly 5px per char at 10px font; pick the longest version that fits.
                   const label =
                     labelAvailW > fullLabel.length * 5
@@ -918,7 +956,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   if (!label) return null;
                   return (
                     <text
-                      x={PAD_LEFT + 28}
+                      x={cuttableX + 28}
                       y={ry + rh / 2 + 3}
                       textAnchor="start"
                       className="fill-foreground text-[10px] font-medium"

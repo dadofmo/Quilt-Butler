@@ -161,7 +161,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     {
       term: "Right sides together (RST)",
       explanation:
-        "Lay two pieces of fabric so their printed (pretty) sides are touching each other. The plain backs of the fabric will be facing you on both the top and the bottom. This is how almost every quilting seam starts.",
+        "\"Right sides together\" — abbreviated RST throughout these instructions — means laying two pieces of fabric so their printed (pretty) sides are touching each other. The plain backs of the fabric will be facing you on both the top and the bottom. This is how almost every quilting seam starts: you sew along the matched edge, then unfold so the two pieces lie flat side by side, printed sides up. Anytime you see \"RST\" later in this guide, it's shorthand for this same step.",
     },
     {
       term: '1/4" seam',
@@ -176,7 +176,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     {
       term: "Unfold (or \"open it up\")",
       explanation:
-        "After sewing two pieces RST, lift the top piece and fold it back along the new seam so both pieces lie flat side by side, printed sides up. The seam becomes a hinge between them.",
+        "After sewing two pieces right sides together (RST), lift the top piece and fold it back along the new seam so both pieces lie flat side by side, printed sides up. The seam becomes a hinge between them.",
     },
     {
       term: "Press the seam",
