@@ -87,7 +87,7 @@ export function PatchworkPreview({
   return (
     <div className="flex flex-col items-center gap-3">
       <div
-        className="grid gap-[3px] rounded-lg bg-border p-[3px] shadow-sm"
+        className="grid gap-[2px] bg-border p-[2px] shadow-sm"
         style={{
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
           width: "min(100%, 360px)",
@@ -105,7 +105,7 @@ export function PatchworkPreview({
                 type="button"
                 onClick={() => cycle(r, c)}
                 aria-label={`Row ${r + 1} column ${c + 1}, fabric ${fab}. Tap to change.`}
-                className="rounded-sm transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-ring"
+                className="transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-ring"
                 style={{
                   background: FABRIC_COLORS[fab],
                   ...fabricBackgroundStyle(fab, photos),
