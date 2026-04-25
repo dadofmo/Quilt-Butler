@@ -23,12 +23,14 @@ export function FabricPatternDefs({ photos }: Props) {
           key={k}
           id={`fabric-${k}`}
           patternUnits="objectBoundingBox"
+          patternContentUnits="objectBoundingBox"
           width={1}
           height={1}
           preserveAspectRatio="xMidYMid slice"
         >
           <image
             href={photos[k]!}
+            xlinkHref={photos[k]!}
             x={0}
             y={0}
             width={1}
