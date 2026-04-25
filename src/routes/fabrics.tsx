@@ -1,12 +1,9 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useRef } from "react";
 import { StepShell } from "@/components/StepShell";
 import { QuiltLayoutPreview } from "@/components/QuiltLayoutPreview";
 import { PatchworkPreview } from "@/components/PatchworkPreview";
 import {
   ALL_FABRIC_KEYS,
-  FABRIC_COLORS,
-  FABRIC_LABELS,
   setPlanner,
   usePlanner,
   type FabricKey,
