@@ -101,17 +101,6 @@ function ResultsStep() {
             </div>
           )}
 
-          <div className="no-print bg-card flex items-center justify-between gap-4 rounded-xl border-2 border-border p-4">
-            <div className="min-w-0">
-              <div className="text-foreground text-base font-semibold">10% safety buffer</div>
-              <div className="text-muted-foreground text-sm">Adds extra fabric for shrinkage & mistakes.</div>
-            </div>
-            <Toggle
-              on={planner.safetyBuffer}
-              onChange={(v) => setPlanner({ safetyBuffer: v })}
-            />
-          </div>
-
           <Section title="Fabric summary">
             <div className="bg-card overflow-hidden rounded-xl border-2 border-border">
               <table className="w-full text-base">
@@ -143,6 +132,32 @@ function ResultsStep() {
                 </tbody>
               </table>
             </div>
+
+            {/* Safety buffer toggle — sits next to the numbers it actually
+                affects so users can flip it and watch yardage update. */}
+            <div className="no-print bg-card mt-3 flex items-center justify-between gap-4 rounded-xl border-2 border-border p-4">
+              <div className="min-w-0">
+                <div className="text-foreground text-base font-semibold">
+                  10% safety buffer {planner.safetyBuffer ? "(included above)" : "(off)"}
+                </div>
+                <div className="text-muted-foreground text-sm">
+                  Toggle to add 10% extra fabric for shrinkage & mistakes — yardage above updates.
+                </div>
+              </div>
+              <Toggle
+                on={planner.safetyBuffer}
+                onChange={(v) => setPlanner({ safetyBuffer: v })}
+              />
+            </div>
+
+            {/* Optional cost estimator. Multiplies total top-fabric yardage
+                by the user-entered price/yard to give a rough ballpark. */}
+            <CostEstimator
+              fabrics={result.fabrics}
+              pricePerYard={planner.pricePerYard}
+              onChange={(v) => setPlanner({ pricePerYard: v })}
+            />
+
             {result.notes && (
               <ul className="text-muted-foreground mt-3 list-disc space-y-1 pl-5 text-sm">
                 {result.notes.map((n, i) => <li key={i}>{n}</li>)}
