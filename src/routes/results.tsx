@@ -424,7 +424,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
         <div className="flex items-center gap-2">
           <span
             className="border-border inline-block h-5 w-5 rounded border"
-            style={{ background: fabricColor }}
+            style={photo ? { backgroundImage: `url(${photo})`, backgroundSize: "cover", backgroundPosition: "center" } : { background: fabricColor }}
           />
           <span className="text-foreground font-semibold">Fabric {req.fabric} cutting plan</span>
         </div>
@@ -498,6 +498,26 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
             <marker id="arrR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
               <path d="M0,0 L10,5 L0,10" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-muted-foreground" />
             </marker>
+            {photo && (
+              <pattern
+                id={stripPatternId}
+                patternUnits="objectBoundingBox"
+                patternContentUnits="objectBoundingBox"
+                width={1}
+                height={1}
+                preserveAspectRatio="xMidYMid slice"
+              >
+                <image
+                  href={photo}
+                  xlinkHref={photo}
+                  x={0}
+                  y={0}
+                  width={1}
+                  height={1}
+                  preserveAspectRatio="xMidYMid slice"
+                />
+              </pattern>
+            )}
           </defs>
 
           {/* Selvage labels */}
