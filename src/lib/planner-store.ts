@@ -42,6 +42,8 @@ export interface PlannerState {
   patchworkGrid: Record<string, FabricKey>;
   /** Optional price per yard (USD or local currency, agnostic) for the cost estimator on the results page. */
   pricePerYard: string;
+  /** Per-line-item prices on the shopping list, keyed by line id (e.g. "fabric-A", "backing", "batting", "binding", "piecing-thread", "quilting-thread"). Stored as strings to preserve user input. */
+  itemPrices: Record<string, string>;
 }
 
 const initial: PlannerState = {
@@ -59,6 +61,7 @@ const initial: PlannerState = {
   patchworkFabricCount: 4,
   patchworkGrid: {},
   pricePerYard: "",
+  itemPrices: {},
 };
 
 let state: PlannerState = initial;
