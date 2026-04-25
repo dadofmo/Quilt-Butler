@@ -30,7 +30,7 @@ function PatternPicker() {
   };
 
   return (
-    <StepShell step={1} title="" hideLogo>
+    <StepShell step={1} title="">
       <div className="-mt-2 mb-4 flex justify-center sm:-mt-4">
         <img
           src={quiltButlerLogo}
