@@ -121,11 +121,13 @@ function SizeStep() {
         const aw = iw / blockSizeNum;
         const ah = ih / blockSizeNum;
         if (isInt(aw) && isInt(ah) && Math.round(aw) >= 1 && Math.round(ah) >= 1) {
+          const total = Math.round(aw) * Math.round(ah);
+          if (total > MAX_BLOCKS) continue;
           borderSuggestions.push({
             border: b,
             across: Math.round(aw),
             down: Math.round(ah),
-            total: Math.round(aw) * Math.round(ah),
+            total,
           });
         }
       }
