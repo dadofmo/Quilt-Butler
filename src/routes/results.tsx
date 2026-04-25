@@ -463,7 +463,7 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
               textAnchor="middle"
               className="fill-muted-foreground text-[10px] font-medium"
             >
-              {fabricWidth}" width of fabric (WOF)
+              {fabricWidth}" — full width of the fabric (selvage to selvage)
             </text>
           </g>
 
