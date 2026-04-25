@@ -65,14 +65,24 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
           ))}
         </svg>
       );
-    case "log-cabin":
+    case "log-cabin": {
+      // 8-unit grid; each unit = 90/8 ≈ 11.25 px. Center 2×2 at (3,3).
+      // Dark = top/right logs (1,2,5,6,9,10), Light = bottom/left (3,4,7,8,11,12).
+      const u = 90 / 8;
+      const r = (x: number, y: number, w: number, h: number, fill: string) => (
+        <rect key={`${x}-${y}-${w}-${h}`} x={x * u} y={y * u} width={w * u} height={h * u} fill={fill} />
+      );
       return (
         <svg {...common} aria-hidden>
-          <rect x={0} y={0} width={90} height={90} fill={C.b} />
-          <rect x={15} y={15} width={60} height={60} fill={C.a} />
-          <rect x={30} y={30} width={30} height={30} fill={C.d} />
+          {/* Dark side: right & top */}
+          {r(5, 3, 1, 2, C.b)}{r(3, 2, 3, 1, C.b)}{r(6, 2, 1, 4, C.b)}{r(2, 1, 5, 1, C.b)}{r(7, 1, 1, 6, C.b)}{r(1, 0, 7, 1, C.b)}
+          {/* Light side: left & bottom */}
+          {r(2, 2, 1, 3, C.a)}{r(2, 5, 4, 1, C.a)}{r(1, 1, 1, 5, C.a)}{r(1, 6, 6, 1, C.a)}{r(0, 0, 1, 7, C.a)}{r(0, 7, 8, 1, C.a)}
+          {/* Center hearth */}
+          <rect x={3 * u} y={3 * u} width={2 * u} height={2 * u} fill={C.d} />
         </svg>
       );
+    }
     case "ohio-star":
       return (
         <svg {...common} aria-hidden>
