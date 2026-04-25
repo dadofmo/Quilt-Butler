@@ -231,11 +231,26 @@ function SizeStep() {
           )}
         </Field>
 
-        <Field label="Fabric width (your bolt)">
-          <Select value={String(fabricWidth)} onChange={(e) => setFabricWidth(Number(e.target.value) as 44 | 60)}>
-            <option value="44">44 inches</option>
-            <option value="60">60 inches</option>
-          </Select>
+        <Field label="Fabric width (your bolt, in inches)">
+          <input
+            type="text"
+            inputMode="decimal"
+            value={fabricWidthText}
+            onChange={(e) => setFabricWidthText(e.target.value)}
+            placeholder="e.g. 44"
+            aria-invalid={!fabricWidthValid}
+            className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+          />
+          <p className="text-muted-foreground mt-2 text-xs leading-snug">
+            Enter your bolt&apos;s width <strong>in inches</strong> — measure selvage to
+            selvage. Common widths: 42&quot;, 44&quot;, 54&quot;, 58&quot;, 60&quot;, or
+            108&quot; for wide-back fabric. All cutting math will use this value.
+          </p>
+          {fabricWidthText.trim() !== "" && !fabricWidthValid && (
+            <p className="text-destructive mt-2 text-sm font-medium">
+              Please enter a positive number of inches (e.g. 44, 54, 60).
+            </p>
+          )}
         </Field>
 
         <Field label="Block size (finished, in inches)">
