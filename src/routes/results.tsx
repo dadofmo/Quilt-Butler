@@ -644,7 +644,7 @@ function CuttingDiagram({ req, fabricWidth, pattern }: { req: FabricRequirement;
       </div>
 
       <div className="text-muted-foreground mt-3 text-xs">
-        Total fabric needed down the bolt: <strong className="text-foreground">{totalLen.toFixed(2)}"</strong> ({req.yards} yd rounded up). Dashed lines = sub-cuts inside each strip.
+        Total fabric needed down the bolt: <strong className="text-foreground">{totalLen.toFixed(2)}"</strong> ({req.yards} yd rounded up).{totalSquares > 0 ? " Dashed lines = sub-cuts inside each strip." : ""}
       </div>
     </div>
   );
