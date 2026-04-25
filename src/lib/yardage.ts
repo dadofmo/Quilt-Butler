@@ -123,6 +123,10 @@ interface CalcResult {
   fabrics: FabricRequirement[];
   unsupported?: boolean;
   notes?: string[];
+  /** Beginner-friendly glossary of techniques the sewing notes lean on.
+   *  Rendered above the per-pattern notes so the same terms only need to
+   *  be explained once. Each entry is { term, explanation }. */
+  basics?: { term: string; explanation: string }[];
   materials?: MaterialsRequirement;
 }
 
@@ -147,6 +151,38 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const notes: string[] = [
     `${blocksAcross} × ${blocksDown} = ${blockCount} blocks (${s.blockSize}" finished)`,
     `Cut sizes include a ${SEAM_ALLOWANCE_DESC}.`,
+  ];
+
+  // Beginner-friendly glossary. The per-pattern sewing notes below lean
+  // on these terms so we only have to explain them once. Simple Squares has
+  // no assembly notes, so we only attach the glossary to results when at
+  // least one pattern-specific sewing step references it.
+  const basics: { term: string; explanation: string }[] = [
+    {
+      term: "Right sides together (RST)",
+      explanation:
+        "Lay two pieces of fabric so their printed (pretty) sides are touching each other. The plain backs of the fabric will be facing you on both the top and the bottom. This is how almost every quilting seam starts.",
+    },
+    {
+      term: '1/4" seam',
+      explanation:
+        "Sew a straight line of stitches exactly 1/4 inch from the edge you're joining. Most machines have a foot or a marked line to help you keep this consistent — it's the standard for every cut size in this plan.",
+    },
+    {
+      term: "Lining up an edge",
+      explanation:
+        "When the steps say \"line up the right edge,\" match just those two edges exactly before sewing. The rest of the piece can hang off the side — only the edge you're sewing has to align. A pin or two through the matched edge keeps things from shifting.",
+    },
+    {
+      term: "Unfold (or \"open it up\")",
+      explanation:
+        "After sewing two pieces RST, lift the top piece and fold it back along the new seam so both pieces lie flat side by side, printed sides up. The seam becomes a hinge between them.",
+    },
+    {
+      term: "Press the seam",
+      explanation:
+        "Set an iron on the seam and press straight down — don't slide back and forth. The little flap of fabric on the back is the \"seam allowance.\" In Log Cabin and Rail Fence, press it toward the most recently added piece (or toward the darker fabric) so the block stays flat as you add more.",
+    },
   ];
 
   if (s.pattern === "simple-squares") {
@@ -198,13 +234,13 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Cut ${squaresEach} squares of Fabric ${t1} and ${squaresEach} squares of Fabric ${t2}, all at ${cut}" × ${cut}" (finished ${s.blockSize}" + 7/8" extra for the diagonal seam).`,
     );
     notes.push(
-      `To turn the squares into triangle blocks: place one Fabric ${t1} square and one Fabric ${t2} square together so the printed sides are touching each other (the plain back of the fabric will be facing you on both the top and bottom). On the back of the top square, use a pencil or fabric marker to draw a straight line from one corner to the opposite corner (a diagonal).`,
+      `To turn the squares into triangle blocks: take one Fabric ${t1} square and one Fabric ${t2} square and place them right sides together (RST). On the back of the top square, use a pencil or fabric marker to draw a straight line from one corner to the opposite corner (a diagonal).`,
     );
     notes.push(
-      `Sew a seam 1/4" away from that drawn line, on BOTH sides of it (so you'll have two parallel lines of stitching). Then cut along the drawn line in the middle — you'll end up with two separate pieces, each with a triangle of ${t1} and a triangle of ${t2} already sewn together along the diagonal.`,
+      `Sew a 1/4" seam down the LEFT side of that drawn line, then a second 1/4" seam down the RIGHT side. You'll end up with two parallel lines of stitching with the drawn line running between them.`,
     );
     notes.push(
-      `Unfold each piece so the two triangles lie flat side-by-side (printed sides up). Iron it flat — quilters call this "pressing." Each pair of squares makes 2 finished half-square triangle blocks, for ${blockCount} blocks total.`,
+      `Now cut along the drawn line in the middle (the line itself, not the stitches). You'll get two pieces, each with a Fabric ${t1} triangle and a Fabric ${t2} triangle already sewn together along the diagonal. Unfold each piece and press the seam toward the darker fabric. Each pair of squares makes 2 finished half-square triangle blocks, for ${blockCount} blocks total.`,
     );
   } else if (s.pattern === "rail-fence") {
     // Each block = 3 rails. Each rail finishes at (blockSize/3) tall × blockSize wide.
@@ -248,7 +284,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Across all ${blockCount} blocks: ${blockCount} rails of Fabric ${r1} (top), ${blockCount} of Fabric ${r2} (middle), ${blockCount} of Fabric ${r3} (bottom).`,
     );
     notes.push(
-      `To sew one block: lay the top rail and the middle rail together so their printed sides are touching, lining up one long edge. Sew along that edge with a 1/4" seam. Unfold the two rails so they lie flat side-by-side (printed sides up) and iron the seam flat — this is called "pressing." Then place the bottom rail on top of the middle rail, printed sides together, line up the long edge, sew, unfold, and press again. You now have one finished block with three stripes.`,
+      `To sew one block: place the top rail and the middle rail right sides together (RST), lining up one long edge. Sew that edge with a 1/4" seam, then unfold and press the seam toward the middle rail. Now place the bottom rail on top of the middle rail RST, line up the long edge, sew, unfold, and press toward the bottom rail. You now have one finished block with three stripes.`,
     );
     notes.push(
       `Layout tip: rotate every other block 90° (alternating horizontal and vertical) when arranging — that's what gives Rail Fence its classic woven look.`,
@@ -337,10 +373,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Across all ${blockCount} blocks: ${blockCount} centers (Fabric ${centerFab}), ${6 * blockCount} dark logs (Fabric ${darkFab}), ${6 * blockCount} light logs (Fabric ${lightFab}).`,
     );
     notes.push(
-      `How to sew one block (the spiral): start with the center "hearth" square in front of you, printed side up. Place log 1 (dark, ${centerCut.toFixed(2)}" long) on top of it along the RIGHT edge so the printed sides of the two pieces are touching each other. Line up the right edges and sew a 1/4" seam down that edge. Unfold the log so it lies flat to the right of the center (printed sides up). Iron the seam flat, with the little flap of fabric on the back tucked under the new log (not under the center) — quilters call this "pressing toward the log," and it keeps the block from getting bumpy as you add more pieces.`,
+      `How to sew one block (the spiral): place the center "hearth" square in front of you, printed side up. Pick up log 1 (dark, ${centerCut.toFixed(2)}" long — the same length as the center). Lay it directly over the center square right sides together (RST), with both right-hand edges lined up exactly. The log will completely cover the center because they're the same length — that's expected; you'll unfold it after sewing. Sew a 1/4" seam along that lined-up right edge only. Unfold the log to the right so it lies flat next to the center (printed sides up). Press the seam toward the new log.`,
     );
     notes.push(
-      `Now rotate the piece a quarter-turn counter-clockwise so what was the top is now the right. Add log 2 (dark, ${(centerFinished + logFinished + SEAM).toFixed(2)}") the same way: place it printed-side-down along the new right edge, sew, unfold, and press toward the new log. Repeat with log 3 (light, ${(centerFinished + logFinished + SEAM).toFixed(2)}") and log 4 (light, ${(centerFinished + 2 * logFinished + SEAM).toFixed(2)}"). After 4 logs you've finished one round of the spiral. Do two more rounds (8 more logs) to finish the block — always adding the next log along the current right edge and rotating between logs.`,
+      `Rotate the whole piece a quarter-turn counter-clockwise so what was the top edge is now the right edge. Pick up log 2 (dark, ${(centerFinished + logFinished + SEAM).toFixed(2)}" long — slightly longer because it now needs to span the center plus the first log). Lay it RST along the new right edge, line up that edge, sew a 1/4" seam, unfold, and press toward log 2. Repeat with log 3 (light, ${(centerFinished + logFinished + SEAM).toFixed(2)}") and log 4 (light, ${(centerFinished + 2 * logFinished + SEAM).toFixed(2)}"), each time rotating a quarter-turn first. That's one round of the spiral done. Do two more rounds (8 more logs) the same way to finish the block — always rotate, then add the next log along the current right edge.`,
     );
     notes.push(
       `Color-placement tip: keep the dark logs on the SAME two adjacent sides every round (e.g. top + right) and the light logs on the OTHER two sides (bottom + left). That's what creates the iconic diagonal split — half the finished block looks dark, the other half looks light.`,
@@ -377,7 +413,14 @@ export function calculateYardage(s: PlannerState): CalcResult {
     .map((r) => ({ ...r, yards: inchesToYards(r.totalInches, s.safetyBuffer) }));
 
   const materials = calculateMaterials(s);
-  return { fabrics: out, notes, materials };
+  // Only attach the basics glossary to patterns that actually have sewing
+  // steps in the notes. Simple Squares is "join squares edge to edge" — the
+  // glossary would be overkill there.
+  const showBasics =
+    s.pattern === "hst" ||
+    s.pattern === "rail-fence" ||
+    s.pattern === "log-cabin";
+  return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
 const BATTING_PRESETS: { label: string; w: number; h: number }[] = [
