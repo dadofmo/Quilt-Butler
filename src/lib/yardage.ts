@@ -234,13 +234,13 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Cut ${squaresEach} squares of Fabric ${t1} and ${squaresEach} squares of Fabric ${t2}, all at ${cut}" × ${cut}" (finished ${s.blockSize}" + 7/8" extra for the diagonal seam).`,
     );
     notes.push(
-      `To turn the squares into triangle blocks: place one Fabric ${t1} square and one Fabric ${t2} square together so the printed sides are touching each other (the plain back of the fabric will be facing you on both the top and bottom). On the back of the top square, use a pencil or fabric marker to draw a straight line from one corner to the opposite corner (a diagonal).`,
+      `To turn the squares into triangle blocks: take one Fabric ${t1} square and one Fabric ${t2} square and place them right sides together (RST). On the back of the top square, use a pencil or fabric marker to draw a straight line from one corner to the opposite corner (a diagonal).`,
     );
     notes.push(
-      `Sew a seam 1/4" away from that drawn line, on BOTH sides of it (so you'll have two parallel lines of stitching). Then cut along the drawn line in the middle — you'll end up with two separate pieces, each with a triangle of ${t1} and a triangle of ${t2} already sewn together along the diagonal.`,
+      `Sew a 1/4" seam down the LEFT side of that drawn line, then a second 1/4" seam down the RIGHT side. You'll end up with two parallel lines of stitching with the drawn line running between them.`,
     );
     notes.push(
-      `Unfold each piece so the two triangles lie flat side-by-side (printed sides up). Iron it flat — quilters call this "pressing." Each pair of squares makes 2 finished half-square triangle blocks, for ${blockCount} blocks total.`,
+      `Now cut along the drawn line in the middle (the line itself, not the stitches). You'll get two pieces, each with a Fabric ${t1} triangle and a Fabric ${t2} triangle already sewn together along the diagonal. Unfold each piece and press the seam toward the darker fabric. Each pair of squares makes 2 finished half-square triangle blocks, for ${blockCount} blocks total.`,
     );
   } else if (s.pattern === "rail-fence") {
     // Each block = 3 rails. Each rail finishes at (blockSize/3) tall × blockSize wide.
