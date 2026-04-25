@@ -158,7 +158,8 @@ function FabricsStep() {
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
             const blocksAcross = Math.max(1, Math.floor(innerW / planner.blockSize));
             const blocksDown = Math.max(1, Math.floor(innerH / planner.blockSize));
-            const borderFabric = (planner.assignments["border"] ?? "C") as FabricKey;
+            const borderDefault = (pattern.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey;
+            const borderFabric = (planner.assignments["border"] ?? borderDefault) as FabricKey;
             return (
               <>
                 <QuiltLayoutPreview
