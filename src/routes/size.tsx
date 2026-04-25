@@ -158,6 +158,8 @@ function SizeStep() {
           const aw = iw / s;
           const ah = ih / s;
           if (isInt(aw) && isInt(ah) && Math.round(aw) >= 1 && Math.round(ah) >= 1) {
+            const total = Math.round(aw) * Math.round(ah);
+            if (total > MAX_BLOCKS) continue;
             // Skip pairs already covered by single-variable lists.
             const sameBlock = Math.abs(s - blockSizeNum) < 0.001;
             const sameBorder = Math.abs(bd - border) < 0.001;
@@ -171,7 +173,7 @@ function SizeStep() {
               border: bd,
               across: Math.round(aw),
               down: Math.round(ah),
-              total: Math.round(aw) * Math.round(ah),
+              total,
               score,
             });
           }
