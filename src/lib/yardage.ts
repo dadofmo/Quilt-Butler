@@ -345,3 +345,29 @@ function addSquares(
   });
   req.totalInches += stripCount * cutSize;
 }
+
+/**
+ * Pack rectangular rails (cutLength × cutHeight) cut from full-width strips.
+ * Each fabric-width strip is cutHeight tall and yields floor(usable / cutLength)
+ * rails. We need ceil(rails / railsPerStrip) such strips, contributing
+ * stripCount × cutHeight inches down the bolt.
+ */
+function addRails(
+  req: FabricRequirement,
+  label: string,
+  count: number,
+  cutLength: number,
+  cutHeight: number,
+  fabricWidth: number,
+) {
+  const usable = fabricWidth - SELVAGE_TRIM;
+  const perStrip = Math.max(1, Math.floor(usable / cutLength));
+  const stripCount = Math.ceil(count / perStrip);
+  req.pieces.push({ label, count, w: cutLength, h: cutHeight });
+  req.strips.push({
+    stripWidth: cutHeight,
+    count: stripCount,
+    pieces: [{ w: cutLength, h: cutHeight, count }],
+  });
+  req.totalInches += stripCount * cutHeight;
+}
