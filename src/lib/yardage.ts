@@ -110,11 +110,27 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
   if (s.pattern === "simple-squares") {
     const cut = s.blockSize + SEAM;
-    const squareFab = (s.assignments["squares"] ?? "A") as FabricKey;
-    addSquares(reqs[squareFab], "Squares", blockCount, cut, s.fabricWidth);
-    notes.push(
-      `Cut ${blockCount} squares of Fabric ${squareFab} at ${cut}" (finished ${s.blockSize}" + 1/2" for seam allowance).`,
-    );
+    // Patchwork mode: split block count across the user's chosen palette
+    // (2–12 fabrics) using the per-cell mix from the preview grid.
+    const mix = computePatchworkMix(s);
+    if (mix) {
+      const lines: string[] = [];
+      for (const fab of ALL_FABRIC_KEYS) {
+        const pct = mix[fab];
+        if (!pct || pct <= 0) continue;
+        const count = Math.ceil(blockCount * pct);
+        addSquares(reqs[fab], `Squares (Fabric ${fab})`, count, cut, s.fabricWidth);
+        lines.push(`Fabric ${fab}: ${count} squares (${Math.round(pct * 100)}% of layout)`);
+      }
+      notes.push(`Cut ${blockCount} squares total at ${cut}" (finished ${s.blockSize}" + 1/2" for seam allowance), split across your fabrics:`);
+      lines.forEach((l) => notes.push(l));
+    } else {
+      const squareFab = (s.assignments["squares"] ?? "A") as FabricKey;
+      addSquares(reqs[squareFab], "Squares", blockCount, cut, s.fabricWidth);
+      notes.push(
+        `Cut ${blockCount} squares of Fabric ${squareFab} at ${cut}" (finished ${s.blockSize}" + 1/2" for seam allowance).`,
+      );
+    }
   } else if (s.pattern === "nine-patch") {
     const patchFinished = s.blockSize / 3;
     const cut = patchFinished + SEAM;
