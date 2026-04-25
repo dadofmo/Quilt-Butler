@@ -1,5 +1,6 @@
-import { FABRIC_COLORS, type FabricKey } from "@/lib/planner-store";
+import { type FabricKey } from "@/lib/planner-store";
 import type { PatternId, SectionAssignments } from "@/lib/planner-store";
+import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
 import { PatternDiagram } from "./PatternDiagram";
 
@@ -8,6 +9,7 @@ interface Props {
   assignments: SectionAssignments;
   hasBorder: boolean;
   borderFabric: FabricKey;
+  photos?: Partial<Record<FabricKey, string>>;
 }
 
 /**
@@ -21,6 +23,7 @@ export function PrintBlockLegend({
   assignments,
   hasBorder,
   borderFabric,
+  photos,
 }: Props) {
   const def = getPattern(pattern);
   if (!def) return null;
@@ -48,6 +51,7 @@ export function PrintBlockLegend({
           assignments={assignments}
           hasBorder={hasBorder}
           size={140}
+          photos={photos}
         />
       </div>
       <div className="min-w-0 flex-1">
@@ -59,7 +63,7 @@ export function PrintBlockLegend({
             <li key={it.fabric} className="flex items-center gap-2 text-xs">
               <span
                 className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-border text-[11px] font-bold text-foreground"
-                style={{ background: FABRIC_COLORS[it.fabric] }}
+                style={fabricBackgroundStyle(it.fabric, photos)}
               >
                 {it.fabric}
               </span>

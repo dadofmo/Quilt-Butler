@@ -73,6 +73,7 @@ function ResultsStep() {
             assignments={planner.assignments}
             hasBorder={planner.borderWidth > 0}
             borderFabric={(planner.assignments.border ?? "C") as FabricKey}
+            photos={planner.fabricPhotos}
           />
 
           <div className="no-print bg-card flex items-center justify-between gap-4 rounded-xl border-2 border-border p-4">
