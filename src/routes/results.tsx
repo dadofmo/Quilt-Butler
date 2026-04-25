@@ -296,11 +296,16 @@ function MaterialsCard({ m }: { m: MaterialsRequirement }) {
   );
 }
 
-function ShopMaterialLine({ label, detail, amount }: { label: string; detail: string; amount: string }) {
+function ShopMaterialLine({ label, whatItIs, detail, amount }: { label: string; whatItIs?: string; detail: string; amount: string }) {
   return (
     <li className="py-3">
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-foreground font-medium">{label}</span>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <span className="text-foreground font-medium">{label}</span>
+          {whatItIs && (
+            <span className="text-muted-foreground ml-2 text-xs italic">— {whatItIs}</span>
+          )}
+        </div>
         <span className="text-foreground text-lg font-semibold whitespace-nowrap">{amount}</span>
       </div>
       <div className="text-muted-foreground mt-1 text-sm">{detail}</div>
