@@ -184,6 +184,88 @@ console.log("\n=== Log Cabin: light & dark share fabric A — buckets must merge
 }
 
 // =========================================================================
+// OHIO STAR
+// =========================================================================
+console.log("\n=== Ohio Star: 50×65, 12\" block, no border ===");
+{
+  const s = { ...base(), pattern: "ohio-star" as const, blockSize: 12, borderWidth: 0 };
+  // 50×65, no border, 12" block: 4×5 = 20 blocks.
+  // unitFinished = 12/3 = 4. plainCut = 4.5. qstCut = 5.25.
+  // Per block: 2 star QST squares + 2 bg QST squares + 4 bg corners + 1 center.
+  // Star (A): 2*20 = 40 QST squares at 5.25". Per strip floor(42.5/5.25)=8.
+  //          Strips=ceil(40/8)=5. Inches=5*5.25=26.25.
+  // Bg (B):  2*20 = 40 QST squares at 5.25" (5 strips × 5.25 = 26.25)
+  //        + 4*20 = 80 corner squares at 4.5". Per strip floor(42.5/4.5)=9.
+  //          Strips=ceil(80/9)=9. Inches=9*4.5=40.5.
+  //        Total B inches = 26.25 + 40.5 = 66.75.
+  // Center (D): 1*20 = 20 squares at 4.5". Per strip 9. Strips=ceil(20/9)=3.
+  //          Inches=3*4.5=13.5.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const d = r.fabrics.find(f => f.fabric === "D")!;
+  check("OS A QST square count", a.pieces[0].count, 40);
+  check("OS A QST cut size", a.pieces[0].w, 5.25);
+  check("OS A strips", a.strips[0].count, 5);
+  check("OS A inches", a.totalInches, 26.25);
+  // Bg has TWO piece buckets (QST + corners)
+  check("OS B bucket count", b.pieces.length, 2);
+  check("OS B QST count", b.pieces[0].count, 40);
+  check("OS B corner count", b.pieces[1].count, 80);
+  check("OS B QST cut", b.pieces[0].w, 5.25);
+  check("OS B corner cut", b.pieces[1].w, 4.5);
+  check("OS B inches", b.totalInches, 66.75);
+  check("OS D center count", d.pieces[0].count, 20);
+  check("OS D center cut", d.pieces[0].w, 4.5);
+  check("OS D strips", d.strips[0].count, 3);
+  check("OS D inches", d.totalInches, 13.5);
+  // Glossary should be attached (has sewing steps)
+  check("OS basics glossary length", r.basics?.length ?? 0, 5);
+}
+
+console.log("\n=== Ohio Star: star & center share fabric A ===");
+{
+  const s = {
+    ...base(), pattern: "ohio-star" as const, blockSize: 12, borderWidth: 0,
+    assignments: { star: "A" as FabricKey, bg: "B" as FabricKey, center: "A" as FabricKey },
+  };
+  // A now holds 40 QST squares (5.25") + 20 center squares (4.5").
+  // Two buckets — different cut sizes, never merged.
+  // Star QST: 5 strips × 5.25 = 26.25. Center: 3 strips × 4.5 = 13.5. Total=39.75.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("OS shared A bucket count", a.pieces.length, 2);
+  const totalA = a.pieces.reduce((acc, p) => acc + p.count, 0);
+  check("OS shared A total pieces", totalA, 60); // 40 QST + 20 centers
+  check("OS shared A inches", a.totalInches, 39.75);
+}
+
+console.log("\n=== Ohio Star: star & bg share fabric A — math still holds ===");
+{
+  const s = {
+    ...base(), pattern: "ohio-star" as const, blockSize: 12, borderWidth: 0,
+    assignments: { star: "A" as FabricKey, bg: "A" as FabricKey, center: "D" as FabricKey },
+  };
+  // QST squares: 80 at 5.25". Per strip 8. Strips=ceil(80/8)=10. Inches=10*5.25=52.5.
+  // Corners: 80 at 4.5". Per strip 9. Strips=ceil(80/9)=9. Inches=9*4.5=40.5.
+  // Total: 93.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("OS A+B merged QST count", a.pieces[0].count, 80);
+  check("OS A+B merged corner count", a.pieces[1].count, 80);
+  check("OS A+B merged inches", a.totalInches, 93);
+}
+
+console.log("\n=== Ohio Star: odd block size 4.25\" — non-integer unit must still produce valid cuts ===");
+{
+  const s = { ...base(), pattern: "ohio-star" as const, quiltWidth: 17, quiltHeight: 17, blockSize: 4.25, borderWidth: 0 };
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  // 4×4 = 16 blocks. Star QST = 32 squares.
+  check("OS odd-unit A count", a.pieces[0].count, 32);
+}
+
+// =========================================================================
 // BORDER MATH
 // =========================================================================
 console.log("\n=== Border: 60×80 inner, 4\" border, 9P pattern ===");
