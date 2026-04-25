@@ -3,7 +3,7 @@ import { StepShell } from "@/components/StepShell";
 import { PatternThumb } from "@/components/PatternThumb";
 import { PATTERNS, getPattern } from "@/lib/patterns";
 import { setPlanner } from "@/lib/planner-store";
-import quiltButlerLogo from "@/assets/quilt-butler-logo.png";
+import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,8 +35,8 @@ function PatternPicker() {
         <img
           src={quiltButlerLogo}
           alt="QuiltButler — Plan smart. Cut confidently. Quilt beautifully."
-          width={1536}
-          height={1024}
+          width={900}
+          height={600}
           fetchPriority="high"
           className="h-auto w-full max-w-sm sm:max-w-md"
         />
