@@ -140,6 +140,7 @@
   .no-print { display: none !important; }
   .print-only { display: inline-block !important; }
   .print-only-flex { display: flex !important; }
+  html { background-image: none !important; background: white !important; }
   body { background: white !important; }
 
   /* Page-break helpers for the printable yardage plan so each section
