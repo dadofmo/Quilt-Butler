@@ -20,7 +20,10 @@ function SizeStep() {
   const [preset, setPreset] = useState(planner.sizePreset);
   const [w, setW] = useState(planner.quiltWidth);
   const [h, setH] = useState(planner.quiltHeight);
-  const [fabricWidth, setFabricWidth] = useState<44 | 60>(planner.fabricWidth);
+  // Fabric width is free-form (in inches) so users can enter whatever their bolt is —
+  // 42, 44, 54, 58, 60, 108 (wide-back), etc. Stored as text while typing so partial
+  // values like "44." don't coerce to NaN mid-keystroke.
+  const [fabricWidthText, setFabricWidthText] = useState(String(planner.fabricWidth));
   // Block size is now a free-text decimal — store as string while typing so
   // the user can type "4." or "4.5" without us coercing to NaN/0 mid-keystroke.
   const [blockSizeText, setBlockSizeText] = useState(String(planner.blockSize));
