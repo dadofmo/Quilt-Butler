@@ -58,6 +58,7 @@ export function PatchworkPreview({
   borderWidth,
   grid,
   onChange,
+  photos,
 }: Props) {
   const { rows, cols } = useMemo(
     () => computeGridShape(quiltWidth, quiltHeight, blockSize, borderWidth),
@@ -105,7 +106,10 @@ export function PatchworkPreview({
                 onClick={() => cycle(r, c)}
                 aria-label={`Row ${r + 1} column ${c + 1}, fabric ${fab}. Tap to change.`}
                 className="rounded-sm transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-ring"
-                style={{ background: FABRIC_COLORS[fab] }}
+                style={{
+                  background: FABRIC_COLORS[fab],
+                  ...fabricBackgroundStyle(fab, photos),
+                }}
               />
             );
           }),
