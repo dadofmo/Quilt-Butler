@@ -286,22 +286,273 @@ function MaterialsCard({ m }: { m: MaterialsRequirement }) {
   );
 }
 
-function ShopMaterialLine({ label, whatItIs, detail, amount }: { label: string; whatItIs?: string; detail: string; amount: string }) {
+/**
+ * One row in the Shopping list. Shows the item, its quantity (yards/spools/etc),
+ * a price input, and a computed subtotal. Price input is hidden in print —
+ * the printed version shows a blank "$ ____" line so users can fill it in by hand.
+ */
+function ShoppingLineRow({
+  id,
+  label,
+  whatItIs,
+  detail,
+  qty,
+  unit,
+  swatch,
+  price,
+  onPrice,
+  children,
+}: {
+  id: string;
+  label: React.ReactNode;
+  whatItIs?: string;
+  detail?: React.ReactNode;
+  qty: number;
+  unit: string;
+  swatch?: React.ReactNode;
+  price: string;
+  onPrice: (v: string) => void;
+  children?: React.ReactNode;
+}) {
+  const priceNum = Number(price);
+  const valid = price.trim() !== "" && !isNaN(priceNum) && priceNum > 0;
+  const subtotal = valid ? qty * priceNum : 0;
   return (
-    <li className="py-3">
+    <li className="py-4">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <span className="text-foreground font-medium">{label}</span>
-          {whatItIs && (
-            <span className="text-muted-foreground ml-2 text-xs italic">— {whatItIs}</span>
-          )}
+        <div className="flex min-w-0 items-start gap-3">
+          {swatch}
+          <div className="min-w-0">
+            <span className="text-foreground font-medium">{label}</span>
+            {whatItIs && (
+              <span className="text-muted-foreground ml-2 text-xs italic">— {whatItIs}</span>
+            )}
+            {detail && (
+              <div className="text-muted-foreground mt-1 text-sm">{detail}</div>
+            )}
+          </div>
         </div>
-        <span className="text-foreground text-lg font-semibold whitespace-nowrap">{amount}</span>
+        <span className="text-foreground text-lg font-semibold whitespace-nowrap">
+          {qty} {unit}
+        </span>
       </div>
-      <div className="text-muted-foreground mt-1 text-sm">{detail}</div>
+      {children}
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-3 pl-9">
+        <div className="flex items-center gap-2">
+          <label htmlFor={`price-${id}`} className="text-muted-foreground text-sm">
+            Price / {unit}:
+          </label>
+          {/* Editable on screen */}
+          <span className="no-print flex items-center gap-1">
+            <span className="text-muted-foreground text-sm">$</span>
+            <input
+              id={`price-${id}`}
+              type="text"
+              inputMode="decimal"
+              value={price}
+              onChange={(e) => onPrice(e.target.value)}
+              placeholder="0.00"
+              className="border-input bg-background placeholder:text-muted-foreground/60 focus-visible:ring-ring w-20 rounded border-2 px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-1"
+            />
+          </span>
+          {/* Printed version: shows entered value or blank line */}
+          <span className="print-only border-b border-foreground pb-0.5 text-sm" style={{ minWidth: "4rem" }}>
+            {valid ? `$${priceNum.toFixed(2)}` : "\u00a0"}
+          </span>
+        </div>
+        <div className="text-foreground text-sm font-semibold whitespace-nowrap">
+          Subtotal: {valid ? `$${subtotal.toFixed(2)}` : "—"}
+        </div>
+      </div>
     </li>
   );
 }
+
+/**
+ * Full shopping list with per-line price inputs and a grand total.
+ */
+function ShoppingList({
+  fabrics,
+  materials,
+  fabricNames,
+  fabricPhotos,
+  itemPrices,
+  safetyBuffer,
+  onName,
+  onPrice,
+}: {
+  fabrics: FabricRequirement[];
+  materials?: MaterialsRequirement;
+  fabricNames: Partial<Record<FabricKey, string>>;
+  fabricPhotos: Partial<Record<FabricKey, string>>;
+  itemPrices: Record<string, string>;
+  safetyBuffer: boolean;
+  onName: (fabric: FabricKey, value: string) => void;
+  onPrice: (id: string, value: string) => void;
+}) {
+  // Build the unified list of shopping lines with quantities + units so we
+  // can both render rows AND compute the grand total in one place.
+  type Line = {
+    id: string;
+    qty: number;
+    unit: string;
+  };
+  const lines: Line[] = [];
+  for (const f of fabrics) lines.push({ id: `fabric-${f.fabric}`, qty: f.yards, unit: "yd" });
+  if (materials) {
+    lines.push({ id: "backing", qty: materials.backing.yards, unit: "yd" });
+    const battingIsPkg = !materials.batting.presetLabel.startsWith("Larger");
+    lines.push({
+      id: "batting",
+      qty: battingIsPkg ? 1 : materials.batting.yards,
+      unit: battingIsPkg ? "pkg" : "yd",
+    });
+    lines.push({ id: "binding", qty: materials.binding.yards, unit: "yd" });
+    lines.push({ id: "piecing-thread", qty: 1, unit: "spool" });
+    lines.push({ id: "quilting-thread", qty: 1, unit: "spool" });
+  }
+
+  const grandTotal = lines.reduce((sum, line) => {
+    const raw = itemPrices[line.id];
+    if (!raw) return sum;
+    const p = Number(raw);
+    if (isNaN(p) || p <= 0) return sum;
+    return sum + line.qty * p;
+  }, 0);
+  const anyPriced = lines.some((l) => {
+    const raw = itemPrices[l.id];
+    if (!raw) return false;
+    const p = Number(raw);
+    return !isNaN(p) && p > 0;
+  });
+
+  return (
+    <div className="bg-card rounded-xl border-2 border-border p-5">
+      <p className="text-muted-foreground mb-4 text-sm">
+        Bring this to the fabric store. Write the fabric name on each line as you pick it
+        — that way you'll know exactly which bolt is "Fabric A" when you start cutting.
+        Enter a price per yard / package / spool to get a running total at the bottom.
+      </p>
+      <ul className="divide-y divide-border">
+        {fabrics.map((f) => {
+          const name = fabricNames[f.fabric] ?? "";
+          const id = `fabric-${f.fabric}`;
+          return (
+            <ShoppingLineRow
+              key={f.fabric}
+              id={id}
+              label={FABRIC_LABELS[f.fabric]}
+              qty={f.yards}
+              unit="yd"
+              price={itemPrices[id] ?? ""}
+              onPrice={(v) => onPrice(id, v)}
+              swatch={
+                <span
+                  className="border-border inline-block h-10 w-10 shrink-0 rounded border"
+                  style={fabricBackgroundStyle(f.fabric, fabricPhotos)}
+                />
+              }
+            >
+              <div className="mt-2 flex items-baseline gap-2 pl-9">
+                <label
+                  htmlFor={`name-${f.fabric}`}
+                  className="text-muted-foreground shrink-0 text-sm"
+                >
+                  Name:
+                </label>
+                <input
+                  id={`name-${f.fabric}`}
+                  type="text"
+                  value={name}
+                  onChange={(e) => onName(f.fabric, e.target.value)}
+                  placeholder="e.g. Moda Bella – Bluebird"
+                  className="no-print border-input bg-background placeholder:text-muted-foreground/60 focus-visible:ring-ring flex-1 border-b-2 px-1 py-1 text-sm focus-visible:outline-none focus-visible:ring-1"
+                />
+                <span className="print-only flex-1 border-b border-foreground pb-0.5 text-sm">
+                  {name || "\u00a0"}
+                </span>
+              </div>
+            </ShoppingLineRow>
+          );
+        })}
+        {materials && (
+          <>
+            <ShoppingLineRow
+              id="backing"
+              label="Backing fabric"
+              whatItIs="the fabric on the back of your quilt (what you see when you flip it over)"
+              detail={`${materials.backing.widths} width${materials.backing.widths === 1 ? "" : "s"} × ${materials.backing.heightIn}" — pieces ${materials.backing.widthIn}" × ${materials.backing.heightIn}" (incl. ${materials.backing.overhang}" overhang each side)`}
+              qty={materials.backing.yards}
+              unit="yd"
+              price={itemPrices["backing"] ?? ""}
+              onPrice={(v) => onPrice("backing", v)}
+            />
+            <ShoppingLineRow
+              id="batting"
+              label="Batting"
+              whatItIs="the fluffy middle layer that goes between the top and backing — gives the quilt its warmth and puffiness"
+              detail={`${materials.batting.widthIn}" × ${materials.batting.heightIn}" — pre-cut: ${materials.batting.presetLabel}, or ${materials.batting.yards} yd off the roll`}
+              qty={materials.batting.presetLabel.startsWith("Larger") ? materials.batting.yards : 1}
+              unit={materials.batting.presetLabel.startsWith("Larger") ? "yd" : "pkg"}
+              price={itemPrices["batting"] ?? ""}
+              onPrice={(v) => onPrice("batting", v)}
+            />
+            <ShoppingLineRow
+              id="binding"
+              label="Binding fabric"
+              whatItIs="the narrow strip that wraps around the raw edges of the quilt to finish them neatly"
+              detail={`Cut ${materials.binding.stripCount} strips at ${materials.binding.stripWidthIn}" wide. Sewn together they wrap the ${materials.binding.perimeterIn}" edge of your quilt (plus ~10" extra for corners and joining).`}
+              qty={materials.binding.yards}
+              unit="yd"
+              price={itemPrices["binding"] ?? ""}
+              onPrice={(v) => onPrice("binding", v)}
+            />
+            <ShoppingLineRow
+              id="piecing-thread"
+              label="Piecing thread"
+              whatItIs="the thread your sewing machine uses to stitch the fabric pieces together"
+              detail="One spool of all-purpose thread in a neutral color (cream, grey, or white) — blends in with most fabrics."
+              qty={1}
+              unit="spool"
+              price={itemPrices["piecing-thread"] ?? ""}
+              onPrice={(v) => onPrice("piecing-thread", v)}
+            />
+            <ShoppingLineRow
+              id="quilting-thread"
+              label="Quilting thread"
+              whatItIs="the thread used for the decorative stitching that holds the three layers (top, batting, backing) together"
+              detail="One spool in the color of your choice — can match your fabric or be a contrasting accent."
+              qty={1}
+              unit="spool"
+              price={itemPrices["quilting-thread"] ?? ""}
+              onPrice={(v) => onPrice("quilting-thread", v)}
+            />
+          </>
+        )}
+      </ul>
+      <div className="text-muted-foreground mt-3 text-sm">
+        {safetyBuffer ? "Includes 10% safety buffer on top fabrics." : "No safety buffer."} Rounded up to ¼ yard.
+      </div>
+
+      {/* Grand total — always visible, prominent */}
+      <div className="border-primary mt-5 rounded-xl border-2 bg-primary/5 p-4">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <span className="text-foreground text-base font-semibold">
+            Total estimated cost
+          </span>
+          <span className="text-primary text-2xl font-bold">
+            {anyPriced ? `≈ $${grandTotal.toFixed(2)}` : "Enter prices above"}
+          </span>
+        </div>
+        <p className="text-muted-foreground mt-1 text-xs">
+          Adds up every line above where you've entered a price. Lines without a price
+          are skipped, so the total only reflects what you've filled in.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 
 
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
