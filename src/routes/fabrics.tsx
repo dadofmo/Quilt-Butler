@@ -12,6 +12,7 @@ import {
   type FabricKey,
 } from "@/lib/planner-store";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
+import { FabricSwatchOption } from "@/components/FabricSwatchOption";
 import { getPattern, fabricsForPattern } from "@/lib/patterns";
 
 export const Route = createFileRoute("/fabrics")({
