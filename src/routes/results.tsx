@@ -352,7 +352,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
   );
 }
 
-function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWidth: number }) {
+function CuttingDiagram({ req, fabricWidth, pattern }: { req: FabricRequirement; fabricWidth: number; pattern: import("@/lib/planner-store").PatternId | null }) {
   const SCALE = 9; // 1 inch = 9px
   const PAD_TOP = 28; // room for WOF arrow
   const PAD_LEFT = 56; // room for selvage label
