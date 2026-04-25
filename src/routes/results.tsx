@@ -368,11 +368,11 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
   const svgH = PAD_TOP + boltH + PAD_BOTTOM;
 
   const fabricColor = FABRIC_COLORS[req.fabric as FabricKey];
-  // Strip fill: when the user uploaded a photo, use the photo via an SVG
-  // pattern so each strip looks like the actual fabric. Otherwise fall back
-  // to the lightened solid color (better contrast for the dashed sub-cuts).
-  const stripPatternId = `cut-fab-${req.fabric}`;
-  const stripFill = photo ? `url(#${stripPatternId})` : `color-mix(in oklab, ${fabricColor} 30%, white)`;
+  // Cutting diagram strips always use the lightened solid color (better
+  // contrast for the dashed sub-cut lines and labels) — even when the user
+  // has uploaded a photo for the fabric. The photo is only shown in the
+  // header swatch above so the quilter can still recognize the fabric.
+  const stripFill = `color-mix(in oklab, ${fabricColor} 30%, white)`;
 
   // Build strip layout
   type Row = {
@@ -424,7 +424,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span
-            className="border-border inline-block h-5 w-5 rounded border"
+            className="border-border inline-block h-10 w-10 rounded border"
             style={photo ? { backgroundImage: `url(${photo})`, backgroundSize: "cover", backgroundPosition: "center" } : { background: fabricColor }}
           />
           <span className="text-foreground font-semibold">Fabric {req.fabric} cutting plan</span>
