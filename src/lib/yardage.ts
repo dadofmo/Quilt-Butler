@@ -153,7 +153,12 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const t2 = (s.assignments["tri2"] ?? "B") as FabricKey;
     addSquares(reqs[t1], "Triangle A squares", squaresEach, cut, s.fabricWidth);
     addSquares(reqs[t2], "Triangle B squares", squaresEach, cut, s.fabricWidth);
-    notes.push(`Cut ${squaresEach} squares of each fabric at ${cut}". Pair, sew diagonal, yields 2 HSTs each.`);
+    notes.push(
+      `Cut ${squaresEach} squares of Fabric ${t1} and ${squaresEach} squares of Fabric ${t2}, all at ${cut}" × ${cut}" (finished ${s.blockSize}" + 7/8" extra for the diagonal seam).`,
+    );
+    notes.push(
+      `To turn squares into triangle blocks: pair one ${t1} square with one ${t2} square, right sides together. Draw a line corner-to-corner on the back of the lighter square, sew 1/4" on each side of that line, then cut along the drawn line. Press open — each pair yields 2 finished half-square triangle blocks (${blockCount} total).`,
+    );
   }
 
   // Border
