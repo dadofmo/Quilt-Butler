@@ -132,7 +132,7 @@ function ResultsStep() {
                   key={f.fabric}
                   className={i === 1 ? "print-page-break" : undefined}
                 >
-                  <CuttingDiagram req={f} fabricWidth={planner.fabricWidth} />
+                  <CuttingDiagram req={f} fabricWidth={planner.fabricWidth} pattern={planner.pattern} />
                 </div>
               ))}
             </div>
@@ -352,7 +352,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
   );
 }
 
-function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWidth: number }) {
+function CuttingDiagram({ req, fabricWidth, pattern }: { req: FabricRequirement; fabricWidth: number; pattern: import("@/lib/planner-store").PatternId | null }) {
   const SCALE = 9; // 1 inch = 9px
   const PAD_TOP = 28; // room for WOF arrow
   const PAD_LEFT = 56; // room for selvage label
@@ -452,6 +452,11 @@ function CuttingDiagram({ req, fabricWidth }: { req: FabricRequirement; fabricWi
           );
         })()}
       </ol>
+      {pattern === "hst" && (
+        <p className="text-foreground mb-2 rounded-md border border-border bg-muted/40 px-3 py-2 text-xs">
+          <strong>Note:</strong> after cutting your squares, see the assembly instructions above ("Heads up before you start") to learn how to turn each pair of squares into two finished triangle blocks.
+        </p>
+      )}
       <p className="text-muted-foreground mb-4 text-xs italic">
         Tip: the "finished edges" (also called the <em>selvage</em>) are the tightly-woven side edges of the fabric that don't fray.
       </p>
