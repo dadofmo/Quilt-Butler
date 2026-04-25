@@ -123,12 +123,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       );
     }
     case "flying-geese":
+      // 2 geese per block, stacked — matches the pattern's actual geometry.
       return (
         <svg {...common} aria-hidden>
-          {[0, 22.5, 45, 67.5].map((y, i) => (
+          {[0, 45].map((y, i) => (
             <g key={i}>
-              <rect x={0} y={y} width={90} height={22.5} fill={C.b} />
-              <polygon points={`45,${y + 2} 88,${y + 21} 2,${y + 21}`} fill={C.a} />
+              <rect x={0} y={y} width={90} height={45} fill={C.b} />
+              <polygon points={`45,${y} 90,${y + 45} 0,${y + 45}`} fill={C.a} />
             </g>
           ))}
         </svg>
