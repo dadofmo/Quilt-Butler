@@ -123,6 +123,10 @@ interface CalcResult {
   fabrics: FabricRequirement[];
   unsupported?: boolean;
   notes?: string[];
+  /** Beginner-friendly glossary of techniques the sewing notes lean on.
+   *  Rendered above the per-pattern notes so the same terms only need to
+   *  be explained once. Each entry is { term, explanation }. */
+  basics?: { term: string; explanation: string }[];
   materials?: MaterialsRequirement;
 }
 
