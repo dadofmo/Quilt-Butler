@@ -30,15 +30,17 @@ function PatternPicker() {
   };
 
   return (
-    <StepShell step={1} title="Pick a quilt pattern" subtitle="Tap a tile to start planning your quilt.">
-      <div className="-mt-4 mb-6 flex justify-center sm:-mt-6 sm:mb-8">
+    <StepShell step={1} title="" hideLogo>
+      <div className="-mt-2 mb-4 flex justify-center sm:-mt-4">
         <img
           src={quiltButlerLogo}
           alt="QuiltButler — Plan smart. Cut confidently. Quilt beautifully."
           className="h-auto w-full max-w-sm sm:max-w-md"
         />
       </div>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+      <h1 className="text-foreground text-2xl font-semibold sm:text-3xl">Pick a quilt pattern</h1>
+      <p className="text-muted-foreground mt-2 text-base">Tap a tile to start planning your quilt.</p>
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:grid-cols-3 sm:gap-4">
         {PATTERNS.map((p) => {
           const ready = p.hasMath;
           return (
