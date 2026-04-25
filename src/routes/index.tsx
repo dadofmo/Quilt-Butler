@@ -35,6 +35,9 @@ function PatternPicker() {
         <img
           src={quiltButlerLogo}
           alt="QuiltButler — Plan smart. Cut confidently. Quilt beautifully."
+          width={1536}
+          height={1024}
+          fetchPriority="high"
           className="h-auto w-full max-w-sm sm:max-w-md"
         />
       </div>
