@@ -133,7 +133,7 @@ function ResultsStep() {
                   key={f.fabric}
                   className={i === 1 ? "print-page-break" : undefined}
                 >
-                  <CuttingDiagram req={f} fabricWidth={planner.fabricWidth} pattern={planner.pattern} />
+                  <CuttingDiagram req={f} fabricWidth={planner.fabricWidth} pattern={planner.pattern} photo={planner.fabricPhotos[f.fabric]} />
                 </div>
               ))}
             </div>
@@ -353,7 +353,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
   );
 }
 
-function CuttingDiagram({ req, fabricWidth, pattern }: { req: FabricRequirement; fabricWidth: number; pattern: import("@/lib/planner-store").PatternId | null }) {
+function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequirement; fabricWidth: number; pattern: import("@/lib/planner-store").PatternId | null; photo?: string }) {
   const SCALE = 9; // 1 inch = 9px
   const PAD_TOP = 28; // room for WOF arrow
   const PAD_LEFT = 56; // room for selvage label
@@ -367,7 +367,11 @@ function CuttingDiagram({ req, fabricWidth, pattern }: { req: FabricRequirement;
   const svgH = PAD_TOP + boltH + PAD_BOTTOM;
 
   const fabricColor = FABRIC_COLORS[req.fabric as FabricKey];
-  const stripFill = `color-mix(in oklab, ${fabricColor} 30%, white)`;
+  // Strip fill: when the user uploaded a photo, use the photo via an SVG
+  // pattern so each strip looks like the actual fabric. Otherwise fall back
+  // to the lightened solid color (better contrast for the dashed sub-cuts).
+  const stripPatternId = `cut-fab-${req.fabric}`;
+  const stripFill = photo ? `url(#${stripPatternId})` : `color-mix(in oklab, ${fabricColor} 30%, white)`;
 
   // Build strip layout
   type Row = {
