@@ -9,7 +9,7 @@ import { Printer } from "lucide-react";
 export const Route = createFileRoute("/results")({
   head: () => ({
     meta: [
-      { title: "Yardage results — Quilt Fabric Planner" },
+      { title: "Yardage results — QuiltButler" },
       { name: "description", content: "Your fabric yardage, cutting diagram, and printable shopping list." },
     ],
   }),

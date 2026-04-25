@@ -15,7 +15,7 @@ import { getPattern, fabricsForPattern } from "@/lib/patterns";
 export const Route = createFileRoute("/fabrics")({
   head: () => ({
     meta: [
-      { title: "Assign fabrics — Quilt Fabric Planner" },
+      { title: "Assign fabrics — QuiltButler" },
       { name: "description", content: "Assign fabrics to each section of your quilt block and preview the patchwork." },
     ],
   }),
