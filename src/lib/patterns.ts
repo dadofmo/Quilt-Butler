@@ -75,8 +75,8 @@ export const PATTERNS: PatternDef[] = [
     sections: [
       { id: "rail1", label: "Top rail", defaultFabric: "A", hint: "One of the three strips in every block." },
       { id: "rail2", label: "Middle rail", defaultFabric: "B", hint: "The middle strip — pick something that contrasts with the top and bottom." },
-      { id: "rail3", label: "Bottom rail", defaultFabric: "D", hint: "The third strip — together the three fabrics make the woven fence look." },
-      borderSection,
+      { id: "rail3", label: "Bottom rail", defaultFabric: "C", hint: "The third strip — together the three fabrics make the woven fence look." },
+      { id: "border", label: "Border", defaultFabric: "D", hint: "The frame around the whole quilt." },
     ],
   },
   {

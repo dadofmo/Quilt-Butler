@@ -84,7 +84,7 @@ function ResultsStep() {
             pattern={planner.pattern!}
             assignments={planner.assignments}
             hasBorder={planner.borderWidth > 0}
-            borderFabric={(planner.assignments.border ?? "C") as FabricKey}
+            borderFabric={(planner.assignments.border ?? pattern?.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey}
             photos={planner.fabricPhotos}
           />
 

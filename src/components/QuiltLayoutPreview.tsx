@@ -56,7 +56,7 @@ export function QuiltLayoutPreview({
           <div className="flex items-stretch gap-2">
             <div className="flex flex-col justify-around py-[5px] text-right">
               {(["rail1", "rail2", "rail3"] as const).map((id, idx) => {
-                const fab = (assignments[id] ?? (["A", "B", "D"] as const)[idx]) as FabricKey;
+                const fab = (assignments[id] ?? (["A", "B", "C"] as const)[idx]) as FabricKey;
                 const role = ["Top rail", "Middle rail", "Bottom rail"][idx];
                 return (
                   <div key={id} className="flex items-center justify-end gap-1.5">
@@ -261,7 +261,7 @@ function MiniBlock({
     case "rail-fence": {
       const r1 = get("rail1", "A");
       const r2 = get("rail2", "B");
-      const r3 = get("rail3", "D");
+      const r3 = get("rail3", "C");
       return (
         <>
           <rect width={200} height={66.67} fill={r1} />

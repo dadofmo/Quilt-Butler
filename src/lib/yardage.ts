@@ -169,7 +169,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const railCutLength = s.blockSize + SEAM;
     const r1 = (s.assignments["rail1"] ?? "A") as FabricKey;
     const r2 = (s.assignments["rail2"] ?? "B") as FabricKey;
-    const r3 = (s.assignments["rail3"] ?? "D") as FabricKey;
+    const r3 = (s.assignments["rail3"] ?? "C") as FabricKey;
     // Group rails by fabric so two rails sharing a fabric share strips.
     const railFabrics: Record<FabricKey, number> = {} as Record<FabricKey, number>;
     for (const f of [r1, r2, r3] as FabricKey[]) {
@@ -207,7 +207,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
   // Border
   if (s.borderWidth > 0) {
-    const borderFab = (s.assignments["border"] ?? "C") as FabricKey;
+    const borderDefault = (getPattern(s.pattern)?.sections.find((sec) => sec.id === "border")?.defaultFabric ?? "C") as FabricKey;
+    const borderFab = (s.assignments["border"] ?? borderDefault) as FabricKey;
     const b = borderInches(s.quiltWidth - 2 * s.borderWidth, s.quiltHeight - 2 * s.borderWidth, s.borderWidth, s.fabricWidth);
     if (b.stripCount > 0) {
       reqs[borderFab].strips.push({
