@@ -307,19 +307,24 @@ function SizeStep() {
           )}
         </Field>
 
-        <Field label="Border width">
-          <Select value={borderPreset} onChange={(e) => setBorderPreset(e.target.value)}>
-            <option value="0">None</option>
-            <option value="2">2 inches</option>
-            <option value="3">3 inches</option>
-            <option value="4">4 inches</option>
-            <option value="5">5 inches</option>
-            <option value="custom">Custom</option>
-          </Select>
-          {borderPreset === "custom" && (
-            <div className="mt-3">
-              <NumberInput label="Border (in)" value={borderCustom} onChange={setBorderCustom} />
-            </div>
+        <Field label="Border width (in inches)">
+          <input
+            type="text"
+            inputMode="decimal"
+            value={borderText}
+            onChange={(e) => setBorderText(e.target.value)}
+            placeholder="e.g. 3 (or 0 for no border)"
+            aria-invalid={!borderValid}
+            className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+          />
+          <p className="text-muted-foreground mt-2 text-xs leading-snug">
+            Enter any width — common borders are 2&quot;, 2.5&quot;, 3&quot;, 4&quot;, 4.5&quot;, 5&quot;.
+            Use <strong>0</strong> for no border.
+          </p>
+          {borderText.trim() !== "" && !borderValid && (
+            <p className="text-destructive mt-2 text-sm font-medium">
+              Please enter 0 or a positive number (e.g. 0, 2.5, 4, 4.5).
+            </p>
           )}
         </Field>
 
