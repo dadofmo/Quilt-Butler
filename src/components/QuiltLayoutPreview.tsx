@@ -100,23 +100,38 @@ export function QuiltLayoutPreview({
           >
             <FabricPatternDefs photos={photos} />
             {Array.from({ length: blocksDown }).map((_, j) =>
-              Array.from({ length: blocksAcross }).map((_, i) => (
-                <svg
-                  key={`${i}-${j}`}
-                  x={i * cellW}
-                  y={j * cellH}
-                  width={cellW}
-                  height={cellH}
-                  viewBox="0 0 200 200"
-                  preserveAspectRatio="none"
-                >
-                  <MiniBlock
-                    pattern={pattern}
-                    assignments={assignments}
-                    photos={photos}
-                  />
-                </svg>
-              )),
+              Array.from({ length: blocksAcross }).map((_, i) => {
+                // Rail Fence convention: rotate every other block 90° so the
+                // rails alternate horizontal/vertical and form a woven fence.
+                const rotate = pattern === "rail-fence" && (i + j) % 2 === 1;
+                return (
+                  <svg
+                    key={`${i}-${j}`}
+                    x={i * cellW}
+                    y={j * cellH}
+                    width={cellW}
+                    height={cellH}
+                    viewBox="0 0 200 200"
+                    preserveAspectRatio="none"
+                  >
+                    {rotate ? (
+                      <g transform="rotate(90 100 100)">
+                        <MiniBlock
+                          pattern={pattern}
+                          assignments={assignments}
+                          photos={photos}
+                        />
+                      </g>
+                    ) : (
+                      <MiniBlock
+                        pattern={pattern}
+                        assignments={assignments}
+                        photos={photos}
+                      />
+                    )}
+                  </svg>
+                );
+              }),
             )}
             {Array.from({ length: blocksAcross + 1 }).map((_, i) => (
               <line

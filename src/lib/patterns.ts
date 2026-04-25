@@ -70,12 +70,12 @@ export const PATTERNS: PatternDef[] = [
   {
     id: "rail-fence",
     name: "Rail Fence",
-    hasMath: false,
-    intro: "Each block is three parallel strips (rails) stacked together. Pick a fabric for each rail.",
+    hasMath: true,
+    intro: "Each block is three parallel strips (rails) sewn together. Alternating blocks are rotated 90° so the rails form a woven 'fence' across the quilt. Pick a fabric for each rail.",
     sections: [
-      { id: "rail1", label: "Top rail", defaultFabric: "A" },
-      { id: "rail2", label: "Middle rail", defaultFabric: "B" },
-      { id: "rail3", label: "Bottom rail", defaultFabric: "D" },
+      { id: "rail1", label: "Top rail", defaultFabric: "A", hint: "One of the three strips in every block." },
+      { id: "rail2", label: "Middle rail", defaultFabric: "B", hint: "The middle strip — pick something that contrasts with the top and bottom." },
+      { id: "rail3", label: "Bottom rail", defaultFabric: "D", hint: "The third strip — together the three fabrics make the woven fence look." },
       borderSection,
     ],
   },
