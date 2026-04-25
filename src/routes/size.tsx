@@ -228,14 +228,7 @@ function SizeStep() {
   }, [blockSizeValid, blockSizeNum, w, h, border]);
 
   const applyBorder = (b: number) => {
-    const presetVals = ["0", "2", "3", "4", "5"];
-    const asStr = String(b);
-    if (presetVals.includes(asStr)) {
-      setBorderPreset(asStr);
-    } else {
-      setBorderPreset("custom");
-      setBorderCustom(b);
-    }
+    setBorderText(String(b));
   };
 
   const fabricWidthNum = Number(fabricWidthText);
