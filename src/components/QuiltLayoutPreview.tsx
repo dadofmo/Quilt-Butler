@@ -59,9 +59,6 @@ export function QuiltLayoutPreview({
           size={220}
           photos={photos}
         />
-        <p className="text-muted-foreground max-w-[220px] text-center text-[11px]">
-          What you're designing now
-        </p>
       </div>
 
       <div className="flex flex-row items-center gap-1 sm:flex-col sm:gap-1 sm:pt-16">
