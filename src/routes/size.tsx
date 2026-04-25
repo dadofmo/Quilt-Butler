@@ -282,8 +282,8 @@ function SizeStep() {
           />
           <p className="text-muted-foreground mt-2 text-xs leading-snug">
             Enter your bolt&apos;s width <strong>in inches</strong> — measure selvage to
-            selvage. Common widths: 42&quot;, 44&quot;, 54&quot;, 58&quot;, 60&quot;, or
-            108&quot; for wide-back fabric. All cutting math will use this value.
+            selvage. Common quilting widths: <strong>42&quot; or 44&quot;</strong>. For
+            backing fabric on large quilts: <strong>108&quot;</strong>. All cutting math will use this value.
           </p>
           {fabricWidthText.trim() !== "" && !fabricWidthValid && (
             <p className="text-destructive mt-2 text-sm font-medium">
