@@ -257,12 +257,16 @@ function renderInner(
     case "flying-geese": {
       const goose = get("goose", "A");
       const sky = get("sky", "B");
+      // Block = 2 geese stacked vertically. Each goose is W×H = 200×100 in
+      // diagram units (the classic 2:1 ratio). Goose triangle apex points UP,
+      // base sits on the bottom of its lane; sky fills the two corner
+      // triangles on either side of the apex.
       return (
         <>
-          {[0, 50, 100, 150].map((y, i) => (
+          {[0, 100].map((y, i) => (
             <g key={i}>
-              <rect x={0} y={y} width={200} height={50} fill={sky} />
-              <polygon points={`100,${y + 5} 195,${y + 47} 5,${y + 47}`} fill={goose} />
+              <rect x={0} y={y} width={200} height={100} fill={sky} />
+              <polygon points={`100,${y} 200,${y + 100} 0,${y + 100}`} fill={goose} />
             </g>
           ))}
         </>

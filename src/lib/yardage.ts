@@ -463,6 +463,71 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Assemble the block as a 3×3 grid: row 1 = bg corner, QST (star points up), bg corner. Row 2 = QST (star points left), center square, QST (star points right). Row 3 = bg corner, QST (star points down), bg corner. Sew each row across, press, then sew the 3 rows together — the 8 star points should meet cleanly at the center square.`,
     );
 
+  } else if (s.pattern === "flying-geese") {
+    // Flying Geese construction (No-Waste 4-at-a-Time method):
+    //   Each "goose" finishes 2:1 — twice as wide as it is tall. We stack
+    //   2 geese vertically per block, so:
+    //     gooseFinishedW = blockSize           (full block width)
+    //     gooseFinishedH = blockSize / 2       (half the block height)
+    //   That gives 2 geese per block.
+    //
+    // The No-Waste method makes 4 finished geese units from:
+    //     1 LARGE goose square at (gooseFinishedW + 1.25")
+    //     4 SMALL sky squares  at (gooseFinishedH + 0.875")
+    //   Pair the 4 small sky squares to opposite corners of the large square,
+    //   draw diagonals, sew 1/4" each side, cut, press → 4 finished geese.
+    //   This is the standard beginner-friendly method and wastes no fabric.
+    //
+    // Per block we need 2 geese, so 2 blocks share 1 large square set:
+    //   geeseSetsPerBlock = 0.5 → ceil(2 * blockCount / 4) large squares
+    //   smallSkyPerBlock  = 4 small squares per LARGE square (also pooled).
+    const gooseFinishedW = s.blockSize;
+    const gooseFinishedH = s.blockSize / 2;
+    const largeCut = gooseFinishedW + 1.25;
+    const smallCut = gooseFinishedH + 0.875;
+
+    const gooseFab = (s.assignments["goose"] ?? "A") as FabricKey;
+    const skyFab = (s.assignments["sky"] ?? "B") as FabricKey;
+
+    // 2 geese per block. Each large square yields 4 finished geese.
+    const totalGeese = 2 * blockCount;
+    const largeSquaresNeeded = Math.ceil(totalGeese / 4);
+    // 4 small sky squares per large square (one per corner).
+    const smallSquaresNeeded = largeSquaresNeeded * 4;
+
+    addSquares(
+      reqs[gooseFab],
+      "Large goose squares",
+      largeSquaresNeeded,
+      largeCut,
+      s.fabricWidth,
+    );
+    addSquares(
+      reqs[skyFab],
+      "Small sky squares",
+      smallSquaresNeeded,
+      smallCut,
+      s.fabricWidth,
+    );
+
+    notes.push(
+      `Each block = 2 geese stacked vertically. Each goose finishes ${gooseFinishedW}" wide × ${gooseFinishedH}" tall (the classic 2:1 ratio).`,
+    );
+    notes.push(
+      `We use the "No-Waste 4-at-a-Time" method: 1 large goose square + 4 small sky squares yields 4 finished geese with zero waste. Across all ${blockCount} blocks you need ${totalGeese} geese, so cut ${largeSquaresNeeded} large goose squares (Fabric ${gooseFab}) at ${largeCut.toFixed(2)}" and ${smallSquaresNeeded} small sky squares (Fabric ${skyFab}) at ${smallCut.toFixed(2)}".`,
+    );
+    notes.push(
+      `How to make 4 geese from one set: lay the LARGE goose square on the table printed side up. Take 2 small sky squares and place them in OPPOSITE corners of the large square, right sides together (RST) — they'll overlap a little in the middle. On the back of each small square, draw a diagonal line from corner to corner so the two drawn lines form one continuous line across the large square. Sew a 1/4" seam down the LEFT side of the line and a second 1/4" seam down the RIGHT side, then cut along the drawn line. You now have 2 heart-shaped pieces.`,
+    );
+    notes.push(
+      `Press each heart open (seam toward the small sky triangles). Take the remaining 2 small sky squares and place one in the empty corner of each heart, RST. Draw a diagonal from the inner corner of the small square out to the point. Sew 1/4" each side of the line, cut along the line, press open. You now have 4 finished geese units, each ${(gooseFinishedW + SEAM).toFixed(2)}" × ${(gooseFinishedH + SEAM).toFixed(2)}" (unfinished cut size).`,
+    );
+    notes.push(
+      `Assemble each block: stack 2 geese on top of each other with all the points facing the SAME direction (traditionally up). Sew the bottom edge of the top goose to the top edge of the bottom goose RST with a 1/4" seam, press toward the bottom goose. Do this for all ${blockCount} blocks.`,
+    );
+    notes.push(
+      `Layout tip: arrange every block with the geese all flying the same direction for the classic "flock" look, OR alternate rows pointing up/down for a chevron pattern. Try a few orientations on the floor before sewing the rows together.`,
+    );
   }
 
   // Border
@@ -499,7 +564,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "hst" ||
     s.pattern === "rail-fence" ||
     s.pattern === "log-cabin" ||
-    s.pattern === "ohio-star";
+    s.pattern === "ohio-star" ||
+    s.pattern === "flying-geese";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

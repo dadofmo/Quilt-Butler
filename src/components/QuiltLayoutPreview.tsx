@@ -357,12 +357,14 @@ function MiniBlock({
     case "flying-geese": {
       const goose = get("goose", "A");
       const sky = get("sky", "B");
+      // 2 geese per block, stacked vertically — matches PatternDiagram &
+      // the No-Waste yardage math in yardage.ts.
       return (
         <>
-          {[0, 50, 100, 150].map((y, i) => (
+          {[0, 100].map((y, i) => (
             <g key={i}>
-              <rect x={0} y={y} width={200} height={50} fill={sky} />
-              <polygon points={`100,${y + 5} 195,${y + 47} 5,${y + 47}`} fill={goose} />
+              <rect x={0} y={y} width={200} height={100} fill={sky} />
+              <polygon points={`100,${y} 200,${y + 100} 0,${y + 100}`} fill={goose} />
             </g>
           ))}
         </>

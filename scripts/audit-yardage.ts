@@ -273,6 +273,75 @@ console.log("\n=== Ohio Star: odd block size 4.25\" — non-integer unit must st
 }
 
 // =========================================================================
+// FLYING GEESE
+// =========================================================================
+console.log("\n=== Flying Geese: 50×65, 12\" block, no border ===");
+{
+  const s = { ...base(), pattern: "flying-geese" as const, blockSize: 12, borderWidth: 0 };
+  // 4×5 = 20 blocks. 2 geese/block → 40 geese.
+  // Each large square yields 4 geese → ceil(40/4) = 10 large squares.
+  // Each large square needs 4 small sky squares → 40 small sky squares.
+  // largeCut = 12 + 1.25 = 13.25". smallCut = 6 + 0.875 = 6.875".
+  // Goose A: 10 squares @ 13.25". Per strip floor(42.5/13.25)=3. Strips=ceil(10/3)=4.
+  //          Inches=4*13.25=53.
+  // Sky B: 40 squares @ 6.875". Per strip floor(42.5/6.875)=6. Strips=ceil(40/6)=7.
+  //          Inches=7*6.875=48.125.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("FG A large goose count", a.pieces[0].count, 10);
+  check("FG A large cut size", a.pieces[0].w, 13.25);
+  check("FG A strips", a.strips[0].count, 4);
+  check("FG A inches", a.totalInches, 53);
+  check("FG B small sky count", b.pieces[0].count, 40);
+  check("FG B small cut size", b.pieces[0].w, 6.875);
+  check("FG B strips", b.strips[0].count, 7);
+  check("FG B inches", b.totalInches, 48.125);
+  // Glossary attached.
+  check("FG basics glossary length", r.basics?.length ?? 0, 5);
+}
+
+console.log("\n=== Flying Geese: goose & sky share fabric A ===");
+{
+  const s = {
+    ...base(), pattern: "flying-geese" as const, blockSize: 12, borderWidth: 0,
+    assignments: { goose: "A" as FabricKey, sky: "A" as FabricKey },
+  };
+  // A holds 10 large (13.25") + 40 small (6.875") squares — different cuts,
+  // 2 buckets retained so the cutting plan still labels each pile.
+  // Inches: 53 (large) + 48.125 (small) = 101.125.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("FG shared A bucket count", a.pieces.length, 2);
+  const totalPieces = a.pieces.reduce((acc, p) => acc + p.count, 0);
+  check("FG shared A total pieces", totalPieces, 50);
+  check("FG shared A inches", a.totalInches, 101.125);
+}
+
+console.log("\n=== Flying Geese: ODD block count (5) — must round up large squares ===");
+{
+  // 12×24 quilt with 12" block = 1×2 = 2 blocks → 4 geese → 1 large square.
+  // 12×36 with 12" = 1×3 = 3 blocks → 6 geese → ceil(6/4) = 2 large squares (with 2 wasted geese).
+  const s = { ...base(), pattern: "flying-geese" as const, quiltWidth: 12, quiltHeight: 36, blockSize: 12, borderWidth: 0 };
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("FG odd-block large squares", a.pieces[0].count, 2);
+  check("FG odd-block small squares", b.pieces[0].count, 8);
+}
+
+console.log("\n=== Flying Geese: non-integer block size 9\" ===");
+{
+  // gooseFinishedW=9, H=4.5. largeCut=10.25, smallCut=5.375.
+  const s = { ...base(), pattern: "flying-geese" as const, quiltWidth: 18, quiltHeight: 18, blockSize: 9, borderWidth: 0 };
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  // 2×2 = 4 blocks → 8 geese → 2 large squares.
+  check("FG odd-unit A count", a.pieces[0].count, 2);
+  check("FG odd-unit A cut size", a.pieces[0].w, 10.25);
+}
+
+// =========================================================================
 // BORDER MATH
 // =========================================================================
 console.log("\n=== Border: 60×80 inner, 4\" border, 9P pattern ===");
