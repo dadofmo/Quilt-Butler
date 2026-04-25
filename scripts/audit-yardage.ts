@@ -217,20 +217,21 @@ console.log("\n=== Cross-check: actual size derived consistently ===");
 // (results.tsx caps the last strip's sub-cuts to remaining; verify this never
 // produces > perStripMax or < remainder)
 // =========================================================================
-console.log("\n=== Per-strip count math (results.tsx mirroring) ===");
+console.log("\n=== UI/calc consistency: same selvage allowance everywhere ===");
 {
-  const s = { ...base(), pattern: "nine-patch" as const, blockSize: 12 };
-  const r = calculateYardage(s);
-  const a = r.fabrics.find(f => f.fabric === "A")!;
-  // A has 100 squares, perStrip=9, 12 strips. So 11 strips × 9 + 1 strip × 1 = 100.
-  // Or could be 11 × 9 + 1 × 1 if remainders chunk that way. Let's confirm.
-  // Replicate results.tsx logic:
-  const piece = a.strips[0].pieces[0];
-  const usable = 44 - 0.5; // results.tsx subtracts 0.5 (NOT 1.5 like yardage.ts!)
-  const perStripMax = Math.floor(usable / piece.w);
-  console.log(`  ⚠ NOTE: results.tsx uses fabricWidth-0.5=${usable} for perStripMax (=${perStripMax}), yardage.ts uses fabricWidth-1.5=42.5 (=${Math.floor(42.5/4.5)})`);
-  check("results.tsx perStripMax (usable=43.5)", perStripMax, 9);
-  // Lucky: floor(43.5/4.5)=9 same as floor(42.5/4.5)=9. But could diverge for other sizes!
+  // Cut size 14.5 used to expose a real bug: yardage.ts allocated for 2/strip,
+  // results.tsx drew 3/strip → user would be one strip short. Now both must
+  // route through piecesPerStrip() / usableFabricWidth().
+  const { piecesPerStrip, usableFabricWidth } = await import("/dev-server/src/lib/yardage");
+  for (const cut of [4.5, 12.5, 13, 14.5, 21]) {
+    const ppsNew = piecesPerStrip(cut, 44);
+    const ppsOld = Math.max(1, Math.floor((44 - 0.5) / cut)); // the buggy local formula
+    if (ppsNew !== ppsOld) {
+      console.log(`  Cut ${cut}": shared=${ppsNew}/strip, old buggy local=${ppsOld}/strip — fix prevents divergence`);
+    }
+    check(`piecesPerStrip(${cut}, 44)`, ppsNew, Math.floor(42.5 / cut));
+  }
+  check("usableFabricWidth(44)", usableFabricWidth(44), 42.5);
 }
 
 // =========================================================================
