@@ -842,6 +842,21 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                     })
                   : null}
 
+                {/* Per-strip height label, sitting in the left padding gutter
+                    so it ALWAYS appears (even on narrow partial strips where
+                    the in-strip label would be truncated). This guarantees
+                    every row visually communicates "this strip is N inches
+                    tall" — no row ever just says "cut 3 @ 11.00" with no
+                    height context. */}
+                <text
+                  x={PAD_LEFT - 6}
+                  y={ry + rh / 2 + 3}
+                  textAnchor="end"
+                  className="fill-foreground text-[10px] font-semibold"
+                >
+                  {r.hIn.toFixed(2)}" tall
+                </text>
+
                 {/* Strip number badge */}
                 <circle cx={PAD_LEFT + 12} cy={ry + rh / 2} r={9} fill="var(--card)" stroke={fabricColor} strokeWidth={1.2} />
                 <text
@@ -853,25 +868,30 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   {r.stripIndex}
                 </text>
 
-                {/* Strip label — anchored just to the right of the strip-number
-                    badge so it never overlaps the number. We also shorten the
-                    label when the used portion is narrow (e.g. last partial
-                    strip) so it doesn't bleed into the leftover area. */}
+                {/* In-strip label — describes the sub-cut action. Height is
+                    already shown in the left gutter, so this label focuses on
+                    "what to cut from this strip" and degrades gracefully on
+                    narrow strips without ever losing critical info. */}
                 {(() => {
                   const labelAvailW = usedW - 30; // px available to the right of the badge
                   const fullLabel = r.isBorder
-                    ? `Border ${r.hIn.toFixed(2)}" × ${fabricWidth}" (full fabric width)`
-                    : `${r.hIn.toFixed(2)}" tall → cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`;
+                    ? `Border strip — ${fabricWidth}" wide (full fabric width), no sub-cuts`
+                    : `sub-cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${r.subCutWidth?.toFixed(2)}" → finished piece ${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}"`;
+                  const midLabel = r.isBorder
+                    ? `Border — full ${fabricWidth}" width`
+                    : `sub-cut ${r.subCutCount} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`;
                   const shortLabel = r.isBorder
-                    ? `Border ${r.hIn.toFixed(2)}"`
-                    : `cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
+                    ? `Border (full width)`
+                    : `${r.subCutCount} × ${r.hIn.toFixed(2)}"×${r.subCutWidth?.toFixed(2)}"`;
                   // Roughly 5px per char at 10px font; pick the longest version that fits.
                   const label =
                     labelAvailW > fullLabel.length * 5
                       ? fullLabel
-                      : labelAvailW > shortLabel.length * 5
-                        ? shortLabel
-                        : "";
+                      : labelAvailW > midLabel.length * 5
+                        ? midLabel
+                        : labelAvailW > shortLabel.length * 5
+                          ? shortLabel
+                          : "";
                   if (!label) return null;
                   return (
                     <text
