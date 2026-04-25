@@ -397,6 +397,62 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
         On
       </span>
     </div>
+}
+
+function CostEstimator({
+  fabrics,
+  pricePerYard,
+  onChange,
+}: {
+  fabrics: FabricRequirement[];
+  pricePerYard: string;
+  onChange: (v: string) => void;
+}) {
+  const totalYards = fabrics.reduce((sum, f) => sum + f.yards, 0);
+  const price = Number(pricePerYard);
+  const valid = pricePerYard.trim() !== "" && !isNaN(price) && price > 0;
+  const total = valid ? totalYards * price : 0;
+  return (
+    <div className="no-print bg-card mt-3 rounded-xl border-2 border-border p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <label htmlFor="price-per-yard" className="text-foreground block text-base font-semibold">
+            Price per yard (optional)
+          </label>
+          <p className="text-muted-foreground text-sm">
+            Get a rough total cost for your top fabrics before you head to the store.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground text-base font-medium">$</span>
+          <input
+            id="price-per-yard"
+            type="text"
+            inputMode="decimal"
+            value={pricePerYard}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="12"
+            className="bg-background border-input focus:ring-ring w-24 rounded-lg border-2 px-3 py-2 text-base focus:outline-none focus:ring-2"
+          />
+          <span className="text-muted-foreground text-sm">/ yd</span>
+        </div>
+      </div>
+      {valid && (
+        <div className="border-border mt-3 flex items-baseline justify-between gap-3 border-t pt-3">
+          <span className="text-foreground text-sm">
+            {totalYards} yd of top fabric × ${price.toFixed(2)}/yd
+          </span>
+          <span className="text-foreground text-xl font-bold">
+            ≈ ${total.toFixed(2)}
+          </span>
+        </div>
+      )}
+      {valid && (
+        <p className="text-muted-foreground mt-1 text-xs">
+          Estimate covers fabrics A/B/C above only — backing, batting, and binding are extra.
+        </p>
+      )}
+    </div>
   );
 }
 
