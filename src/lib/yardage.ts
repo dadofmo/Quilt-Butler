@@ -43,8 +43,23 @@ const HST_EXTRA = 0.875; // extra for HST squares: finished + 7/8"
  * trim selvages and account for crooked grain. We subtract 1.5" from the bolt
  * width when calculating how many pieces fit per strip — so a "44-inch" bolt
  * provides about 42.5" of usable fabric.
+ *
+ * EXPORTED so every UI surface (cutting diagram, leftover labels, copy text)
+ * uses the same number. Reimplementing this constant locally caused a real
+ * bug where the diagram drew 3 squares per strip while the calculator
+ * allocated fabric for only 2 — leaving the quilter short.
  */
-const SELVAGE_TRIM = 1.5;
+export const SELVAGE_TRIM = 1.5;
+
+/** Usable bolt width after trimming selvage on both sides. */
+export function usableFabricWidth(fabricWidth: number): number {
+  return fabricWidth - SELVAGE_TRIM;
+}
+
+/** How many pieces of `cutSize` fit across a strip of usable fabric width. */
+export function piecesPerStrip(cutSize: number, fabricWidth: number): number {
+  return Math.max(1, Math.floor(usableFabricWidth(fabricWidth) / cutSize));
+}
 
 export const SEAM_ALLOWANCE_DESC =
   "1/4 inch seam allowance on every side (the strip of fabric hidden inside the seam when two pieces are sewn together — 0.25\" per side adds 0.5\" total to each cut)";

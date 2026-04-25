@@ -4,7 +4,7 @@ import { PrintBlockLegend } from "@/components/PrintBlockLegend";
 import { FABRIC_COLORS, FABRIC_LABELS, setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
-import { calculateYardage, describePieceShape, type FabricRequirement, type MaterialsRequirement } from "@/lib/yardage";
+import { calculateYardage, describePieceShape, piecesPerStrip, usableFabricWidth, type FabricRequirement, type MaterialsRequirement } from "@/lib/yardage";
 import { Printer } from "lucide-react";
 
 export const Route = createFileRoute("/results")({
@@ -622,8 +622,9 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
   req.strips.forEach((strip) => {
     const piece = strip.pieces[0];
     const isBorder = piece?.w === fabricWidth;
-    const usable = fabricWidth - 0.5;
-    const perStripMax = piece && !isBorder ? Math.floor(usable / piece.w) : undefined;
+    // Use the same selvage allowance as yardage.ts so the diagram never
+    // draws more sub-cuts per strip than the calculator allocated fabric for.
+    const perStripMax = piece && !isBorder ? piecesPerStrip(piece.w, fabricWidth) : undefined;
     const totalNeeded = piece && !isBorder ? piece.count : 0;
     let cutSoFar = 0;
     for (let i = 0; i < strip.count; i++) {
@@ -728,7 +729,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
               textAnchor="middle"
               className="fill-muted-foreground text-[10px] font-medium"
             >
-              {(fabricWidth - 1.5).toFixed(1)}" usable width ({fabricWidth}" bolt minus ~0.75" selvage on each side)
+              {usableFabricWidth(fabricWidth).toFixed(1)}" usable width ({fabricWidth}" bolt minus ~0.75" selvage on each side)
             </text>
           </g>
 
