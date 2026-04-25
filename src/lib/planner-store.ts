@@ -27,7 +27,8 @@ export interface PlannerState {
   quiltWidth: number; // inches
   quiltHeight: number; // inches
   sizePreset: string;
-  fabricWidth: 44 | 60;
+  /** Usable fabric width in inches (full bolt width, selvage to selvage). User-entered. */
+  fabricWidth: number;
   blockSize: number; // inches (decimal allowed)
   borderWidth: number; // inches, 0 for none
   assignments: SectionAssignments;
