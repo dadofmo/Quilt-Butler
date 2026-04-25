@@ -289,123 +289,90 @@ function SizeStep() {
           )}
         </Field>
 
-        {/* Fit feedback — perfect-fit confirmation OR uneven-divide warning. */}
-        {fit && (
-          fit.perfect ? (
-            <div
-              className="rounded-xl border-2 border-primary/40 bg-accent/60 p-4"
-              role="status"
-            >
-              <div className="text-accent-foreground text-sm font-semibold uppercase tracking-wide">
-                ✓ Perfect fit
-              </div>
-              <p className="text-foreground mt-1 text-sm leading-relaxed">
-                A {blockSizeNum}&quot; block divides evenly into your{" "}
-                <strong>{fit.innerW}&quot; × {fit.innerH}&quot;</strong> inner area —
-                your quilt will have <strong>{fit.blocksAcross} blocks wide</strong> by{" "}
-                <strong>{fit.blocksDown} blocks tall</strong> for{" "}
-                <strong>{fit.total} total blocks</strong>.
-              </p>
-            </div>
-          ) : (
-            <div
-              className="rounded-xl border-2 border-destructive/40 bg-destructive/5 p-4"
-              role="alert"
-            >
-              <div className="text-destructive text-sm font-semibold uppercase tracking-wide">
-                ⚠ Doesn&apos;t divide evenly
-              </div>
-              <p className="text-foreground mt-1 text-sm leading-relaxed">
-                A {blockSizeNum}&quot; block fits{" "}
-                <strong>{fit.blocksAcross} across × {fit.blocksDown} down</strong>{" "}
-                inside your {fit.innerW}&quot; × {fit.innerH}&quot; inner area, leaving{" "}
-                <strong>{fit.remW}&quot; left/right</strong> and{" "}
-                <strong>{fit.remH}&quot; top/bottom</strong>. You can continue —
-                you&apos;ll need to trim the extra or add a filler strip to absorb it.
-              </p>
-              {(fit.borderSuggestions.length > 0 ||
-                fit.blockSuggestions.length > 0 ||
-                fit.comboSuggestions.length > 0) && (
-                <div className="mt-3 space-y-2 border-t border-destructive/20 pt-3">
-                  <p className="text-foreground text-xs font-semibold">
-                    To fill the full {fit.innerW}&quot; × {fit.innerH}&quot; inner area perfectly, try one of these:
+        {/* Finished quilt size — actual size produced by the current block +
+            border choices, plus bullet suggestions for getting to the
+            desired size when the math doesn't divide evenly. */}
+        {fit && (() => {
+          const actualW = fit.blocksAcross * blockSizeNum + 2 * border;
+          const actualH = fit.blocksDown * blockSizeNum + 2 * border;
+          const matchesDesired = fit.perfect;
+          const closestBorder = fit.borderSuggestions[0];
+          const closestBlock = fit.blockSuggestions[0];
+          return (
+            <Field label="Finished quilt size">
+              <div className="bg-card border-input rounded-xl border-2 p-4">
+                <p className="text-foreground text-sm leading-relaxed">
+                  With a <strong>{blockSizeNum}&quot;</strong> block and{" "}
+                  <strong>{border}&quot;</strong> border, your finished quilt will be{" "}
+                  <strong>{actualW}&quot; × {actualH}&quot;</strong>{" "}
+                  ({fit.blocksAcross} × {fit.blocksDown} ={" "}
+                  {fit.total} blocks).
+                </p>
+                {matchesDesired ? (
+                  <p className="text-foreground mt-2 text-sm leading-relaxed">
+                    ✓ This matches your desired{" "}
+                    <strong>{fit.quiltW}&quot; × {fit.quiltH}&quot;</strong> exactly.
                   </p>
-                  {fit.borderSuggestions.length > 0 ? (
-                    <p className="text-muted-foreground text-xs leading-relaxed">
-                      <span className="text-foreground font-medium">
-                        Keep your {blockSizeNum}&quot; block, change border to:
-                      </span>{" "}
-                      {fit.borderSuggestions.map((b, i) => (
-                        <button
-                          key={b.border}
-                          type="button"
-                          onClick={() => applyBorder(b.border)}
-                          className="text-primary mx-0.5 underline underline-offset-2 hover:opacity-80"
-                        >
-                          {b.border}&quot; ({b.across}×{b.down}={b.total} blocks)
-                          {i < fit.borderSuggestions.length - 1 ? "," : ""}
-                        </button>
-                      ))}
+                ) : (
+                  <div className="mt-3 border-t border-border pt-3">
+                    <p className="text-foreground text-sm font-semibold">
+                      Options to get to desired finished quilt size{" "}
+                      ({fit.quiltW}&quot; × {fit.quiltH}&quot;):
                     </p>
-                  ) : (
-                    <p className="text-muted-foreground text-xs leading-relaxed">
-                      <span className="text-foreground font-medium">
-                        Keep your {blockSizeNum}&quot; block, change border to:
-                      </span>{" "}
-                      <span className="italic">no border between 0&quot; and 10&quot; gives a perfect fit with this block size.</span>
-                    </p>
-                  )}
-                  {fit.blockSuggestions.length > 0 ? (
-                    <p className="text-muted-foreground text-xs leading-relaxed">
-                      <span className="text-foreground font-medium">
-                        Keep your {border}&quot; border, change block to:
-                      </span>{" "}
-                      {fit.blockSuggestions.map((s, i) => (
-                        <button
-                          key={s.size}
-                          type="button"
-                          onClick={() => setBlockSizeText(String(s.size))}
-                          className="text-primary mx-0.5 underline underline-offset-2 hover:opacity-80"
-                        >
-                          {s.size}&quot; ({s.across}×{s.down}={s.total} blocks)
-                          {i < fit.blockSuggestions.length - 1 ? "," : ""}
-                        </button>
-                      ))}
-                    </p>
-                  ) : (
-                    <p className="text-muted-foreground text-xs leading-relaxed">
-                      <span className="text-foreground font-medium">
-                        Keep your {border}&quot; border, change block to:
-                      </span>{" "}
-                      <span className="italic">no block between 2&quot; and 15&quot; divides evenly into {fit.innerW}&quot; × {fit.innerH}&quot;.</span>
-                    </p>
-                  )}
-                  {fit.comboSuggestions.length > 0 && (
-                    <p className="text-muted-foreground text-xs leading-relaxed">
-                      <span className="text-foreground font-medium">
-                        Or change both at once:
-                      </span>{" "}
-                      {fit.comboSuggestions.map((c, i) => (
-                        <button
-                          key={`${c.block}-${c.border}`}
-                          type="button"
-                          onClick={() => {
-                            setBlockSizeText(String(c.block));
-                            applyBorder(c.border);
-                          }}
-                          className="text-primary mx-0.5 underline underline-offset-2 hover:opacity-80"
-                        >
-                          {c.block}&quot; block + {c.border}&quot; border ({c.across}×{c.down}={c.total} blocks)
-                          {i < fit.comboSuggestions.length - 1 ? "," : ""}
-                        </button>
-                      ))}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          )
-        )}
+                    <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed">
+                      <li className="text-muted-foreground">
+                        <span className="text-foreground">
+                          Keep your <strong>{blockSizeNum}&quot;</strong> block, change border to{" "}
+                        </span>
+                        {closestBorder ? (
+                          <button
+                            type="button"
+                            onClick={() => applyBorder(closestBorder.border)}
+                            className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
+                          >
+                            {closestBorder.border}&quot;
+                          </button>
+                        ) : (
+                          <span className="italic">
+                            no border between 0&quot; and 10&quot; gives an exact fit with this block size.
+                          </span>
+                        )}
+                        {closestBorder && (
+                          <span className="text-muted-foreground">
+                            {" "}({closestBorder.across} × {closestBorder.down} = {closestBorder.total} blocks)
+                          </span>
+                        )}
+                      </li>
+                      <li className="text-muted-foreground">
+                        <span className="text-foreground">
+                          Keep your <strong>{border}&quot;</strong> border, change block size to{" "}
+                        </span>
+                        {closestBlock ? (
+                          <button
+                            type="button"
+                            onClick={() => setBlockSizeText(String(closestBlock.size))}
+                            className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
+                          >
+                            {closestBlock.size}&quot;
+                          </button>
+                        ) : (
+                          <span className="italic">
+                            no block between 2&quot; and 15&quot; divides evenly with this border.
+                          </span>
+                        )}
+                        {closestBlock && (
+                          <span className="text-muted-foreground">
+                            {" "}({closestBlock.across} × {closestBlock.down} = {closestBlock.total} blocks)
+                          </span>
+                        )}
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </Field>
+          );
+        })()}
 
         <button
           onClick={next}
