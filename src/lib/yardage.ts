@@ -159,6 +159,50 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `To turn the squares into triangle blocks: stack one Fabric ${t1} square on top of one Fabric ${t2} square so the pretty (printed) sides face each other — the plain backs of the fabric should be facing out. On the back of the top square, use a pencil or fabric marker to draw a straight line from one corner to the opposite corner (a diagonal). Sew a seam 1/4" away from that line on BOTH sides of it (two parallel seams). Then cut along the drawn line with scissors or a rotary cutter — you'll get two pieces. Open each piece and press it flat with an iron (this is called "pressing open"). Each pair of squares makes 2 finished half-square triangle blocks, for ${blockCount} blocks total.`,
     );
+  } else if (s.pattern === "rail-fence") {
+    // Each block = 3 rails. Each rail finishes at (blockSize/3) tall × blockSize wide.
+    // Cut size: (blockSize/3 + 0.5)" tall × (blockSize + 0.5)" long.
+    // We cut full-fabric-width strips at the rail-cut height, then sub-cut
+    // them into block-length rails — the most efficient way to piece rails.
+    const railFinished = s.blockSize / 3;
+    const railCutHeight = railFinished + SEAM;
+    const railCutLength = s.blockSize + SEAM;
+    const r1 = (s.assignments["rail1"] ?? "A") as FabricKey;
+    const r2 = (s.assignments["rail2"] ?? "B") as FabricKey;
+    const r3 = (s.assignments["rail3"] ?? "D") as FabricKey;
+    // Group rails by fabric so two rails sharing a fabric share strips.
+    const railFabrics: Record<FabricKey, number> = {} as Record<FabricKey, number>;
+    for (const f of [r1, r2, r3] as FabricKey[]) {
+      railFabrics[f] = (railFabrics[f] ?? 0) + blockCount;
+    }
+    for (const fab of ALL_FABRIC_KEYS) {
+      const railsNeeded = railFabrics[fab];
+      if (!railsNeeded) continue;
+      addRails(
+        reqs[fab],
+        `${railsNeeded} rails (Fabric ${fab})`,
+        railsNeeded,
+        railCutLength,
+        railCutHeight,
+        s.fabricWidth,
+      );
+    }
+    const railsPerStrip = Math.max(
+      1,
+      Math.floor((s.fabricWidth - SELVAGE_TRIM) / railCutLength),
+    );
+    notes.push(
+      `Each block = 3 rails. Cut each rail at ${railCutHeight.toFixed(2)}" tall × ${railCutLength.toFixed(2)}" long (finished ${railFinished.toFixed(2)}" × ${s.blockSize}" + 1/2" for seam allowance).`,
+    );
+    notes.push(
+      `Cutting strategy: cut full-width strips ${railCutHeight.toFixed(2)}" tall across the bolt, then sub-cut each strip into ${railsPerStrip} rails of ${railCutLength.toFixed(2)}" long.`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${blockCount} rails of Fabric ${r1} (top), ${blockCount} of Fabric ${r2} (middle), ${blockCount} of Fabric ${r3} (bottom). Sew the three rails together along their long edges to form one block.`,
+    );
+    notes.push(
+      `Layout tip: rotate every other block 90° (alternating horizontal and vertical) when arranging — that's what gives Rail Fence its classic woven look.`,
+    );
   }
 
   // Border
