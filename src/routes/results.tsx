@@ -132,7 +132,7 @@ function ResultsStep() {
                   key={f.fabric}
                   className={i === 1 ? "print-page-break" : undefined}
                 >
-                  <CuttingDiagram req={f} fabricWidth={planner.fabricWidth} />
+                  <CuttingDiagram req={f} fabricWidth={planner.fabricWidth} pattern={planner.pattern} />
                 </div>
               ))}
             </div>
