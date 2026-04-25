@@ -56,7 +56,7 @@ export function QuiltLayoutPreview({
           <div className="flex items-stretch gap-2">
             <div className="flex flex-col justify-around py-[5px] text-right">
               {(["rail1", "rail2", "rail3"] as const).map((id, idx) => {
-                const fab = (assignments[id] ?? (["A", "B", "D"] as const)[idx]) as FabricKey;
+                const fab = (assignments[id] ?? (["A", "B", "C"] as const)[idx]) as FabricKey;
                 const role = ["Top rail", "Middle rail", "Bottom rail"][idx];
                 return (
                   <div key={id} className="flex items-center justify-end gap-1.5">
