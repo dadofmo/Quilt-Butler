@@ -38,6 +38,9 @@ function FabricsStep() {
   const hasBorder = planner.borderWidth > 0;
   const sections = pattern.sections.filter((s) => s.id !== "border" || hasBorder);
   const availableFabrics = fabricsForPattern(pattern, hasBorder);
+  // Fabrics actually used INSIDE the block (excluding the border) — used to
+  // figure out which letter is the "next unused" one for an accent border.
+  const blockOnlyFabrics = fabricsForPattern(pattern, false);
 
   const update = (sectionId: string, fab: FabricKey) => {
     setPlanner({ assignments: { ...planner.assignments, [sectionId]: fab } });
