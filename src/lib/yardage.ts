@@ -237,6 +237,7 @@ export function calculateMaterials(s: PlannerState): MaterialsRequirement {
       yards: bindingYards,
     },
   };
+}
 
 /**
  * Returns a fabric-mix percentage map for patchwork (Simple Squares) mode,
