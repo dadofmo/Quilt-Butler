@@ -197,13 +197,17 @@ function SizeStep() {
     }
   };
 
+  const fabricWidthNum = Number(fabricWidthText);
+  const fabricWidthValid =
+    fabricWidthText.trim() !== "" && !isNaN(fabricWidthNum) && fabricWidthNum > 0;
+
   const next = () => {
-    if (!blockSizeValid) return;
+    if (!blockSizeValid || !fabricWidthValid) return;
     setPlanner({
       sizePreset: preset,
       quiltWidth: Number(w) || 0,
       quiltHeight: Number(h) || 0,
-      fabricWidth,
+      fabricWidth: fabricWidthNum,
       blockSize: blockSizeNum,
       borderWidth: border,
     });
