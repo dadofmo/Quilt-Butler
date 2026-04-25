@@ -261,7 +261,7 @@ function MiniBlock({
     case "rail-fence": {
       const r1 = get("rail1", "A");
       const r2 = get("rail2", "B");
-      const r3 = get("rail3", "D");
+      const r3 = get("rail3", "C");
       return (
         <>
           <rect width={200} height={66.67} fill={r1} />
