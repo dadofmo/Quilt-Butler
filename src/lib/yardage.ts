@@ -169,7 +169,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const railCutLength = s.blockSize + SEAM;
     const r1 = (s.assignments["rail1"] ?? "A") as FabricKey;
     const r2 = (s.assignments["rail2"] ?? "B") as FabricKey;
-    const r3 = (s.assignments["rail3"] ?? "D") as FabricKey;
+    const r3 = (s.assignments["rail3"] ?? "C") as FabricKey;
     // Group rails by fabric so two rails sharing a fabric share strips.
     const railFabrics: Record<FabricKey, number> = {} as Record<FabricKey, number>;
     for (const f of [r1, r2, r3] as FabricKey[]) {
