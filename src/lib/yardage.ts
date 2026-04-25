@@ -330,6 +330,13 @@ function blank(fabric: FabricKey): FabricRequirement {
   return { fabric, pieces: [], strips: [], totalInches: 0, yards: 0 };
 }
 
+/**
+ * Add a batch of square sub-cut pieces (w === h) to a fabric requirement.
+ *
+ * INVARIANT: width === height. The cutting diagram detects squares vs.
+ * rectangles by comparing piece.w and piece.h, so callers MUST NOT use this
+ * for rectangular pieces. Use addRails (or addRectangles) instead.
+ */
 function addSquares(
   req: FabricRequirement,
   label: string,
@@ -348,10 +355,16 @@ function addSquares(
 }
 
 /**
- * Pack rectangular rails (cutLength × cutHeight) cut from full-width strips.
- * Each fabric-width strip is cutHeight tall and yields floor(usable / cutLength)
- * rails. We need ceil(rails / railsPerStrip) such strips, contributing
- * stripCount × cutHeight inches down the bolt.
+ * Pack rectangular sub-cut pieces (cutLength × cutHeight) cut from full-width
+ * strips. Each fabric-width strip is cutHeight tall and yields
+ * floor(usable / cutLength) pieces. We need ceil(count / perStrip) such
+ * strips, contributing stripCount × cutHeight inches down the bolt.
+ *
+ * INVARIANT: width !== height. For square sub-cuts, use addSquares so the
+ * cutting diagram and shopping list correctly label the shape.
+ *
+ * Used by Rail Fence (rails) and any future pattern with rectangular cuts
+ * (e.g. Flying Geese, Brick, Bargello strips).
  */
 function addRails(
   req: FabricRequirement,
@@ -361,6 +374,12 @@ function addRails(
   cutHeight: number,
   fabricWidth: number,
 ) {
+  if (Math.abs(cutLength - cutHeight) < 0.01) {
+    // A square slipped in via addRails. Forward to addSquares so downstream
+    // diagrams keep their "square" wording correct.
+    addSquares(req, label, count, cutLength, fabricWidth);
+    return;
+  }
   const usable = fabricWidth - SELVAGE_TRIM;
   const perStrip = Math.max(1, Math.floor(usable / cutLength));
   const stripCount = Math.ceil(count / perStrip);
@@ -372,3 +391,4 @@ function addRails(
   });
   req.totalInches += stripCount * cutHeight;
 }
+
