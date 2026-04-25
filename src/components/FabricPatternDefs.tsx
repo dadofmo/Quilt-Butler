@@ -3,15 +3,13 @@ import { ALL_FABRIC_KEYS, type FabricKey } from "@/lib/planner-store";
 interface Props {
   photos?: Partial<Record<FabricKey, string>>;
   /**
-   * When set, patterns use `userSpaceOnUse` with this tile size (in the
-   * SVG's user units) instead of `objectBoundingBox`. This makes a single
-   * fabric photo span MANY shapes coherently — e.g. all 6 light logs in a
-   * Log Cabin block reveal slices of one continuous image, instead of each
-   * log showing the entire photo squished into its tiny bounding box.
+   * Size (in SVG user units) of one repeating tile of the fabric photo.
+   * The pattern always uses `userSpaceOnUse` and TILES the photo across
+   * every shape that uses it — so a polka dot is the same physical size
+   * in a long thin log as in a square. Each shape becomes a "window" onto
+   * a continuously-tiled fabric, just like cutting from a real bolt.
    *
-   * Pass the block / diagram size (e.g. 200 for MiniBlock's 200×200 viewBox).
-   * Omit to keep the legacy "fill each shape with the whole photo" behaviour
-   * (used by swatch chips and standalone diagrams).
+   * Default ≈ 80 user units (~40% of a 200-unit block diagram).
    */
   tileSize?: number;
   /** Unique suffix to scope pattern IDs when multiple instances coexist on the page. */
@@ -20,10 +18,8 @@ interface Props {
 
 /**
  * Renders <defs> with an SVG <pattern> for every fabric that has an
- * uploaded photo. By default each pattern fills the bounding box of the
- * shape it's applied to. With `tileSize`, the pattern instead tiles a
- * fixed-size image across the SVG's user space — so a single fabric photo
- * spans every shape that uses it.
+ * uploaded photo. The photo tiles at a fixed user-space size so every
+ * shape — regardless of dimensions — shows the fabric at the same scale.
  *
  * Place this as the FIRST child inside the root <svg> of any diagram
  * that wants to render uploaded fabric photos.
@@ -32,54 +28,37 @@ export function FabricPatternDefs({ photos, tileSize, idSuffix = "" }: Props) {
   if (!photos) return null;
   const entries = ALL_FABRIC_KEYS.filter((k) => !!photos[k]);
   if (entries.length === 0) return null;
-  const useUserSpace = typeof tileSize === "number" && tileSize > 0;
+  // Render the photo at this fixed pixel size in SVG user space, then let
+  // the pattern tile/repeat across every shape. This means a polka dot is
+  // exactly the same size in a 1"×6" strip as it is in a 3"×3" square —
+  // just like a real bolt of fabric. Each shape is a "window" onto the
+  // same continuously-tiled fabric. We use `tileSize` if provided, else a
+  // sensible default (~80 SVG units, roughly 40% of a 200-unit block).
+  const tile = typeof tileSize === "number" && tileSize > 0 ? tileSize : 80;
   return (
     <defs>
-      {entries.map((k) => {
-        // When tileSize is set: classic "one photo spans the whole block"
-        // (userSpaceOnUse). All shapes of this fabric reveal slices of one
-        // continuous image — used by swatch chips / coherent-block previews.
-        //
-        // Default mode (no tileSize): each shape gets its OWN copy of the
-        // photo, but we DO NOT stretch it. The pattern uses a viewBox with
-        // `preserveAspectRatio="xMidYMid slice"` so the photo fills the
-        // shape's bounding box at its native aspect, center-cropped — like
-        // CSS `background-size: cover`. A long thin log shows a wide thin
-        // slice; a square shows a centered square slice. All strips of the
-        // same fabric look like cuts from the same bolt — only the length
-        // of the visible slice changes.
-        const commonImage = (
+      {entries.map((k) => (
+        <pattern
+          key={k}
+          id={`fabric-${k}${idSuffix}`}
+          patternUnits="userSpaceOnUse"
+          patternContentUnits="userSpaceOnUse"
+          width={tile}
+          height={tile}
+          x={0}
+          y={0}
+        >
           <image
             href={photos[k]!}
             xlinkHref={photos[k]!}
             x={0}
             y={0}
-            width={useUserSpace ? tileSize : 100}
-            height={useUserSpace ? tileSize : 100}
+            width={tile}
+            height={tile}
             preserveAspectRatio="xMidYMid slice"
           />
-        );
-        return (
-          <pattern
-            key={k}
-            id={`fabric-${k}${idSuffix}`}
-            patternUnits={useUserSpace ? "userSpaceOnUse" : "objectBoundingBox"}
-            patternContentUnits={useUserSpace ? "userSpaceOnUse" : "objectBoundingBox"}
-            width={useUserSpace ? tileSize : 1}
-            height={useUserSpace ? tileSize : 1}
-            x={0}
-            y={0}
-            {...(useUserSpace
-              ? {}
-              : {
-                  viewBox: "0 0 100 100",
-                  preserveAspectRatio: "xMidYMid slice",
-                })}
-          >
-            {commonImage}
-          </pattern>
-        );
-      })}
+        </pattern>
+      ))}
     </defs>
   );
 }
