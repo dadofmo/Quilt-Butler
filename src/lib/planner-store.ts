@@ -61,6 +61,7 @@ const initial: PlannerState = {
   patchworkFabricCount: 4,
   patchworkGrid: {},
   pricePerYard: "",
+  itemPrices: {},
 };
 
 let state: PlannerState = initial;
