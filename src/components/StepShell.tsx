@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
+import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
 
 interface Props {
   step: 1 | 2 | 3 | 4;
@@ -26,9 +27,18 @@ export function StepShell({ step, title, subtitle, backTo, children }: Props) {
           ) : (
             <span className="text-primary text-base font-semibold tracking-tight">QuiltButler</span>
           )}
-          <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-            Step {step} of 4
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+              Step {step} of 4
+            </span>
+            <img
+              src={quiltButlerLogo}
+              alt="QuiltButler"
+              width={900}
+              height={600}
+              className="h-7 w-auto sm:h-8"
+            />
+          </div>
         </div>
         <div className="bg-muted h-1.5 w-full">
           <div
