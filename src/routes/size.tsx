@@ -217,7 +217,7 @@ function SizeStep() {
   return (
     <StepShell step={2} title="Quilt size & basics" subtitle="A few quick details so we can do the math." backTo="/">
       <div className="space-y-6">
-        <Field label="Finished quilt size">
+        <Field label="Desired finished quilt size">
           <Select value={preset} onChange={(e) => onPreset(e.target.value)}>
             {Object.entries(SIZE_PRESETS).map(([k, v]) => (
               <option key={k} value={k}>{v.label}</option>
