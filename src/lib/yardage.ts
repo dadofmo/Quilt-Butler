@@ -198,7 +198,13 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Cut ${squaresEach} squares of Fabric ${t1} and ${squaresEach} squares of Fabric ${t2}, all at ${cut}" × ${cut}" (finished ${s.blockSize}" + 7/8" extra for the diagonal seam).`,
     );
     notes.push(
-      `To turn the squares into triangle blocks: stack one Fabric ${t1} square on top of one Fabric ${t2} square so the pretty (printed) sides face each other — the plain backs of the fabric should be facing out. On the back of the top square, use a pencil or fabric marker to draw a straight line from one corner to the opposite corner (a diagonal). Sew a seam 1/4" away from that line on BOTH sides of it (two parallel seams). Then cut along the drawn line with scissors or a rotary cutter — you'll get two pieces. Open each piece and press it flat with an iron (this is called "pressing open"). Each pair of squares makes 2 finished half-square triangle blocks, for ${blockCount} blocks total.`,
+      `To turn the squares into triangle blocks: place one Fabric ${t1} square and one Fabric ${t2} square together so the printed sides are touching each other (the plain back of the fabric will be facing you on both the top and bottom). On the back of the top square, use a pencil or fabric marker to draw a straight line from one corner to the opposite corner (a diagonal).`,
+    );
+    notes.push(
+      `Sew a seam 1/4" away from that drawn line, on BOTH sides of it (so you'll have two parallel lines of stitching). Then cut along the drawn line in the middle — you'll end up with two separate pieces, each with a triangle of ${t1} and a triangle of ${t2} already sewn together along the diagonal.`,
+    );
+    notes.push(
+      `Unfold each piece so the two triangles lie flat side-by-side (printed sides up). Iron it flat — quilters call this "pressing." Each pair of squares makes 2 finished half-square triangle blocks, for ${blockCount} blocks total.`,
     );
   } else if (s.pattern === "rail-fence") {
     // Each block = 3 rails. Each rail finishes at (blockSize/3) tall × blockSize wide.
@@ -239,7 +245,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Cutting strategy: cut full-width strips ${railCutHeight.toFixed(2)}" tall across the bolt, then sub-cut each strip into ${railsPerStrip} rails of ${railCutLength.toFixed(2)}" long.`,
     );
     notes.push(
-      `Across all ${blockCount} blocks: ${blockCount} rails of Fabric ${r1} (top), ${blockCount} of Fabric ${r2} (middle), ${blockCount} of Fabric ${r3} (bottom). Sew the three rails together along their long edges to form one block.`,
+      `Across all ${blockCount} blocks: ${blockCount} rails of Fabric ${r1} (top), ${blockCount} of Fabric ${r2} (middle), ${blockCount} of Fabric ${r3} (bottom).`,
+    );
+    notes.push(
+      `To sew one block: lay the top rail and the middle rail together so their printed sides are touching, lining up one long edge. Sew along that edge with a 1/4" seam. Unfold the two rails so they lie flat side-by-side (printed sides up) and iron the seam flat — this is called "pressing." Then place the bottom rail on top of the middle rail, printed sides together, line up the long edge, sew, unfold, and press again. You now have one finished block with three stripes.`,
     );
     notes.push(
       `Layout tip: rotate every other block 90° (alternating horizontal and vertical) when arranging — that's what gives Rail Fence its classic woven look.`,
@@ -328,10 +337,16 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Across all ${blockCount} blocks: ${blockCount} centers (Fabric ${centerFab}), ${6 * blockCount} dark logs (Fabric ${darkFab}), ${6 * blockCount} light logs (Fabric ${lightFab}).`,
     );
     notes.push(
-      `Sewing order (one block, spiral): sew log 1 (dark, ${centerCut.toFixed(2)}") to the RIGHT of the center; press toward the log. Then log 2 (dark, ${(centerFinished + logFinished + SEAM).toFixed(2)}") across the TOP. Then log 3 (light, same length) on the LEFT. Then log 4 (light, +${logFinished.toFixed(2)}" longer) on the BOTTOM. Repeat for two more rounds, alternating dark on the top/right and light on the bottom/left — the dark logs and the light logs each end up covering two adjacent sides, giving the iconic diagonal.`,
+      `How to sew one block (the spiral): start with the center "hearth" square in front of you, printed side up. Place log 1 (dark, ${centerCut.toFixed(2)}" long) on top of it along the RIGHT edge so the printed sides of the two pieces are touching each other. Line up the right edges and sew a 1/4" seam down that edge. Unfold the log so it lies flat to the right of the center (printed sides up). Iron the seam flat, with the little flap of fabric on the back tucked under the new log (not under the center) — quilters call this "pressing toward the log," and it keeps the block from getting bumpy as you add more pieces.`,
     );
     notes.push(
-      `Layout tip: arranging the finished blocks so all the dark corners point the same direction creates the classic "Straight Furrows" or "Sunshine and Shadow" sets. Try a few orientations on the floor before sewing them together.`,
+      `Now rotate the piece a quarter-turn counter-clockwise so what was the top is now the right. Add log 2 (dark, ${(centerFinished + logFinished + SEAM).toFixed(2)}") the same way: place it printed-side-down along the new right edge, sew, unfold, and press toward the new log. Repeat with log 3 (light, ${(centerFinished + logFinished + SEAM).toFixed(2)}") and log 4 (light, ${(centerFinished + 2 * logFinished + SEAM).toFixed(2)}"). After 4 logs you've finished one round of the spiral. Do two more rounds (8 more logs) to finish the block — always adding the next log along the current right edge and rotating between logs.`,
+    );
+    notes.push(
+      `Color-placement tip: keep the dark logs on the SAME two adjacent sides every round (e.g. top + right) and the light logs on the OTHER two sides (bottom + left). That's what creates the iconic diagonal split — half the finished block looks dark, the other half looks light.`,
+    );
+    notes.push(
+      `Layout tip: arranging the finished blocks so all the dark corners point the same direction creates classic Log Cabin layouts called "Straight Furrows" or "Sunshine and Shadow." Try a few orientations on the floor (or a bed) before sewing the blocks together.`,
     );
   }
 
