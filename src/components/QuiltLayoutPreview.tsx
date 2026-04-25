@@ -1,6 +1,7 @@
 import type { PatternId, SectionAssignments, FabricKey } from "@/lib/planner-store";
 import { FABRIC_COLORS } from "@/lib/planner-store";
 import { fabricFill } from "@/lib/fabric-fill";
+import { getPattern } from "@/lib/patterns";
 import { FabricPatternDefs } from "./FabricPatternDefs";
 import { PatternDiagram } from "./PatternDiagram";
 
@@ -56,7 +57,10 @@ export function QuiltLayoutPreview({
           <div className="flex items-stretch gap-2">
             <div className="flex flex-col justify-around py-[5px] text-right">
               {(["rail1", "rail2", "rail3"] as const).map((id, idx) => {
-                const fab = (assignments[id] ?? (["A", "B", "C"] as const)[idx]) as FabricKey;
+                // Resolve through the pattern definition first so this stays
+                // in lockstep with src/lib/patterns.ts (Rail Fence rails = A/B/C).
+                const railDef = getPattern(pattern)?.sections.find((s) => s.id === id);
+                const fab = (assignments[id] ?? railDef?.defaultFabric ?? (["A", "B", "C"] as const)[idx]) as FabricKey;
                 const role = ["Top rail", "Middle rail", "Bottom rail"][idx];
                 return (
                   <div key={id} className="flex items-center justify-end gap-1.5">
@@ -209,8 +213,14 @@ function MiniBlock({
   assignments: SectionAssignments;
   photos?: Partial<Record<FabricKey, string>>;
 }) {
-  const get = (k: string, fb: FabricKey) =>
-    fabricFill((assignments[k] ?? fb) as FabricKey, photos);
+  // Fallback resolves through the pattern definition (single source of truth
+  // in src/lib/patterns.ts) before the literal — so a section's defaultFabric
+  // change propagates here automatically.
+  const def = getPattern(pattern);
+  const get = (k: string, fb: FabricKey) => {
+    const sectionDefault = def?.sections.find((s) => s.id === k)?.defaultFabric;
+    return fabricFill((assignments[k] ?? sectionDefault ?? fb) as FabricKey, photos);
+  };
 
   switch (pattern) {
     case "simple-squares": {

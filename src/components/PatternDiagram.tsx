@@ -1,5 +1,6 @@
 import type { FabricKey, PatternId, SectionAssignments } from "@/lib/planner-store";
 import { fabricFill } from "@/lib/fabric-fill";
+import { getPattern } from "@/lib/patterns";
 import { FabricPatternDefs } from "./FabricPatternDefs";
 
 interface Props {
@@ -10,18 +11,29 @@ interface Props {
   photos?: Partial<Record<FabricKey, string>>;
 }
 
+/**
+ * Resolve the fabric for a section. Falls back to the pattern definition's
+ * defaultFabric (single source of truth in src/lib/patterns.ts) instead of
+ * a hardcoded literal — this prevents the diagram from drifting away from
+ * what the calculator and the rest of the UI use.
+ */
 function fillFor(
+  pattern: PatternId,
   assignments: SectionAssignments,
   key: string,
-  fallback: FabricKey,
+  hardcodedFallback: FabricKey,
   photos?: Partial<Record<FabricKey, string>>,
 ) {
-  const f = (assignments[key] ?? fallback) as FabricKey;
+  const def = getPattern(pattern);
+  const sectionDefault = def?.sections.find((s) => s.id === key)?.defaultFabric;
+  const f = (assignments[key] ?? sectionDefault ?? hardcodedFallback) as FabricKey;
   return fabricFill(f, photos);
 }
 
 export function PatternDiagram({ pattern, assignments, hasBorder, size = 280, photos }: Props) {
-  const borderKey = (assignments["border"] ?? "C") as FabricKey;
+  const def = getPattern(pattern);
+  const borderDefault = (def?.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey;
+  const borderKey = (assignments["border"] ?? borderDefault) as FabricKey;
   const borderHasPhoto = hasBorder && !!photos?.[borderKey];
   const borderColor = hasBorder
     ? borderHasPhoto
@@ -60,7 +72,7 @@ function renderInner(
   a: SectionAssignments,
   photos?: Partial<Record<FabricKey, string>>,
 ) {
-  const get = (k: string, fb: FabricKey) => fillFor(a, k, fb, photos);
+  const get = (k: string, fb: FabricKey) => fillFor(pattern, a, k, fb, photos);
   switch (pattern) {
     case "simple-squares": {
       const c = get("squares", "A");
