@@ -154,6 +154,28 @@ function ResultsStep() {
                 where the user can enter a price for each individual line item
                 (fabrics, backing, batting, binding, threads) and see a
                 grand total. */}
+            {result.basics && result.basics.length > 0 && (
+              <div className="border-border bg-muted/40 mt-4 rounded-md border p-4">
+                <div className="text-foreground text-sm font-semibold">
+                  Quilting basics — read this once
+                </div>
+                <p className="text-muted-foreground mt-1 text-xs">
+                  The sewing steps below use these terms. They're the same for
+                  every pattern, so once you've got these you can follow any of
+                  the per-step instructions.
+                </p>
+                <dl className="mt-3 space-y-2 text-sm">
+                  {result.basics.map((b) => (
+                    <div key={b.term}>
+                      <dt className="text-foreground font-medium">{b.term}</dt>
+                      <dd className="text-muted-foreground mt-0.5">
+                        {b.explanation}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            )}
             {result.notes && (
               <ul className="text-muted-foreground mt-3 list-disc space-y-1 pl-5 text-sm">
                 {result.notes.map((n, i) => <li key={i}>{n}</li>)}
