@@ -27,18 +27,9 @@ export function StepShell({ step, title, subtitle, backTo, children }: Props) {
           ) : (
             <span className="text-primary text-base font-semibold tracking-tight">QuiltButler</span>
           )}
-          <div className="flex items-center gap-3">
-            <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-              Step {step} of 4
-            </span>
-            <img
-              src={quiltButlerLogo}
-              alt="QuiltButler"
-              width={900}
-              height={600}
-              className="h-7 w-auto sm:h-8"
-            />
-          </div>
+          <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
+            Step {step} of 4
+          </span>
         </div>
         <div className="bg-muted h-1.5 w-full">
           <div
@@ -49,8 +40,19 @@ export function StepShell({ step, title, subtitle, backTo, children }: Props) {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 pb-24 pt-6 sm:pt-10">
-        {title && <h1 className="text-foreground text-2xl font-semibold sm:text-3xl">{title}</h1>}
-        {subtitle && <p className="text-muted-foreground mt-2 text-base">{subtitle}</p>}
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            {title && <h1 className="text-foreground text-2xl font-semibold sm:text-3xl">{title}</h1>}
+            {subtitle && <p className="text-muted-foreground mt-2 text-base">{subtitle}</p>}
+          </div>
+          <img
+            src={quiltButlerLogo}
+            alt="QuiltButler"
+            width={900}
+            height={600}
+            className="h-16 w-auto shrink-0 sm:h-20"
+          />
+        </div>
         <div className={title || subtitle ? "mt-6 sm:mt-8" : ""}>{children}</div>
       </main>
     </div>
