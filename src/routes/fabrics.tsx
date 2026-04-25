@@ -204,7 +204,7 @@ function FabricsStep() {
             const nextAccent = ALL_FABRIC_KEYS.find((f) => !blockFabrics.includes(f));
             const choices = isBorder
               ? (nextAccent ? [...blockFabrics, nextAccent] : blockFabrics)
-              : availableFabrics;
+              : blockOnlyFabrics;
             return (
               <div key={s.id} className="bg-card rounded-xl border-2 border-border p-4">
                 <div className="text-foreground mb-1 text-base font-semibold">{s.label}</div>
