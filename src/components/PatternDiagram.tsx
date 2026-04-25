@@ -59,7 +59,10 @@ export function PatternDiagram({ pattern, assignments, hasBorder, size = 280, ph
     >
       <div className="bg-card flex h-full w-full items-center justify-center rounded">
         <svg width={size - 40} height={size - 40} viewBox="0 0 200 200">
-          <FabricPatternDefs photos={photos} />
+          {/* tileSize=200 makes one fabric photo span the whole 200×200 block,
+              so logs/triangles/squares of the same fabric reveal a coherent
+              slice of one image — like real fabric cut from one piece. */}
+          <FabricPatternDefs photos={photos} tileSize={200} />
           {renderInner(pattern, assignments, photos)}
         </svg>
       </div>
