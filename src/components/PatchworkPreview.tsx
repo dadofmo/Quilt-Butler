@@ -4,6 +4,7 @@ import {
   FABRIC_COLORS,
   type FabricKey,
 } from "@/lib/planner-store";
+import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 
 interface Props {
   /** Number of distinct fabrics to cycle through (2–12). */
@@ -18,6 +19,8 @@ interface Props {
   /** Per-cell assignments, keyed "r,c". */
   grid: Record<string, FabricKey>;
   onChange: (next: Record<string, FabricKey>) => void;
+  /** Optional uploaded photos per fabric — overrides solid color in cells. */
+  photos?: Partial<Record<FabricKey, string>>;
 }
 
 /**
@@ -55,6 +58,7 @@ export function PatchworkPreview({
   borderWidth,
   grid,
   onChange,
+  photos,
 }: Props) {
   const { rows, cols } = useMemo(
     () => computeGridShape(quiltWidth, quiltHeight, blockSize, borderWidth),
@@ -102,7 +106,10 @@ export function PatchworkPreview({
                 onClick={() => cycle(r, c)}
                 aria-label={`Row ${r + 1} column ${c + 1}, fabric ${fab}. Tap to change.`}
                 className="rounded-sm transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-ring"
-                style={{ background: FABRIC_COLORS[fab] }}
+                style={{
+                  background: FABRIC_COLORS[fab],
+                  ...fabricBackgroundStyle(fab, photos),
+                }}
               />
             );
           }),

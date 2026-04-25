@@ -4,12 +4,12 @@ import { QuiltLayoutPreview } from "@/components/QuiltLayoutPreview";
 import { PatchworkPreview } from "@/components/PatchworkPreview";
 import {
   ALL_FABRIC_KEYS,
-  FABRIC_COLORS,
-  FABRIC_LABELS,
   setPlanner,
   usePlanner,
   type FabricKey,
 } from "@/lib/planner-store";
+import { fabricBackgroundStyle } from "@/lib/fabric-fill";
+import { FabricSwatchOption } from "@/components/FabricSwatchOption";
 import { getPattern, fabricsForPattern } from "@/lib/patterns";
 
 export const Route = createFileRoute("/fabrics")({
@@ -44,6 +44,23 @@ function FabricsStep() {
 
   const update = (sectionId: string, fab: FabricKey) => {
     setPlanner({ assignments: { ...planner.assignments, [sectionId]: fab } });
+  };
+
+  const setFabricPhoto = (key: FabricKey, dataUrl: string | null) => {
+    const next = { ...planner.fabricPhotos };
+    if (dataUrl) next[key] = dataUrl;
+    else delete next[key];
+    setPlanner({ fabricPhotos: next });
+  };
+
+  const handlePhotoUpload = (key: FabricKey, file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result === "string") setFabricPhoto(key, result);
+    };
+    reader.readAsDataURL(file);
   };
 
   // Patchwork preview is meaningful for "simple-squares" — a grid of squares
@@ -111,8 +128,8 @@ function FabricsStep() {
                   className="border-border inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium"
                 >
                   <span
-                    className="h-3 w-3 rounded-sm"
-                    style={{ background: FABRIC_COLORS[f] }}
+                    className="h-3 w-3 rounded-sm border border-border/60"
+                    style={fabricBackgroundStyle(f, planner.fabricPhotos)}
                   />
                   {f}
                 </span>
@@ -128,6 +145,7 @@ function FabricsStep() {
             borderWidth={planner.borderWidth}
             grid={planner.patchworkGrid}
             onChange={(g) => setPlanner({ patchworkGrid: g })}
+            photos={planner.fabricPhotos}
           />
         </div>
       )}
@@ -153,6 +171,7 @@ function FabricsStep() {
                   quiltWidth={planner.quiltWidth}
                   quiltHeight={planner.quiltHeight}
                   borderWidth={planner.borderWidth}
+                  photos={planner.fabricPhotos}
                 />
                 <p className="text-muted-foreground mt-4 text-center text-xs leading-relaxed">
                   You&apos;re designing <strong>one block</strong>. That block will be sewn{" "}
@@ -201,22 +220,15 @@ function FabricsStep() {
                   style={{ gridTemplateColumns: `repeat(${Math.min(choices.length, 6)}, minmax(0,1fr))` }}
                 >
                   {choices.map((f) => (
-                    <button
+                    <FabricSwatchOption
                       key={f}
-                      onClick={() => update(s.id, f)}
-                      aria-label={FABRIC_LABELS[f]}
-                      className={`flex flex-col items-center gap-1 rounded-lg border-2 p-2 text-sm font-medium transition-all ${
-                        current === f
-                          ? "border-primary ring-primary/20 ring-2"
-                          : "border-border hover:border-muted-foreground"
-                      }`}
-                    >
-                      <span
-                        className="h-8 w-full rounded"
-                        style={{ background: FABRIC_COLORS[f] }}
-                      />
-                      <span className="text-foreground">{f}</span>
-                    </button>
+                      fabricKey={f}
+                      selected={current === f}
+                      photo={planner.fabricPhotos[f]}
+                      onSelect={() => update(s.id, f)}
+                      onUpload={(file) => handlePhotoUpload(f, file)}
+                      onClear={() => setFabricPhoto(f, null)}
+                    />
                   ))}
                 </div>
               </div>

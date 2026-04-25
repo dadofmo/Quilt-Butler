@@ -34,6 +34,8 @@ export interface PlannerState {
   assignments: SectionAssignments;
   safetyBuffer: boolean;
   fabricNames: Partial<Record<FabricKey, string>>;
+  /** Optional user-uploaded photo (data URL) for each fabric — used in previews instead of the swatch color. */
+  fabricPhotos: Partial<Record<FabricKey, string>>;
   /** Number of distinct fabrics user wants to use in the patchwork preview (2–12). */
   patchworkFabricCount: number;
   /** Per-cell fabric assignments for the patchwork preview grid, keyed "r,c". */
@@ -51,6 +53,7 @@ const initial: PlannerState = {
   assignments: {},
   safetyBuffer: true,
   fabricNames: {},
+  fabricPhotos: {},
   patchworkFabricCount: 4,
   patchworkGrid: {},
 };

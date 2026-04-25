@@ -1,5 +1,7 @@
 import type { PatternId, SectionAssignments, FabricKey } from "@/lib/planner-store";
 import { FABRIC_COLORS } from "@/lib/planner-store";
+import { fabricFill } from "@/lib/fabric-fill";
+import { FabricPatternDefs } from "./FabricPatternDefs";
 import { PatternDiagram } from "./PatternDiagram";
 
 interface Props {
@@ -12,16 +14,9 @@ interface Props {
   quiltWidth: number;
   quiltHeight: number;
   borderWidth: number;
+  photos?: Partial<Record<FabricKey, string>>;
 }
 
-/**
- * Renders side-by-side: a single block (the one being designed)
- * and a small thumbnail of the entire quilt showing that block
- * tiled blocksAcross × blocksDown, with the border drawn around it.
- *
- * Helps beginners understand: "I'm coloring 1 block, but it repeats
- * to make the whole quilt."
- */
 export function QuiltLayoutPreview({
   pattern,
   assignments,
@@ -32,16 +27,15 @@ export function QuiltLayoutPreview({
   quiltWidth,
   quiltHeight,
   borderWidth,
+  photos,
 }: Props) {
   const blockCount = blocksAcross * blocksDown;
 
-  // Mini quilt sizing
-  const MAX = 140; // max thumbnail dimension in px
+  const MAX = 140;
   const aspect = quiltWidth / quiltHeight;
   const thumbW = aspect >= 1 ? MAX : Math.round(MAX * aspect);
   const thumbH = aspect >= 1 ? Math.round(MAX / aspect) : MAX;
 
-  // Inside the thumbnail, scale border thickness to match real quilt proportions
   const borderPxX = hasBorder ? (borderWidth / quiltWidth) * thumbW : 0;
   const borderPxY = hasBorder ? (borderWidth / quiltHeight) * thumbH : 0;
   const innerW = thumbW - borderPxX * 2;
@@ -49,11 +43,11 @@ export function QuiltLayoutPreview({
   const cellW = innerW / blocksAcross;
   const cellH = innerH / blocksDown;
 
+  const borderPhoto = hasBorder ? photos?.[borderFabric] : undefined;
   const borderColor = hasBorder ? FABRIC_COLORS[borderFabric] : "transparent";
 
   return (
     <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
-      {/* Single block — what they're designing */}
       <div className="flex flex-col items-center gap-2">
         <div className="text-foreground text-xs font-semibold uppercase tracking-wide">
           1 block
@@ -63,48 +57,42 @@ export function QuiltLayoutPreview({
           assignments={assignments}
           hasBorder={false}
           size={220}
+          photos={photos}
         />
         <p className="text-muted-foreground max-w-[220px] text-center text-[11px]">
           What you're designing now
         </p>
       </div>
 
-      {/* Arrow + multiplier */}
       <div className="flex flex-row items-center gap-1 sm:flex-col sm:gap-1 sm:pt-16">
         <span className="text-primary text-xl font-bold">×{blockCount}</span>
-        <svg
-          width="44"
-          height="22"
-          viewBox="0 0 44 22"
-          className="text-muted-foreground hidden sm:block"
-          aria-hidden
-        >
+        <svg width="44" height="22" viewBox="0 0 44 22" className="text-muted-foreground hidden sm:block" aria-hidden>
           <line x1="2" y1="11" x2="38" y2="11" stroke="currentColor" strokeWidth="1.5" strokeDasharray="3 3" />
           <polyline points="32,5 40,11 32,17" fill="none" stroke="currentColor" strokeWidth="1.5" />
         </svg>
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 22 22"
-          className="text-muted-foreground sm:hidden"
-          aria-hidden
-        >
+        <svg width="22" height="22" viewBox="0 0 22 22" className="text-muted-foreground sm:hidden" aria-hidden>
           <polyline points="6,4 14,11 6,18" fill="none" stroke="currentColor" strokeWidth="1.5" />
         </svg>
       </div>
 
-      {/* Whole quilt thumbnail */}
       <div className="flex flex-col items-center gap-2">
         <div className="text-foreground text-xs font-semibold uppercase tracking-wide">
           Your full quilt
         </div>
         <div
-          className="rounded-md shadow-sm"
+          className="rounded-md shadow-sm overflow-hidden"
           style={{
             width: thumbW,
             height: thumbH,
             background: borderColor,
             padding: `${borderPxY}px ${borderPxX}px`,
+            ...(borderPhoto
+              ? {
+                  backgroundImage: `url(${borderPhoto})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }
+              : {}),
           }}
         >
           <svg
@@ -113,6 +101,7 @@ export function QuiltLayoutPreview({
             viewBox={`0 0 ${innerW} ${innerH}`}
             className="block"
           >
+            <FabricPatternDefs photos={photos} />
             {Array.from({ length: blocksDown }).map((_, j) =>
               Array.from({ length: blocksAcross }).map((_, i) => (
                 <svg
@@ -127,13 +116,11 @@ export function QuiltLayoutPreview({
                   <MiniBlock
                     pattern={pattern}
                     assignments={assignments}
+                    photos={photos}
                   />
                 </svg>
               )),
             )}
-            {/* Block boundary grid drawn in parent coords so strokes
-                stay crisp and uniform regardless of cell aspect ratio.
-                This is what visually separates one block from the next. */}
             {Array.from({ length: blocksAcross + 1 }).map((_, i) => (
               <line
                 key={`v-${i}`}
@@ -169,24 +156,20 @@ export function QuiltLayoutPreview({
   );
 }
 
-/**
- * A pattern block rendered without its own border, scaled into 200×200
- * viewBox so the parent SVG can place it via nested <svg> at any size.
- */
 function MiniBlock({
   pattern,
   assignments,
+  photos,
 }: {
   pattern: PatternId;
   assignments: SectionAssignments;
+  photos?: Partial<Record<FabricKey, string>>;
 }) {
   const get = (k: string, fb: FabricKey) =>
-    FABRIC_COLORS[(assignments[k] ?? fb) as FabricKey];
+    fabricFill((assignments[k] ?? fb) as FabricKey, photos);
 
   switch (pattern) {
     case "simple-squares": {
-      // Block = a single square. Mini block fills its cell so the white
-      // grid lines drawn by the parent show the block boundaries.
       const c = get("squares", "A");
       return <rect width={200} height={200} fill={c} />;
     }

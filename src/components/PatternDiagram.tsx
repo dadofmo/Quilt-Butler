@@ -1,44 +1,68 @@
 import type { FabricKey, PatternId, SectionAssignments } from "@/lib/planner-store";
-import { FABRIC_COLORS } from "@/lib/planner-store";
+import { fabricFill } from "@/lib/fabric-fill";
+import { FabricPatternDefs } from "./FabricPatternDefs";
 
 interface Props {
   pattern: PatternId;
   assignments: SectionAssignments;
   hasBorder: boolean;
   size?: number;
+  photos?: Partial<Record<FabricKey, string>>;
 }
 
-function fill(assignments: SectionAssignments, key: string, fallback: FabricKey) {
+function fillFor(
+  assignments: SectionAssignments,
+  key: string,
+  fallback: FabricKey,
+  photos?: Partial<Record<FabricKey, string>>,
+) {
   const f = (assignments[key] ?? fallback) as FabricKey;
-  return FABRIC_COLORS[f];
+  return fabricFill(f, photos);
 }
 
-export function PatternDiagram({ pattern, assignments, hasBorder, size = 280 }: Props) {
-  const border = hasBorder ? fill(assignments, "border", "C") : "transparent";
-  const inner = (
-    <svg width={size - 40} height={size - 40} viewBox="0 0 200 200">
-      {renderInner(pattern, assignments)}
-    </svg>
-  );
+export function PatternDiagram({ pattern, assignments, hasBorder, size = 280, photos }: Props) {
+  const borderKey = (assignments["border"] ?? "C") as FabricKey;
+  const borderHasPhoto = hasBorder && !!photos?.[borderKey];
+  const borderColor = hasBorder
+    ? borderHasPhoto
+      ? "transparent"
+      : fabricFill(borderKey, photos)
+    : "transparent";
 
   return (
     <div
-      className="relative inline-block rounded-lg p-5"
-      style={{ background: border, width: size, height: size }}
+      className="relative inline-block rounded-lg p-5 overflow-hidden"
+      style={{
+        background: borderColor,
+        width: size,
+        height: size,
+        ...(borderHasPhoto
+          ? {
+              backgroundImage: `url(${photos![borderKey]})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }
+          : {}),
+      }}
     >
       <div className="bg-card flex h-full w-full items-center justify-center rounded">
-        {inner}
+        <svg width={size - 40} height={size - 40} viewBox="0 0 200 200">
+          <FabricPatternDefs photos={photos} />
+          {renderInner(pattern, assignments, photos)}
+        </svg>
       </div>
     </div>
   );
 }
 
-function renderInner(pattern: PatternId, a: SectionAssignments) {
-  const get = (k: string, fb: FabricKey) => fill(a, k, fb);
+function renderInner(
+  pattern: PatternId,
+  a: SectionAssignments,
+  photos?: Partial<Record<FabricKey, string>>,
+) {
+  const get = (k: string, fb: FabricKey) => fillFor(a, k, fb, photos);
   switch (pattern) {
     case "simple-squares": {
-      // Each block IS a single square — render as one solid square so the
-      // "1 block" diagram matches the quilt thumbnail (which tiles plain blocks).
       const c = get("squares", "A");
       return <rect x={0} y={0} width={200} height={200} fill={c} />;
     }
