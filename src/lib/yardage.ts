@@ -10,6 +10,32 @@ export interface FabricRequirement {
   yards: number; // rounded up to 0.25
 }
 
+/**
+ * Single source of truth for describing a sub-cut piece's shape.
+ *
+ * Any UI surface (cutting diagram, shopping list, print legend, future
+ * patterns) MUST use this helper instead of reimplementing the
+ * square-vs-rectangle check, so a Rail-Fence-style mismatch can't recur.
+ *
+ * Pass a piece's cut width and height in inches.
+ */
+export function describePieceShape(w: number, h: number) {
+  const isSquare = Math.abs(w - h) < 0.01;
+  const noun = isSquare ? "square" : "rectangle";
+  // For rectangles we show H × W (height first) because rails are typically
+  // cut from a strip H tall, sub-cut every W along the bolt — matching how
+  // the user actually cuts it.
+  const sizeLabel = isSquare
+    ? `${w.toFixed(2)}" × ${w.toFixed(2)}"`
+    : `${h.toFixed(2)}" × ${w.toFixed(2)}"`;
+  return {
+    isSquare,
+    noun,
+    nounPlural: isSquare ? "squares" : "rectangles",
+    sizeLabel,
+  };
+}
+
 const SEAM = 0.5; // 1/4" seam allowance per side -> +0.5" total
 const HST_EXTRA = 0.875; // extra for HST squares: finished + 7/8"
 /**
