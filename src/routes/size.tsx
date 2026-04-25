@@ -75,6 +75,11 @@ function SizeStep() {
 
     const isInt = (x: number) => Math.abs(x - Math.round(x)) < 0.001;
 
+    // Hard cap on suggestions so we never recommend a quilt with more than
+    // ~100 blocks — even mathematically perfect, 200+ tiny squares would
+    // take months to sew and is not a beginner-friendly suggestion.
+    const MAX_BLOCKS = 100;
+
     // ----- Block-size suggestions: keep CURRENT border, find block sizes that
     // divide both inner dimensions evenly. Search 2.0–15.0 in 0.25" steps so
     // we always find something useful (not just from a tiny preset list).
@@ -87,11 +92,13 @@ function SizeStep() {
         const aw = innerW / s;
         const ah = innerH / s;
         if (isInt(aw) && isInt(ah) && Math.round(aw) >= 1 && Math.round(ah) >= 1) {
+          const total = Math.round(aw) * Math.round(ah);
+          if (total > MAX_BLOCKS) continue;
           blockSuggestions.push({
             size: s,
             across: Math.round(aw),
             down: Math.round(ah),
-            total: Math.round(aw) * Math.round(ah),
+            total,
           });
         }
       }
