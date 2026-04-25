@@ -12,7 +12,13 @@ export type PatternId =
   | "squares-on-point"
   | "plus-block";
 
-export type FabricKey = "A" | "B" | "C" | "D";
+export type FabricKey =
+  | "A" | "B" | "C" | "D" | "E" | "F"
+  | "G" | "H" | "I" | "J" | "K" | "L";
+
+export const ALL_FABRIC_KEYS: FabricKey[] = [
+  "A","B","C","D","E","F","G","H","I","J","K","L",
+];
 
 export type SectionAssignments = Record<string, FabricKey>;
 
@@ -22,11 +28,15 @@ export interface PlannerState {
   quiltHeight: number; // inches
   sizePreset: string;
   fabricWidth: 44 | 60;
-  blockSize: number; // inches
+  blockSize: number; // inches (decimal allowed)
   borderWidth: number; // inches, 0 for none
   assignments: SectionAssignments;
   safetyBuffer: boolean;
   fabricNames: Partial<Record<FabricKey, string>>;
+  /** Number of distinct fabrics user wants to use in the patchwork preview (2–12). */
+  patchworkFabricCount: number;
+  /** Per-cell fabric assignments for the patchwork preview grid, keyed "r,c". */
+  patchworkGrid: Record<string, FabricKey>;
 }
 
 const initial: PlannerState = {
@@ -40,6 +50,8 @@ const initial: PlannerState = {
   assignments: {},
   safetyBuffer: true,
   fabricNames: {},
+  patchworkFabricCount: 4,
+  patchworkGrid: {},
 };
 
 let state: PlannerState = initial;
@@ -82,6 +94,14 @@ export const FABRIC_COLORS: Record<FabricKey, string> = {
   B: "var(--fabric-b)",
   C: "var(--fabric-c)",
   D: "var(--fabric-d)",
+  E: "var(--fabric-e)",
+  F: "var(--fabric-f)",
+  G: "var(--fabric-g)",
+  H: "var(--fabric-h)",
+  I: "var(--fabric-i)",
+  J: "var(--fabric-j)",
+  K: "var(--fabric-k)",
+  L: "var(--fabric-l)",
 };
 
 export const FABRIC_LABELS: Record<FabricKey, string> = {
@@ -89,4 +109,12 @@ export const FABRIC_LABELS: Record<FabricKey, string> = {
   B: "Fabric B — Yellow",
   C: "Fabric C — Green",
   D: "Fabric D — Pink",
+  E: "Fabric E — Coral",
+  F: "Fabric F — Teal",
+  G: "Fabric G — Lavender",
+  H: "Fabric H — Mustard",
+  I: "Fabric I — Plum",
+  J: "Fabric J — Mint",
+  K: "Fabric K — Rust",
+  L: "Fabric L — Slate",
 };

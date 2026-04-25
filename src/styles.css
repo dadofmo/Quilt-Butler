@@ -33,6 +33,14 @@
   --color-fabric-b: var(--fabric-b);
   --color-fabric-c: var(--fabric-c);
   --color-fabric-d: var(--fabric-d);
+  --color-fabric-e: var(--fabric-e);
+  --color-fabric-f: var(--fabric-f);
+  --color-fabric-g: var(--fabric-g);
+  --color-fabric-h: var(--fabric-h);
+  --color-fabric-i: var(--fabric-i);
+  --color-fabric-j: var(--fabric-j);
+  --color-fabric-k: var(--fabric-k);
+  --color-fabric-l: var(--fabric-l);
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -68,11 +76,19 @@
   --input: oklch(0.9 0.02 130);
   --ring: oklch(0.62 0.07 150);
 
-  /* Fabric swatches */
-  --fabric-a: oklch(0.7 0.13 240); /* blue */
+  /* Fabric swatches — 12 distinct hues spaced around the wheel */
+  --fabric-a: oklch(0.7 0.13 240);  /* blue */
   --fabric-b: oklch(0.88 0.16 95);  /* yellow */
   --fabric-c: oklch(0.72 0.14 145); /* green */
   --fabric-d: oklch(0.78 0.13 0);   /* pink */
+  --fabric-e: oklch(0.72 0.16 35);  /* coral */
+  --fabric-f: oklch(0.7 0.12 200);  /* teal */
+  --fabric-g: oklch(0.78 0.1 300);  /* lavender */
+  --fabric-h: oklch(0.78 0.14 75);  /* mustard */
+  --fabric-i: oklch(0.55 0.13 330); /* plum */
+  --fabric-j: oklch(0.85 0.1 165);  /* mint */
+  --fabric-k: oklch(0.6 0.15 50);   /* rust */
+  --fabric-l: oklch(0.55 0.04 250); /* slate */
 }
 
 @layer base {

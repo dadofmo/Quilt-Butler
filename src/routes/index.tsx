@@ -22,7 +22,7 @@ function PatternPicker() {
   const choose = (id: (typeof PATTERNS)[number]["id"]) => {
     const pattern = getPattern(id);
     if (!pattern) return;
-    const assignments: Record<string, "A" | "B" | "C" | "D"> = {};
+    const assignments: Record<string, import("@/lib/planner-store").FabricKey> = {};
     pattern.sections.forEach((s) => (assignments[s.id] = s.defaultFabric));
     setPlanner({ pattern: id, assignments });
     navigate({ to: "/size" });
