@@ -162,7 +162,7 @@ function ResultsStep() {
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
                           <span
-                            className="border-border inline-block h-6 w-6 rounded border"
+                            className="border-border inline-block h-10 w-10 rounded border"
                             style={fabricBackgroundStyle(f.fabric, planner.fabricPhotos)}
                           />
                           <span className="text-foreground font-medium">
