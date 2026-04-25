@@ -175,14 +175,82 @@ function renderInner(
       const star = get("star", "A");
       const bg = get("bg", "B");
       const center = get("center", "D");
+      // Proper Ohio Star geometry: 3×3 grid where each edge unit is a QST
+      // (quarter-square triangle). The star points are formed by the two
+      // triangles that meet at the EDGE of the QST adjacent to the center
+      // square — together with the points from the other 3 edge units they
+      // form the 8-pointed star. Corner units & center unit are plain.
+      const u = 200 / 3; // unit size
+      // QST at grid (gx, gy) — `axis` controls which diagonal the star
+      // triangles sit on. For Ohio Star, every edge QST has its star points
+      // pointing INWARD toward the block center, so:
+      //   top edge (1,0):    star points down  → vertical bowtie
+      //   right edge (2,1):  star points left  → horizontal bowtie
+      //   bottom edge (1,2): star points up    → vertical bowtie
+      //   left edge (0,1):   star points right → horizontal bowtie
+      const qst = (gx: number, gy: number, axis: "v" | "h", key: string) => {
+        const x = gx * u;
+        const y = gy * u;
+        const cx = x + u / 2;
+        const cy = y + u / 2;
+        // Two star triangles forming a bowtie along `axis`, two bg triangles
+        // along the other axis.
+        const starTris =
+          axis === "v"
+            ? [
+                `${x},${y} ${x + u},${y} ${cx},${cy}`,        // top star tri
+                `${x},${y + u} ${x + u},${y + u} ${cx},${cy}`, // bottom star tri
+              ]
+            : [
+                `${x},${y} ${x},${y + u} ${cx},${cy}`,         // left star tri
+                `${x + u},${y} ${x + u},${y + u} ${cx},${cy}`, // right star tri
+              ];
+        const bgTris =
+          axis === "v"
+            ? [
+                `${x},${y} ${x},${y + u} ${cx},${cy}`,
+                `${x + u},${y} ${x + u},${y + u} ${cx},${cy}`,
+              ]
+            : [
+                `${x},${y} ${x + u},${y} ${cx},${cy}`,
+                `${x},${y + u} ${x + u},${y + u} ${cx},${cy}`,
+              ];
+        return (
+          <g key={key}>
+            <rect x={x} y={y} width={u} height={u} fill={bg} />
+            {bgTris.map((p, i) => (
+              <polygon key={`b${i}`} points={p} fill={bg} />
+            ))}
+            {starTris.map((p, i) => (
+              <polygon key={`s${i}`} points={p} fill={star} />
+            ))}
+          </g>
+        );
+      };
       return (
         <>
+          {/* Background base */}
           <rect width={200} height={200} fill={bg} />
-          <polygon points="100,10 140,70 60,70" fill={star} />
-          <polygon points="190,100 130,140 130,60" fill={star} />
-          <polygon points="100,190 60,130 140,130" fill={star} />
-          <polygon points="10,100 70,60 70,140" fill={star} />
-          <rect x={70} y={70} width={60} height={60} fill={center} />
+          {/* 4 plain background corner units (already covered by base, but
+              drawn explicitly so the per-unit grid lines below land cleanly) */}
+          <rect x={0} y={0} width={u} height={u} fill={bg} />
+          <rect x={2 * u} y={0} width={u} height={u} fill={bg} />
+          <rect x={0} y={2 * u} width={u} height={u} fill={bg} />
+          <rect x={2 * u} y={2 * u} width={u} height={u} fill={bg} />
+          {/* 4 QST edge units — star points pointing INWARD */}
+          {qst(1, 0, "v", "top")}
+          {qst(2, 1, "h", "right")}
+          {qst(1, 2, "v", "bottom")}
+          {qst(0, 1, "h", "left")}
+          {/* Center square */}
+          <rect x={u} y={u} width={u} height={u} fill={center} />
+          {/* Subtle 3×3 unit grid lines so beginners can see the construction */}
+          <g stroke="white" strokeWidth={1} opacity={0.6}>
+            <line x1={u} y1={0} x2={u} y2={200} />
+            <line x1={2 * u} y1={0} x2={2 * u} y2={200} />
+            <line x1={0} y1={u} x2={200} y2={u} />
+            <line x1={0} y1={2 * u} x2={200} y2={2 * u} />
+          </g>
         </>
       );
     }
