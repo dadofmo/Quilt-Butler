@@ -73,6 +73,7 @@ function ResultsStep() {
             assignments={planner.assignments}
             hasBorder={planner.borderWidth > 0}
             borderFabric={(planner.assignments.border ?? "C") as FabricKey}
+            photos={planner.fabricPhotos}
           />
 
           <div className="no-print bg-card flex items-center justify-between gap-4 rounded-xl border-2 border-border p-4">
@@ -133,7 +134,7 @@ function ResultsStep() {
                   key={f.fabric}
                   className={i === 1 ? "print-page-break" : undefined}
                 >
-                  <CuttingDiagram req={f} fabricWidth={planner.fabricWidth} pattern={planner.pattern} />
+                  <CuttingDiagram req={f} fabricWidth={planner.fabricWidth} pattern={planner.pattern} photo={planner.fabricPhotos[f.fabric]} />
                 </div>
               ))}
             </div>
@@ -353,7 +354,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
   );
 }
 
-function CuttingDiagram({ req, fabricWidth, pattern }: { req: FabricRequirement; fabricWidth: number; pattern: import("@/lib/planner-store").PatternId | null }) {
+function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequirement; fabricWidth: number; pattern: import("@/lib/planner-store").PatternId | null; photo?: string }) {
   const SCALE = 9; // 1 inch = 9px
   const PAD_TOP = 28; // room for WOF arrow
   const PAD_LEFT = 56; // room for selvage label
@@ -367,7 +368,11 @@ function CuttingDiagram({ req, fabricWidth, pattern }: { req: FabricRequirement;
   const svgH = PAD_TOP + boltH + PAD_BOTTOM;
 
   const fabricColor = FABRIC_COLORS[req.fabric as FabricKey];
-  const stripFill = `color-mix(in oklab, ${fabricColor} 30%, white)`;
+  // Strip fill: when the user uploaded a photo, use the photo via an SVG
+  // pattern so each strip looks like the actual fabric. Otherwise fall back
+  // to the lightened solid color (better contrast for the dashed sub-cuts).
+  const stripPatternId = `cut-fab-${req.fabric}`;
+  const stripFill = photo ? `url(#${stripPatternId})` : `color-mix(in oklab, ${fabricColor} 30%, white)`;
 
   // Build strip layout
   type Row = {
@@ -420,7 +425,7 @@ function CuttingDiagram({ req, fabricWidth, pattern }: { req: FabricRequirement;
         <div className="flex items-center gap-2">
           <span
             className="border-border inline-block h-5 w-5 rounded border"
-            style={{ background: fabricColor }}
+            style={photo ? { backgroundImage: `url(${photo})`, backgroundSize: "cover", backgroundPosition: "center" } : { background: fabricColor }}
           />
           <span className="text-foreground font-semibold">Fabric {req.fabric} cutting plan</span>
         </div>
@@ -494,6 +499,26 @@ function CuttingDiagram({ req, fabricWidth, pattern }: { req: FabricRequirement;
             <marker id="arrR" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
               <path d="M0,0 L10,5 L0,10" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-muted-foreground" />
             </marker>
+            {photo && (
+              <pattern
+                id={stripPatternId}
+                patternUnits="objectBoundingBox"
+                patternContentUnits="objectBoundingBox"
+                width={1}
+                height={1}
+                preserveAspectRatio="xMidYMid slice"
+              >
+                <image
+                  href={photo}
+                  xlinkHref={photo}
+                  x={0}
+                  y={0}
+                  width={1}
+                  height={1}
+                  preserveAspectRatio="xMidYMid slice"
+                />
+              </pattern>
+            )}
           </defs>
 
           {/* Selvage labels */}
