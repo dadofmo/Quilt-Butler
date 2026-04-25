@@ -3,6 +3,7 @@ import { StepShell } from "@/components/StepShell";
 import { PatternThumb } from "@/components/PatternThumb";
 import { PATTERNS, getPattern } from "@/lib/patterns";
 import { setPlanner } from "@/lib/planner-store";
+import quiltButlerLogo from "@/assets/quilt-butler-logo.png";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -30,6 +31,13 @@ function PatternPicker() {
 
   return (
     <StepShell step={1} title="Pick a quilt pattern" subtitle="Tap a tile to start planning your quilt.">
+      <div className="-mt-4 mb-6 flex justify-center sm:-mt-6 sm:mb-8">
+        <img
+          src={quiltButlerLogo}
+          alt="QuiltButler — Plan smart. Cut confidently. Quilt beautifully."
+          className="h-auto w-full max-w-sm sm:max-w-md"
+        />
+      </div>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
         {PATTERNS.map((p) => {
           const ready = p.hasMath;
