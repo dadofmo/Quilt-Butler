@@ -40,6 +40,8 @@ export interface PlannerState {
   patchworkFabricCount: number;
   /** Per-cell fabric assignments for the patchwork preview grid, keyed "r,c". */
   patchworkGrid: Record<string, FabricKey>;
+  /** Optional price per yard (USD or local currency, agnostic) for the cost estimator on the results page. */
+  pricePerYard: string;
 }
 
 const initial: PlannerState = {
@@ -56,6 +58,7 @@ const initial: PlannerState = {
   fabricPhotos: {},
   patchworkFabricCount: 4,
   patchworkGrid: {},
+  pricePerYard: "",
 };
 
 let state: PlannerState = initial;
