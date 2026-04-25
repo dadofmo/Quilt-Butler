@@ -160,7 +160,9 @@ export function getPattern(id: PatternId | null): PatternDef | null {
  * Returned in canonical order A, B, C, D.
  */
 export function fabricsForPattern(pattern: PatternDef, includeBorder: boolean): FabricKey[] {
-  const order: FabricKey[] = ["A", "B", "C", "D"];
+  const order: FabricKey[] = [
+    "A","B","C","D","E","F","G","H","I","J","K","L",
+  ];
   const used = new Set<FabricKey>();
   pattern.sections.forEach((s) => {
     if (s.id === "border" && !includeBorder) return;

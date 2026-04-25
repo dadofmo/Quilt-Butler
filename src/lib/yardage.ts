@@ -1,4 +1,4 @@
-import type { FabricKey, PlannerState } from "./planner-store";
+import { ALL_FABRIC_KEYS, type FabricKey, type PlannerState } from "./planner-store";
 import { getPattern } from "./patterns";
 
 export interface FabricRequirement {
@@ -12,6 +12,16 @@ export interface FabricRequirement {
 
 const SEAM = 0.5; // 1/4" seam allowance per side -> +0.5" total
 const HST_EXTRA = 0.875; // extra for HST squares: finished + 7/8"
+/**
+ * Selvage allowance: real bolts are not perfectly the labeled width once you
+ * trim selvages and account for crooked grain. We subtract 1.5" from the bolt
+ * width when calculating how many pieces fit per strip — so a "44-inch" bolt
+ * provides about 42.5" of usable fabric.
+ */
+const SELVAGE_TRIM = 1.5;
+
+export const SEAM_ALLOWANCE_DESC =
+  "1/4 inch seam allowance (0.25\" per side adds 0.5\" to cut size)";
 
 function roundUpQuarter(yards: number): number {
   return Math.ceil(yards * 4) / 4;
@@ -25,11 +35,11 @@ function inchesToYards(inches: number, buffer: boolean): number {
 // Pack same-width pieces into strips of fabricWidth.
 // Returns rows needed (each row = 1 strip of stripWidth tall).
 function packStrips(
-  cutSize: number, // each piece is cutSize x cutSize (square pieces in our patterns)
+  cutSize: number,
   count: number,
   fabricWidth: number,
 ): { stripWidth: number; stripCount: number } {
-  const usable = fabricWidth - 0.5; // selvage allowance
+  const usable = fabricWidth - SELVAGE_TRIM;
   const perStrip = Math.max(1, Math.floor(usable / cutSize));
   const stripCount = Math.ceil(count / perStrip);
   return { stripWidth: cutSize, stripCount };
@@ -38,34 +48,33 @@ function packStrips(
 // Border length needed (down the bolt, cut as long strips across width-of-fabric and pieced)
 function borderInches(quiltW: number, quiltH: number, borderW: number, fabricWidth: number) {
   if (borderW <= 0) return { stripWidth: 0, stripCount: 0, inches: 0 };
-  // Two side strips at quiltH, two top/bottom at quiltW + 2*borderW
   const sides = 2 * quiltH;
   const topBot = 2 * (quiltW + 2 * borderW);
   const totalLength = sides + topBot;
-  const usable = fabricWidth - 0.5;
+  const usable = fabricWidth - SELVAGE_TRIM;
   const stripsNeeded = Math.ceil(totalLength / usable);
   return { stripWidth: borderW + SEAM, stripCount: stripsNeeded, inches: stripsNeeded * (borderW + SEAM) };
 }
 
 export interface MaterialsRequirement {
   backing: {
-    widthIn: number;       // backing piece needed (with overhang)
+    widthIn: number;
     heightIn: number;
-    widths: number;        // # of fabric widths to seam together
-    yards: number;         // yards to buy off the bolt
-    overhang: number;      // inches added per side
+    widths: number;
+    yards: number;
+    overhang: number;
   };
   batting: {
     widthIn: number;
     heightIn: number;
-    presetLabel: string;   // closest standard pre-cut size
-    yards: number;         // by-the-yard alternative (off a 90"+ wide roll)
+    presetLabel: string;
+    yards: number;
   };
   binding: {
     perimeterIn: number;
-    stripWidthIn: number;  // typical 2.5"
-    stripCount: number;    // # of WOF strips needed
-    yards: number;         // yardage to buy
+    stripWidthIn: number;
+    stripCount: number;
+    yards: number;
   };
 }
 
@@ -81,13 +90,13 @@ export function calculateYardage(s: PlannerState): CalcResult {
   if (!pattern) return { fabrics: [] };
   if (!pattern.hasMath) return { fabrics: [], unsupported: true, materials: calculateMaterials(s) };
 
-  // Build per-fabric piece lists, then convert to strips.
-  const reqs: Record<FabricKey, FabricRequirement> = {
-    A: blank("A"),
-    B: blank("B"),
-    C: blank("C"),
-    D: blank("D"),
-  };
+  const reqs: Record<FabricKey, FabricRequirement> = ALL_FABRIC_KEYS.reduce(
+    (acc, k) => {
+      acc[k] = blank(k);
+      return acc;
+    },
+    {} as Record<FabricKey, FabricRequirement>,
+  );
 
   const innerW = s.quiltWidth - 2 * s.borderWidth;
   const innerH = s.quiltHeight - 2 * s.borderWidth;
@@ -96,41 +105,36 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const blockCount = blocksAcross * blocksDown;
   const notes: string[] = [
     `${blocksAcross} × ${blocksDown} = ${blockCount} blocks (${s.blockSize}" finished)`,
+    `Cut sizes include a ${SEAM_ALLOWANCE_DESC}.`,
   ];
 
   if (s.pattern === "simple-squares") {
-    // 1 square per block at blockSize finished, cut size = blockSize + 0.5
     const cut = s.blockSize + SEAM;
-    const squareFab = s.assignments["squares"] ?? "A";
+    const squareFab = (s.assignments["squares"] ?? "A") as FabricKey;
     addSquares(reqs[squareFab], "Squares", blockCount, cut, s.fabricWidth);
     notes.push(
-      `Cut ${blockCount} squares of Fabric ${squareFab} at ${cut}" (finished ${s.blockSize}" + 1/2" seam allowance).`,
+      `Cut ${blockCount} squares of Fabric ${squareFab} at ${cut}" (finished ${s.blockSize}" + 1/2" for seam allowance).`,
     );
   } else if (s.pattern === "nine-patch") {
-    // 9 squares per block. Patch finished size = blockSize/3, cut size = +0.5
     const patchFinished = s.blockSize / 3;
     const cut = patchFinished + SEAM;
-    // Center & 4 corners = 5 of fabric "center"; 4 alternating = 4 of fabric "outer"
     const centerCount = 5 * blockCount;
     const outerCount = 4 * blockCount;
-    const centerFab = s.assignments["center"] ?? "A";
-    const outerFab = s.assignments["outer"] ?? "B";
+    const centerFab = (s.assignments["center"] ?? "A") as FabricKey;
+    const outerFab = (s.assignments["outer"] ?? "B") as FabricKey;
     addSquares(reqs[centerFab], "Center & corner squares", centerCount, cut, s.fabricWidth);
     addSquares(reqs[outerFab], "Alternating squares", outerCount, cut, s.fabricWidth);
     notes.push(
-      `Each block uses 5 corner/center squares + 4 alternating squares (${cut}" cut size including seam allowance).`,
+      `Each block uses 5 corner/center squares + 4 alternating squares (${cut}" cut size).`,
     );
     notes.push(
       `Across all ${blockCount} blocks: ${centerCount} squares of Fabric ${centerFab} (5 × ${blockCount}) and ${outerCount} squares of Fabric ${outerFab} (4 × ${blockCount}).`,
     );
   } else if (s.pattern === "hst") {
-    // Each block = 1 HST. Cut size for two HSTs from one square pair = finished + 7/8.
-    // Simpler: each block needs 1 square of each fabric at (blockSize + 7/8) -> yields 2 HSTs (we use 1, waste 1).
-    // To avoid waste, pair blocks: count squares of each = ceil(blockCount/2).
     const cut = s.blockSize + HST_EXTRA;
     const squaresEach = Math.ceil(blockCount / 2);
-    const t1 = s.assignments["tri1"] ?? "A";
-    const t2 = s.assignments["tri2"] ?? "B";
+    const t1 = (s.assignments["tri1"] ?? "A") as FabricKey;
+    const t2 = (s.assignments["tri2"] ?? "B") as FabricKey;
     addSquares(reqs[t1], "Triangle A squares", squaresEach, cut, s.fabricWidth);
     addSquares(reqs[t2], "Triangle B squares", squaresEach, cut, s.fabricWidth);
     notes.push(`Cut ${squaresEach} squares of each fabric at ${cut}". Pair, sew diagonal, yields 2 HSTs each.`);
@@ -138,7 +142,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
   // Border
   if (s.borderWidth > 0) {
-    const borderFab = s.assignments["border"] ?? "C";
+    const borderFab = (s.assignments["border"] ?? "C") as FabricKey;
     const b = borderInches(s.quiltWidth - 2 * s.borderWidth, s.quiltHeight - 2 * s.borderWidth, s.borderWidth, s.fabricWidth);
     if (b.stripCount > 0) {
       reqs[borderFab].strips.push({
@@ -156,8 +160,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     }
   }
 
-  // Convert to yards
-  const out: FabricRequirement[] = (["A", "B", "C", "D"] as FabricKey[])
+  const out: FabricRequirement[] = ALL_FABRIC_KEYS
     .map((k) => reqs[k])
     .filter((r) => r.totalInches > 0)
     .map((r) => ({ ...r, yards: inchesToYards(r.totalInches, s.safetyBuffer) }));
@@ -166,7 +169,6 @@ export function calculateYardage(s: PlannerState): CalcResult {
   return { fabrics: out, notes, materials };
 }
 
-// Standard pre-cut batting sizes (inches)
 const BATTING_PRESETS: { label: string; w: number; h: number }[] = [
   { label: "Craft (36\" × 45\")", w: 36, h: 45 },
   { label: "Crib (45\" × 60\")", w: 45, h: 60 },
@@ -178,27 +180,22 @@ const BATTING_PRESETS: { label: string; w: number; h: number }[] = [
 ];
 
 export function calculateMaterials(s: PlannerState): MaterialsRequirement {
-  const overhang = 4; // 4" of extra on each side -> +8" total
+  const overhang = 4;
   const backW = s.quiltWidth + overhang * 2;
   const backH = s.quiltHeight + overhang * 2;
 
-  // Backing: how many fabric widths must be seamed together (vertically),
-  // each strip = quilt-height-with-overhang long.
-  const usableBackWidth = s.fabricWidth - 1; // ~0.5" selvage trim per side
+  const usableBackWidth = s.fabricWidth - SELVAGE_TRIM;
   const widths = Math.max(1, Math.ceil(backW / usableBackWidth));
   const backingInches = widths * backH;
   const backingYards = roundUpQuarter(backingInches / 36);
 
-  // Batting: pick the smallest preset that fits both dimensions.
   const fits = BATTING_PRESETS.find((p) => p.w >= backW && p.h >= backH);
   const battingPreset = fits ? fits.label : "Larger than King — buy by the yard";
-  // By-the-yard batting (rolls are ~90"+ wide, so usually 1 length suffices).
   const battingYards = roundUpQuarter(backH / 36);
 
-  // Binding: 2.5" strips across WOF, total length = perimeter + 10" join allowance.
   const stripWidthIn = 2.5;
   const perimeter = 2 * (s.quiltWidth + s.quiltHeight) + 10;
-  const usableBinding = s.fabricWidth - 0.5;
+  const usableBinding = s.fabricWidth - SELVAGE_TRIM;
   const stripCount = Math.ceil(perimeter / usableBinding);
   const bindingInches = stripCount * stripWidthIn;
   const bindingYards = roundUpQuarter(bindingInches / 36);
