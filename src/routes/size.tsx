@@ -27,10 +27,10 @@ function SizeStep() {
   // Block size is now a free-text decimal — store as string while typing so
   // the user can type "4." or "4.5" without us coercing to NaN/0 mid-keystroke.
   const [blockSizeText, setBlockSizeText] = useState(String(planner.blockSize));
-  const [borderPreset, setBorderPreset] = useState<string>(
-    [0, 2, 3, 4, 5].includes(planner.borderWidth) ? String(planner.borderWidth) : "custom",
-  );
-  const [borderCustom, setBorderCustom] = useState(planner.borderWidth);
+  // Border width is now free-form text (in inches) so quilters can enter
+  // any width — 0, 2.5, 4.5, etc. Stored as text while typing so partial
+  // values like "2." don't coerce to NaN mid-keystroke.
+  const [borderText, setBorderText] = useState(String(planner.borderWidth));
 
   if (!planner.pattern) {
     return (
@@ -54,7 +54,9 @@ function SizeStep() {
   // strip to absorb the leftover. We surface a clear warning instead.
   const blockSizeNum = Number(blockSizeText);
   const blockSizeValid = blockSizeText.trim() !== "" && !isNaN(blockSizeNum) && blockSizeNum > 0;
-  const border = borderPreset === "custom" ? Number(borderCustom) || 0 : Number(borderPreset);
+  const borderNum = Number(borderText);
+  const borderValid = borderText.trim() !== "" && !isNaN(borderNum) && borderNum >= 0;
+  const border = borderValid ? borderNum : 0;
 
   const fit = useMemo(() => {
     if (!blockSizeValid) return null;
@@ -73,6 +75,11 @@ function SizeStep() {
 
     const isInt = (x: number) => Math.abs(x - Math.round(x)) < 0.001;
 
+    // Hard cap on suggestions so we never recommend a quilt with more than
+    // ~100 blocks — even mathematically perfect, 200+ tiny squares would
+    // take months to sew and is not a beginner-friendly suggestion.
+    const MAX_BLOCKS = 100;
+
     // ----- Block-size suggestions: keep CURRENT border, find block sizes that
     // divide both inner dimensions evenly. Search 2.0–15.0 in 0.25" steps so
     // we always find something useful (not just from a tiny preset list).
@@ -85,11 +92,13 @@ function SizeStep() {
         const aw = innerW / s;
         const ah = innerH / s;
         if (isInt(aw) && isInt(ah) && Math.round(aw) >= 1 && Math.round(ah) >= 1) {
+          const total = Math.round(aw) * Math.round(ah);
+          if (total > MAX_BLOCKS) continue;
           blockSuggestions.push({
             size: s,
             across: Math.round(aw),
             down: Math.round(ah),
-            total: Math.round(aw) * Math.round(ah),
+            total,
           });
         }
       }
@@ -112,11 +121,13 @@ function SizeStep() {
         const aw = iw / blockSizeNum;
         const ah = ih / blockSizeNum;
         if (isInt(aw) && isInt(ah) && Math.round(aw) >= 1 && Math.round(ah) >= 1) {
+          const total = Math.round(aw) * Math.round(ah);
+          if (total > MAX_BLOCKS) continue;
           borderSuggestions.push({
             border: b,
             across: Math.round(aw),
             down: Math.round(ah),
-            total: Math.round(aw) * Math.round(ah),
+            total,
           });
         }
       }
@@ -147,6 +158,8 @@ function SizeStep() {
           const aw = iw / s;
           const ah = ih / s;
           if (isInt(aw) && isInt(ah) && Math.round(aw) >= 1 && Math.round(ah) >= 1) {
+            const total = Math.round(aw) * Math.round(ah);
+            if (total > MAX_BLOCKS) continue;
             // Skip pairs already covered by single-variable lists.
             const sameBlock = Math.abs(s - blockSizeNum) < 0.001;
             const sameBorder = Math.abs(bd - border) < 0.001;
@@ -160,7 +173,7 @@ function SizeStep() {
               border: bd,
               across: Math.round(aw),
               down: Math.round(ah),
-              total: Math.round(aw) * Math.round(ah),
+              total,
               score,
             });
           }
@@ -226,14 +239,7 @@ function SizeStep() {
   }, [blockSizeValid, blockSizeNum, w, h, border]);
 
   const applyBorder = (b: number) => {
-    const presetVals = ["0", "2", "3", "4", "5"];
-    const asStr = String(b);
-    if (presetVals.includes(asStr)) {
-      setBorderPreset(asStr);
-    } else {
-      setBorderPreset("custom");
-      setBorderCustom(b);
-    }
+    setBorderText(String(b));
   };
 
   const fabricWidthNum = Number(fabricWidthText);
@@ -241,7 +247,7 @@ function SizeStep() {
     fabricWidthText.trim() !== "" && !isNaN(fabricWidthNum) && fabricWidthNum > 0;
 
   const next = () => {
-    if (!blockSizeValid || !fabricWidthValid) return;
+    if (!blockSizeValid || !fabricWidthValid || !borderValid) return;
     setPlanner({
       sizePreset: preset,
       quiltWidth: Number(w) || 0,
@@ -282,8 +288,8 @@ function SizeStep() {
           />
           <p className="text-muted-foreground mt-2 text-xs leading-snug">
             Enter your bolt&apos;s width <strong>in inches</strong> — measure selvage to
-            selvage. Common widths: 42&quot;, 44&quot;, 54&quot;, 58&quot;, 60&quot;, or
-            108&quot; for wide-back fabric. All cutting math will use this value.
+            selvage. Common quilting widths: <strong>42&quot; or 44&quot;</strong>. For
+            backing fabric on large quilts: <strong>108&quot;</strong>. All cutting math will use this value.
           </p>
           {fabricWidthText.trim() !== "" && !fabricWidthValid && (
             <p className="text-destructive mt-2 text-sm font-medium">
@@ -312,19 +318,24 @@ function SizeStep() {
           )}
         </Field>
 
-        <Field label="Border width">
-          <Select value={borderPreset} onChange={(e) => setBorderPreset(e.target.value)}>
-            <option value="0">None</option>
-            <option value="2">2 inches</option>
-            <option value="3">3 inches</option>
-            <option value="4">4 inches</option>
-            <option value="5">5 inches</option>
-            <option value="custom">Custom</option>
-          </Select>
-          {borderPreset === "custom" && (
-            <div className="mt-3">
-              <NumberInput label="Border (in)" value={borderCustom} onChange={setBorderCustom} />
-            </div>
+        <Field label="Border width (in inches)">
+          <input
+            type="text"
+            inputMode="decimal"
+            value={borderText}
+            onChange={(e) => setBorderText(e.target.value)}
+            placeholder="e.g. 3 (or 0 for no border)"
+            aria-invalid={!borderValid}
+            className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+          />
+          <p className="text-muted-foreground mt-2 text-xs leading-snug">
+            Enter any width — common borders are 2&quot;, 2.5&quot;, 3&quot;, 4&quot;, 4.5&quot;, 5&quot;.
+            Use <strong>0</strong> for no border.
+          </p>
+          {borderText.trim() !== "" && !borderValid && (
+            <p className="text-destructive mt-2 text-sm font-medium">
+              Please enter 0 or a positive number (e.g. 0, 2.5, 4, 4.5).
+            </p>
           )}
         </Field>
 
@@ -458,10 +469,10 @@ function SizeStep() {
 
         <button
           onClick={next}
-          disabled={!blockSizeValid || !fabricWidthValid}
+          disabled={!blockSizeValid || !fabricWidthValid || !borderValid}
           className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed w-full rounded-xl px-6 py-4 text-lg font-semibold shadow-sm transition-colors"
         >
-          Continue →
+          Assign fabrics →
         </button>
       </div>
     </StepShell>

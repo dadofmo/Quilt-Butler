@@ -32,11 +32,23 @@ function ResultsStep() {
 
   const result = calculateYardage(planner);
 
+  // Compute the ACTUAL finished size from the same math the calculator uses,
+  // so the header (and the size-mismatch note) always match what the quilter
+  // will end up with — never just the originally-desired size.
+  const innerW = planner.quiltWidth - 2 * planner.borderWidth;
+  const innerH = planner.quiltHeight - 2 * planner.borderWidth;
+  const blocksAcross = Math.max(1, Math.floor(innerW / planner.blockSize));
+  const blocksDown = Math.max(1, Math.floor(innerH / planner.blockSize));
+  const actualW = blocksAcross * planner.blockSize + 2 * planner.borderWidth;
+  const actualH = blocksDown * planner.blockSize + 2 * planner.borderWidth;
+  const sizeMismatch =
+    actualW !== planner.quiltWidth || actualH !== planner.quiltHeight;
+
   return (
     <StepShell
       step={4}
       title="Your quilt plan"
-      subtitle={`${pattern.name} • ${planner.quiltWidth}" × ${planner.quiltHeight}"`}
+      subtitle={`${pattern.name} • ${actualW}" × ${actualH}" finished`}
       backTo="/fabrics"
     >
       {result.unsupported ? (
@@ -76,16 +88,18 @@ function ResultsStep() {
             photos={planner.fabricPhotos}
           />
 
-          <div className="no-print bg-card flex items-center justify-between gap-4 rounded-xl border-2 border-border p-4">
-            <div className="min-w-0">
-              <div className="text-foreground text-base font-semibold">10% safety buffer</div>
-              <div className="text-muted-foreground text-sm">Adds extra fabric for shrinkage & mistakes.</div>
+          {sizeMismatch && (
+            <div className="bg-accent/60 text-foreground rounded-xl border-2 border-primary/40 p-4 text-sm leading-relaxed">
+              <strong>Heads up:</strong> your finished quilt will be{" "}
+              <strong>{actualW}" × {actualH}"</strong> with a {planner.blockSize}" block and{" "}
+              {planner.borderWidth}" border — not the {planner.quiltWidth}" ×{" "}
+              {planner.quiltHeight}" you originally chose. All the math below is for the actual{" "}
+              {actualW}" × {actualH}" size.{" "}
+              <Link to="/size" className="text-primary font-semibold underline">
+                Return to Step 2 to adjust →
+              </Link>
             </div>
-            <Toggle
-              on={planner.safetyBuffer}
-              onChange={(v) => setPlanner({ safetyBuffer: v })}
-            />
-          </div>
+          )}
 
           <Section title="Fabric summary">
             <div className="bg-card overflow-hidden rounded-xl border-2 border-border">
@@ -118,6 +132,32 @@ function ResultsStep() {
                 </tbody>
               </table>
             </div>
+
+            {/* Safety buffer toggle — sits next to the numbers it actually
+                affects so users can flip it and watch yardage update. */}
+            <div className="no-print bg-card mt-3 flex items-center justify-between gap-4 rounded-xl border-2 border-border p-4">
+              <div className="min-w-0">
+                <div className="text-foreground text-base font-semibold">
+                  10% safety buffer {planner.safetyBuffer ? "(included above)" : "(off)"}
+                </div>
+                <div className="text-muted-foreground text-sm">
+                  Toggle to add 10% extra fabric for shrinkage & mistakes — yardage above updates.
+                </div>
+              </div>
+              <Toggle
+                on={planner.safetyBuffer}
+                onChange={(v) => setPlanner({ safetyBuffer: v })}
+              />
+            </div>
+
+            {/* Optional cost estimator. Multiplies total top-fabric yardage
+                by the user-entered price/yard to give a rough ballpark. */}
+            <CostEstimator
+              fabrics={result.fabrics}
+              pricePerYard={planner.pricePerYard}
+              onChange={(v: string) => setPlanner({ pricePerYard: v })}
+            />
+
             {result.notes && (
               <ul className="text-muted-foreground mt-3 list-disc space-y-1 pl-5 text-sm">
                 {result.notes.map((n, i) => <li key={i}>{n}</li>)}
@@ -233,12 +273,18 @@ function ResultsStep() {
           </Section>
           </div>
 
-          <button
-            onClick={() => window.print()}
-            className="no-print bg-primary text-primary-foreground hover:bg-primary/90 inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-lg font-semibold shadow-sm transition-colors"
-          >
-            <Printer className="h-5 w-5" /> Print / Save as PDF
-          </button>
+          <div className="no-print space-y-2">
+            <button
+              onClick={() => window.print()}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-lg font-semibold shadow-sm transition-colors"
+            >
+              <Printer className="h-5 w-5" /> Print / Save as PDF
+            </button>
+            <p className="text-muted-foreground text-center text-xs leading-snug">
+              Tip: take this plan to the fabric store. On a phone, screenshot this page;
+              on a computer, click <strong>Print → Save as PDF</strong> so you have it offline.
+            </p>
+          </div>
         </div>
       )}
     </StepShell>
@@ -350,6 +396,63 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
       <span className={`text-sm font-semibold ${on ? "text-foreground" : "text-muted-foreground"}`}>
         On
       </span>
+    </div>
+  );
+}
+
+function CostEstimator({
+  fabrics,
+  pricePerYard,
+  onChange,
+}: {
+  fabrics: FabricRequirement[];
+  pricePerYard: string;
+  onChange: (v: string) => void;
+}) {
+  const totalYards = fabrics.reduce((sum, f) => sum + f.yards, 0);
+  const price = Number(pricePerYard);
+  const valid = pricePerYard.trim() !== "" && !isNaN(price) && price > 0;
+  const total = valid ? totalYards * price : 0;
+  return (
+    <div className="no-print bg-card mt-3 rounded-xl border-2 border-border p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <label htmlFor="price-per-yard" className="text-foreground block text-base font-semibold">
+            Price per yard (optional)
+          </label>
+          <p className="text-muted-foreground text-sm">
+            Get a rough total cost for your top fabrics before you head to the store.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground text-base font-medium">$</span>
+          <input
+            id="price-per-yard"
+            type="text"
+            inputMode="decimal"
+            value={pricePerYard}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="12"
+            className="bg-background border-input focus:ring-ring w-24 rounded-lg border-2 px-3 py-2 text-base focus:outline-none focus:ring-2"
+          />
+          <span className="text-muted-foreground text-sm">/ yd</span>
+        </div>
+      </div>
+      {valid && (
+        <div className="border-border mt-3 flex items-baseline justify-between gap-3 border-t pt-3">
+          <span className="text-foreground text-sm">
+            {totalYards} yd of top fabric × ${price.toFixed(2)}/yd
+          </span>
+          <span className="text-foreground text-xl font-bold">
+            ≈ ${total.toFixed(2)}
+          </span>
+        </div>
+      )}
+      {valid && (
+        <p className="text-muted-foreground mt-1 text-xs">
+          Estimate covers fabrics A/B/C above only — backing, batting, and binding are extra.
+        </p>
+      )}
     </div>
   );
 }
@@ -488,7 +591,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
               textAnchor="middle"
               className="fill-muted-foreground text-[10px] font-medium"
             >
-              {fabricWidth}" — full width of the fabric (selvage to selvage)
+              {(fabricWidth - 1.5).toFixed(1)}" usable width ({fabricWidth}" bolt minus ~0.75" selvage on each side)
             </text>
           </g>
 

@@ -239,7 +239,7 @@ function FabricsStep() {
             onClick={() => navigate({ to: "/results" })}
             className="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-xl px-6 py-4 text-lg font-semibold shadow-sm transition-colors"
           >
-            Calculate yardage →
+            See your quilt plan →
           </button>
         </div>
     </StepShell>
