@@ -397,6 +397,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
         On
       </span>
     </div>
+  );
 }
 
 function CostEstimator({
