@@ -134,12 +134,11 @@ export function QuiltLayoutPreview({
             viewBox={`0 0 ${innerW} ${innerH}`}
             className="block"
           >
-            {/* tileSize=200 matches each mini-block's 200×200 viewBox so
-                a single fabric photo spans the entire block — every log,
-                triangle, or square assigned to that fabric reveals a slice
-                of ONE coherent image instead of each shape showing the
-                whole photo squished into its tiny bounds. */}
-            <FabricPatternDefs photos={photos} tileSize={200} />
+            {/* No tileSize: each shape independently shows the fabric photo
+                scaled to its bounds — the same way a quilter cuts each strip
+                from the bolt. Every block looks identical and matches the
+                "1 block" preview. */}
+            <FabricPatternDefs photos={photos} />
             {Array.from({ length: blocksDown }).map((_, j) =>
               Array.from({ length: blocksAcross }).map((_, i) => {
                 // Rail Fence convention: rotate every other block 90° so the
