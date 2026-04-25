@@ -273,12 +273,18 @@ function ResultsStep() {
           </Section>
           </div>
 
-          <button
-            onClick={() => window.print()}
-            className="no-print bg-primary text-primary-foreground hover:bg-primary/90 inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-lg font-semibold shadow-sm transition-colors"
-          >
-            <Printer className="h-5 w-5" /> Print / Save as PDF
-          </button>
+          <div className="no-print space-y-2">
+            <button
+              onClick={() => window.print()}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-lg font-semibold shadow-sm transition-colors"
+            >
+              <Printer className="h-5 w-5" /> Print / Save as PDF
+            </button>
+            <p className="text-muted-foreground text-center text-xs leading-snug">
+              Tip: take this plan to the fabric store. On a phone, screenshot this page;
+              on a computer, click <strong>Print → Save as PDF</strong> so you have it offline.
+            </p>
+          </div>
         </div>
       )}
     </StepShell>
