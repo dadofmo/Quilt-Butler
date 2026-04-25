@@ -38,6 +38,9 @@ function FabricsStep() {
   const hasBorder = planner.borderWidth > 0;
   const sections = pattern.sections.filter((s) => s.id !== "border" || hasBorder);
   const availableFabrics = fabricsForPattern(pattern, hasBorder);
+  // Fabrics actually used INSIDE the block (excluding the border) — used to
+  // figure out which letter is the "next unused" one for an accent border.
+  const blockOnlyFabrics = fabricsForPattern(pattern, false);
 
   const update = (sectionId: string, fab: FabricKey) => {
     setPlanner({ assignments: { ...planner.assignments, [sectionId]: fab } });
@@ -171,13 +174,13 @@ function FabricsStep() {
             // For patchwork patterns, only show border picker here (the squares
             // section is driven by the tap-to-cycle preview above).
             if (isPatchwork && s.id !== "border") return null;
-            // Border choices = every fabric used in the block, PLUS one extra
+            // Border choices = every fabric used in the BLOCK, plus one extra
             // "accent" option (the next unused letter) for users who want a
             // unique border fabric. Anything beyond that is noise.
             const isBorder = s.id === "border";
-            const nextAccent = ALL_FABRIC_KEYS.find((f) => !availableFabrics.includes(f));
+            const nextAccent = ALL_FABRIC_KEYS.find((f) => !blockOnlyFabrics.includes(f));
             const choices = isBorder
-              ? (nextAccent ? [...availableFabrics, nextAccent] : availableFabrics)
+              ? (nextAccent ? [...blockOnlyFabrics, nextAccent] : blockOnlyFabrics)
               : availableFabrics;
             return (
               <div key={s.id} className="bg-card rounded-xl border-2 border-border p-4">
