@@ -337,10 +337,16 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Across all ${blockCount} blocks: ${blockCount} centers (Fabric ${centerFab}), ${6 * blockCount} dark logs (Fabric ${darkFab}), ${6 * blockCount} light logs (Fabric ${lightFab}).`,
     );
     notes.push(
-      `Sewing order (one block, spiral): sew log 1 (dark, ${centerCut.toFixed(2)}") to the RIGHT of the center; press toward the log. Then log 2 (dark, ${(centerFinished + logFinished + SEAM).toFixed(2)}") across the TOP. Then log 3 (light, same length) on the LEFT. Then log 4 (light, +${logFinished.toFixed(2)}" longer) on the BOTTOM. Repeat for two more rounds, alternating dark on the top/right and light on the bottom/left — the dark logs and the light logs each end up covering two adjacent sides, giving the iconic diagonal.`,
+      `How to sew one block (the spiral): start with the center "hearth" square in front of you, printed side up. Place log 1 (dark, ${centerCut.toFixed(2)}" long) on top of it along the RIGHT edge so the printed sides of the two pieces are touching each other. Line up the right edges and sew a 1/4" seam down that edge. Unfold the log so it lies flat to the right of the center (printed sides up). Iron the seam flat, with the little flap of fabric on the back tucked under the new log (not under the center) — quilters call this "pressing toward the log," and it keeps the block from getting bumpy as you add more pieces.`,
     );
     notes.push(
-      `Layout tip: arranging the finished blocks so all the dark corners point the same direction creates the classic "Straight Furrows" or "Sunshine and Shadow" sets. Try a few orientations on the floor before sewing them together.`,
+      `Now rotate the piece a quarter-turn counter-clockwise so what was the top is now the right. Add log 2 (dark, ${(centerFinished + logFinished + SEAM).toFixed(2)}") the same way: place it printed-side-down along the new right edge, sew, unfold, and press toward the new log. Repeat with log 3 (light, ${(centerFinished + logFinished + SEAM).toFixed(2)}") and log 4 (light, ${(centerFinished + 2 * logFinished + SEAM).toFixed(2)}"). After 4 logs you've finished one round of the spiral. Do two more rounds (8 more logs) to finish the block — always adding the next log along the current right edge and rotating between logs.`,
+    );
+    notes.push(
+      `Color-placement tip: keep the dark logs on the SAME two adjacent sides every round (e.g. top + right) and the light logs on the OTHER two sides (bottom + left). That's what creates the iconic diagonal split — half the finished block looks dark, the other half looks light.`,
+    );
+    notes.push(
+      `Layout tip: arranging the finished blocks so all the dark corners point the same direction creates classic Log Cabin layouts called "Straight Furrows" or "Sunshine and Shadow." Try a few orientations on the floor (or a bed) before sewing the blocks together.`,
     );
   }
 
