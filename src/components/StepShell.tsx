@@ -39,9 +39,9 @@ export function StepShell({ step, title, subtitle, backTo, children }: Props) {
       </header>
 
       <main className="mx-auto max-w-3xl px-4 pb-24 pt-6 sm:pt-10">
-        <h1 className="text-foreground text-2xl font-semibold sm:text-3xl">{title}</h1>
+        {title && <h1 className="text-foreground text-2xl font-semibold sm:text-3xl">{title}</h1>}
         {subtitle && <p className="text-muted-foreground mt-2 text-base">{subtitle}</p>}
-        <div className="mt-6 sm:mt-8">{children}</div>
+        <div className={title || subtitle ? "mt-6 sm:mt-8" : ""}>{children}</div>
       </main>
     </div>
   );
