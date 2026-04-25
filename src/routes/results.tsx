@@ -32,11 +32,23 @@ function ResultsStep() {
 
   const result = calculateYardage(planner);
 
+  // Compute the ACTUAL finished size from the same math the calculator uses,
+  // so the header (and the size-mismatch note) always match what the quilter
+  // will end up with — never just the originally-desired size.
+  const innerW = planner.quiltWidth - 2 * planner.borderWidth;
+  const innerH = planner.quiltHeight - 2 * planner.borderWidth;
+  const blocksAcross = Math.max(1, Math.floor(innerW / planner.blockSize));
+  const blocksDown = Math.max(1, Math.floor(innerH / planner.blockSize));
+  const actualW = blocksAcross * planner.blockSize + 2 * planner.borderWidth;
+  const actualH = blocksDown * planner.blockSize + 2 * planner.borderWidth;
+  const sizeMismatch =
+    actualW !== planner.quiltWidth || actualH !== planner.quiltHeight;
+
   return (
     <StepShell
       step={4}
       title="Your quilt plan"
-      subtitle={`${pattern.name} • ${planner.quiltWidth}" × ${planner.quiltHeight}"`}
+      subtitle={`${pattern.name} • ${actualW}" × ${actualH}" finished`}
       backTo="/fabrics"
     >
       {result.unsupported ? (
