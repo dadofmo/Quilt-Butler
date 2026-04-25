@@ -284,7 +284,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Across all ${blockCount} blocks: ${blockCount} rails of Fabric ${r1} (top), ${blockCount} of Fabric ${r2} (middle), ${blockCount} of Fabric ${r3} (bottom).`,
     );
     notes.push(
-      `To sew one block: lay the top rail and the middle rail together so their printed sides are touching, lining up one long edge. Sew along that edge with a 1/4" seam. Unfold the two rails so they lie flat side-by-side (printed sides up) and iron the seam flat — this is called "pressing." Then place the bottom rail on top of the middle rail, printed sides together, line up the long edge, sew, unfold, and press again. You now have one finished block with three stripes.`,
+      `To sew one block: place the top rail and the middle rail right sides together (RST), lining up one long edge. Sew that edge with a 1/4" seam, then unfold and press the seam toward the middle rail. Now place the bottom rail on top of the middle rail RST, line up the long edge, sew, unfold, and press toward the bottom rail. You now have one finished block with three stripes.`,
     );
     notes.push(
       `Layout tip: rotate every other block 90° (alternating horizontal and vertical) when arranging — that's what gives Rail Fence its classic woven look.`,
