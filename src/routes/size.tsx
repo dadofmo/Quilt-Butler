@@ -308,7 +308,7 @@ function SizeStep() {
                   <p className="text-foreground text-xs font-semibold">
                     To fill the full {fit.innerW}&quot; × {fit.innerH}&quot; inner area perfectly, try one of these:
                   </p>
-                  {fit.borderSuggestions.length > 0 && (
+                  {fit.borderSuggestions.length > 0 ? (
                     <p className="text-muted-foreground text-xs leading-relaxed">
                       <span className="text-foreground font-medium">
                         Keep your {blockSizeNum}&quot; block, change border to:
@@ -325,8 +325,15 @@ function SizeStep() {
                         </button>
                       ))}
                     </p>
+                  ) : (
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      <span className="text-foreground font-medium">
+                        Keep your {blockSizeNum}&quot; block, change border to:
+                      </span>{" "}
+                      <span className="italic">no border between 0&quot; and 10&quot; gives a perfect fit with this block size.</span>
+                    </p>
                   )}
-                  {fit.blockSuggestions.length > 0 && (
+                  {fit.blockSuggestions.length > 0 ? (
                     <p className="text-muted-foreground text-xs leading-relaxed">
                       <span className="text-foreground font-medium">
                         Keep your {border}&quot; border, change block to:
@@ -342,6 +349,13 @@ function SizeStep() {
                           {i < fit.blockSuggestions.length - 1 ? "," : ""}
                         </button>
                       ))}
+                    </p>
+                  ) : (
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      <span className="text-foreground font-medium">
+                        Keep your {border}&quot; border, change block to:
+                      </span>{" "}
+                      <span className="italic">no block between 2&quot; and 15&quot; divides evenly into {fit.innerW}&quot; × {fit.innerH}&quot;.</span>
                     </p>
                   )}
                   {fit.comboSuggestions.length > 0 && (
