@@ -237,6 +237,42 @@ export function calculateMaterials(s: PlannerState): MaterialsRequirement {
       yards: bindingYards,
     },
   };
+
+/**
+ * Returns a fabric-mix percentage map for patchwork (Simple Squares) mode,
+ * based on the per-cell preview grid the user designed. Returns null if
+ * patchwork mode isn't relevant (e.g. user kept the default empty grid AND
+ * only one fabric is being used).
+ */
+function computePatchworkMix(s: PlannerState): Record<FabricKey, number> | null {
+  const count = Math.max(2, Math.min(12, s.patchworkFabricCount || 0));
+  if (!count || count < 2) return null;
+  const palette = ALL_FABRIC_KEYS.slice(0, count);
+  // Recreate the same grid shape PatchworkPreview uses.
+  const aspect = s.quiltWidth / s.quiltHeight;
+  const targetCells = 36;
+  let rows = Math.round(Math.sqrt(targetCells / aspect));
+  let cols = Math.round(Math.sqrt(targetCells * aspect));
+  rows = Math.max(3, Math.min(10, rows));
+  cols = Math.max(3, Math.min(10, cols));
+
+  const counts: Partial<Record<FabricKey, number>> = {};
+  let total = 0;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const key = `${r},${c}`;
+      const fab =
+        s.patchworkGrid[key] && palette.includes(s.patchworkGrid[key])
+          ? s.patchworkGrid[key]
+          : palette[(r + c) % palette.length];
+      counts[fab] = (counts[fab] ?? 0) + 1;
+      total += 1;
+    }
+  }
+  if (total === 0) return null;
+  const out = {} as Record<FabricKey, number>;
+  for (const k of ALL_FABRIC_KEYS) out[k] = (counts[k] ?? 0) / total;
+  return out;
 }
 
 function blank(fabric: FabricKey): FabricRequirement {
