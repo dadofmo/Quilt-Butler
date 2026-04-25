@@ -4,6 +4,7 @@ import {
   FABRIC_COLORS,
   type FabricKey,
 } from "@/lib/planner-store";
+import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 
 interface Props {
   /** Number of distinct fabrics to cycle through (2–12). */
@@ -18,6 +19,8 @@ interface Props {
   /** Per-cell assignments, keyed "r,c". */
   grid: Record<string, FabricKey>;
   onChange: (next: Record<string, FabricKey>) => void;
+  /** Optional uploaded photos per fabric — overrides solid color in cells. */
+  photos?: Partial<Record<FabricKey, string>>;
 }
 
 /**
