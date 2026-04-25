@@ -413,7 +413,14 @@ export function calculateYardage(s: PlannerState): CalcResult {
     .map((r) => ({ ...r, yards: inchesToYards(r.totalInches, s.safetyBuffer) }));
 
   const materials = calculateMaterials(s);
-  return { fabrics: out, notes, materials };
+  // Only attach the basics glossary to patterns that actually have sewing
+  // steps in the notes. Simple Squares is "join squares edge to edge" — the
+  // glossary would be overkill there.
+  const showBasics =
+    s.pattern === "hst" ||
+    s.pattern === "rail-fence" ||
+    s.pattern === "log-cabin";
+  return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
 const BATTING_PRESETS: { label: string; w: number; h: number }[] = [
