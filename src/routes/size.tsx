@@ -27,10 +27,10 @@ function SizeStep() {
   // Block size is now a free-text decimal — store as string while typing so
   // the user can type "4." or "4.5" without us coercing to NaN/0 mid-keystroke.
   const [blockSizeText, setBlockSizeText] = useState(String(planner.blockSize));
-  const [borderPreset, setBorderPreset] = useState<string>(
-    [0, 2, 3, 4, 5].includes(planner.borderWidth) ? String(planner.borderWidth) : "custom",
-  );
-  const [borderCustom, setBorderCustom] = useState(planner.borderWidth);
+  // Border width is now free-form text (in inches) so quilters can enter
+  // any width — 0, 2.5, 4.5, etc. Stored as text while typing so partial
+  // values like "2." don't coerce to NaN mid-keystroke.
+  const [borderText, setBorderText] = useState(String(planner.borderWidth));
 
   if (!planner.pattern) {
     return (
