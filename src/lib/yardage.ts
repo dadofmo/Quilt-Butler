@@ -498,7 +498,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const showBasics =
     s.pattern === "hst" ||
     s.pattern === "rail-fence" ||
-    s.pattern === "log-cabin";
+    s.pattern === "log-cabin" ||
+    s.pattern === "ohio-star";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
