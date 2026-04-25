@@ -54,7 +54,9 @@ function SizeStep() {
   // strip to absorb the leftover. We surface a clear warning instead.
   const blockSizeNum = Number(blockSizeText);
   const blockSizeValid = blockSizeText.trim() !== "" && !isNaN(blockSizeNum) && blockSizeNum > 0;
-  const border = borderPreset === "custom" ? Number(borderCustom) || 0 : Number(borderPreset);
+  const borderNum = Number(borderText);
+  const borderValid = borderText.trim() !== "" && !isNaN(borderNum) && borderNum >= 0;
+  const border = borderValid ? borderNum : 0;
 
   const fit = useMemo(() => {
     if (!blockSizeValid) return null;
