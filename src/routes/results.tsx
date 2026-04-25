@@ -646,15 +646,18 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
   });
 
   // Total sub-cut pieces needed for this fabric (sum of non-border piece counts).
-  // These may be squares (Simple Squares, 9-Patch, HST) or rectangles (Rail Fence rails).
+  // These may be squares (Simple Squares, 9-Patch, HST) or rectangles (Rail
+  // Fence rails, future Flying Geese / Brick / Bargello, etc.). Shape
+  // detection is delegated to describePieceShape so every UI surface stays
+  // in sync with the yardage layer.
   const subCutPieces = req.pieces.filter((p) => p.w !== fabricWidth);
   const totalSquares = subCutPieces.reduce((sum, p) => sum + p.count, 0);
-  // Detect whether the sub-cuts are rectangles (rails) vs squares so the
-  // labels & legend describe the actual shape being cut.
   const firstSubCut = subCutPieces[0];
-  const isRectCut = !!firstSubCut && Math.abs(firstSubCut.w - firstSubCut.h) > 0.01;
-  const pieceNoun = isRectCut ? "rectangle" : "square";
-  const pieceNounPlural = isRectCut ? "rectangles" : "squares";
+  const shape = firstSubCut
+    ? describePieceShape(firstSubCut.w, firstSubCut.h)
+    : describePieceShape(0, 0);
+  const pieceNoun = shape.noun;
+  const pieceNounPlural = shape.nounPlural;
 
   return (
     <div className="bg-card rounded-xl border-2 border-border p-4">
