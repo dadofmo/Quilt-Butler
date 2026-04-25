@@ -249,13 +249,13 @@ function computePatchworkMix(s: PlannerState): Record<FabricKey, number> | null 
   const count = Math.max(2, Math.min(12, s.patchworkFabricCount || 0));
   if (!count || count < 2) return null;
   const palette = ALL_FABRIC_KEYS.slice(0, count);
-  // Recreate the same grid shape PatchworkPreview uses.
-  const aspect = s.quiltWidth / s.quiltHeight;
-  const targetCells = 36;
-  let rows = Math.round(Math.sqrt(targetCells / aspect));
-  let cols = Math.round(Math.sqrt(targetCells * aspect));
-  rows = Math.max(3, Math.min(10, rows));
-  cols = Math.max(3, Math.min(10, cols));
+  // Recreate the same grid shape PatchworkPreview uses - the real block
+  // layout (blocks across by blocks down) given block size and border width.
+  const innerW = Math.max(0, s.quiltWidth - 2 * s.borderWidth);
+  const innerH = Math.max(0, s.quiltHeight - 2 * s.borderWidth);
+  const safeBlock = Math.max(0.0001, s.blockSize);
+  const cols = Math.max(1, Math.floor(innerW / safeBlock));
+  const rows = Math.max(1, Math.floor(innerH / safeBlock));
 
   const counts: Partial<Record<FabricKey, number>> = {};
   let total = 0;
