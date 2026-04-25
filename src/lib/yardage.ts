@@ -244,6 +244,95 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Layout tip: rotate every other block 90° (alternating horizontal and vertical) when arranging — that's what gives Rail Fence its classic woven look.`,
     );
+  } else if (s.pattern === "log-cabin") {
+    // Log Cabin construction (traditional spiral, light/dark diagonal split):
+    //   centerFinished = blockSize / 4   (the small "hearth" square)
+    //   logFinished    = blockSize / 8   (every log is the same width)
+    //   3 rounds of 4 logs = 12 logs per block
+    //   block size after 3 rounds = c + 6w = blockSize/4 + 3*blockSize/4 = blockSize ✓
+    //
+    // Logs go around in a spiral (right, top, left, bottom, then repeat).
+    // They come in equal-length pairs — one DARK, one LIGHT — with length
+    // stepping +logFinished between successive pairs:
+    //   Dark  lengths (finished): c, c+w, c+2w, c+3w, c+4w, c+5w  (6 logs/block)
+    //   Light lengths (finished): c+w, c+2w, c+3w, c+4w, c+5w, c+6w  (6 logs/block)
+    // Two adjacent sides end up dark, the opposite two end up light — the
+    // classic Log Cabin diagonal.
+    const centerFinished = s.blockSize / 4;
+    const logFinished = s.blockSize / 8;
+    const ROUNDS = 3;
+    const logCount = 4 * ROUNDS; // 12 logs per block
+    const logCutWidth = logFinished + SEAM;
+    const centerCut = centerFinished + SEAM;
+
+    const centerFab = (s.assignments["center"] ?? "A") as FabricKey;
+    const lightFab = (s.assignments["light"] ?? "B") as FabricKey;
+    const darkFab = (s.assignments["dark"] ?? "C") as FabricKey;
+
+    // 1 center square per block.
+    addSquares(reqs[centerFab], "Center 'hearth' squares", blockCount, centerCut, s.fabricWidth);
+
+    // Build the per-fabric list of log lengths (finished). Steps i = 0..5 for
+    // dark, 1..6 for light — equivalent to "stepCount" logs per fabric.
+    const stepCount = 2 * ROUNDS; // 6 logs per fabric per block
+    type Bucket = { lenCut: number; lenFinished: number; count: number };
+    const bucketize = (offsetW: number): Bucket[] => {
+      const buckets: Bucket[] = [];
+      for (let i = 0; i < stepCount; i++) {
+        const lenFinished = centerFinished + (i + offsetW) * logFinished;
+        const lenCut = lenFinished + SEAM;
+        buckets.push({ lenFinished, lenCut, count: blockCount });
+      }
+      return buckets;
+    };
+    // Dark starts at c (offset 0), Light starts at c+w (offset 1).
+    const fabricLogs: Partial<Record<FabricKey, Bucket[]>> = {};
+    const addToFabric = (fab: FabricKey, more: Bucket[]) => {
+      const existing = fabricLogs[fab] ?? [];
+      // Merge by length (in case dark & light share a fabric, or center === log).
+      for (const b of more) {
+        const hit = existing.find((e) => Math.abs(e.lenCut - b.lenCut) < 0.001);
+        if (hit) hit.count += b.count;
+        else existing.push({ ...b });
+      }
+      fabricLogs[fab] = existing;
+    };
+    addToFabric(darkFab, bucketize(0));
+    addToFabric(lightFab, bucketize(1));
+
+    // For each fabric, sort buckets longest → shortest (helps cutters work
+    // through the strip in a predictable order) and add as rectangular cuts.
+    for (const fab of ALL_FABRIC_KEYS) {
+      const buckets = fabricLogs[fab];
+      if (!buckets || buckets.length === 0) continue;
+      buckets.sort((a, b) => b.lenCut - a.lenCut);
+      for (const bk of buckets) {
+        addRails(
+          reqs[fab],
+          `${bk.count} logs at ${bk.lenCut.toFixed(2)}"`,
+          bk.count,
+          bk.lenCut,
+          logCutWidth,
+          s.fabricWidth,
+        );
+      }
+    }
+
+    notes.push(
+      `Each block = 1 center square (${centerCut.toFixed(2)}" cut, finished ${centerFinished.toFixed(2)}") + ${logCount} logs (${logCutWidth.toFixed(2)}" tall, lengths ${(centerFinished + SEAM).toFixed(2)}"–${(centerFinished + 6 * logFinished + SEAM).toFixed(2)}").`,
+    );
+    notes.push(
+      `Cutting strategy: cut full-width strips ${logCutWidth.toFixed(2)}" tall and sub-cut into logs at each length your shopping list shows. Cut the center squares from a separate ${centerCut.toFixed(2)}"-tall strip.`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${blockCount} centers (Fabric ${centerFab}), ${6 * blockCount} dark logs (Fabric ${darkFab}), ${6 * blockCount} light logs (Fabric ${lightFab}).`,
+    );
+    notes.push(
+      `Sewing order (one block, spiral): sew log 1 (dark, ${centerCut.toFixed(2)}") to the RIGHT of the center; press toward the log. Then log 2 (dark, ${(centerFinished + logFinished + SEAM).toFixed(2)}") across the TOP. Then log 3 (light, same length) on the LEFT. Then log 4 (light, +${logFinished.toFixed(2)}" longer) on the BOTTOM. Repeat for two more rounds, alternating dark on the top/right and light on the bottom/left — the dark logs and the light logs each end up covering two adjacent sides, giving the iconic diagonal.`,
+    );
+    notes.push(
+      `Layout tip: arranging the finished blocks so all the dark corners point the same direction creates the classic "Straight Furrows" or "Sunshine and Shadow" sets. Try a few orientations on the floor before sewing them together.`,
+    );
   }
 
   // Border
