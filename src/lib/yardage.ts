@@ -21,7 +21,7 @@ const HST_EXTRA = 0.875; // extra for HST squares: finished + 7/8"
 const SELVAGE_TRIM = 1.5;
 
 export const SEAM_ALLOWANCE_DESC =
-  "1/4 inch seam allowance (0.25\" per side adds 0.5\" to cut size)";
+  "1/4 inch seam allowance on every side (the strip of fabric hidden inside the seam when two pieces are sewn together — 0.25\" per side adds 0.5\" total to each cut)";
 
 function roundUpQuarter(yards: number): number {
   return Math.ceil(yards * 4) / 4;
