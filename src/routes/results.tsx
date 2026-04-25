@@ -645,10 +645,16 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
     }
   });
 
-  // Total squares needed for this fabric (sum of non-border piece counts)
-  const totalSquares = req.pieces
-    .filter((p) => p.w !== fabricWidth)
-    .reduce((sum, p) => sum + p.count, 0);
+  // Total sub-cut pieces needed for this fabric (sum of non-border piece counts).
+  // These may be squares (Simple Squares, 9-Patch, HST) or rectangles (Rail Fence rails).
+  const subCutPieces = req.pieces.filter((p) => p.w !== fabricWidth);
+  const totalSquares = subCutPieces.reduce((sum, p) => sum + p.count, 0);
+  // Detect whether the sub-cuts are rectangles (rails) vs squares so the
+  // labels & legend describe the actual shape being cut.
+  const firstSubCut = subCutPieces[0];
+  const isRectCut = !!firstSubCut && Math.abs(firstSubCut.w - firstSubCut.h) > 0.01;
+  const pieceNoun = isRectCut ? "rectangle" : "square";
+  const pieceNounPlural = isRectCut ? "rectangles" : "squares";
 
   return (
     <div className="bg-card rounded-xl border-2 border-border p-4">
@@ -674,17 +680,21 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
           Cut <strong>horizontal strips</strong> across the full {fabricWidth}" width at the heights shown.
         </li>
         {totalSquares > 0 && (() => {
-          const sq = req.pieces.find((p) => p.w !== fabricWidth);
-          const size = sq ? sq.w.toFixed(2) : "";
+          const sq = firstSubCut;
+          const sizeLabel = sq
+            ? isRectCut
+              ? `${sq.h.toFixed(2)}" × ${sq.w.toFixed(2)}"`
+              : `${sq.w.toFixed(2)}" × ${sq.w.toFixed(2)}"`
+            : "";
           return (
             <li>
               Sub-cut along the <span className="text-muted-foreground">dashed lines</span> to get
               {" "}
               <strong>
-                {totalSquares} squares total
-                {size && <> — each square {size}" × {size}"</>}
+                {totalSquares} {totalSquares === 1 ? pieceNoun : pieceNounPlural} total
+                {sizeLabel && <> — each {pieceNoun} {sizeLabel}</>}
               </strong>{" "}
-              from this fabric. The shaded area on the right of each strip is leftover (you can't fit another full square there).
+              from this fabric. The shaded area on the right of each strip is leftover (you can't fit another full {pieceNoun} there).
             </li>
           );
         })()}
@@ -851,7 +861,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   const labelAvailW = usedW - 30; // px available to the right of the badge
                   const fullLabel = r.isBorder
                     ? `Border ${r.hIn.toFixed(2)}" × ${fabricWidth}" (full fabric width)`
-                    : `${r.hIn.toFixed(2)}" tall → cut ${r.subCutCount} square${r.subCutCount === 1 ? "" : "s"} every ${r.subCutWidth?.toFixed(2)}" (${r.subCutWidth?.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`;
+                    : `${r.hIn.toFixed(2)}" tall → cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`;
                   const shortLabel = r.isBorder
                     ? `Border ${r.hIn.toFixed(2)}"`
                     : `cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
