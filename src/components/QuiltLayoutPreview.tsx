@@ -147,7 +147,7 @@ export function QuiltLayoutPreview({
             ))}
           </svg>
         </div>
-        <p className="text-muted-foreground max-w-[160px] text-center text-[11px]">
+        <p className="text-muted-foreground max-w-[220px] text-center text-[11px]">
           {blocksAcross} × {blocksDown} blocks
           {hasBorder && <> + border</>}
         </p>
