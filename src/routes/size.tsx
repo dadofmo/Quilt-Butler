@@ -290,17 +290,29 @@ function SizeStep() {
         </Field>
 
         {/* Finished quilt size — actual size produced by the current block +
-            border choices, plus bullet suggestions for getting to the
-            desired size when the math doesn't divide evenly. */}
+            border choices, with a visual layout preview, plus bullet
+            suggestions for getting to the desired size when the math
+            doesn't divide evenly (including a layout-altering combo option). */}
         {fit && (() => {
           const actualW = fit.blocksAcross * blockSizeNum + 2 * border;
           const actualH = fit.blocksDown * blockSizeNum + 2 * border;
           const matchesDesired = fit.perfect;
           const closestBorder = fit.borderSuggestions[0];
           const closestBlock = fit.blockSuggestions[0];
+          const closestCombo = fit.comboSuggestions[0];
           return (
             <Field label="Finished quilt size">
               <div className="bg-card border-input rounded-xl border-2 p-4">
+                {/* Visual quilt layout preview */}
+                <div className="mb-4 flex justify-center">
+                  <QuiltLayoutDiagram
+                    quiltW={actualW}
+                    quiltH={actualH}
+                    blocksAcross={fit.blocksAcross}
+                    blocksDown={fit.blocksDown}
+                    border={border}
+                  />
+                </div>
                 <p className="text-foreground text-sm leading-relaxed">
                   With a <strong>{blockSizeNum}&quot;</strong> block and{" "}
                   <strong>{border}&quot;</strong> border, your finished quilt will be{" "}
@@ -366,6 +378,27 @@ function SizeStep() {
                           </span>
                         )}
                       </li>
+                      {closestCombo && (
+                        <li className="text-muted-foreground">
+                          <span className="text-foreground">
+                            Adjust the <strong>block grid layout</strong> — use a{" "}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setBlockSizeText(String(closestCombo.block));
+                              applyBorder(closestCombo.border);
+                            }}
+                            className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
+                          >
+                            {closestCombo.block}&quot; block with a {closestCombo.border}&quot; border
+                          </button>
+                          <span className="text-muted-foreground">
+                            {" "}(changes the layout to {closestCombo.across} × {closestCombo.down} ={" "}
+                            {closestCombo.total} blocks for an exact fit).
+                          </span>
+                        </li>
+                      )}
                     </ul>
                   </div>
                 )}
