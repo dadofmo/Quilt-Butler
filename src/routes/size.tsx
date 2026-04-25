@@ -409,7 +409,7 @@ function SizeStep() {
 
         <button
           onClick={next}
-          disabled={!blockSizeValid}
+          disabled={!blockSizeValid || !fabricWidthValid}
           className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed w-full rounded-xl px-6 py-4 text-lg font-semibold shadow-sm transition-colors"
         >
           Continue →
