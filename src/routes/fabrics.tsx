@@ -121,6 +121,8 @@ function FabricsStep() {
             fabricCount={planner.patchworkFabricCount}
             quiltWidth={planner.quiltWidth}
             quiltHeight={planner.quiltHeight}
+            blockSize={planner.blockSize}
+            borderWidth={planner.borderWidth}
             grid={planner.patchworkGrid}
             onChange={(g) => setPlanner({ patchworkGrid: g })}
           />
