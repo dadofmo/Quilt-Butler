@@ -87,7 +87,7 @@ export function PatchworkPreview({
   return (
     <div className="flex flex-col items-center gap-3">
       <div
-        className="grid gap-[2px] bg-border p-[2px] shadow-sm"
+        className="grid shadow-sm"
         style={{
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
           width: "min(100%, 360px)",
