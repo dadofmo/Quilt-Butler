@@ -153,6 +153,38 @@ export function calculateYardage(s: PlannerState): CalcResult {
     `Cut sizes include a ${SEAM_ALLOWANCE_DESC}.`,
   ];
 
+  // Beginner-friendly glossary. The per-pattern sewing notes below lean
+  // on these terms so we only have to explain them once. Simple Squares has
+  // no assembly notes, so we only attach the glossary to results when at
+  // least one pattern-specific sewing step references it.
+  const basics: { term: string; explanation: string }[] = [
+    {
+      term: "Right sides together (RST)",
+      explanation:
+        "Lay two pieces of fabric so their printed (pretty) sides are touching each other. The plain backs of the fabric will be facing you on both the top and the bottom. This is how almost every quilting seam starts.",
+    },
+    {
+      term: '1/4" seam',
+      explanation:
+        "Sew a straight line of stitches exactly 1/4 inch from the edge you're joining. Most machines have a foot or a marked line to help you keep this consistent — it's the standard for every cut size in this plan.",
+    },
+    {
+      term: "Lining up an edge",
+      explanation:
+        "When the steps say \"line up the right edge,\" match just those two edges exactly before sewing. The rest of the piece can hang off the side — only the edge you're sewing has to align. A pin or two through the matched edge keeps things from shifting.",
+    },
+    {
+      term: "Unfold (or \"open it up\")",
+      explanation:
+        "After sewing two pieces RST, lift the top piece and fold it back along the new seam so both pieces lie flat side by side, printed sides up. The seam becomes a hinge between them.",
+    },
+    {
+      term: "Press the seam",
+      explanation:
+        "Set an iron on the seam and press straight down — don't slide back and forth. The little flap of fabric on the back is the \"seam allowance.\" In Log Cabin and Rail Fence, press it toward the most recently added piece (or toward the darker fabric) so the block stays flat as you add more.",
+    },
+  ];
+
   if (s.pattern === "simple-squares") {
     const cut = s.blockSize + SEAM;
     // Patchwork mode: split block count across the user's chosen palette
