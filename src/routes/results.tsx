@@ -700,10 +700,13 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
       {/* How-to legend */}
       <ol className="text-foreground mb-2 list-decimal space-y-1 pl-5 text-sm">
         <li>
-          Lay your <strong>{req.yards} yd</strong> of fabric flat, with the <strong>finished edges</strong> on the left & right.
+          Lay your <strong>{req.yards} yd</strong> of fabric flat, with the <strong>selvages</strong> (the tightly-woven, sometimes-printed side edges) on the left & right.
         </li>
         <li>
-          Cut <strong>horizontal strips</strong> across the full {fabricWidth}" width at the heights shown.
+          <strong className="text-destructive">Trim off both selvages first.</strong> They're stiffer than the rest of the fabric, often have factory dots or text on them, and will pucker your seams if sewn into a block. Slice about <strong>0.75" off each side</strong> with your rotary cutter so you're working with clean, usable fabric edge-to-edge. <span className="text-muted-foreground">(That's why the diagram shows {usableFabricWidth(fabricWidth).toFixed(1)}" usable across a {fabricWidth}" bolt — the math already accounts for this trim.)</span>
+        </li>
+        <li>
+          Cut <strong>horizontal strips</strong> across the full <strong>{usableFabricWidth(fabricWidth).toFixed(1)}" usable width</strong> at the heights shown in the diagram.
         </li>
         {totalSquares > 0 && (() => {
           const sq = firstSubCut;
@@ -716,7 +719,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                 {totalSquares} {totalSquares === 1 ? pieceNoun : pieceNounPlural} total
                 {sizeLabel && <> — each {pieceNoun} {sizeLabel}</>}
               </strong>{" "}
-              from this fabric. The shaded area on the right of each strip is leftover (you can't fit another full {pieceNoun} there).
+              from this fabric. <strong>Always start your first sub-cut from the trimmed edge</strong> (not the original selvage edge). The shaded area on the far right of each strip is leftover (you can't fit another full {pieceNoun} there).
             </li>
           );
         })()}
@@ -727,7 +730,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
         </p>
       )}
       <p className="text-muted-foreground mb-4 text-xs italic">
-        Tip: the "finished edges" (also called the <em>selvage</em>) are the tightly-woven side edges of the fabric that don't fray.
+        New to quilting? The <strong>selvage</strong> is the factory-finished side edge of the bolt — usually slightly thicker, sometimes with the manufacturer's name or color dots printed on it. It doesn't behave like the rest of the fabric and is never used in a quilt block. In the diagram below, the two thin grey strips on the far left and far right of every row are the selvage — they're shown so you can see exactly what gets trimmed away before any sub-cuts.
       </p>
 
       <div className="overflow-x-auto">
@@ -773,7 +776,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
             transform={`rotate(-90 ${PAD_LEFT - 84} ${PAD_TOP + boltH / 2})`}
             className="fill-muted-foreground text-[10px]"
           >
-            finished edge
+            selvage — trim off (~0.75")
           </text>
           <text
             x={PAD_LEFT + boltW + 8}
@@ -782,7 +785,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
             transform={`rotate(90 ${PAD_LEFT + boltW + 8} ${PAD_TOP + boltH / 2})`}
             className="fill-muted-foreground text-[10px]"
           >
-            finished edge
+            selvage — trim off (~0.75")
           </text>
 
           {/* Bolt outline */}
