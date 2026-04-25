@@ -290,28 +290,23 @@ function SizeStep() {
                 <strong>{fit.remH}&quot; top/bottom</strong>. You can continue —
                 you&apos;ll need to trim the extra or add a filler strip to absorb it.
               </p>
-              {(fit.borderSuggestions.length > 0 || fit.blockSuggestions.length > 0) && (
+              {(fit.borderSuggestions.length > 0 ||
+                fit.blockSuggestions.length > 0 ||
+                fit.comboSuggestions.length > 0) && (
                 <div className="mt-3 space-y-2 border-t border-destructive/20 pt-3">
                   <p className="text-foreground text-xs font-semibold">
                     To fill the full {fit.innerW}&quot; × {fit.innerH}&quot; inner area perfectly, try one of these:
                   </p>
                   {fit.borderSuggestions.length > 0 && (
                     <p className="text-muted-foreground text-xs leading-relaxed">
-                      <span className="text-foreground font-medium">Keep your {blockSizeNum}&quot; block, change border to:</span>{" "}
+                      <span className="text-foreground font-medium">
+                        Keep your {blockSizeNum}&quot; block, change border to:
+                      </span>{" "}
                       {fit.borderSuggestions.map((b, i) => (
                         <button
                           key={b.border}
                           type="button"
-                          onClick={() => {
-                            const presetVals = ["0", "2", "3", "4", "5"];
-                            const asStr = String(b.border);
-                            if (presetVals.includes(asStr)) {
-                              setBorderPreset(asStr);
-                            } else {
-                              setBorderPreset("custom");
-                              setBorderCustom(b.border);
-                            }
-                          }}
+                          onClick={() => applyBorder(b.border)}
                           className="text-primary mx-0.5 underline underline-offset-2 hover:opacity-80"
                         >
                           {b.border}&quot; ({b.across}×{b.down}={b.total} blocks)
@@ -322,15 +317,39 @@ function SizeStep() {
                   )}
                   {fit.blockSuggestions.length > 0 && (
                     <p className="text-muted-foreground text-xs leading-relaxed">
-                      <span className="text-foreground font-medium">Keep your {border}&quot; border, change block to:</span>{" "}
+                      <span className="text-foreground font-medium">
+                        Keep your {border}&quot; border, change block to:
+                      </span>{" "}
                       {fit.blockSuggestions.map((s, i) => (
                         <button
-                          key={s}
+                          key={s.size}
                           type="button"
-                          onClick={() => setBlockSizeText(String(s))}
+                          onClick={() => setBlockSizeText(String(s.size))}
                           className="text-primary mx-0.5 underline underline-offset-2 hover:opacity-80"
                         >
-                          {s}&quot;{i < fit.blockSuggestions.length - 1 ? "," : ""}
+                          {s.size}&quot; ({s.across}×{s.down}={s.total} blocks)
+                          {i < fit.blockSuggestions.length - 1 ? "," : ""}
+                        </button>
+                      ))}
+                    </p>
+                  )}
+                  {fit.comboSuggestions.length > 0 && (
+                    <p className="text-muted-foreground text-xs leading-relaxed">
+                      <span className="text-foreground font-medium">
+                        Or change both at once:
+                      </span>{" "}
+                      {fit.comboSuggestions.map((c, i) => (
+                        <button
+                          key={`${c.block}-${c.border}`}
+                          type="button"
+                          onClick={() => {
+                            setBlockSizeText(String(c.block));
+                            applyBorder(c.border);
+                          }}
+                          className="text-primary mx-0.5 underline underline-offset-2 hover:opacity-80"
+                        >
+                          {c.block}&quot; block + {c.border}&quot; border ({c.across}×{c.down}={c.total} blocks)
+                          {i < fit.comboSuggestions.length - 1 ? "," : ""}
                         </button>
                       ))}
                     </p>
