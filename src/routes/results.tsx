@@ -150,14 +150,10 @@ function ResultsStep() {
               />
             </div>
 
-            {/* Optional cost estimator. Multiplies total top-fabric yardage
-                by the user-entered price/yard to give a rough ballpark. */}
-            <CostEstimator
-              fabrics={result.fabrics}
-              pricePerYard={planner.pricePerYard}
-              onChange={(v: string) => setPlanner({ pricePerYard: v })}
-            />
-
+            {/* Cost estimator now lives in the Shopping list section below,
+                where the user can enter a price for each individual line item
+                (fabrics, backing, batting, binding, threads) and see a
+                grand total. */}
             {result.notes && (
               <ul className="text-muted-foreground mt-3 list-disc space-y-1 pl-5 text-sm">
                 {result.notes.map((n, i) => <li key={i}>{n}</li>)}
