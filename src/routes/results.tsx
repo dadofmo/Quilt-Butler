@@ -513,7 +513,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
               textAnchor="middle"
               className="fill-muted-foreground text-[10px] font-medium"
             >
-              {fabricWidth}" — full width of the fabric (selvage to selvage)
+              {(fabricWidth - 1.5).toFixed(1)}" usable width ({fabricWidth}" bolt minus ~0.75" selvage on each side)
             </text>
           </g>
 
