@@ -83,17 +83,45 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
-    case "ohio-star":
+    case "ohio-star": {
+      // 3×3 grid of 30px units. Each edge unit is a QST with star points
+      // pointing inward toward the center square.
+      const u = 30;
+      const qst = (gx: number, gy: number, axis: "v" | "h", key: string) => {
+        const x = gx * u;
+        const y = gy * u;
+        const cx = x + u / 2;
+        const cy = y + u / 2;
+        const tris =
+          axis === "v"
+            ? [
+                `${x},${y} ${x + u},${y} ${cx},${cy}`,
+                `${x},${y + u} ${x + u},${y + u} ${cx},${cy}`,
+              ]
+            : [
+                `${x},${y} ${x},${y + u} ${cx},${cy}`,
+                `${x + u},${y} ${x + u},${y + u} ${cx},${cy}`,
+              ];
+        return (
+          <g key={key}>
+            <rect x={x} y={y} width={u} height={u} fill={C.b} />
+            {tris.map((p, i) => (
+              <polygon key={i} points={p} fill={C.a} />
+            ))}
+          </g>
+        );
+      };
       return (
         <svg {...common} aria-hidden>
           <rect width={90} height={90} fill={C.b} />
-          <polygon points="45,5 60,30 30,30" fill={C.a} />
-          <polygon points="85,45 60,60 60,30" fill={C.a} />
-          <polygon points="45,85 30,60 60,60" fill={C.a} />
-          <polygon points="5,45 30,30 30,60" fill={C.a} />
-          <rect x={30} y={30} width={30} height={30} fill={C.d} />
+          {qst(1, 0, "v", "t")}
+          {qst(2, 1, "h", "r")}
+          {qst(1, 2, "v", "btm")}
+          {qst(0, 1, "h", "l")}
+          <rect x={u} y={u} width={u} height={u} fill={C.d} />
         </svg>
       );
+    }
     case "flying-geese":
       return (
         <svg {...common} aria-hidden>
