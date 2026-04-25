@@ -52,13 +52,45 @@ export function QuiltLayoutPreview({
         <div className="text-foreground text-xs font-semibold uppercase tracking-wide">
           1 block
         </div>
-        <PatternDiagram
-          pattern={pattern}
-          assignments={assignments}
-          hasBorder={false}
-          size={220}
-          photos={photos}
-        />
+        {pattern === "rail-fence" ? (
+          <div className="flex items-stretch gap-2">
+            <div className="flex flex-col justify-around py-[5px] text-right">
+              {(["rail1", "rail2", "rail3"] as const).map((id, idx) => {
+                const fab = (assignments[id] ?? (["A", "B", "D"] as const)[idx]) as FabricKey;
+                const role = ["Top rail", "Middle rail", "Bottom rail"][idx];
+                return (
+                  <div key={id} className="flex items-center justify-end gap-1.5">
+                    <span className="text-foreground text-[10px] font-medium leading-tight">
+                      {role}
+                    </span>
+                    <span
+                      className="border-border text-foreground inline-flex h-5 w-5 items-center justify-center rounded border text-[10px] font-bold"
+                      style={{ background: fabricFill(fab, photos) }}
+                      aria-label={`Fabric ${fab}`}
+                    >
+                      {fab}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+            <PatternDiagram
+              pattern={pattern}
+              assignments={assignments}
+              hasBorder={false}
+              size={220}
+              photos={photos}
+            />
+          </div>
+        ) : (
+          <PatternDiagram
+            pattern={pattern}
+            assignments={assignments}
+            hasBorder={false}
+            size={220}
+            photos={photos}
+          />
+        )}
       </div>
 
       <div className="flex flex-row items-center gap-1 sm:flex-col sm:gap-1 sm:pt-16">
