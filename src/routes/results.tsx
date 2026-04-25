@@ -776,7 +776,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
             transform={`rotate(-90 ${PAD_LEFT - 84} ${PAD_TOP + boltH / 2})`}
             className="fill-muted-foreground text-[10px]"
           >
-            finished edge
+            selvage — trim off (~0.75")
           </text>
           <text
             x={PAD_LEFT + boltW + 8}
@@ -785,7 +785,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
             transform={`rotate(90 ${PAD_LEFT + boltW + 8} ${PAD_TOP + boltH / 2})`}
             className="fill-muted-foreground text-[10px]"
           >
-            finished edge
+            selvage — trim off (~0.75")
           </text>
 
           {/* Bolt outline */}
