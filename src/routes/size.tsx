@@ -236,7 +236,7 @@ function SizeStep() {
     fabricWidthText.trim() !== "" && !isNaN(fabricWidthNum) && fabricWidthNum > 0;
 
   const next = () => {
-    if (!blockSizeValid || !fabricWidthValid) return;
+    if (!blockSizeValid || !fabricWidthValid || !borderValid) return;
     setPlanner({
       sizePreset: preset,
       quiltWidth: Number(w) || 0,
