@@ -529,6 +529,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Layout tip: arrange every block with the geese all flying the same direction for the classic "flock" look, OR alternate rows pointing up/down for a chevron pattern. Try a few orientations on the floor before sewing the rows together.`,
     );
   }
+
+  // Border
   if (s.borderWidth > 0) {
     const borderDefault = (getPattern(s.pattern)?.sections.find((sec) => sec.id === "border")?.defaultFabric ?? "C") as FabricKey;
     const borderFab = (s.assignments["border"] ?? borderDefault) as FabricKey;
