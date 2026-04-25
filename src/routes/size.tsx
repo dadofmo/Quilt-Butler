@@ -20,7 +20,10 @@ function SizeStep() {
   const [preset, setPreset] = useState(planner.sizePreset);
   const [w, setW] = useState(planner.quiltWidth);
   const [h, setH] = useState(planner.quiltHeight);
-  const [fabricWidth, setFabricWidth] = useState<44 | 60>(planner.fabricWidth);
+  // Fabric width is free-form (in inches) so users can enter whatever their bolt is —
+  // 42, 44, 54, 58, 60, 108 (wide-back), etc. Stored as text while typing so partial
+  // values like "44." don't coerce to NaN mid-keystroke.
+  const [fabricWidthText, setFabricWidthText] = useState(String(planner.fabricWidth));
   // Block size is now a free-text decimal — store as string while typing so
   // the user can type "4." or "4.5" without us coercing to NaN/0 mid-keystroke.
   const [blockSizeText, setBlockSizeText] = useState(String(planner.blockSize));
@@ -194,13 +197,17 @@ function SizeStep() {
     }
   };
 
+  const fabricWidthNum = Number(fabricWidthText);
+  const fabricWidthValid =
+    fabricWidthText.trim() !== "" && !isNaN(fabricWidthNum) && fabricWidthNum > 0;
+
   const next = () => {
-    if (!blockSizeValid) return;
+    if (!blockSizeValid || !fabricWidthValid) return;
     setPlanner({
       sizePreset: preset,
       quiltWidth: Number(w) || 0,
       quiltHeight: Number(h) || 0,
-      fabricWidth,
+      fabricWidth: fabricWidthNum,
       blockSize: blockSizeNum,
       borderWidth: border,
     });
@@ -224,11 +231,26 @@ function SizeStep() {
           )}
         </Field>
 
-        <Field label="Fabric width (your bolt)">
-          <Select value={String(fabricWidth)} onChange={(e) => setFabricWidth(Number(e.target.value) as 44 | 60)}>
-            <option value="44">44 inches</option>
-            <option value="60">60 inches</option>
-          </Select>
+        <Field label="Fabric width (your bolt, in inches)">
+          <input
+            type="text"
+            inputMode="decimal"
+            value={fabricWidthText}
+            onChange={(e) => setFabricWidthText(e.target.value)}
+            placeholder="e.g. 44"
+            aria-invalid={!fabricWidthValid}
+            className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+          />
+          <p className="text-muted-foreground mt-2 text-xs leading-snug">
+            Enter your bolt&apos;s width <strong>in inches</strong> — measure selvage to
+            selvage. Common widths: 42&quot;, 44&quot;, 54&quot;, 58&quot;, 60&quot;, or
+            108&quot; for wide-back fabric. All cutting math will use this value.
+          </p>
+          {fabricWidthText.trim() !== "" && !fabricWidthValid && (
+            <p className="text-destructive mt-2 text-sm font-medium">
+              Please enter a positive number of inches (e.g. 44, 54, 60).
+            </p>
+          )}
         </Field>
 
         <Field label="Block size (finished, in inches)">
@@ -387,7 +409,7 @@ function SizeStep() {
 
         <button
           onClick={next}
-          disabled={!blockSizeValid}
+          disabled={!blockSizeValid || !fabricWidthValid}
           className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed w-full rounded-xl px-6 py-4 text-lg font-semibold shadow-sm transition-colors"
         >
           Continue →
