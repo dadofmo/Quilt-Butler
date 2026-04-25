@@ -3,15 +3,13 @@ import { ALL_FABRIC_KEYS, type FabricKey } from "@/lib/planner-store";
 interface Props {
   photos?: Partial<Record<FabricKey, string>>;
   /**
-   * When set, patterns use `userSpaceOnUse` with this tile size (in the
-   * SVG's user units) instead of `objectBoundingBox`. This makes a single
-   * fabric photo span MANY shapes coherently — e.g. all 6 light logs in a
-   * Log Cabin block reveal slices of one continuous image, instead of each
-   * log showing the entire photo squished into its tiny bounding box.
+   * Size (in SVG user units) of one repeating tile of the fabric photo.
+   * The pattern always uses `userSpaceOnUse` and TILES the photo across
+   * every shape that uses it — so a polka dot is the same physical size
+   * in a long thin log as in a square. Each shape becomes a "window" onto
+   * a continuously-tiled fabric, just like cutting from a real bolt.
    *
-   * Pass the block / diagram size (e.g. 200 for MiniBlock's 200×200 viewBox).
-   * Omit to keep the legacy "fill each shape with the whole photo" behaviour
-   * (used by swatch chips and standalone diagrams).
+   * Default ≈ 80 user units (~40% of a 200-unit block diagram).
    */
   tileSize?: number;
   /** Unique suffix to scope pattern IDs when multiple instances coexist on the page. */
@@ -20,10 +18,8 @@ interface Props {
 
 /**
  * Renders <defs> with an SVG <pattern> for every fabric that has an
- * uploaded photo. By default each pattern fills the bounding box of the
- * shape it's applied to. With `tileSize`, the pattern instead tiles a
- * fixed-size image across the SVG's user space — so a single fabric photo
- * spans every shape that uses it.
+ * uploaded photo. The photo tiles at a fixed user-space size so every
+ * shape — regardless of dimensions — shows the fabric at the same scale.
  *
  * Place this as the FIRST child inside the root <svg> of any diagram
  * that wants to render uploaded fabric photos.
