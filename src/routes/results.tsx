@@ -206,9 +206,9 @@ function ResultsStep() {
                 })}
                 {result.materials && (
                   <>
-                    <ShopMaterialLine label="Backing fabric" detail={`${result.materials.backing.widths} width${result.materials.backing.widths === 1 ? "" : "s"} × ${result.materials.backing.heightIn}" — pieces ${result.materials.backing.widthIn}" × ${result.materials.backing.heightIn}" (incl. ${result.materials.backing.overhang}" overhang each side)`} amount={`${result.materials.backing.yards} yd`} />
-                    <ShopMaterialLine label="Batting" detail={`${result.materials.batting.widthIn}" × ${result.materials.batting.heightIn}" — pre-cut: ${result.materials.batting.presetLabel}, or ${result.materials.batting.yards} yd off the roll`} amount={result.materials.batting.presetLabel.startsWith("Larger") ? `${result.materials.batting.yards} yd` : "1 pkg"} />
-                    <ShopMaterialLine label="Binding fabric" detail={`Cut ${result.materials.binding.stripCount} long strips, each ${result.materials.binding.stripWidthIn}" wide and as long as your fabric is wide (selvage to selvage). Sewn together they wrap the ${result.materials.binding.perimeterIn}" edge of your quilt (plus ~10" extra for corners and joining).`} amount={`${result.materials.binding.yards} yd`} />
+                    <ShopMaterialLine label="Backing fabric" whatItIs="the fabric on the back of your quilt (what you see when you flip it over)" detail={`${result.materials.backing.widths} width${result.materials.backing.widths === 1 ? "" : "s"} × ${result.materials.backing.heightIn}" — pieces ${result.materials.backing.widthIn}" × ${result.materials.backing.heightIn}" (incl. ${result.materials.backing.overhang}" overhang each side)`} amount={`${result.materials.backing.yards} yd`} />
+                    <ShopMaterialLine label="Batting" whatItIs="the fluffy middle layer that goes between the top and backing — gives the quilt its warmth and puffiness" detail={`${result.materials.batting.widthIn}" × ${result.materials.batting.heightIn}" — pre-cut: ${result.materials.batting.presetLabel}, or ${result.materials.batting.yards} yd off the roll`} amount={result.materials.batting.presetLabel.startsWith("Larger") ? `${result.materials.batting.yards} yd` : "1 pkg"} />
+                    <ShopMaterialLine label="Binding fabric" whatItIs="the narrow strip that wraps around the raw edges of the quilt to finish them neatly" detail={`Cut ${result.materials.binding.stripCount} long strips, each ${result.materials.binding.stripWidthIn}" wide and as long as your fabric is wide (selvage to selvage). Sewn together they wrap the ${result.materials.binding.perimeterIn}" edge of your quilt (plus ~10" extra for corners and joining).`} amount={`${result.materials.binding.yards} yd`} />
                     <li className="text-muted-foreground py-2 text-xs italic">
                       Plus: piecing thread (neutral) and quilting thread (your choice).
                     </li>
@@ -296,11 +296,16 @@ function MaterialsCard({ m }: { m: MaterialsRequirement }) {
   );
 }
 
-function ShopMaterialLine({ label, detail, amount }: { label: string; detail: string; amount: string }) {
+function ShopMaterialLine({ label, whatItIs, detail, amount }: { label: string; whatItIs?: string; detail: string; amount: string }) {
   return (
     <li className="py-3">
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-foreground font-medium">{label}</span>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <span className="text-foreground font-medium">{label}</span>
+          {whatItIs && (
+            <span className="text-muted-foreground ml-2 text-xs italic">— {whatItIs}</span>
+          )}
+        </div>
         <span className="text-foreground text-lg font-semibold whitespace-nowrap">{amount}</span>
       </div>
       <div className="text-muted-foreground mt-1 text-sm">{detail}</div>
