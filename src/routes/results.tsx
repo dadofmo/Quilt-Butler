@@ -185,87 +185,24 @@ function ResultsStep() {
           {/* Force the shopping list onto its own page (page 3) when printed. */}
           <div className="print-page-break-before">
           <Section title="Shopping list">
-            <div className="bg-card rounded-xl border-2 border-border p-5">
-              <p className="text-muted-foreground mb-4 text-sm">
-                Bring this to the fabric store. Write the fabric name on each line as you pick it
-                — that way you'll know exactly which bolt is "Fabric A" when you start cutting.
-              </p>
-              <ul className="divide-y divide-border">
-                {result.fabrics.map((f) => {
-                  const name = planner.fabricNames[f.fabric] ?? "";
-                  return (
-                    <li key={f.fabric} className="py-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <span
-                            className="border-border inline-block h-10 w-10 rounded border"
-                            style={fabricBackgroundStyle(f.fabric, planner.fabricPhotos)}
-                          />
-                          <span className="text-foreground font-medium">
-                            {FABRIC_LABELS[f.fabric]}
-                          </span>
-                        </div>
-                        <span className="text-foreground text-lg font-semibold whitespace-nowrap">
-                          {f.yards} yd
-                        </span>
-                      </div>
-                      <div className="mt-2 flex items-baseline gap-2 pl-9">
-                        <label
-                          htmlFor={`name-${f.fabric}`}
-                          className="text-muted-foreground shrink-0 text-sm"
-                        >
-                          Name:
-                        </label>
-                        {/* On screen: editable input. When printed: shows the
-                            typed name, OR a blank underline to fill in by hand. */}
-                        <input
-                          id={`name-${f.fabric}`}
-                          type="text"
-                          value={name}
-                          onChange={(e) =>
-                            setPlanner({
-                              fabricNames: {
-                                ...planner.fabricNames,
-                                [f.fabric]: e.target.value,
-                              },
-                            })
-                          }
-                          placeholder="e.g. Moda Bella – Bluebird"
-                          className="no-print border-input bg-background placeholder:text-muted-foreground/60 focus-visible:ring-ring flex-1 border-b-2 px-1 py-1 text-sm focus-visible:outline-none focus-visible:ring-1"
-                        />
-                        {/* Print-only: shows the name if filled, otherwise a blank
-                            underline the user can write on. */}
-                        <span className="print-only flex-1 border-b border-foreground pb-0.5 text-sm">
-                          {name || "\u00a0"}
-                        </span>
-                      </div>
-                    </li>
-                  );
-                })}
-                {result.materials && (
-                  <>
-                    <ShopMaterialLine label="Backing fabric" whatItIs="the fabric on the back of your quilt (what you see when you flip it over)" detail={`${result.materials.backing.widths} width${result.materials.backing.widths === 1 ? "" : "s"} × ${result.materials.backing.heightIn}" — pieces ${result.materials.backing.widthIn}" × ${result.materials.backing.heightIn}" (incl. ${result.materials.backing.overhang}" overhang each side)`} amount={`${result.materials.backing.yards} yd`} />
-                    <ShopMaterialLine label="Batting" whatItIs="the fluffy middle layer that goes between the top and backing — gives the quilt its warmth and puffiness" detail={`${result.materials.batting.widthIn}" × ${result.materials.batting.heightIn}" — pre-cut: ${result.materials.batting.presetLabel}, or ${result.materials.batting.yards} yd off the roll`} amount={result.materials.batting.presetLabel.startsWith("Larger") ? `${result.materials.batting.yards} yd` : "1 pkg"} />
-                    <ShopMaterialLine label="Binding fabric" whatItIs="the narrow strip that wraps around the raw edges of the quilt to finish them neatly" detail={`Cut ${result.materials.binding.stripCount} long strips, each ${result.materials.binding.stripWidthIn}" wide and as long as your fabric is wide (selvage to selvage). Sewn together they wrap the ${result.materials.binding.perimeterIn}" edge of your quilt (plus ~10" extra for corners and joining).`} amount={`${result.materials.binding.yards} yd`} />
-                    <ShopMaterialLine
-                      label="Piecing thread"
-                      whatItIs="the thread your sewing machine uses to stitch the fabric pieces together"
-                      detail="One spool of all-purpose thread in a neutral color (cream, grey, or white) — blends in with most fabrics."
-                      amount="1 spool"
-                    />
-                    <ShopMaterialLine
-                      label="Quilting thread"
-                      whatItIs="the thread used for the decorative stitching that holds the three layers (top, batting, backing) together"
-                      detail="One spool in the color of your choice — can match your fabric or be a contrasting accent."
-                      amount="1 spool"
-                    />
-                  </>
-                )}
-              </ul>
-              <div className="text-muted-foreground mt-3 text-sm">
-                {planner.safetyBuffer ? "Includes 10% safety buffer on top fabrics." : "No safety buffer."} Rounded up to ¼ yard.
-              </div>
-            </div>
+            <ShoppingList
+              fabrics={result.fabrics}
+              materials={result.materials}
+              fabricNames={planner.fabricNames}
+              fabricPhotos={planner.fabricPhotos}
+              itemPrices={planner.itemPrices}
+              safetyBuffer={planner.safetyBuffer}
+              onName={(fabric, value) =>
+                setPlanner({
+                  fabricNames: { ...planner.fabricNames, [fabric]: value },
+                })
+              }
+              onPrice={(id, value) =>
+                setPlanner({
+                  itemPrices: { ...planner.itemPrices, [id]: value },
+                })
+              }
+            />
           </Section>
           </div>
 
