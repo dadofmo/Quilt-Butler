@@ -171,11 +171,14 @@ function FabricsStep() {
             // For patchwork patterns, only show border picker here (the squares
             // section is driven by the tap-to-cycle preview above).
             if (isPatchwork && s.id !== "border") return null;
-            // Border can be ANY of the 12 fabrics — it's a separate piece of
-            // yardage on the shopping list, so the user shouldn't be limited
-            // to fabrics already used in the block.
+            // Border choices = every fabric used in the block, PLUS one extra
+            // "accent" option (the next unused letter) for users who want a
+            // unique border fabric. Anything beyond that is noise.
             const isBorder = s.id === "border";
-            const choices = isBorder ? ALL_FABRIC_KEYS : availableFabrics;
+            const nextAccent = ALL_FABRIC_KEYS.find((f) => !availableFabrics.includes(f));
+            const choices = isBorder
+              ? (nextAccent ? [...availableFabrics, nextAccent] : availableFabrics)
+              : availableFabrics;
             return (
               <div key={s.id} className="bg-card rounded-xl border-2 border-border p-4">
                 <div className="text-foreground mb-1 text-base font-semibold">{s.label}</div>
