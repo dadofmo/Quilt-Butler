@@ -742,12 +742,13 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
             </marker>
           </defs>
 
-          {/* Selvage labels */}
+          {/* Selvage labels — sit at the very edge of the bolt area, outside
+              the per-strip height labels in the gutter. */}
           <text
-            x={PAD_LEFT - 8}
+            x={PAD_LEFT - 84}
             y={PAD_TOP + boltH / 2}
             textAnchor="middle"
-            transform={`rotate(-90 ${PAD_LEFT - 8} ${PAD_TOP + boltH / 2})`}
+            transform={`rotate(-90 ${PAD_LEFT - 84} ${PAD_TOP + boltH / 2})`}
             className="fill-muted-foreground text-[10px]"
           >
             finished edge
