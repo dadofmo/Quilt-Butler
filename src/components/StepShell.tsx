@@ -24,7 +24,7 @@ export function StepShell({ step, title, subtitle, backTo, children }: Props) {
               <ArrowLeft className="h-4 w-4" /> Back
             </Link>
           ) : (
-            <span className="text-primary text-base font-semibold tracking-tight">Quilt Fabric Planner</span>
+            <span className="text-primary text-base font-semibold tracking-tight">QuiltButler</span>
           )}
           <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
             Step {step} of 4
