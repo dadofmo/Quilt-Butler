@@ -588,7 +588,7 @@ function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void 
 function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequirement; fabricWidth: number; pattern: import("@/lib/planner-store").PatternId | null; photo?: string }) {
   const SCALE = 9; // 1 inch = 9px
   const PAD_TOP = 28; // room for WOF arrow
-  const PAD_LEFT = 56; // room for selvage label
+  const PAD_LEFT = 96; // room for selvage label + per-strip height label
   const PAD_RIGHT = 16;
   const PAD_BOTTOM = 18;
 
