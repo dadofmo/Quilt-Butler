@@ -916,10 +916,12 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   {r.hIn.toFixed(2)}" tall
                 </text>
 
-                {/* Strip number badge */}
-                <circle cx={PAD_LEFT + 12} cy={ry + rh / 2} r={9} fill="var(--card)" stroke={fabricColor} strokeWidth={1.2} />
+                {/* Strip number badge — sits at the start of the cuttable
+                    area (just inside the left selvage) so it doesn't visually
+                    overlap the non-cuttable selvage zone. */}
+                <circle cx={cuttableX + 12} cy={ry + rh / 2} r={9} fill="var(--card)" stroke={fabricColor} strokeWidth={1.2} />
                 <text
-                  x={PAD_LEFT + 12}
+                  x={cuttableX + 12}
                   y={ry + rh / 2 + 3}
                   textAnchor="middle"
                   className="fill-foreground text-[10px] font-semibold"
@@ -941,7 +943,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                     : `sub-cut ${r.subCutCount} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`;
                   const shortLabel = r.isBorder
                     ? `Border (full width)`
-                    : `${r.subCutCount} × ${r.hIn.toFixed(2)}"×${r.subCutWidth?.toFixed(2)}"`;
+                    : `sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
                   // Roughly 5px per char at 10px font; pick the longest version that fits.
                   const label =
                     labelAvailW > fullLabel.length * 5
@@ -954,7 +956,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   if (!label) return null;
                   return (
                     <text
-                      x={PAD_LEFT + 28}
+                      x={cuttableX + 28}
                       y={ry + rh / 2 + 3}
                       textAnchor="start"
                       className="fill-foreground text-[10px] font-medium"
