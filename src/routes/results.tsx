@@ -452,7 +452,7 @@ function CuttingDiagram({ req, fabricWidth, pattern }: { req: FabricRequirement;
           );
         })()}
       </ol>
-      {pattern === "hst" && (
+      {pattern === "hst" && totalSquares > 0 && (
         <p className="text-foreground mb-2 rounded-md border border-border bg-muted/40 px-3 py-2 text-xs">
           <strong>Note:</strong> after cutting your squares, see the assembly instructions above to learn how to turn each pair of squares into two finished triangle blocks.
         </p>
