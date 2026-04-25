@@ -338,7 +338,7 @@ function SizeStep() {
           const matchesDesired = fit.perfect;
           const closestBorder = fit.borderSuggestions[0];
           const closestBlock = fit.blockSuggestions[0];
-          const closestCombo = fit.comboSuggestions[0];
+          const comboOptions = fit.comboSuggestions;
           return (
             <Field label="Finished quilt size">
               <div className="bg-card border-input rounded-xl border-2 p-4">
@@ -417,25 +417,35 @@ function SizeStep() {
                           </span>
                         )}
                       </li>
-                      {closestCombo && (
+                      {comboOptions.length > 0 && (
                         <li className="text-muted-foreground">
                           <span className="text-foreground">
-                            Adjust the <strong>block grid layout</strong> — use a{" "}
+                            Adjust the <strong>block grid layout</strong> — these
+                            combinations of block size + border give an exact{" "}
+                            {fit.quiltW}&quot; × {fit.quiltH}&quot; finish:
                           </span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setBlockSizeText(String(closestCombo.block));
-                              applyBorder(closestCombo.border);
-                            }}
-                            className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
-                          >
-                            {closestCombo.block}&quot; block with a {closestCombo.border}&quot; border
-                          </button>
-                          <span className="text-muted-foreground">
-                            {" "}(changes the layout to {closestCombo.across} × {closestCombo.down} ={" "}
-                            {closestCombo.total} blocks for an exact fit).
-                          </span>
+                          <ul className="mt-1.5 list-none space-y-1 pl-0">
+                            {comboOptions.map((c, i) => (
+                              <li key={`${c.block}-${c.border}`} className="text-muted-foreground">
+                                <span className="text-foreground font-semibold">
+                                  Option {i + 1}:{" "}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setBlockSizeText(String(c.block));
+                                    applyBorder(c.border);
+                                  }}
+                                  className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
+                                >
+                                  {c.block}&quot; block with a {c.border}&quot; border
+                                </button>
+                                <span className="text-muted-foreground">
+                                  {" "}({c.across} × {c.down} = {c.total} blocks)
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
                         </li>
                       )}
                     </ul>
