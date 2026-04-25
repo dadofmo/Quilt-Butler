@@ -48,6 +48,23 @@ function FabricsStep() {
     setPlanner({ assignments: { ...planner.assignments, [sectionId]: fab } });
   };
 
+  const setFabricPhoto = (key: FabricKey, dataUrl: string | null) => {
+    const next = { ...planner.fabricPhotos };
+    if (dataUrl) next[key] = dataUrl;
+    else delete next[key];
+    setPlanner({ fabricPhotos: next });
+  };
+
+  const handlePhotoUpload = (key: FabricKey, file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result === "string") setFabricPhoto(key, result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Patchwork preview is meaningful for "simple-squares" — a grid of squares
   // is exactly what the user is laying out. For block patterns we still show
   // it as a color-mood preview but make the labeling honest.
