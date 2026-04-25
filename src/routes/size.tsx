@@ -40,9 +40,6 @@ function SizeStep() {
     );
   }
 
-  const desiredW = Number(w) || 0;
-  const desiredH = Number(h) || 0;
-
   const onPreset = (key: string) => {
     setPreset(key);
     if (key !== "custom") {
