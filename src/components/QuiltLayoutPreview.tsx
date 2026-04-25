@@ -316,14 +316,41 @@ function MiniBlock({
       const star = get("star", "A");
       const bg = get("bg", "B");
       const center = get("center", "D");
+      // Same Ohio Star geometry as PatternDiagram — kept in sync so the
+      // single-block view and the full-quilt preview show the same star.
+      const u = 200 / 3;
+      const qst = (gx: number, gy: number, axis: "v" | "h", key: string) => {
+        const x = gx * u;
+        const y = gy * u;
+        const cx = x + u / 2;
+        const cy = y + u / 2;
+        const starTris =
+          axis === "v"
+            ? [
+                `${x},${y} ${x + u},${y} ${cx},${cy}`,
+                `${x},${y + u} ${x + u},${y + u} ${cx},${cy}`,
+              ]
+            : [
+                `${x},${y} ${x},${y + u} ${cx},${cy}`,
+                `${x + u},${y} ${x + u},${y + u} ${cx},${cy}`,
+              ];
+        return (
+          <g key={key}>
+            <rect x={x} y={y} width={u} height={u} fill={bg} />
+            {starTris.map((p, i) => (
+              <polygon key={`s${i}`} points={p} fill={star} />
+            ))}
+          </g>
+        );
+      };
       return (
         <>
           <rect width={200} height={200} fill={bg} />
-          <polygon points="100,10 140,70 60,70" fill={star} />
-          <polygon points="190,100 130,140 130,60" fill={star} />
-          <polygon points="100,190 60,130 140,130" fill={star} />
-          <polygon points="10,100 70,60 70,140" fill={star} />
-          <rect x={70} y={70} width={60} height={60} fill={center} />
+          {qst(1, 0, "v", "top")}
+          {qst(2, 1, "h", "right")}
+          {qst(1, 2, "v", "bottom")}
+          {qst(0, 1, "h", "left")}
+          <rect x={u} y={u} width={u} height={u} fill={center} />
         </>
       );
     }

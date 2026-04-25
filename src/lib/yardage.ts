@@ -384,6 +384,85 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Layout tip: arranging the finished blocks so all the dark corners point the same direction creates classic Log Cabin layouts called "Straight Furrows" or "Sunshine and Shadow." Try a few orientations on the floor (or a bed) before sewing the blocks together.`,
     );
+  } else if (s.pattern === "ohio-star") {
+    // Ohio Star construction:
+    //   Each block = a 3×3 grid of "units", where unitFinished = blockSize / 3.
+    //     - 4 corner units: plain background squares (cut = unitFinished + 0.5")
+    //     - 4 edge units:   pieced quarter-square triangles (QSTs) — each has
+    //                       2 star triangles on one diagonal + 2 background
+    //                       triangles on the other, forming the 8 star points.
+    //     - 1 center unit:  plain center square (cut = unitFinished + 0.5")
+    //
+    // QST construction (standard quilting technique):
+    //   To make 4 QST units per block, pair 2 star squares with 2 background
+    //   squares — both cut at unitFinished + 1.25" (the "quarter-square trim",
+    //   1.25" extra to absorb the bias-cut diagonals on both axes).
+    //   Pair RST → draw diagonal → sew 1/4" each side → cut on line → 2 HSTs.
+    //   Two HSTs paired with seams nesting opposite → draw the OTHER diagonal
+    //   → sew 1/4" each side → cut → 2 QSTs.
+    //   Net per block: 2 star + 2 bg "QST squares" yield 4 finished QST units. ✓
+    const unitFinished = s.blockSize / 3;
+    const plainCut = unitFinished + SEAM;       // corner & center squares
+    const qstCut = unitFinished + 1.25;          // bigger square for QST trim
+
+    const starFab = (s.assignments["star"] ?? "A") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
+    const centerFab = (s.assignments["center"] ?? "D") as FabricKey;
+
+    // Per-block piece counts:
+    const qstStarSquaresPerBlock = 2;
+    const qstBgSquaresPerBlock = 2;
+    const cornerBgPerBlock = 4;
+    const centerPerBlock = 1;
+
+    addSquares(
+      reqs[starFab],
+      "QST squares (star fabric)",
+      qstStarSquaresPerBlock * blockCount,
+      qstCut,
+      s.fabricWidth,
+    );
+    addSquares(
+      reqs[bgFab],
+      "QST squares (background)",
+      qstBgSquaresPerBlock * blockCount,
+      qstCut,
+      s.fabricWidth,
+    );
+    addSquares(
+      reqs[bgFab],
+      "Corner squares (background)",
+      cornerBgPerBlock * blockCount,
+      plainCut,
+      s.fabricWidth,
+    );
+    addSquares(
+      reqs[centerFab],
+      "Center squares",
+      centerPerBlock * blockCount,
+      plainCut,
+      s.fabricWidth,
+    );
+
+    notes.push(
+      `Each block = 3×3 grid of units, finished ${unitFinished.toFixed(2)}" each. 4 corners + 1 center are plain squares; 4 edge units are pieced quarter-square triangles (QSTs) that form the 8 star points.`,
+    );
+    notes.push(
+      `Per block, cut: 2 star squares + 2 background squares at ${qstCut.toFixed(2)}" (these become the 4 QST units), 4 background squares at ${plainCut.toFixed(2)}" (corners), and 1 center square at ${plainCut.toFixed(2)}". The QST squares are cut larger to absorb the diagonal bias trim.`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${qstStarSquaresPerBlock * blockCount} star QST squares (Fabric ${starFab}), ${qstBgSquaresPerBlock * blockCount} background QST squares + ${cornerBgPerBlock * blockCount} background corners (Fabric ${bgFab}), and ${centerPerBlock * blockCount} center squares (Fabric ${centerFab}).`,
+    );
+    notes.push(
+      `How to make ONE QST unit (you'll repeat this 4 times per block): take one star QST square and one background QST square (both ${qstCut.toFixed(2)}"), place them right sides together (RST), and on the back of the lighter square draw a diagonal line corner-to-corner. Sew a 1/4" seam down the LEFT side of the line, then a second 1/4" seam down the RIGHT side. Cut along the drawn line — you now have 2 half-square triangle (HST) units.`,
+    );
+    notes.push(
+      `Press both HSTs open (seam toward the darker fabric). Now stack the 2 HSTs RST so the star triangle of one sits on the background triangle of the other, and the seams "nest" together (run them under your finger — when they lock into each other you've got it). On the back of the top HST, draw a NEW diagonal line — this one runs perpendicular to the first seam (corner-to-corner across the seam, not along it). Sew 1/4" each side of this new line, cut on the drawn line, unfold, and press. You now have 2 finished QST units, each showing 4 little triangles meeting in the middle: 2 star triangles forming a "bowtie" along one diagonal and 2 background triangles along the other. Trim each QST to ${(unitFinished + SEAM).toFixed(2)}" square.`,
+    );
+    notes.push(
+      `Assemble the block as a 3×3 grid: row 1 = bg corner, QST (star points up), bg corner. Row 2 = QST (star points left), center square, QST (star points right). Row 3 = bg corner, QST (star points down), bg corner. Sew each row across, press, then sew the 3 rows together — the 8 star points should meet cleanly at the center square.`,
+    );
+
   }
 
   // Border
@@ -419,7 +498,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const showBasics =
     s.pattern === "hst" ||
     s.pattern === "rail-fence" ||
-    s.pattern === "log-cabin";
+    s.pattern === "log-cabin" ||
+    s.pattern === "ohio-star";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

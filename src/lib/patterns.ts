@@ -95,12 +95,13 @@ export const PATTERNS: PatternDef[] = [
   {
     id: "ohio-star",
     name: "Ohio Star",
-    hasMath: false,
-    intro: "An 8-pointed star sitting on a background, with a small center square.",
+    hasMath: true,
+    intro:
+      "A classic 8-pointed star made from a 3×3 grid of 'units'. The 4 corner units are plain background squares, the 4 edge units are pieced 'quarter-square triangles' (QSTs) that form the star points, and the 1 center unit is a plain square. Pick a fabric for the star points, a contrasting fabric for the background, and (optionally) a third fabric to highlight the center.",
     sections: [
-      { id: "star", label: "Star points", defaultFabric: "A", hint: "The triangles forming the star." },
-      { id: "bg", label: "Background", defaultFabric: "B", hint: "Around and between the star points." },
-      { id: "center", label: "Center square", defaultFabric: "D" },
+      { id: "star", label: "Star points", defaultFabric: "A", hint: "The 8 triangles forming the star — usually the boldest fabric so the star reads clearly against the background." },
+      { id: "bg", label: "Background", defaultFabric: "B", hint: "Fills the 4 corner squares and sits between the star points — pick something that contrasts strongly with the star fabric." },
+      { id: "center", label: "Center square", defaultFabric: "D", hint: "The single square in the middle of every block — can repeat the star fabric, the background, or use a third accent fabric." },
       borderSection,
     ],
   },
