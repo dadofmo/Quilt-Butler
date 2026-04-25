@@ -198,7 +198,13 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Cut ${squaresEach} squares of Fabric ${t1} and ${squaresEach} squares of Fabric ${t2}, all at ${cut}" × ${cut}" (finished ${s.blockSize}" + 7/8" extra for the diagonal seam).`,
     );
     notes.push(
-      `To turn the squares into triangle blocks: stack one Fabric ${t1} square on top of one Fabric ${t2} square so the pretty (printed) sides face each other — the plain backs of the fabric should be facing out. On the back of the top square, use a pencil or fabric marker to draw a straight line from one corner to the opposite corner (a diagonal). Sew a seam 1/4" away from that line on BOTH sides of it (two parallel seams). Then cut along the drawn line with scissors or a rotary cutter — you'll get two pieces. Open each piece and press it flat with an iron (this is called "pressing open"). Each pair of squares makes 2 finished half-square triangle blocks, for ${blockCount} blocks total.`,
+      `To turn the squares into triangle blocks: place one Fabric ${t1} square and one Fabric ${t2} square together so the printed sides are touching each other (the plain back of the fabric will be facing you on both the top and bottom). On the back of the top square, use a pencil or fabric marker to draw a straight line from one corner to the opposite corner (a diagonal).`,
+    );
+    notes.push(
+      `Sew a seam 1/4" away from that drawn line, on BOTH sides of it (so you'll have two parallel lines of stitching). Then cut along the drawn line in the middle — you'll end up with two separate pieces, each with a triangle of ${t1} and a triangle of ${t2} already sewn together along the diagonal.`,
+    );
+    notes.push(
+      `Unfold each piece so the two triangles lie flat side-by-side (printed sides up). Iron it flat — quilters call this "pressing." Each pair of squares makes 2 finished half-square triangle blocks, for ${blockCount} blocks total.`,
     );
   } else if (s.pattern === "rail-fence") {
     // Each block = 3 rails. Each rail finishes at (blockSize/3) tall × blockSize wide.
