@@ -452,3 +452,103 @@ function NumberInput({ label, value, onChange }: { label: string; value: number;
     </label>
   );
 }
+
+/**
+ * Tiny visual of the finished quilt: shows the border ring around the
+ * block grid (blocksAcross × blocksDown), scaled to fit a max box while
+ * preserving the real quilt aspect ratio. Helps users see at a glance
+ * what their inputs will produce.
+ */
+function QuiltLayoutDiagram({
+  quiltW,
+  quiltH,
+  blocksAcross,
+  blocksDown,
+  border,
+}: {
+  quiltW: number;
+  quiltH: number;
+  blocksAcross: number;
+  blocksDown: number;
+  border: number;
+}) {
+  const MAX = 180;
+  if (quiltW <= 0 || quiltH <= 0) return null;
+  const aspect = quiltW / quiltH;
+  const w = aspect >= 1 ? MAX : Math.round(MAX * aspect);
+  const h = aspect >= 1 ? Math.round(MAX / aspect) : MAX;
+  const borderPxX = (border / quiltW) * w;
+  const borderPxY = (border / quiltH) * h;
+  const innerW = w - borderPxX * 2;
+  const innerH = h - borderPxY * 2;
+  const cellW = innerW / Math.max(1, blocksAcross);
+  const cellH = innerH / Math.max(1, blocksDown);
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <svg
+        width={w}
+        height={h}
+        viewBox={`0 0 ${w} ${h}`}
+        className="rounded-md shadow-sm"
+        aria-label={`Quilt layout: ${blocksAcross} by ${blocksDown} blocks${border > 0 ? ` with ${border} inch border` : ""}`}
+      >
+        {/* Border ring */}
+        {border > 0 && (
+          <rect
+            x={0}
+            y={0}
+            width={w}
+            height={h}
+            fill="oklch(0.85 0.05 250)"
+          />
+        )}
+        {/* Inner block area background */}
+        <rect
+          x={borderPxX}
+          y={borderPxY}
+          width={innerW}
+          height={innerH}
+          fill="oklch(0.95 0.02 250)"
+        />
+        {/* Block grid lines */}
+        {Array.from({ length: blocksAcross + 1 }).map((_, i) => (
+          <line
+            key={`v-${i}`}
+            x1={borderPxX + i * cellW}
+            y1={borderPxY}
+            x2={borderPxX + i * cellW}
+            y2={borderPxY + innerH}
+            stroke="oklch(0.55 0.02 250)"
+            strokeWidth={1}
+          />
+        ))}
+        {Array.from({ length: blocksDown + 1 }).map((_, j) => (
+          <line
+            key={`h-${j}`}
+            x1={borderPxX}
+            y1={borderPxY + j * cellH}
+            x2={borderPxX + innerW}
+            y2={borderPxY + j * cellH}
+            stroke="oklch(0.55 0.02 250)"
+            strokeWidth={1}
+          />
+        ))}
+        {/* Outer outline */}
+        <rect
+          x={0.5}
+          y={0.5}
+          width={w - 1}
+          height={h - 1}
+          fill="none"
+          stroke="oklch(0.4 0.02 250)"
+          strokeWidth={1}
+        />
+      </svg>
+      <p className="text-muted-foreground text-[11px]">
+        {quiltW}&quot; × {quiltH}&quot; · {blocksAcross} × {blocksDown} blocks
+        {border > 0 && <> · {border}&quot; border</>}
+      </p>
+    </div>
+  );
+}
