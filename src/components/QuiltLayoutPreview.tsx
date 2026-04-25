@@ -281,14 +281,30 @@ function MiniBlock({
       );
     }
     case "log-cabin": {
-      const center = get("center", "D");
+      // 8-unit grid (200/8 = 25). Center 2u×2u at (3,3); 12 logs spiral out.
+      // Dark = top/right sides, Light = bottom/left — classic diagonal split.
+      const center = get("center", "A");
       const light = get("light", "B");
-      const dark = get("dark", "A");
+      const dark = get("dark", "C");
+      const u = 25;
+      const lr = (x: number, y: number, w: number, h: number, fill: string, key: string) => (
+        <rect key={key} x={x * u} y={y * u} width={w * u} height={h * u} fill={fill} />
+      );
       return (
         <>
-          <rect width={200} height={200} fill={light} />
-          <rect x={30} y={30} width={140} height={140} fill={dark} />
-          <rect x={70} y={70} width={60} height={60} fill={center} />
+          {lr(5, 3, 1, 2, dark, "d1")}
+          {lr(3, 2, 3, 1, dark, "d2")}
+          {lr(6, 2, 1, 4, dark, "d5")}
+          {lr(2, 1, 5, 1, dark, "d6")}
+          {lr(7, 1, 1, 6, dark, "d9")}
+          {lr(1, 0, 7, 1, dark, "d10")}
+          {lr(2, 2, 1, 3, light, "l3")}
+          {lr(2, 5, 4, 1, light, "l4")}
+          {lr(1, 1, 1, 5, light, "l7")}
+          {lr(1, 6, 6, 1, light, "l8")}
+          {lr(0, 0, 1, 7, light, "l11")}
+          {lr(0, 7, 8, 1, light, "l12")}
+          <rect x={3 * u} y={3 * u} width={2 * u} height={2 * u} fill={center} />
         </>
       );
     }
