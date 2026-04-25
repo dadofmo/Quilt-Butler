@@ -246,14 +246,21 @@ console.log("\n=== Ohio Star: star & bg share fabric A — math still holds ==="
     ...base(), pattern: "ohio-star" as const, blockSize: 12, borderWidth: 0,
     assignments: { star: "A" as FabricKey, bg: "A" as FabricKey, center: "D" as FabricKey },
   };
-  // QST squares: 80 at 5.25". Per strip 8. Strips=ceil(80/8)=10. Inches=10*5.25=52.5.
-  // Corners: 80 at 4.5". Per strip 9. Strips=ceil(80/9)=9. Inches=9*4.5=40.5.
+  // Three buckets retained (intentional): star QST squares, bg QST squares,
+  // and bg corner squares. Star + bg buckets share dimensions but stay
+  // separately labeled so the cutting plan still tells the quilter what each
+  // pile of squares is FOR. Strip count is the same either way because
+  // packStrips runs per-bucket on the same dimensions.
+  // Star QST: 40 at 5.25" → 5 strips × 5.25 = 26.25
+  // Bg QST:   40 at 5.25" → 5 strips × 5.25 = 26.25
+  // Corners:  80 at 4.5"  → 9 strips × 4.5  = 40.5
   // Total: 93.
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
-  check("OS A+B merged QST count", a.pieces[0].count, 80);
-  check("OS A+B merged corner count", a.pieces[1].count, 80);
-  check("OS A+B merged inches", a.totalInches, 93);
+  check("OS shared star+bg bucket count", a.pieces.length, 3);
+  const totalPieces = a.pieces.reduce((acc, p) => acc + p.count, 0);
+  check("OS shared star+bg total pieces", totalPieces, 160); // 40+40+80
+  check("OS shared star+bg inches", a.totalInches, 93);
 }
 
 console.log("\n=== Ohio Star: odd block size 4.25\" — non-integer unit must still produce valid cuts ===");
