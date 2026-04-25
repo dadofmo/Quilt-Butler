@@ -208,7 +208,7 @@ function ResultsStep() {
                   <>
                     <ShopMaterialLine label="Backing fabric" detail={`${result.materials.backing.widths} width${result.materials.backing.widths === 1 ? "" : "s"} × ${result.materials.backing.heightIn}" — pieces ${result.materials.backing.widthIn}" × ${result.materials.backing.heightIn}" (incl. ${result.materials.backing.overhang}" overhang each side)`} amount={`${result.materials.backing.yards} yd`} />
                     <ShopMaterialLine label="Batting" detail={`${result.materials.batting.widthIn}" × ${result.materials.batting.heightIn}" — pre-cut: ${result.materials.batting.presetLabel}, or ${result.materials.batting.yards} yd off the roll`} amount={result.materials.batting.presetLabel.startsWith("Larger") ? `${result.materials.batting.yards} yd` : "1 pkg"} />
-                    <ShopMaterialLine label="Binding fabric" detail={`${result.materials.binding.stripCount} strips × ${result.materials.binding.stripWidthIn}" wide (WOF) — covers ${result.materials.binding.perimeterIn}" perimeter + 10" join`} amount={`${result.materials.binding.yards} yd`} />
+                    <ShopMaterialLine label="Binding fabric" detail={`Cut ${result.materials.binding.stripCount} long strips, each ${result.materials.binding.stripWidthIn}" wide and as long as your fabric is wide (selvage to selvage). Sewn together they wrap the ${result.materials.binding.perimeterIn}" edge of your quilt (plus ~10" extra for corners and joining).`} amount={`${result.materials.binding.yards} yd`} />
                     <li className="text-muted-foreground py-2 text-xs italic">
                       Plus: piecing thread (neutral) and quilting thread (your choice).
                     </li>
