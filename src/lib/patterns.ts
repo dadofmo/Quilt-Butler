@@ -120,11 +120,22 @@ export const PATTERNS: PatternDef[] = [
   {
     id: "disappearing-nine-patch",
     name: "Disappearing Nine Patch",
-    hasMath: false,
-    intro: "Start with a nine-patch block, then cut it into quarters and rearrange — creates a more complex look from two fabrics.",
+    hasMath: true,
+    intro:
+      "Start by sewing a regular Nine Patch (3×3 grid of squares using two contrasting fabrics). Then slice the finished block in half horizontally and again vertically — making 4 quarter-blocks — and rotate each quarter 180° before sewing them back together. The two extra seams 'disappear' the original 9-patch and reveal a more complex pinwheel/chain block from just two fabrics.",
     sections: [
-      { id: "center", label: "Center & corner squares", defaultFabric: "A" },
-      { id: "outer", label: "Alternating squares", defaultFabric: "B" },
+      {
+        id: "center",
+        label: "Center & corner squares (5 per starting block)",
+        defaultFabric: "A",
+        hint: "The 4 corners + the middle of the original 9-patch — usually the bolder fabric. After the slice-and-rotate these end up forming the chain that runs through the finished block.",
+      },
+      {
+        id: "outer",
+        label: "Alternating squares (4 per starting block)",
+        defaultFabric: "B",
+        hint: "The 4 squares between the corners — pick something that contrasts. After rearrangement these become the pinwheel/background sections of the finished block.",
+      },
       borderSection,
     ],
   },
