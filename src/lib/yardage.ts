@@ -610,10 +610,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `How to sew ONE block (square-in-a-square): take the 2 corner-triangle squares for this block and cut each one once corner-to-corner on the diagonal — you'll have 4 right triangles. Lay the on-point center square in front of you printed side up, oriented as a regular square (not yet rotated).`,
     );
     notes.push(
-      `Take one corner triangle and place it on the TOP edge of the center square right sides together (RST), with the triangle's long edge (the hypotenuse — the diagonal cut you just made) lined up exactly along the top edge of the center square. The triangle's point will sit centered above the square. Sew a 1/4" seam along that lined-up edge, then unfold the triangle up and away. Press the seam toward the triangle.`,
+      `Take one corner triangle and place it on the TOP edge of the center square right sides together (RST), with the triangle's long edge (the diagonal cut you just made) lined up exactly along the top edge of the center square. The triangle's point will sit centered above the square. Sew a 1/4" seam along that lined-up edge, then unfold the triangle up and away. Press the seam toward the triangle.`,
     );
     notes.push(
-      `Repeat with a second triangle on the BOTTOM edge of the center square (RST, hypotenuse lined up with the bottom edge, sew, unfold, press). Now do the LEFT and RIGHT edges the same way. After all 4 triangles are attached and pressed, the center square will appear rotated 45° inside a larger square. Trim the block to ${(s.blockSize + SEAM).toFixed(2)}" — the corner triangles are cut slightly oversized on purpose so you have room to true up the block.`,
+      `Repeat with a second triangle on the BOTTOM edge of the center square (RST, long edge lined up with the bottom edge, sew, unfold, press). Now do the LEFT and RIGHT edges the same way. After all 4 triangles are attached and pressed, the center square will appear rotated 45° inside a larger square. Trim the block to ${(s.blockSize + SEAM).toFixed(2)}" — the corner triangles are cut slightly oversized on purpose so you have room to true up the block.`,
     );
     notes.push(
       `Layout tip: Squares on Point looks great as a straight grid (every diamond facing the same way) or alternating with plain background squares for a "diamonds floating in a sky" effect. Try a few layouts before sewing the rows together.`,
