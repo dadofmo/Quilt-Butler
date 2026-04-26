@@ -342,6 +342,61 @@ console.log("\n=== Flying Geese: non-integer block size 9\" ===");
 }
 
 // =========================================================================
+// DISAPPEARING NINE PATCH
+// =========================================================================
+console.log("\n=== Disappearing Nine Patch: 50×65, 12\" finished block, no border ===");
+{
+  const s = { ...base(), pattern: "disappearing-nine-patch" as const, blockSize: 12, borderWidth: 0 };
+  // 4×5 = 20 finished blocks. Starting block = 13" (12 + 1).
+  // patchFinished = 13/3 ≈ 4.3333. cut = 4.8333.
+  // A: 5*20 = 100 squares. Per strip floor(42.5/4.8333) = 8. Strips = ceil(100/8) = 13.
+  //    Inches = 13 * 4.8333... = 62.8333...
+  // B: 4*20 = 80 squares. Strips = ceil(80/8) = 10. Inches = 10 * 4.8333 = 48.333.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const expectedCut = 13/3 + 0.5;
+  check("D9P A count", a.pieces[0].count, 100);
+  check("D9P A cut size", a.pieces[0].w, expectedCut);
+  check("D9P A strips", a.strips[0].count, 13);
+  check("D9P A inches", a.totalInches, 13 * expectedCut, 0.001);
+  check("D9P B count", b.pieces[0].count, 80);
+  check("D9P B strips", b.strips[0].count, 10);
+  check("D9P B inches", b.totalInches, 10 * expectedCut, 0.001);
+  check("D9P basics glossary attached", r.basics?.length ?? 0, 5);
+}
+
+console.log("\n=== Disappearing Nine Patch: starting block math (8\" final → 9\" starting) ===");
+{
+  const s = { ...base(), pattern: "disappearing-nine-patch" as const, quiltWidth: 32, quiltHeight: 32, blockSize: 8, borderWidth: 0 };
+  // 4×4 = 16 blocks. Starting = 9", patch finished = 3", cut = 3.5".
+  // A: 80 squares. Per strip floor(42.5/3.5)=12. Strips = ceil(80/12)=7. Inches=7*3.5=24.5.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("D9P 8\" cut size", a.pieces[0].w, 3.5);
+  check("D9P 8\" A count", a.pieces[0].count, 80);
+  check("D9P 8\" A strips", a.strips[0].count, 7);
+  check("D9P 8\" A inches", a.totalInches, 24.5);
+}
+
+console.log("\n=== Disappearing Nine Patch: shared fabric on both sections ===");
+{
+  const s = {
+    ...base(), pattern: "disappearing-nine-patch" as const, blockSize: 12, borderWidth: 0,
+    assignments: { center: "A" as FabricKey, outer: "A" as FabricKey },
+  };
+  // All 9 squares per block are A. 9*20 = 180 squares — but addSquares is
+  // called twice (5*20=100 then 4*20=80), so two buckets exist with the same
+  // cut size, summing to 180 pieces and 23 strips total (13 + 10).
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const totalPieces = a.pieces.reduce((acc, p) => acc + p.count, 0);
+  check("D9P shared A total pieces", totalPieces, 180);
+  const totalStrips = a.strips.reduce((acc, sp) => acc + sp.count, 0);
+  check("D9P shared A total strips", totalStrips, 23);
+}
+
+// =========================================================================
 // BORDER MATH
 // =========================================================================
 console.log("\n=== Border: 60×80 inner, 4\" border, 9P pattern ===");

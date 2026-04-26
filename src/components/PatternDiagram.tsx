@@ -273,24 +273,34 @@ function renderInner(
       );
     }
     case "disappearing-nine-patch": {
-      const center = get("center", "A");
-      const outer = get("outer", "B");
+      // Show the FINISHED (rearranged) block, not the original 9-patch.
+      // After slicing the 9-patch in half H+V and rotating each quarter 180°:
+      //   - the 4 original CORNER squares (Fabric A) meet at the new CENTER,
+      //     forming a 2×2 block of A in the middle (the "chain"),
+      //   - the original CENTER square (also A) splits into 4 quarter-pieces
+      //     that land at the 4 outer CORNERS of the new block,
+      //   - the 4 original ALTERNATING squares (Fabric B) split into halves
+      //     that wrap around the edges as the background.
+      // Drawn on a 6×6 grid (units of half-a-patch). u = 200/6.
+      const center = get("center", "A"); // Fabric A — corners + center of original 9-patch
+      const outer = get("outer", "B");   // Fabric B — the alternating squares
+      const u = 200 / 6;
       return (
         <>
-          {[0, 1, 2].flatMap((j) =>
-            [0, 1, 2].map((i) => (
-              <rect
-                key={`${i}-${j}`}
-                x={i * 66 + 2}
-                y={j * 66 + 2}
-                width={62}
-                height={62}
-                fill={(i + j) % 2 === 0 ? center : outer}
-              />
-            )),
-          )}
-          <line x1={100} y1={0} x2={100} y2={200} stroke="white" strokeWidth={3} />
-          <line x1={0} y1={100} x2={200} y2={100} stroke="white" strokeWidth={3} />
+          {/* Background fill = Fabric B (covers everything not painted with A) */}
+          <rect width={200} height={200} fill={outer} />
+          {/* Center 2×2 block of A (4 original corner squares meeting) */}
+          <rect x={2 * u} y={2 * u} width={2 * u} height={2 * u} fill={center} />
+          {/* 4 small A squares at the new outer corners (original center, quartered) */}
+          <rect x={0} y={0} width={u} height={u} fill={center} />
+          <rect x={5 * u} y={0} width={u} height={u} fill={center} />
+          <rect x={0} y={5 * u} width={u} height={u} fill={center} />
+          <rect x={5 * u} y={5 * u} width={u} height={u} fill={center} />
+          {/* Subtle grid lines marking the slice points (original 9-patch cuts) */}
+          <g stroke="white" strokeWidth={1.5} opacity={0.7}>
+            <line x1={3 * u} y1={0} x2={3 * u} y2={200} />
+            <line x1={0} y1={3 * u} x2={200} y2={3 * u} />
+          </g>
         </>
       );
     }
