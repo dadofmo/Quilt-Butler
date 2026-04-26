@@ -397,7 +397,64 @@ console.log("\n=== Disappearing Nine Patch: shared fabric on both sections ===")
 }
 
 // =========================================================================
-// BORDER MATH
+// SQUARES ON POINT
+// =========================================================================
+console.log("\n=== Squares on Point: 50×65, 12\" block, no border ===");
+{
+  const s = { ...base(), pattern: "squares-on-point" as const, blockSize: 12, borderWidth: 0 };
+  // 4×5 = 20 blocks.
+  // centerCut = 12/√2 + 0.5 ≈ 8.9853. Per strip floor(42.5/8.9853)=4. Strips=ceil(20/4)=5.
+  //   Inches = 5 * 8.9853 ≈ 44.9264.
+  // cornerCut = 12/2 + 0.875 = 6.875. Count = 2*20 = 40.
+  //   Per strip floor(42.5/6.875)=6. Strips=ceil(40/6)=7. Inches=7*6.875=48.125.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const expectedCenterCut = 12 / Math.SQRT2 + 0.5;
+  check("SoP A on-point count", a.pieces[0].count, 20);
+  check("SoP A center cut size", a.pieces[0].w, expectedCenterCut, 0.0001);
+  check("SoP A strips", a.strips[0].count, 5);
+  check("SoP A inches", a.totalInches, 5 * expectedCenterCut, 0.001);
+  check("SoP B corner-square count", b.pieces[0].count, 40);
+  check("SoP B corner cut size", b.pieces[0].w, 6.875);
+  check("SoP B strips", b.strips[0].count, 7);
+  check("SoP B inches", b.totalInches, 48.125);
+  check("SoP basics glossary attached", r.basics?.length ?? 0, 5);
+}
+
+console.log("\n=== Squares on Point: square & bg share fabric A ===");
+{
+  const s = {
+    ...base(), pattern: "squares-on-point" as const, blockSize: 12, borderWidth: 0,
+    assignments: { square: "A" as FabricKey, bg: "A" as FabricKey },
+  };
+  // A holds both buckets — different cut sizes, 2 buckets retained.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("SoP shared A bucket count", a.pieces.length, 2);
+  const totalPieces = a.pieces.reduce((acc, p) => acc + p.count, 0);
+  check("SoP shared A total pieces", totalPieces, 60); // 20 + 40
+  const expectedCenterCut = 12 / Math.SQRT2 + 0.5;
+  check("SoP shared A inches", a.totalInches, 5 * expectedCenterCut + 48.125, 0.001);
+}
+
+console.log("\n=== Squares on Point: 8\" block ===");
+{
+  const s = { ...base(), pattern: "squares-on-point" as const, quiltWidth: 32, quiltHeight: 32, blockSize: 8, borderWidth: 0 };
+  // 4×4 = 16 blocks.
+  // centerCut = 8/√2 + 0.5 ≈ 6.1569. Per strip floor(42.5/6.1569)=6. Strips=ceil(16/6)=3.
+  // cornerCut = 4 + 0.875 = 4.875. Count = 32. Per strip floor(42.5/4.875)=8. Strips=ceil(32/8)=4. Inches=4*4.875=19.5.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("SoP 8\" A count", a.pieces[0].count, 16);
+  check("SoP 8\" A strips", a.strips[0].count, 3);
+  check("SoP 8\" B count", b.pieces[0].count, 32);
+  check("SoP 8\" B strips", b.strips[0].count, 4);
+  check("SoP 8\" B inches", b.totalInches, 19.5);
+}
+
+
 // =========================================================================
 console.log("\n=== Border: 60×80 inner, 4\" border, 9P pattern ===");
 {
