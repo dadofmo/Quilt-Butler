@@ -51,7 +51,7 @@ export function StepShell({ step, title, subtitle, backTo, children }: Props) {
               alt="QuiltButler"
               width={900}
               height={600}
-              className="h-16 w-auto shrink-0 sm:h-20"
+              className="h-24 w-auto shrink-0 sm:h-30"
             />
           </div>
         )}
