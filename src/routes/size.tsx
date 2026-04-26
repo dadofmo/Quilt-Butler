@@ -350,85 +350,45 @@ function SizeStep() {
                       Options to get to desired finished quilt size{" "}
                       ({fit.quiltW}&quot; × {fit.quiltH}&quot;):
                     </p>
-                    <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed">
-                      <li className="text-muted-foreground">
-                        <span className="text-foreground">
-                          Keep your <strong>{blockSizeNum}&quot;</strong> block, change border to{" "}
-                        </span>
-                        {closestBorder ? (
-                          <button
-                            type="button"
-                            onClick={() => applyBorder(closestBorder.border)}
-                            className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
-                          >
-                            {closestBorder.border}&quot;
-                          </button>
-                        ) : (
-                          <span className="italic">
-                            no border between 0&quot; and 10&quot; gives an exact fit with this block size.
-                          </span>
-                        )}
-                        {closestBorder && (
-                          <span className="text-muted-foreground">
-                            {" "}({closestBorder.across} × {closestBorder.down} = {closestBorder.total} blocks)
-                          </span>
-                        )}
-                      </li>
-                      <li className="text-muted-foreground">
-                        <span className="text-foreground">
-                          Keep your <strong>{border}&quot;</strong> border, change block size to{" "}
-                        </span>
-                        {closestBlock ? (
-                          <button
-                            type="button"
-                            onClick={() => setBlockSizeText(String(closestBlock.size))}
-                            className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
-                          >
-                            {closestBlock.size}&quot;
-                          </button>
-                        ) : (
-                          <span className="italic">
-                            no block between 2&quot; and 15&quot; divides evenly with this border.
-                          </span>
-                        )}
-                        {closestBlock && (
-                          <span className="text-muted-foreground">
-                            {" "}({closestBlock.across} × {closestBlock.down} = {closestBlock.total} blocks)
-                          </span>
-                        )}
-                      </li>
-                      {comboOptions.length > 0 && (
-                        <li className="text-muted-foreground">
-                          <span className="text-foreground">
-                            Adjust the <strong>block grid layout</strong> — these
-                            combinations of block size + border give an exact{" "}
-                            {fit.quiltW}&quot; × {fit.quiltH}&quot; finish:
-                          </span>
-                          <ul className="mt-1.5 list-none space-y-1 pl-0">
-                            {comboOptions.map((c, i) => (
-                              <li key={`${c.block}-${c.border}`} className="text-muted-foreground">
-                                <span className="text-foreground font-semibold">
-                                  Option {i + 1}:{" "}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setBlockSizeText(String(c.block));
-                                    applyBorder(c.border);
-                                  }}
-                                  className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
-                                >
-                                  {c.block}&quot; block with a {c.border}&quot; border
-                                </button>
-                                <span className="text-muted-foreground">
-                                  {" "}({c.across} × {c.down} = {c.total} blocks)
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </li>
-                      )}
-                    </ul>
+                    {comboOptions.length > 0 ? (
+                      <>
+                        <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                          These block size + border combinations give an exact{" "}
+                          <strong className="text-foreground">
+                            {fit.quiltW}&quot; × {fit.quiltH}&quot;
+                          </strong>{" "}
+                          finish. Tap any option to apply it:
+                        </p>
+                        <ul className="mt-2 list-none space-y-1.5 pl-0 text-sm leading-relaxed">
+                          {comboOptions.map((c, i) => (
+                            <li key={`${c.block}-${c.border}`} className="text-muted-foreground">
+                              <span className="text-foreground font-semibold">
+                                Option {i + 1}:{" "}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setBlockSizeText(String(c.block));
+                                  applyBorder(c.border);
+                                }}
+                                className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
+                              >
+                                {c.block}&quot; block with a {c.border}&quot; border
+                              </button>
+                              <span className="text-muted-foreground">
+                                {" "}({c.across} × {c.down} = {c.total} blocks)
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : (
+                      <p className="text-muted-foreground mt-2 text-sm italic leading-relaxed">
+                        No reasonable block size + border combinations give an
+                        exact fit at this quilt size. Try adjusting your desired
+                        quilt size slightly.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
