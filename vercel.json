@@ -3,13 +3,7 @@
   "buildCommand": "vite build",
   "outputDirectory": "dist/client",
   "framework": null,
-  "functions": {
-    "dist/server/server.js": {
-      "runtime": "nodejs20.x"
-    }
-  },
   "rewrites": [
-    { "source": "/assets/(.*)", "destination": "/assets/$1" },
-    { "source": "/(.*)", "destination": "/dist/server/server.js" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
