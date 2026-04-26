@@ -114,10 +114,10 @@ function ResultsStep() {
                 <tbody>
                   {result.fabrics.map((f) => (
                     <tr key={f.fabric} className="border-t border-border">
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-1">
                         <div className="flex items-center gap-2">
                           <span
-                            className="border-border inline-block h-5 w-5 rounded border"
+                            className="border-border inline-block h-9 w-9 rounded border"
                             style={fabricBackgroundStyle(f.fabric, planner.fabricPhotos)}
                           />
                           <span className="font-semibold">{f.fabric}</span>
