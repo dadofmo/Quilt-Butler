@@ -158,11 +158,21 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     case "plus-block":
+      // 3×3 grid — center column + center row form the "+", 4 corners are bg.
       return (
         <svg {...common} aria-hidden>
-          <rect width={90} height={90} fill={C.b} />
-          <rect x={30} y={0} width={30} height={90} fill={C.a} />
-          <rect x={0} y={30} width={90} height={30} fill={C.a} />
+          {[0, 1, 2].flatMap((j) =>
+            [0, 1, 2].map((i) => (
+              <rect
+                key={`${i}-${j}`}
+                x={i * 30}
+                y={j * 30}
+                width={30}
+                height={30}
+                fill={i === 1 || j === 1 ? C.a : C.b}
+              />
+            )),
+          )}
         </svg>
       );
   }
