@@ -307,18 +307,19 @@ function renderInner(
     case "squares-on-point": {
       const sq = get("square", "A");
       const bg = get("bg", "B");
+      // Square-in-a-square: 1 on-point square (diamond) per block whose
+      // points touch the midpoints of each block edge. The 4 corner
+      // triangles are the background. Matches the yardage math
+      // (centerSide = blockSize / √2).
       return (
         <>
           <rect width={200} height={200} fill={bg} />
-          {[50, 150].flatMap((cy) =>
-            [50, 150].map((cx) => (
-              <polygon
-                key={`${cx}-${cy}`}
-                points={`${cx},${cy - 32} ${cx + 32},${cy} ${cx},${cy + 32} ${cx - 32},${cy}`}
-                fill={sq}
-              />
-            )),
-          )}
+          <polygon points="100,0 200,100 100,200 0,100" fill={sq} />
+          {/* Subtle guide lines along the diamond edges so beginners can see
+              the corner triangles as separate pieces. */}
+          <g stroke="white" strokeWidth={1.5} opacity={0.6} fill="none">
+            <polygon points="100,0 200,100 100,200 0,100" />
+          </g>
         </>
       );
     }

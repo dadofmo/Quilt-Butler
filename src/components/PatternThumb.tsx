@@ -149,18 +149,12 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       );
     }
     case "squares-on-point":
+      // Single on-point diamond per block — matches PatternDiagram, MiniBlock,
+      // and the square-in-a-square yardage math.
       return (
         <svg {...common} aria-hidden>
           <rect width={90} height={90} fill={C.b} />
-          {[22.5, 67.5].flatMap((cy) =>
-            [22.5, 67.5].map((cx) => (
-              <polygon
-                key={`${cx}-${cy}`}
-                points={`${cx},${cy - 14} ${cx + 14},${cy} ${cx},${cy + 14} ${cx - 14},${cy}`}
-                fill={C.a}
-              />
-            )),
-          )}
+          <polygon points="45,0 90,45 45,90 0,45" fill={C.a} />
         </svg>
       );
     case "plus-block":

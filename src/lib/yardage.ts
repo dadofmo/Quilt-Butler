@@ -571,6 +571,53 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Layout tip: D9P blocks look great in a straight grid (the chains line up across the whole quilt) OR rotated so every other block is turned 90° for a more scattered look. Try both on the floor before sewing the rows together.`,
     );
+  } else if (s.pattern === "squares-on-point") {
+    // Squares on Point construction (classic "square-in-a-square" unit):
+    //   The on-point square's POINTS touch the midpoints of each block edge,
+    //   so its diagonal = blockSize. Side = blockSize / √2.
+    //   Center on-point square cut size = (blockSize / √2) + 0.5"
+    //     (finished side + 1/2" seam allowance, like any straight-edge cut).
+    //   Corner triangles: 2 squares cut at (blockSize / 2) + 0.875" per block,
+    //     each cut once on the diagonal → 4 triangles per block (one per
+    //     corner). The +7/8" matches the standard HST formula since two of
+    //     the triangle's edges become diagonal-cut and need extra room.
+    //
+    // Per block: 1 on-point center square + 2 corner squares (yielding 4
+    // corner triangles).
+    const SQRT2 = Math.SQRT2;
+    const centerCut = s.blockSize / SQRT2 + SEAM;
+    const cornerCut = s.blockSize / 2 + HST_EXTRA;
+
+    const sqFab = (s.assignments["square"] ?? "A") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
+
+    const centerCount = blockCount;       // 1 on-point square per block
+    const cornerSqCount = 2 * blockCount; // 2 corner squares per block (→ 4 triangles)
+
+    addSquares(reqs[sqFab], "On-point center squares", centerCount, centerCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Corner-triangle squares", cornerSqCount, cornerCut, s.fabricWidth);
+
+    notes.push(
+      `Each block = 1 on-point square (cut ${centerCut.toFixed(2)}") framed by 4 background corner triangles. The on-point square's points touch the midpoints of each block edge, so its finished side = ${(s.blockSize / SQRT2).toFixed(2)}" (block size ÷ √2).`,
+    );
+    notes.push(
+      `For the 4 corner triangles, cut 2 background squares at ${cornerCut.toFixed(2)}" per block — each square gets cut once on the diagonal to make 2 triangles. The +7/8" extra matches the standard half-square-triangle formula because two of each triangle's edges end up on the bias.`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${centerCount} on-point squares (Fabric ${sqFab}) and ${cornerSqCount} corner-triangle squares (Fabric ${bgFab}, which yield ${4 * blockCount} triangles).`,
+    );
+    notes.push(
+      `How to sew ONE block (square-in-a-square): take the 2 corner-triangle squares for this block and cut each one once corner-to-corner on the diagonal — you'll have 4 right triangles. Lay the on-point center square in front of you printed side up, oriented as a regular square (not yet rotated).`,
+    );
+    notes.push(
+      `Take one corner triangle and place it on the TOP edge of the center square right sides together (RST), with the triangle's long edge (the hypotenuse — the diagonal cut you just made) lined up exactly along the top edge of the center square. The triangle's point will sit centered above the square. Sew a 1/4" seam along that lined-up edge, then unfold the triangle up and away. Press the seam toward the triangle.`,
+    );
+    notes.push(
+      `Repeat with a second triangle on the BOTTOM edge of the center square (RST, hypotenuse lined up with the bottom edge, sew, unfold, press). Now do the LEFT and RIGHT edges the same way. After all 4 triangles are attached and pressed, the center square will appear rotated 45° inside a larger square. Trim the block to ${(s.blockSize + SEAM).toFixed(2)}" — the corner triangles are cut slightly oversized on purpose so you have room to true up the block.`,
+    );
+    notes.push(
+      `Layout tip: Squares on Point looks great as a straight grid (every diamond facing the same way) or alternating with plain background squares for a "diamonds floating in a sky" effect. Try a few layouts before sewing the rows together.`,
+    );
   }
 
   // Border
@@ -609,7 +656,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "log-cabin" ||
     s.pattern === "ohio-star" ||
     s.pattern === "flying-geese" ||
-    s.pattern === "disappearing-nine-patch";
+    s.pattern === "disappearing-nine-patch" ||
+    s.pattern === "squares-on-point";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
