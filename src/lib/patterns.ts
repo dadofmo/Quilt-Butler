@@ -164,11 +164,22 @@ export const PATTERNS: PatternDef[] = [
   {
     id: "plus-block",
     name: "Plus Block",
-    hasMath: false,
-    intro: "A simple plus/cross shape on a background.",
+    hasMath: true,
+    intro:
+      "Each block is a 3×3 grid where the center column + center row form a bold '+' on a background. The 5 plus squares (center + 4 around it) use one fabric; the 4 corner squares use a contrasting background fabric.",
     sections: [
-      { id: "plus", label: "Plus shape", defaultFabric: "A" },
-      { id: "bg", label: "Background", defaultFabric: "B" },
+      {
+        id: "plus",
+        label: "Plus squares (5 per block)",
+        defaultFabric: "A",
+        hint: "The 5 squares forming the '+': center + the 4 squares directly above, below, left, and right of it. Usually the boldest fabric so the plus reads clearly.",
+      },
+      {
+        id: "bg",
+        label: "Background corners (4 per block)",
+        defaultFabric: "B",
+        hint: "The 4 corner squares around the '+'. Pick something that contrasts with the plus fabric.",
+      },
       borderSection,
     ],
   },

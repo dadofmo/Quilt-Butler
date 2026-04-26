@@ -618,6 +618,40 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Layout tip: Squares on Point looks great as a straight grid (every diamond facing the same way) or alternating with plain background squares for a "diamonds floating in a sky" effect. Try a few layouts before sewing the rows together.`,
     );
+  } else if (s.pattern === "plus-block") {
+    // Plus Block construction:
+    //   3×3 grid of equal squares. Center column + center row = the "+" (5
+    //   squares), the 4 corners = background. Same cut math as Nine Patch:
+    //     unitFinished = blockSize / 3
+    //     cut = unitFinished + 0.5"
+    //   Per block: 5 plus squares + 4 background corner squares.
+    const unitFinished = s.blockSize / 3;
+    const cut = unitFinished + SEAM;
+    const plusCount = 5 * blockCount;
+    const bgCount = 4 * blockCount;
+    const plusFab = (s.assignments["plus"] ?? "A") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
+    addSquares(reqs[plusFab], "Plus squares", plusCount, cut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Background corner squares", bgCount, cut, s.fabricWidth);
+
+    notes.push(
+      `Each block = 3×3 grid of ${unitFinished.toFixed(2)}"-finished squares (cut at ${cut.toFixed(2)}"). The center square + the 4 squares directly above, below, left, and right of it form the "+" — that's 5 plus squares per block. The 4 corner squares are background.`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${plusCount} squares of Fabric ${plusFab} (5 × ${blockCount}, the "+") and ${bgCount} squares of Fabric ${bgFab} (4 × ${blockCount}, the corners).`,
+    );
+    notes.push(
+      `How to sew ONE block (3 rows of 3 squares): lay out the 9 squares for one block in front of you in a 3×3 grid — Row 1: bg corner, plus, bg corner. Row 2: plus, plus (center), plus. Row 3: bg corner, plus, bg corner. The 5 plus squares should form a clear "+" with the 4 background squares in the corners.`,
+    );
+    notes.push(
+      `Sew Row 1 first: place the bg corner and the plus square right sides together (RST), line up the right edge, sew a 1/4" seam. Unfold and press the seam toward the darker fabric. Now place the second bg corner on the right side of the plus square RST, line up the right edge, sew, unfold, press. You now have one row of 3 squares. Repeat for Row 2 and Row 3.`,
+    );
+    notes.push(
+      `Now sew the 3 rows together: place Row 1 on top of Row 2 RST, lining up the bottom edge of Row 1 with the top edge of Row 2 — make sure the vertical seams between squares match up exactly (a pin through each seam intersection helps). Sew a 1/4" seam across the whole edge, unfold, and press. Add Row 3 to the bottom of Row 2 the same way. The "+" should now read clearly across the finished block.`,
+    );
+    notes.push(
+      `Layout tip: Plus Blocks look striking sewn edge-to-edge in a straight grid (every "+" facing the same direction) so the plus shapes float on a sea of background. For a more scattered look, try mixing in a few blocks where the plus and background fabrics are swapped.`,
+    );
   }
 
   // Border
@@ -657,7 +691,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "ohio-star" ||
     s.pattern === "flying-geese" ||
     s.pattern === "disappearing-nine-patch" ||
-    s.pattern === "squares-on-point";
+    s.pattern === "squares-on-point" ||
+    s.pattern === "plus-block";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

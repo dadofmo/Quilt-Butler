@@ -401,11 +401,23 @@ function MiniBlock({
     case "plus-block": {
       const plus = get("plus", "A");
       const bg = get("bg", "B");
+      // 3×3 grid of equal squares — same geometry as PatternDiagram.
+      const u = 200 / 3;
+      const isPlus = (i: number, j: number) => i === 1 || j === 1;
       return (
         <>
-          <rect width={200} height={200} fill={bg} />
-          <rect x={70} width={60} height={200} fill={plus} />
-          <rect y={70} width={200} height={60} fill={plus} />
+          {[0, 1, 2].flatMap((j) =>
+            [0, 1, 2].map((i) => (
+              <rect
+                key={`${i}-${j}`}
+                x={i * u}
+                y={j * u}
+                width={u}
+                height={u}
+                fill={isPlus(i, j) ? plus : bg}
+              />
+            )),
+          )}
         </>
       );
     }
