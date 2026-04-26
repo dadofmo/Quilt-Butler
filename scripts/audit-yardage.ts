@@ -454,7 +454,8 @@ console.log("\n=== Squares on Point: 8\" block ===");
   check("SoP 8\" B inches", b.totalInches, 19.5);
 }
 
-
+// =========================================================================
+// BORDER MATH
 // =========================================================================
 console.log("\n=== Border: 60×80 inner, 4\" border, 9P pattern ===");
 {
