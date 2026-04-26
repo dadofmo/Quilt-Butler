@@ -608,7 +608,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "rail-fence" ||
     s.pattern === "log-cabin" ||
     s.pattern === "ohio-star" ||
-    s.pattern === "flying-geese";
+    s.pattern === "flying-geese" ||
+    s.pattern === "disappearing-nine-patch";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
