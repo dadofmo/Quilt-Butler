@@ -528,6 +528,49 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Layout tip: arrange every block with the geese all flying the same direction for the classic "flock" look, OR alternate rows pointing up/down for a chevron pattern. Try a few orientations on the floor before sewing the rows together.`,
     );
+  } else if (s.pattern === "disappearing-nine-patch") {
+    // Disappearing Nine Patch construction:
+    //   Sew a standard 3×3 nine-patch, then slice it in half horizontally
+    //   AND vertically (2 extra seams). Rotate each of the 4 quarter-blocks
+    //   180° and sew back together → a pinwheel/chain block from 2 fabrics.
+    //
+    // KEY MATH: the 2 extra seams shrink the finished block by 1" total
+    // (1/2" per new cut — 1/4" seam allowance on each side). To make the
+    // user's chosen blockSize the FINAL finished size, we start with a
+    // 9-patch whose patches finish at (blockSize + 1) / 3 — so the original
+    // 9-patch finishes at blockSize + 1, then loses 1" to the new seams.
+    //
+    // Per starting block: 5 center/corner squares + 4 alternating squares
+    // (identical piece counts to a regular Nine Patch).
+    const finalBlock = s.blockSize;
+    const startingBlock = finalBlock + 1; // before the slice-and-rotate
+    const patchFinished = startingBlock / 3;
+    const cut = patchFinished + SEAM;
+    const centerCount = 5 * blockCount;
+    const outerCount = 4 * blockCount;
+    const centerFab = (s.assignments["center"] ?? "A") as FabricKey;
+    const outerFab = (s.assignments["outer"] ?? "B") as FabricKey;
+    addSquares(reqs[centerFab], "Center & corner squares", centerCount, cut, s.fabricWidth);
+    addSquares(reqs[outerFab], "Alternating squares", outerCount, cut, s.fabricWidth);
+
+    notes.push(
+      `Each finished Disappearing Nine Patch block is ${finalBlock}" — but you start by sewing a slightly LARGER ${startingBlock}" nine-patch (each small square finishes at ${patchFinished.toFixed(2)}", cut at ${cut.toFixed(2)}"). The two extra seams from slicing the block in half horizontally and vertically eat up exactly 1" total, leaving the final block at ${finalBlock}".`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${centerCount} squares of Fabric ${centerFab} (5 × ${blockCount}, the corner+center squares of each starting nine-patch) and ${outerCount} squares of Fabric ${outerFab} (4 × ${blockCount}, the alternating squares).`,
+    );
+    notes.push(
+      `Step 1 — Sew the nine-patch: arrange 9 squares in a 3×3 grid for each block, with Fabric ${centerFab} in the 4 corners + center and Fabric ${outerFab} in the 4 alternating positions (a checkerboard). Sew each row of 3 squares together with a 1/4" seam, then sew the 3 rows together. Press all seams toward the darker fabric. You should have a flat ${startingBlock}"-finished nine-patch block.`,
+    );
+    notes.push(
+      `Step 2 — Slice it: lay the nine-patch flat on a cutting mat. Find the exact horizontal midpoint and cut straight across with a rotary cutter — right through the middle row of squares. Then find the exact vertical midpoint and cut straight down through the middle column. You'll end up with 4 quarter-blocks, each containing pieces of both fabrics. Don't worry about cutting "through" the middle squares — that's the whole point of the technique.`,
+    );
+    notes.push(
+      `Step 3 — Rotate & rearrange: rotate each of the 4 quarter-blocks 180° (a half-turn). The original CORNER squares of the nine-patch (Fabric ${centerFab}) now meet in the MIDDLE of the new block, forming a chain. The original CENTER square gets split across all 4 quarters and ends up at the new corners. Sew the 4 quarter-blocks back together — top two RST first, bottom two RST, then join the two halves — with 1/4" seams. Press the seams open or to one side. Your finished D9P block is now ${finalBlock}".`,
+    );
+    notes.push(
+      `Layout tip: D9P blocks look great in a straight grid (the chains line up across the whole quilt) OR rotated so every other block is turned 90° for a more scattered look. Try both on the floor before sewing the rows together.`,
+    );
   }
 
   // Border
