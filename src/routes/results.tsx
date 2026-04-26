@@ -463,7 +463,7 @@ function ShoppingList({
             <ShoppingLineRow
               key={f.fabric}
               id={id}
-              label={FABRIC_LABELS[f.fabric]}
+              label={fabricPhotos[f.fabric] ? `Fabric ${f.fabric}` : FABRIC_LABELS[f.fabric]}
               qty={f.yards}
               unit="yd"
               price={itemPrices[id] ?? ""}
