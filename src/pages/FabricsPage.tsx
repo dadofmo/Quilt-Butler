@@ -240,7 +240,7 @@ function FabricsStepInner() {
           })}
 
           <button
-            onClick={() => navigate({ to: "/results" })}
+            onClick={() => navigate("/results")}
             className="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-xl px-6 py-4 text-lg font-semibold shadow-sm transition-colors"
           >
             See your quilt plan →

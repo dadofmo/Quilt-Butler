@@ -229,7 +229,7 @@ function SizeStepInner() {
       blockSize: blockSizeNum,
       borderWidth: border,
     });
-    navigate({ to: "/fabrics" });
+    navigate("/fabrics");
   };
 
   return (

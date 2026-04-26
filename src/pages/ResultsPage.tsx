@@ -66,7 +66,7 @@ function ResultsStepInner() {
               In the meantime, here's what else you'll need regardless of pattern:
             </p>
             <button
-              onClick={() => navigate({ to: "/" })}
+              onClick={() => navigate("/")}
               className="bg-primary text-primary-foreground hover:bg-primary/90 mt-5 inline-flex rounded-xl px-5 py-3 text-base font-semibold"
             >
               Try another pattern
