@@ -68,6 +68,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Main app component — renders the active route via TanStack Router's <Outlet />
 function RootComponent() {
   return <Outlet />;
 }
