@@ -460,7 +460,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Press both HSTs open (seam toward the darker fabric). Now stack the 2 HSTs RST so the star triangle of one sits on the background triangle of the other, and the seams "nest" together (run them under your finger — when they lock into each other you've got it). On the back of the top HST, draw a NEW diagonal line — this one runs perpendicular to the first seam (corner-to-corner across the seam, not along it). Sew 1/4" each side of this new line, cut on the drawn line, unfold, and press. You now have 2 finished QST units, each showing 4 little triangles meeting in the middle: 2 star triangles forming a "bowtie" along one diagonal and 2 background triangles along the other. Trim each QST to ${(unitFinished + SEAM).toFixed(2)}" square.`,
     );
     notes.push(
-      `Assemble the block as a 3×3 grid: row 1 = bg corner, QST (star points up), bg corner. Row 2 = QST (star points left), center square, QST (star points right). Row 3 = bg corner, QST (star points down), bg corner. Sew each row across, press, then sew the 3 rows together — the 8 star points should meet cleanly at the center square.`,
+      `Assemble the block as a 3×3 grid: row 1 = background corner, QST (star points up), background corner. Row 2 = QST (star points left), center square, QST (star points right). Row 3 = background corner, QST (star points down), background corner. Sew each row across, press, then sew the 3 rows together — the 8 star points should meet cleanly at the center square.`,
     );
 
   } else if (s.pattern === "flying-geese") {
@@ -641,10 +641,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Across all ${blockCount} blocks: ${plusCount} squares of Fabric ${plusFab} (5 × ${blockCount}, the "+") and ${bgCount} squares of Fabric ${bgFab} (4 × ${blockCount}, the corners).`,
     );
     notes.push(
-      `How to sew ONE block (3 rows of 3 squares): lay out the 9 squares for one block in front of you in a 3×3 grid — Row 1: bg corner, plus, bg corner. Row 2: plus, plus (center), plus. Row 3: bg corner, plus, bg corner. The 5 plus squares should form a clear "+" with the 4 background squares in the corners.`,
+      `How to sew ONE block (3 rows of 3 squares): lay out the 9 squares for one block in front of you in a 3×3 grid — Row 1: background corner, plus, background corner. Row 2: plus, plus (center), plus. Row 3: background corner, plus, background corner. The 5 plus squares should form a clear "+" with the 4 background squares in the corners.`,
     );
     notes.push(
-      `Sew Row 1 first: place the bg corner and the plus square right sides together (RST), line up the right edge, sew a 1/4" seam. Unfold and press the seam toward the darker fabric. Now place the second bg corner on the right side of the plus square RST, line up the right edge, sew, unfold, press. You now have one row of 3 squares. Repeat for Row 2 and Row 3.`,
+      `Sew Row 1 first: place the background corner and the plus square right sides together (RST), line up the right edge, sew a 1/4" seam. Unfold and press the seam toward the darker fabric. Now place the second background corner on the right side of the plus square RST, line up the right edge, sew, unfold, press. You now have one row of 3 squares. Repeat for Row 2 and Row 3.`,
     );
     notes.push(
       `Now sew the 3 rows together: place Row 1 on top of Row 2 RST, lining up the bottom edge of Row 1 with the top edge of Row 2 — make sure the vertical seams between squares match up exactly (a pin through each seam intersection helps). Sew a 1/4" seam across the whole edge, unfold, and press. Add Row 3 to the bottom of Row 2 the same way. The "+" should now read clearly across the finished block.`,
