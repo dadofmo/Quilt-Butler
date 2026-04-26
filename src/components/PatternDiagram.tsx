@@ -326,11 +326,32 @@ function renderInner(
     case "plus-block": {
       const plus = get("plus", "A");
       const bg = get("bg", "B");
+      // 3×3 grid of equal squares — center column + center row form the "+"
+      // (5 plus squares), 4 corners are background. Matches the yardage math.
+      const u = 200 / 3;
+      const isPlus = (i: number, j: number) => i === 1 || j === 1;
       return (
         <>
-          <rect width={200} height={200} fill={bg} />
-          <rect x={70} y={0} width={60} height={200} fill={plus} />
-          <rect x={0} y={70} width={200} height={60} fill={plus} />
+          {[0, 1, 2].flatMap((j) =>
+            [0, 1, 2].map((i) => (
+              <rect
+                key={`${i}-${j}`}
+                x={i * u}
+                y={j * u}
+                width={u}
+                height={u}
+                fill={isPlus(i, j) ? plus : bg}
+              />
+            )),
+          )}
+          {/* Subtle 3×3 grid lines so beginners can see each square as a
+              separate cut piece. */}
+          <g stroke="white" strokeWidth={1} opacity={0.6}>
+            <line x1={u} y1={0} x2={u} y2={200} />
+            <line x1={2 * u} y1={0} x2={2 * u} y2={200} />
+            <line x1={0} y1={u} x2={200} y2={u} />
+            <line x1={0} y1={2 * u} x2={200} y2={2 * u} />
+          </g>
         </>
       );
     }
