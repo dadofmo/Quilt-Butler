@@ -641,10 +641,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Across all ${blockCount} blocks: ${plusCount} squares of Fabric ${plusFab} (5 × ${blockCount}, the "+") and ${bgCount} squares of Fabric ${bgFab} (4 × ${blockCount}, the corners).`,
     );
     notes.push(
-      `How to sew ONE block (3 rows of 3 squares): lay out the 9 squares for one block in front of you in a 3×3 grid — Row 1: bg corner, plus, bg corner. Row 2: plus, plus (center), plus. Row 3: bg corner, plus, bg corner. The 5 plus squares should form a clear "+" with the 4 background squares in the corners.`,
+      `How to sew ONE block (3 rows of 3 squares): lay out the 9 squares for one block in front of you in a 3×3 grid — Row 1: background corner, plus, background corner. Row 2: plus, plus (center), plus. Row 3: background corner, plus, background corner. The 5 plus squares should form a clear "+" with the 4 background squares in the corners.`,
     );
     notes.push(
-      `Sew Row 1 first: place the bg corner and the plus square right sides together (RST), line up the right edge, sew a 1/4" seam. Unfold and press the seam toward the darker fabric. Now place the second bg corner on the right side of the plus square RST, line up the right edge, sew, unfold, press. You now have one row of 3 squares. Repeat for Row 2 and Row 3.`,
+      `Sew Row 1 first: place the background corner and the plus square right sides together (RST), line up the right edge, sew a 1/4" seam. Unfold and press the seam toward the darker fabric. Now place the second background corner on the right side of the plus square RST, line up the right edge, sew, unfold, press. You now have one row of 3 squares. Repeat for Row 2 and Row 3.`,
     );
     notes.push(
       `Now sew the 3 rows together: place Row 1 on top of Row 2 RST, lining up the bottom edge of Row 1 with the top edge of Row 2 — make sure the vertical seams between squares match up exactly (a pin through each seam intersection helps). Sew a 1/4" seam across the whole edge, unfold, and press. Add Row 3 to the bottom of Row 2 the same way. The "+" should now read clearly across the finished block.`,
