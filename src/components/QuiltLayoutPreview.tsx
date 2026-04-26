@@ -231,8 +231,7 @@ function MiniBlock({
       const c = get("squares", "A");
       return <rect width={200} height={200} fill={c} />;
     }
-    case "nine-patch":
-    case "disappearing-nine-patch": {
+    case "nine-patch": {
       const center = get("center", "A");
       const outer = get("outer", "B");
       return (
@@ -249,6 +248,23 @@ function MiniBlock({
               />
             )),
           )}
+        </>
+      );
+    }
+    case "disappearing-nine-patch": {
+      // Match PatternDiagram: render the FINISHED (rearranged) block —
+      // 2×2 center of A, 4 small A corners, B background.
+      const center = get("center", "A");
+      const outer = get("outer", "B");
+      const u = 200 / 6;
+      return (
+        <>
+          <rect width={200} height={200} fill={outer} />
+          <rect x={2 * u} y={2 * u} width={2 * u} height={2 * u} fill={center} />
+          <rect x={0} y={0} width={u} height={u} fill={center} />
+          <rect x={5 * u} y={0} width={u} height={u} fill={center} />
+          <rect x={0} y={5 * u} width={u} height={u} fill={center} />
+          <rect x={5 * u} y={5 * u} width={u} height={u} fill={center} />
         </>
       );
     }
