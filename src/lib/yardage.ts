@@ -460,7 +460,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Press both HSTs open (seam toward the darker fabric). Now stack the 2 HSTs RST so the star triangle of one sits on the background triangle of the other, and the seams "nest" together (run them under your finger — when they lock into each other you've got it). On the back of the top HST, draw a NEW diagonal line — this one runs perpendicular to the first seam (corner-to-corner across the seam, not along it). Sew 1/4" each side of this new line, cut on the drawn line, unfold, and press. You now have 2 finished QST units, each showing 4 little triangles meeting in the middle: 2 star triangles forming a "bowtie" along one diagonal and 2 background triangles along the other. Trim each QST to ${(unitFinished + SEAM).toFixed(2)}" square.`,
     );
     notes.push(
-      `Assemble the block as a 3×3 grid: row 1 = bg corner, QST (star points up), bg corner. Row 2 = QST (star points left), center square, QST (star points right). Row 3 = bg corner, QST (star points down), bg corner. Sew each row across, press, then sew the 3 rows together — the 8 star points should meet cleanly at the center square.`,
+      `Assemble the block as a 3×3 grid: row 1 = background corner, QST (star points up), background corner. Row 2 = QST (star points left), center square, QST (star points right). Row 3 = background corner, QST (star points down), background corner. Sew each row across, press, then sew the 3 rows together — the 8 star points should meet cleanly at the center square.`,
     );
 
   } else if (s.pattern === "flying-geese") {
