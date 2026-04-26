@@ -146,6 +146,10 @@ function SizeStep() {
       total: number;
       score: number;
     };
+    // Minimum reasonable finished block size for beginners — anything
+    // smaller produces tiny pieces that are tedious to cut and sew.
+    const MIN_BLOCK = 4;
+    const MAX_COMBO_OPTIONS = 10;
     const comboSuggestions: ComboSuggestion[] = [];
     if (!perfect) {
       for (let b2 = 0; b2 <= 40; b2++) {
@@ -153,19 +157,17 @@ function SizeStep() {
         const iw = quiltW - 2 * bd;
         const ih = quiltH - 2 * bd;
         if (iw <= 0 || ih <= 0) continue;
-        for (let s4 = 8; s4 <= 60; s4++) {
+        // Start from MIN_BLOCK (in quarter-inch increments) so we never
+        // suggest impractically small blocks.
+        for (let s4 = MIN_BLOCK * 4; s4 <= 60; s4++) {
           const s = s4 / 4;
           const aw = iw / s;
           const ah = ih / s;
           if (isInt(aw) && isInt(ah) && Math.round(aw) >= 1 && Math.round(ah) >= 1) {
             const total = Math.round(aw) * Math.round(ah);
             if (total > MAX_BLOCKS) continue;
-            // Skip pairs already covered by single-variable lists.
-            const sameBlock = Math.abs(s - blockSizeNum) < 0.001;
-            const sameBorder = Math.abs(bd - border) < 0.001;
-            if (sameBlock || sameBorder) continue;
-            // Weight block changes a bit more than border changes — quilters
-            // are usually more attached to their block size than border width.
+            // Score by closeness to the user's current choices so the
+            // smallest adjustments float to the top.
             const score =
               Math.abs(s - blockSizeNum) * 1.5 + Math.abs(bd - border) * 1.0;
             comboSuggestions.push({
@@ -182,44 +184,11 @@ function SizeStep() {
       comboSuggestions.sort((a, b) => a.score - b.score);
     }
 
-    // Diversify combo suggestions so the user sees a meaningful spread of
-    // options — a smaller block, a similar-size block, and a larger block —
-    // rather than 4 near-duplicates clustered around one size. We bucket by
-    // block size relative to the user's current choice and pick the
-    // best-scored option from each bucket.
-    const diversifiedCombos: ComboSuggestion[] = [];
-    if (comboSuggestions.length > 0) {
-      const smaller = comboSuggestions.filter((c) => c.block < blockSizeNum);
-      const larger = comboSuggestions.filter((c) => c.block > blockSizeNum);
-      // Already sorted by score (closeness). Take a few from each side.
-      const picks: ComboSuggestion[] = [];
-      // Closest overall first.
-      if (comboSuggestions[0]) picks.push(comboSuggestions[0]);
-      // Then alternate: smallest-block option, largest-block option, then
-      // additional close options to round out the list.
-      const smallestBlock = [...smaller].sort((a, b) => a.block - b.block)[0];
-      const largestBlock = [...larger].sort((a, b) => b.block - a.block)[0];
-      if (smallestBlock) picks.push(smallestBlock);
-      if (largestBlock) picks.push(largestBlock);
-      // Fill remaining slots with next-closest options not already picked.
-      for (const c of comboSuggestions) {
-        if (picks.length >= 5) break;
-        if (!picks.some((p) => p.block === c.block && p.border === c.border)) {
-          picks.push(c);
-        }
-      }
-      // De-dupe and re-sort by block size (ascending) so options read
-      // smallest → largest, which is easier to scan.
-      const seen = new Set<string>();
-      for (const p of picks) {
-        const key = `${p.block}-${p.border}`;
-        if (!seen.has(key)) {
-          seen.add(key);
-          diversifiedCombos.push(p);
-        }
-      }
-      diversifiedCombos.sort((a, b) => a.block - b.block);
-    }
+    // Take the top N closest options (capped) and re-sort by block size
+    // ascending so the list reads smallest → largest for easier scanning.
+    const diversifiedCombos: ComboSuggestion[] = comboSuggestions
+      .slice(0, MAX_COMBO_OPTIONS)
+      .sort((a, b) => a.block - b.block);
 
     return {
       perfect,
@@ -234,7 +203,7 @@ function SizeStep() {
       quiltH,
       blockSuggestions: blockSuggestions.slice(0, 4),
       borderSuggestions: borderSuggestions.slice(0, 3),
-      comboSuggestions: diversifiedCombos.slice(0, 5),
+      comboSuggestions: diversifiedCombos,
     };
   }, [blockSizeValid, blockSizeNum, w, h, border]);
 
@@ -347,8 +316,6 @@ function SizeStep() {
           const actualW = fit.blocksAcross * blockSizeNum + 2 * border;
           const actualH = fit.blocksDown * blockSizeNum + 2 * border;
           const matchesDesired = fit.perfect;
-          const closestBorder = fit.borderSuggestions[0];
-          const closestBlock = fit.blockSuggestions[0];
           const comboOptions = fit.comboSuggestions;
           return (
             <Field label="Finished quilt size">
@@ -381,85 +348,45 @@ function SizeStep() {
                       Options to get to desired finished quilt size{" "}
                       ({fit.quiltW}&quot; × {fit.quiltH}&quot;):
                     </p>
-                    <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed">
-                      <li className="text-muted-foreground">
-                        <span className="text-foreground">
-                          Keep your <strong>{blockSizeNum}&quot;</strong> block, change border to{" "}
-                        </span>
-                        {closestBorder ? (
-                          <button
-                            type="button"
-                            onClick={() => applyBorder(closestBorder.border)}
-                            className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
-                          >
-                            {closestBorder.border}&quot;
-                          </button>
-                        ) : (
-                          <span className="italic">
-                            no border between 0&quot; and 10&quot; gives an exact fit with this block size.
-                          </span>
-                        )}
-                        {closestBorder && (
-                          <span className="text-muted-foreground">
-                            {" "}({closestBorder.across} × {closestBorder.down} = {closestBorder.total} blocks)
-                          </span>
-                        )}
-                      </li>
-                      <li className="text-muted-foreground">
-                        <span className="text-foreground">
-                          Keep your <strong>{border}&quot;</strong> border, change block size to{" "}
-                        </span>
-                        {closestBlock ? (
-                          <button
-                            type="button"
-                            onClick={() => setBlockSizeText(String(closestBlock.size))}
-                            className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
-                          >
-                            {closestBlock.size}&quot;
-                          </button>
-                        ) : (
-                          <span className="italic">
-                            no block between 2&quot; and 15&quot; divides evenly with this border.
-                          </span>
-                        )}
-                        {closestBlock && (
-                          <span className="text-muted-foreground">
-                            {" "}({closestBlock.across} × {closestBlock.down} = {closestBlock.total} blocks)
-                          </span>
-                        )}
-                      </li>
-                      {comboOptions.length > 0 && (
-                        <li className="text-muted-foreground">
-                          <span className="text-foreground">
-                            Adjust the <strong>block grid layout</strong> — these
-                            combinations of block size + border give an exact{" "}
-                            {fit.quiltW}&quot; × {fit.quiltH}&quot; finish:
-                          </span>
-                          <ul className="mt-1.5 list-none space-y-1 pl-0">
-                            {comboOptions.map((c, i) => (
-                              <li key={`${c.block}-${c.border}`} className="text-muted-foreground">
-                                <span className="text-foreground font-semibold">
-                                  Option {i + 1}:{" "}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setBlockSizeText(String(c.block));
-                                    applyBorder(c.border);
-                                  }}
-                                  className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
-                                >
-                                  {c.block}&quot; block with a {c.border}&quot; border
-                                </button>
-                                <span className="text-muted-foreground">
-                                  {" "}({c.across} × {c.down} = {c.total} blocks)
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </li>
-                      )}
-                    </ul>
+                    {comboOptions.length > 0 ? (
+                      <>
+                        <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+                          These block size + border combinations give an exact{" "}
+                          <strong className="text-foreground">
+                            {fit.quiltW}&quot; × {fit.quiltH}&quot;
+                          </strong>{" "}
+                          finish. Tap any option to apply it:
+                        </p>
+                        <ul className="mt-2 list-none space-y-1.5 pl-0 text-sm leading-relaxed">
+                          {comboOptions.map((c, i) => (
+                            <li key={`${c.block}-${c.border}`} className="text-muted-foreground">
+                              <span className="text-foreground font-semibold">
+                                Option {i + 1}:{" "}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setBlockSizeText(String(c.block));
+                                  applyBorder(c.border);
+                                }}
+                                className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
+                              >
+                                {c.block}&quot; block with a {c.border}&quot; border
+                              </button>
+                              <span className="text-muted-foreground">
+                                {" "}({c.across} × {c.down} = {c.total} blocks)
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
+                    ) : (
+                      <p className="text-muted-foreground mt-2 text-sm italic leading-relaxed">
+                        No reasonable block size + border combinations give an
+                        exact fit at this quilt size. Try adjusting your desired
+                        quilt size slightly.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
