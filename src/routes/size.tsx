@@ -330,13 +330,50 @@ function SizeStep() {
                     border={border}
                   />
                 </div>
-                <p className="text-foreground text-sm leading-relaxed">
-                  With a <strong>{blockSizeNum}&quot;</strong> block and{" "}
-                  <strong>{border}&quot;</strong> border, your finished quilt will be{" "}
-                  <strong>{actualW}&quot; × {actualH}&quot;</strong>{" "}
-                  ({fit.blocksAcross} × {fit.blocksDown} ={" "}
-                  {fit.total} blocks).
-                </p>
+                {(() => {
+                  const desiredArea = fit.quiltW * fit.quiltH;
+                  const actualArea = actualW * actualH;
+                  let sizeNote: React.ReactNode = null;
+                  if (!matchesDesired) {
+                    const isSmaller =
+                      actualW < fit.quiltW || actualH < fit.quiltH
+                        ? actualArea <= desiredArea
+                        : false;
+                    const isLarger =
+                      actualW > fit.quiltW || actualH > fit.quiltH
+                        ? actualArea >= desiredArea
+                        : false;
+                    // Fallback when one dimension is bigger and the other smaller —
+                    // compare total area to decide which word fits best.
+                    const direction = isSmaller
+                      ? "smaller"
+                      : isLarger
+                        ? "larger"
+                        : actualArea < desiredArea
+                          ? "smaller"
+                          : "larger";
+                    sizeNote = (
+                      <>
+                        {" "}— that&apos;s <strong>{direction}</strong> than your
+                        desired{" "}
+                        <strong>
+                          {fit.quiltW}&quot; × {fit.quiltH}&quot;
+                        </strong>
+                        .
+                      </>
+                    );
+                  }
+                  return (
+                    <p className="text-foreground text-sm leading-relaxed">
+                      With a <strong>{blockSizeNum}&quot;</strong> block and{" "}
+                      <strong>{border}&quot;</strong> border, your finished quilt will be{" "}
+                      <strong>{actualW}&quot; × {actualH}&quot;</strong>{" "}
+                      ({fit.blocksAcross} × {fit.blocksDown} ={" "}
+                      {fit.total} blocks){sizeNote}
+                      {matchesDesired ? "." : ""}
+                    </p>
+                  );
+                })()}
                 {matchesDesired ? (
                   <p className="text-foreground mt-2 text-sm leading-relaxed">
                     ✓ This matches your desired{" "}
