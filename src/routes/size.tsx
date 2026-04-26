@@ -1,20 +1,23 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useNavigate, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { SIZE_PRESETS, setPlanner, usePlanner } from "@/lib/planner-store";
 import { useState, useMemo } from "react";
 import { AlertTriangle } from "lucide-react";
 
-export const Route = createFileRoute("/size")({
-  head: () => ({
-    meta: [
-      { title: "Quilt size — QuiltButler" },
-      { name: "description", content: "Set your finished quilt size, fabric width, block size and border." },
-    ],
-  }),
-  component: SizeStep,
-});
+export default function SizeStep() {
+  return (
+    <>
+      <Helmet>
+        <title>Quilt size — QuiltButler</title>
+        <meta name="description" content="Set your finished quilt size, fabric width, block size and border." />
+      </Helmet>
+      <SizeStepInner />
+    </>
+  );
+}
 
-function SizeStep() {
+function SizeStepInner() {
   const planner = usePlanner();
   const navigate = useNavigate();
 

@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SizeRouteImport } from './routes/size'
 import { Route as ResultsRouteImport } from './routes/results'
 import { Route as FabricsRouteImport } from './routes/fabrics'
-import { Route as IndexRouteImport } from './routes/index'
 
 const SizeRoute = SizeRouteImport.update({
   id: '/size',
@@ -29,41 +28,32 @@ const FabricsRoute = FabricsRouteImport.update({
   path: '/fabrics',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/fabrics': typeof FabricsRoute
   '/results': typeof ResultsRoute
   '/size': typeof SizeRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/fabrics': typeof FabricsRoute
   '/results': typeof ResultsRoute
   '/size': typeof SizeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/fabrics': typeof FabricsRoute
   '/results': typeof ResultsRoute
   '/size': typeof SizeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/fabrics' | '/results' | '/size'
+  fullPaths: '/fabrics' | '/results' | '/size'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/fabrics' | '/results' | '/size'
-  id: '__root__' | '/' | '/fabrics' | '/results' | '/size'
+  to: '/fabrics' | '/results' | '/size'
+  id: '__root__' | '/fabrics' | '/results' | '/size'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   FabricsRoute: typeof FabricsRoute
   ResultsRoute: typeof ResultsRoute
   SizeRoute: typeof SizeRoute
@@ -92,18 +82,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FabricsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   FabricsRoute: FabricsRoute,
   ResultsRoute: ResultsRoute,
   SizeRoute: SizeRoute,

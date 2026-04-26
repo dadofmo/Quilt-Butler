@@ -1,4 +1,5 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useNavigate, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { QuiltLayoutPreview } from "@/components/QuiltLayoutPreview";
 import { PatchworkPreview } from "@/components/PatchworkPreview";
@@ -12,17 +13,19 @@ import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { FabricSwatchOption } from "@/components/FabricSwatchOption";
 import { getPattern, fabricsForPattern } from "@/lib/patterns";
 
-export const Route = createFileRoute("/fabrics")({
-  head: () => ({
-    meta: [
-      { title: "Assign fabrics — QuiltButler" },
-      { name: "description", content: "Assign fabrics to each section of your quilt block and preview the patchwork." },
-    ],
-  }),
-  component: FabricsStep,
-});
+export default function FabricsStep() {
+  return (
+    <>
+      <Helmet>
+        <title>Assign fabrics — QuiltButler</title>
+        <meta name="description" content="Assign fabrics to each section of your quilt block and preview the patchwork." />
+      </Helmet>
+      <FabricsStepInner />
+    </>
+  );
+}
 
-function FabricsStep() {
+function FabricsStepInner() {
   const planner = usePlanner();
   const navigate = useNavigate();
   const pattern = getPattern(planner.pattern);
