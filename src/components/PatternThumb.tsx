@@ -134,18 +134,20 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
           ))}
         </svg>
       );
-    case "disappearing-nine-patch":
+    case "disappearing-nine-patch": {
+      // Finished (rearranged) D9P block — matches PatternDiagram & MiniBlock.
+      const u = 90 / 6;
       return (
         <svg {...common} aria-hidden>
-          {[0, 30, 60].flatMap((y, j) =>
-            [0, 30, 60].map((x, i) => (
-              <rect key={`${i}-${j}`} x={x + 1} y={y + 1} width={28} height={28} fill={(i + j) % 2 === 0 ? C.a : C.b} />
-            )),
-          )}
-          <line x1={45} y1={0} x2={45} y2={90} stroke="white" strokeWidth={2} />
-          <line x1={0} y1={45} x2={90} y2={45} stroke="white" strokeWidth={2} />
+          <rect width={90} height={90} fill={C.b} />
+          <rect x={2 * u} y={2 * u} width={2 * u} height={2 * u} fill={C.a} />
+          <rect x={0} y={0} width={u} height={u} fill={C.a} />
+          <rect x={5 * u} y={0} width={u} height={u} fill={C.a} />
+          <rect x={0} y={5 * u} width={u} height={u} fill={C.a} />
+          <rect x={5 * u} y={5 * u} width={u} height={u} fill={C.a} />
         </svg>
       );
+    }
     case "squares-on-point":
       return (
         <svg {...common} aria-hidden>
