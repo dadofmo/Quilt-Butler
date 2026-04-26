@@ -316,8 +316,6 @@ function SizeStep() {
           const actualW = fit.blocksAcross * blockSizeNum + 2 * border;
           const actualH = fit.blocksDown * blockSizeNum + 2 * border;
           const matchesDesired = fit.perfect;
-          const closestBorder = fit.borderSuggestions[0];
-          const closestBlock = fit.blockSuggestions[0];
           const comboOptions = fit.comboSuggestions;
           return (
             <Field label="Finished quilt size">
