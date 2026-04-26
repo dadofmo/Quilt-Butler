@@ -142,11 +142,22 @@ export const PATTERNS: PatternDef[] = [
   {
     id: "squares-on-point",
     name: "Squares on Point",
-    hasMath: false,
-    intro: "Squares rotated 45° (like diamonds) sitting on a background fabric.",
+    hasMath: true,
+    intro:
+      "Each block is one square rotated 45° (a diamond) framed by 4 background corner triangles — a classic 'square-in-a-square' unit. Pick a bold fabric for the on-point square and a calmer fabric for the background corners so the diamond reads clearly.",
     sections: [
-      { id: "square", label: "On-point squares", defaultFabric: "A", hint: "The diamond shapes." },
-      { id: "bg", label: "Background", defaultFabric: "B", hint: "The fabric they sit on." },
+      {
+        id: "square",
+        label: "On-point square (1 per block)",
+        defaultFabric: "A",
+        hint: "The diamond in the middle of every block — usually the boldest fabric so it pops against the background corners.",
+      },
+      {
+        id: "bg",
+        label: "Background corners (4 triangles per block)",
+        defaultFabric: "B",
+        hint: "The 4 corner triangles that frame the diamond — pick something that contrasts so the on-point shape stands out.",
+      },
       borderSection,
     ],
   },
