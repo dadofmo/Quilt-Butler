@@ -1,23 +1,26 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { PatternThumb } from "@/components/PatternThumb";
 import { PATTERNS, getPattern } from "@/lib/patterns";
 import { setPlanner } from "@/lib/planner-store";
 import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "QuiltButler — Fabric calculator for quilters" },
-      { name: "description", content: "Pick a pattern, enter your quilt size, and get accurate fabric yardage with a printable cutting plan." },
-      { property: "og:title", content: "QuiltButler — Fabric calculator for quilters" },
-      { property: "og:description", content: "Pick a pattern, enter your quilt size, and get accurate fabric yardage with a printable cutting plan." },
-    ],
-  }),
-  component: PatternPicker,
-});
+export default function PatternPicker() {
+  return (
+    <>
+      <Helmet>
+        <title>QuiltButler — Fabric calculator for quilters</title>
+        <meta name="description" content="Pick a pattern, enter your quilt size, and get accurate fabric yardage with a printable cutting plan." />
+        <meta property="og:title" content="QuiltButler — Fabric calculator for quilters" />
+        <meta property="og:description" content="Pick a pattern, enter your quilt size, and get accurate fabric yardage with a printable cutting plan." />
+      </Helmet>
+      <PatternPickerInner />
+    </>
+  );
+}
 
-function PatternPicker() {
+function PatternPickerInner() {
   const navigate = useNavigate();
 
   const choose = (id: (typeof PATTERNS)[number]["id"]) => {
@@ -26,7 +29,7 @@ function PatternPicker() {
     const assignments: Record<string, import("@/lib/planner-store").FabricKey> = {};
     pattern.sections.forEach((s) => (assignments[s.id] = s.defaultFabric));
     setPlanner({ pattern: id, assignments });
-    navigate({ to: "/size" });
+    navigate("/size");
   };
 
   return (

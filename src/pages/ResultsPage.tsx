@@ -1,4 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { PrintBlockLegend } from "@/components/PrintBlockLegend";
 import { FABRIC_COLORS, FABRIC_LABELS, setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
@@ -7,17 +8,19 @@ import { getPattern } from "@/lib/patterns";
 import { calculateYardage, describePieceShape, piecesPerStrip, usableFabricWidth, type FabricRequirement, type MaterialsRequirement } from "@/lib/yardage";
 import { Printer } from "lucide-react";
 
-export const Route = createFileRoute("/results")({
-  head: () => ({
-    meta: [
-      { title: "Yardage results — QuiltButler" },
-      { name: "description", content: "Your fabric yardage, cutting diagram, and printable shopping list." },
-    ],
-  }),
-  component: ResultsStep,
-});
+export default function ResultsStep() {
+  return (
+    <>
+      <Helmet>
+        <title>Yardage results — QuiltButler</title>
+        <meta name="description" content="Your fabric yardage, cutting diagram, and printable shopping list." />
+      </Helmet>
+      <ResultsStepInner />
+    </>
+  );
+}
 
-function ResultsStep() {
+function ResultsStepInner() {
   const planner = usePlanner();
   const navigate = useNavigate();
   const pattern = getPattern(planner.pattern);
@@ -63,7 +66,7 @@ function ResultsStep() {
               In the meantime, here's what else you'll need regardless of pattern:
             </p>
             <button
-              onClick={() => navigate({ to: "/" })}
+              onClick={() => navigate("/")}
               className="bg-primary text-primary-foreground hover:bg-primary/90 mt-5 inline-flex rounded-xl px-5 py-3 text-base font-semibold"
             >
               Try another pattern
