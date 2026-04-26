@@ -656,7 +656,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "log-cabin" ||
     s.pattern === "ohio-star" ||
     s.pattern === "flying-geese" ||
-    s.pattern === "disappearing-nine-patch";
+    s.pattern === "disappearing-nine-patch" ||
+    s.pattern === "squares-on-point";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
