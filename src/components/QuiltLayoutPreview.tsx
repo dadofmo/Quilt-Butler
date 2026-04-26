@@ -389,18 +389,12 @@ function MiniBlock({
     case "squares-on-point": {
       const sq = get("square", "A");
       const bg = get("bg", "B");
+      // Single on-point diamond per block, matching PatternDiagram & the
+      // square-in-a-square yardage math.
       return (
         <>
           <rect width={200} height={200} fill={bg} />
-          {[50, 150].flatMap((cy) =>
-            [50, 150].map((cx) => (
-              <polygon
-                key={`${cx}-${cy}`}
-                points={`${cx},${cy - 32} ${cx + 32},${cy} ${cx},${cy + 32} ${cx - 32},${cy}`}
-                fill={sq}
-              />
-            )),
-          )}
+          <polygon points="100,0 200,100 100,200 0,100" fill={sq} />
         </>
       );
     }
