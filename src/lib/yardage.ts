@@ -598,7 +598,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     addSquares(reqs[bgFab], "Corner-triangle squares", cornerSqCount, cornerCut, s.fabricWidth);
 
     notes.push(
-      `Each block = 1 on-point square (cut ${centerCut.toFixed(2)}") framed by 4 background corner triangles. The on-point square's points touch the midpoints of each block edge, so its finished side = ${(s.blockSize / SQRT2).toFixed(2)}" (block size ÷ √2).`,
+      `Each block = 1 on-point square (cut ${centerCut.toFixed(2)}") framed by 4 background corner triangles. The on-point square's points touch the midpoints of each block edge, so its finished side = ${(s.blockSize / SQRT2).toFixed(2)}".`,
     );
     notes.push(
       `For the 4 corner triangles, cut 2 background squares at ${cornerCut.toFixed(2)}" per block — each square gets cut once on the diagonal to make 2 triangles. The +7/8" extra matches the standard half-square-triangle formula because two of each triangle's edges end up on the bias.`,
