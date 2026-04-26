@@ -203,7 +203,7 @@ function SizeStep() {
       quiltH,
       blockSuggestions: blockSuggestions.slice(0, 4),
       borderSuggestions: borderSuggestions.slice(0, 3),
-      comboSuggestions: diversifiedCombos.slice(0, 5),
+      comboSuggestions: diversifiedCombos,
     };
   }, [blockSizeValid, blockSizeNum, w, h, border]);
 
