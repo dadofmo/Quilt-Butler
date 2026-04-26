@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { StepShell } from "@/components/StepShell";
 import { SIZE_PRESETS, setPlanner, usePlanner } from "@/lib/planner-store";
 import { useState, useMemo } from "react";
+import { AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/size")({
   head: () => ({
@@ -380,11 +381,18 @@ function SizeStep() {
                     <strong>{fit.quiltW}&quot; × {fit.quiltH}&quot;</strong> exactly.
                   </p>
                 ) : (
-                  <div className="mt-3 border-t border-border pt-3">
-                    <p className="text-foreground text-sm font-semibold">
-                      Options to get to desired finished quilt size{" "}
-                      ({fit.quiltW}&quot; × {fit.quiltH}&quot;):
-                    </p>
+                  <div className="mt-3 rounded-lg border-2 border-amber-500/60 bg-amber-50 p-3 dark:bg-amber-950/30">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle
+                        className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400"
+                        aria-hidden="true"
+                      />
+                      <p className="text-foreground text-sm font-semibold">
+                        Heads up — your finished size doesn&apos;t match your
+                        desired size. Here are options to get to{" "}
+                        {fit.quiltW}&quot; × {fit.quiltH}&quot;:
+                      </p>
+                    </div>
                     {comboOptions.length > 0 ? (
                       <>
                         <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
