@@ -455,7 +455,61 @@ console.log("\n=== Squares on Point: 8\" block ===");
 }
 
 // =========================================================================
-// BORDER MATH
+// PLUS BLOCK
+// =========================================================================
+console.log("\n=== Plus Block: 50×65, 12\" block, no border ===");
+{
+  const s = { ...base(), pattern: "plus-block" as const, blockSize: 12, borderWidth: 0 };
+  // 4×5 = 20 blocks. unit = 12/3 = 4. cut = 4.5.
+  // A: 5*20 = 100 squares. Per strip floor(42.5/4.5)=9. Strips=ceil(100/9)=12. Inches=12*4.5=54.
+  // B: 4*20 = 80 squares. Strips=ceil(80/9)=9. Inches=9*4.5=40.5.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("PB A plus count", a.pieces[0].count, 100);
+  check("PB A cut size", a.pieces[0].w, 4.5);
+  check("PB A strips", a.strips[0].count, 12);
+  check("PB A inches", a.totalInches, 54);
+  check("PB B bg count", b.pieces[0].count, 80);
+  check("PB B strips", b.strips[0].count, 9);
+  check("PB B inches", b.totalInches, 40.5);
+  check("PB basics glossary attached", r.basics?.length ?? 0, 5);
+}
+
+console.log("\n=== Plus Block: plus & bg share fabric A — 2 buckets, same cut ===");
+{
+  const s = {
+    ...base(), pattern: "plus-block" as const, blockSize: 12, borderWidth: 0,
+    assignments: { plus: "A" as FabricKey, bg: "A" as FabricKey },
+  };
+  // 9 squares × 20 blocks = 180 squares total. 2 buckets at 4.5". Strips = 12 + 9 = 21.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const totalPieces = a.pieces.reduce((acc, p) => acc + p.count, 0);
+  check("PB shared A total pieces", totalPieces, 180);
+  const totalStrips = a.strips.reduce((acc, sp) => acc + sp.count, 0);
+  check("PB shared A total strips", totalStrips, 21);
+  check("PB shared A inches", a.totalInches, 21 * 4.5);
+}
+
+console.log("\n=== Plus Block: 9\" block ===");
+{
+  const s = { ...base(), pattern: "plus-block" as const, quiltWidth: 27, quiltHeight: 36, blockSize: 9, borderWidth: 0 };
+  // 3×4 = 12 blocks. unit=3, cut=3.5.
+  // A: 5*12 = 60 squares. Per strip floor(42.5/3.5)=12. Strips=ceil(60/12)=5. Inches=5*3.5=17.5.
+  // B: 4*12 = 48 squares. Strips=ceil(48/12)=4. Inches=4*3.5=14.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("PB 9\" A count", a.pieces[0].count, 60);
+  check("PB 9\" A strips", a.strips[0].count, 5);
+  check("PB 9\" A inches", a.totalInches, 17.5);
+  check("PB 9\" B count", b.pieces[0].count, 48);
+  check("PB 9\" B strips", b.strips[0].count, 4);
+  check("PB 9\" B inches", b.totalInches, 14);
+}
+
+
 // =========================================================================
 console.log("\n=== Border: 60×80 inner, 4\" border, 9P pattern ===");
 {
