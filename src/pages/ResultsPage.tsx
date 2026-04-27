@@ -204,8 +204,7 @@ function ResultsStepInner() {
             </Section>
           )}
 
-          {/* Force the shopping list onto its own page (page 3) when printed. */}
-          <div className="print-page-break-before">
+          <div className="print-keep-together">
           <Section title="Shopping list">
             <ShoppingList
               fabrics={result.fabrics}
