@@ -2,7 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { QuiltLayoutPreview } from "@/components/QuiltLayoutPreview";
-import { PatchworkPreview } from "@/components/PatchworkPreview";
+import { PatchworkPreview, PatchworkPreviewHint } from "@/components/PatchworkPreview";
 import {
   ALL_FABRIC_KEYS,
   setPlanner,
