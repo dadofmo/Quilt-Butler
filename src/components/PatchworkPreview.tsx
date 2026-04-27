@@ -21,6 +21,8 @@ interface Props {
   onChange: (next: Record<string, FabricKey>) => void;
   /** Optional uploaded photos per fabric — overrides solid color in cells. */
   photos?: Partial<Record<FabricKey, string>>;
+  /** Fabric assigned to the border — drives the visible frame around the grid. */
+  borderFabric?: FabricKey;
 }
 
 /**
