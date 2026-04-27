@@ -42,5 +42,6 @@ export default function App() {
       <Route path="/results" element={<ResultsPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </>
   );
 }
