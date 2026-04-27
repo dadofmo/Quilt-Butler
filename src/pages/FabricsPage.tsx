@@ -124,19 +124,28 @@ function FabricsStepInner() {
                 {planner.patchworkFabricCount}
               </span>
             </div>
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {palette.map((f) => (
-                <span
-                  key={f}
-                  className="border-border inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium"
-                >
+            <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+              <div className="flex flex-wrap gap-1.5">
+                {palette.map((f) => (
                   <span
-                    className="h-3 w-3 rounded-sm border border-border/60"
-                    style={fabricBackgroundStyle(f, planner.fabricPhotos)}
-                  />
-                  {f}
-                </span>
-              ))}
+                    key={f}
+                    className="border-border inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium"
+                  >
+                    <span
+                      className="h-3 w-3 rounded-sm border border-border/60"
+                      style={fabricBackgroundStyle(f, planner.fabricPhotos)}
+                    />
+                    {f}
+                  </span>
+                ))}
+              </div>
+              <PatchworkPreviewHint
+                fabricCount={planner.patchworkFabricCount}
+                quiltWidth={planner.quiltWidth}
+                quiltHeight={planner.quiltHeight}
+                blockSize={planner.blockSize}
+                borderWidth={planner.borderWidth}
+              />
             </div>
           </div>
 
