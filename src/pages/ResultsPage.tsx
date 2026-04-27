@@ -190,11 +190,8 @@ function ResultsStepInner() {
             <div className="space-y-4">
               {/* In print: keep Fabric A on page 1 with the summary, then
                   start a new page at Fabric B so B & C share page 2. */}
-              {result.fabrics.map((f, i) => (
-                <div
-                  key={f.fabric}
-                  className={i === 1 ? "print-page-break" : undefined}
-                >
+              {result.fabrics.map((f) => (
+                <div key={f.fabric} className="print-keep-together">
                   <CuttingDiagram req={f} fabricWidth={planner.fabricWidth} pattern={planner.pattern} photo={planner.fabricPhotos[f.fabric]} />
                 </div>
               ))}
@@ -207,8 +204,7 @@ function ResultsStepInner() {
             </Section>
           )}
 
-          {/* Force the shopping list onto its own page (page 3) when printed. */}
-          <div className="print-page-break-before">
+          <div className="print-keep-together">
           <Section title="Shopping list">
             <ShoppingList
               fabrics={result.fabrics}
