@@ -21,6 +21,8 @@ interface Props {
   onChange: (next: Record<string, FabricKey>) => void;
   /** Optional uploaded photos per fabric — overrides solid color in cells. */
   photos?: Partial<Record<FabricKey, string>>;
+  /** Fabric assigned to the border — drives the visible frame around the grid. */
+  borderFabric?: FabricKey;
 }
 
 /**
@@ -59,6 +61,7 @@ export function PatchworkPreview({
   grid,
   onChange,
   photos,
+  borderFabric,
 }: Props) {
   const { rows, cols } = useMemo(
     () => computeGridShape(quiltWidth, quiltHeight, blockSize, borderWidth),
@@ -84,36 +87,61 @@ export function PatchworkPreview({
     onChange({ ...grid, [`${r},${c}`]: nextFab });
   };
 
+  // Outer frame = border + inner blocks. Sized so the border thickness is to
+  // scale relative to the blocks (e.g. a 3" border around 12" blocks renders
+  // as 3/12 of a block on each side).
+  const innerW = cols * blockSize;
+  const innerH = rows * blockSize;
+  const outerW = innerW + 2 * borderWidth;
+  const outerH = innerH + 2 * borderWidth;
+  const borderPct = borderWidth > 0 ? (borderWidth / outerW) * 100 : 0;
+  const showBorder = borderWidth > 0 && !!borderFabric;
+
   return (
     <div className="flex flex-col items-center gap-3">
       <div
-        className="grid shadow-sm"
+        className="shadow-sm"
         style={{
-          gridTemplateColumns: `repeat(${cols}, 1fr)`,
           width: "min(100%, 360px)",
-          aspectRatio: `${cols} / ${rows}`,
+          aspectRatio: `${outerW} / ${outerH}`,
+          padding: showBorder ? `${borderPct}%` : 0,
+          ...(showBorder && borderFabric
+            ? {
+                background: FABRIC_COLORS[borderFabric],
+                ...fabricBackgroundStyle(borderFabric, photos),
+              }
+            : {}),
         }}
-        role="grid"
-        aria-label="Patchwork color preview — tap a square to cycle fabric"
+        role="group"
+        aria-label="Patchwork color preview with border"
       >
-        {Array.from({ length: rows }).flatMap((_, r) =>
-          Array.from({ length: cols }).map((_, c) => {
-            const fab = cellFor(r, c);
-            return (
-              <button
-                key={`${r}-${c}`}
-                type="button"
-                onClick={() => cycle(r, c)}
-                aria-label={`Row ${r + 1} column ${c + 1}, fabric ${fab}. Tap to change.`}
-                className="transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-ring"
-                style={{
-                  background: FABRIC_COLORS[fab],
-                  ...fabricBackgroundStyle(fab, photos),
-                }}
-              />
-            );
-          }),
-        )}
+        <div
+          className="grid h-full w-full"
+          style={{
+            gridTemplateColumns: `repeat(${cols}, 1fr)`,
+          }}
+          role="grid"
+          aria-label="Patchwork color preview — tap a square to cycle fabric"
+        >
+          {Array.from({ length: rows }).flatMap((_, r) =>
+            Array.from({ length: cols }).map((_, c) => {
+              const fab = cellFor(r, c);
+              return (
+                <button
+                  key={`${r}-${c}`}
+                  type="button"
+                  onClick={() => cycle(r, c)}
+                  aria-label={`Row ${r + 1} column ${c + 1}, fabric ${fab}. Tap to change.`}
+                  className="transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-ring"
+                  style={{
+                    background: FABRIC_COLORS[fab],
+                    ...fabricBackgroundStyle(fab, photos),
+                  }}
+                />
+              );
+            }),
+          )}
+        </div>
       </div>
     </div>
   );

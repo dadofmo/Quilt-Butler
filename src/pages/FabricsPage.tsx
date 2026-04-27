@@ -149,16 +149,23 @@ function FabricsStepInner() {
             </div>
           </div>
 
-          <PatchworkPreview
-            fabricCount={planner.patchworkFabricCount}
-            quiltWidth={planner.quiltWidth}
-            quiltHeight={planner.quiltHeight}
-            blockSize={planner.blockSize}
-            borderWidth={planner.borderWidth}
-            grid={planner.patchworkGrid}
-            onChange={(g) => setPlanner({ patchworkGrid: g })}
-            photos={planner.fabricPhotos}
-          />
+          {(() => {
+            const borderDefault = (pattern.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey;
+            const borderFabric = (planner.assignments["border"] ?? borderDefault) as FabricKey;
+            return (
+              <PatchworkPreview
+                fabricCount={planner.patchworkFabricCount}
+                quiltWidth={planner.quiltWidth}
+                quiltHeight={planner.quiltHeight}
+                blockSize={planner.blockSize}
+                borderWidth={planner.borderWidth}
+                grid={planner.patchworkGrid}
+                onChange={(g) => setPlanner({ patchworkGrid: g })}
+                photos={planner.fabricPhotos}
+                borderFabric={hasBorder ? borderFabric : undefined}
+              />
+            );
+          })()}
         </div>
       )}
 
