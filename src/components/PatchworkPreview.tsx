@@ -115,12 +115,41 @@ export function PatchworkPreview({
           }),
         )}
       </div>
-      <p className="text-muted-foreground text-center text-xs">
-        Tap any square to cycle through your {palette.length} fabric
-        {palette.length === 1 ? "" : "s"}. This is your real layout:{" "}
-        <strong>{cols} × {rows} = {cols * rows} blocks</strong> at {blockSize}&quot; each.
-      </p>
     </div>
+  );
+}
+
+/**
+ * Compact helper text describing the patchwork tap-to-cycle behavior + the
+ * real layout dimensions. Rendered next to the A/B/C/D fabric chips so it
+ * doesn't push the preview down.
+ */
+export function PatchworkPreviewHint({
+  fabricCount,
+  quiltWidth,
+  quiltHeight,
+  blockSize,
+  borderWidth,
+}: {
+  fabricCount: number;
+  quiltWidth: number;
+  quiltHeight: number;
+  blockSize: number;
+  borderWidth: number;
+}) {
+  const { rows, cols } = computeGridShape(
+    quiltWidth,
+    quiltHeight,
+    blockSize,
+    borderWidth,
+  );
+  const count = Math.max(2, Math.min(12, fabricCount));
+  return (
+    <span className="text-muted-foreground text-xs leading-snug">
+      Tap any square to cycle through your {count} fabric
+      {count === 1 ? "" : "s"}. Layout:{" "}
+      <strong>{cols} × {rows} = {cols * rows} blocks</strong> at {blockSize}&quot; each.
+    </span>
   );
 }
 
