@@ -4,6 +4,7 @@ import PatternPickerPage from "./pages/PatternPickerPage";
 import SizePage from "./pages/SizePage";
 import FabricsPage from "./pages/FabricsPage";
 import ResultsPage from "./pages/ResultsPage";
+import { ScrollToTop } from "./components/ScrollToTop";
 
 function NotFound() {
   return (
@@ -32,7 +33,9 @@ function NotFound() {
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
       <Route path="/" element={<PatternPickerPage />} />
       <Route path="/size" element={<SizePage />} />
       <Route path="/fabrics" element={<FabricsPage />} />
