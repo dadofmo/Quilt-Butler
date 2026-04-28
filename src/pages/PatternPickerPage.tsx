@@ -12,8 +12,20 @@ export default function PatternPicker() {
       <Helmet>
         <title>QuiltButler — Fabric calculator for quilters</title>
         <meta name="description" content="Pick a pattern, enter your quilt size, and get accurate fabric yardage with a printable cutting plan." />
+        <link rel="canonical" href="https://quiltbutler.com/" />
         <meta property="og:title" content="QuiltButler — Fabric calculator for quilters" />
         <meta property="og:description" content="Pick a pattern, enter your quilt size, and get accurate fabric yardage with a printable cutting plan." />
+        <meta property="og:url" content="https://quiltbutler.com/" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "QuiltButler",
+          "url": "https://quiltbutler.com/",
+          "description": "Pick a pattern, enter your quilt size, and get accurate fabric yardage with a printable cutting plan.",
+          "applicationCategory": "DesignApplication",
+          "operatingSystem": "Any",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+        })}</script>
       </Helmet>
       <PatternPickerInner />
     </>

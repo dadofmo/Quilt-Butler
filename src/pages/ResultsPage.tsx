@@ -14,6 +14,11 @@ export default function ResultsStep() {
       <Helmet>
         <title>Yardage results — QuiltButler</title>
         <meta name="description" content="Your fabric yardage, cutting diagram, and printable shopping list." />
+        <link rel="canonical" href="https://quiltbutler.com/results" />
+        <meta name="robots" content="noindex, follow" />
+        <meta property="og:title" content="Yardage results — QuiltButler" />
+        <meta property="og:description" content="Your fabric yardage, cutting diagram, and printable shopping list." />
+        <meta property="og:url" content="https://quiltbutler.com/results" />
       </Helmet>
       <ResultsStepInner />
     </>
