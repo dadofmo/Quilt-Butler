@@ -11,6 +11,10 @@ export default function SizeStep() {
       <Helmet>
         <title>Quilt size — QuiltButler</title>
         <meta name="description" content="Set your finished quilt size, fabric width, block size and border." />
+        <link rel="canonical" href="https://quiltbutler.com/size" />
+        <meta property="og:title" content="Quilt size — QuiltButler" />
+        <meta property="og:description" content="Set your finished quilt size, fabric width, block size and border." />
+        <meta property="og:url" content="https://quiltbutler.com/size" />
       </Helmet>
       <SizeStepInner />
     </>

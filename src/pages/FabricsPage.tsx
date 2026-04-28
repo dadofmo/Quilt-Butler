@@ -19,6 +19,10 @@ export default function FabricsStep() {
       <Helmet>
         <title>Assign fabrics — QuiltButler</title>
         <meta name="description" content="Assign fabrics to each section of your quilt block and preview the patchwork." />
+        <link rel="canonical" href="https://quiltbutler.com/fabrics" />
+        <meta property="og:title" content="Assign fabrics — QuiltButler" />
+        <meta property="og:description" content="Assign fabrics to each section of your quilt block and preview the patchwork." />
+        <meta property="og:url" content="https://quiltbutler.com/fabrics" />
       </Helmet>
       <FabricsStepInner />
     </>
