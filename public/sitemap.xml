@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://quiltbutler.lovable.app/</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://quiltbutler.com/</loc>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://quiltbutler.lovable.app/size</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://quiltbutler.com/size</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quiltbutler.lovable.app/fabrics</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://quiltbutler.com/fabrics</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://quiltbutler.lovable.app/results</loc>
-    <changefreq>monthly</changefreq>
+    <loc>https://quiltbutler.com/results</loc>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 </urlset>
