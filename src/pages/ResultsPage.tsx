@@ -738,7 +738,13 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
       </p>
 
       <div className="overflow-x-auto">
-        <svg width={svgW} height={svgH} className="block">
+        <svg
+          width={svgW}
+          height={svgH}
+          className="block"
+          role="img"
+          aria-label={`QuiltButler visual cutting diagram showing fabric strip layout for Fabric ${req.fabric} on a ${fabricWidth} inch bolt`}
+        >
           {/* WOF arrow */}
           <g>
             <line
