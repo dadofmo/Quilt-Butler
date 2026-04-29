@@ -10,18 +10,18 @@ export default function PatternPicker() {
   return (
     <>
       <Helmet>
-        <title>QuiltButler — Fabric calculator for quilters</title>
-        <meta name="description" content="Pick a pattern, enter your quilt size, and get accurate fabric yardage with a printable cutting plan." />
+        <title>QuiltButler — Free Quilt Planner | Yardage, Cutting Diagrams & Fabric Visualizer</title>
+        <meta name="description" content="Free quilt planning tool for all skill levels. Choose from 10+ patterns, get exact yardage requirements, visual cutting diagrams, a project cost estimate, and see your fabric choices come to life before you buy. No login required." />
         <link rel="canonical" href="https://quiltbutler.com/" />
-        <meta property="og:title" content="QuiltButler — Fabric calculator for quilters" />
-        <meta property="og:description" content="Pick a pattern, enter your quilt size, and get accurate fabric yardage with a printable cutting plan." />
+        <meta property="og:title" content="QuiltButler — Free Quilt Planner | Yardage, Cutting Diagrams & Fabric Visualizer" />
+        <meta property="og:description" content="Free quilt planning tool for all skill levels. Choose from 10+ patterns, get exact yardage requirements, visual cutting diagrams, a project cost estimate, and see your fabric choices come to life before you buy. No login required." />
         <meta property="og:url" content="https://quiltbutler.com/" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebApplication",
           "name": "QuiltButler",
           "url": "https://quiltbutler.com/",
-          "description": "Pick a pattern, enter your quilt size, and get accurate fabric yardage with a printable cutting plan.",
+          "description": "Free quilt planning tool for all skill levels. Choose from 10+ patterns, get exact yardage requirements, visual cutting diagrams, a project cost estimate, and see your fabric choices come to life before you buy. No login required.",
           "applicationCategory": "DesignApplication",
           "operatingSystem": "Any",
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }

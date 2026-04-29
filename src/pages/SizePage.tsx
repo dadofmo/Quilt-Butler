@@ -9,11 +9,11 @@ export default function SizeStep() {
   return (
     <>
       <Helmet>
-        <title>Quilt size — QuiltButler</title>
-        <meta name="description" content="Set your finished quilt size, fabric width, block size and border." />
+        <title>Plan Your Quilt Size — QuiltButler</title>
+        <meta name="description" content="Enter your quilt dimensions and block size to get a personalized fabric plan including yardage, cutting diagrams and total project cost." />
         <link rel="canonical" href="https://quiltbutler.com/size" />
-        <meta property="og:title" content="Quilt size — QuiltButler" />
-        <meta property="og:description" content="Set your finished quilt size, fabric width, block size and border." />
+        <meta property="og:title" content="Plan Your Quilt Size — QuiltButler" />
+        <meta property="og:description" content="Enter your quilt dimensions and block size to get a personalized fabric plan including yardage, cutting diagrams and total project cost." />
         <meta property="og:url" content="https://quiltbutler.com/size" />
       </Helmet>
       <SizeStepInner />
