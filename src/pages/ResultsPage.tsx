@@ -12,12 +12,12 @@ export default function ResultsStep() {
   return (
     <>
       <Helmet>
-        <title>Yardage results — QuiltButler</title>
-        <meta name="description" content="Your fabric yardage, cutting diagram, and printable shopping list." />
+        <title>Your Complete Quilt Plan — QuiltButler</title>
+        <meta name="description" content="Your personalized quilt plan including exact yardage per fabric, visual cutting diagrams, project cost estimate, and a printable shopping list ready to take to the fabric store." />
         <link rel="canonical" href="https://quiltbutler.com/results" />
         <meta name="robots" content="noindex, follow" />
-        <meta property="og:title" content="Yardage results — QuiltButler" />
-        <meta property="og:description" content="Your fabric yardage, cutting diagram, and printable shopping list." />
+        <meta property="og:title" content="Your Complete Quilt Plan — QuiltButler" />
+        <meta property="og:description" content="Your personalized quilt plan including exact yardage per fabric, visual cutting diagrams, project cost estimate, and a printable shopping list ready to take to the fabric store." />
         <meta property="og:url" content="https://quiltbutler.com/results" />
       </Helmet>
       <ResultsStepInner />
