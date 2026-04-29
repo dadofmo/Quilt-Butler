@@ -210,7 +210,7 @@ function ResultsStepInner() {
           )}
 
           <div className="print-keep-together">
-          <Section title="Shopping list">
+          <Section title="Shopping list" ariaLabel="QuiltButler printable shopping list showing fabric yardage requirements for quilt project">
             <ShoppingList
               fabrics={result.fabrics}
               materials={result.materials}
@@ -250,9 +250,9 @@ function ResultsStepInner() {
   );
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, ariaLabel, children }: { title: string; ariaLabel?: string; children: React.ReactNode }) {
   return (
-    <section>
+    <section aria-label={ariaLabel}>
       <h2 className="text-foreground mb-3 text-lg font-semibold">{title}</h2>
       {children}
     </section>
