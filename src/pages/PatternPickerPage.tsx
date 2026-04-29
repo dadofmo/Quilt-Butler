@@ -49,7 +49,7 @@ function PatternPickerInner() {
       <div className="-mt-2 mb-4 flex justify-center sm:-mt-4">
         <img
           src={quiltButlerLogo}
-          alt="QuiltButler — Plan smart. Cut confidently. Quilt beautifully."
+          alt="QuiltButler quilt planner and fabric calculator logo"
           width={900}
           height={600}
           fetchPriority="high"

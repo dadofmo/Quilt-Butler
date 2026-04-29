@@ -48,7 +48,7 @@ export function StepShell({ step, title, subtitle, backTo, children }: Props) {
             </div>
             <img
               src={quiltButlerLogo}
-              alt="QuiltButler"
+              alt="QuiltButler quilt planner and fabric calculator logo"
               width={900}
               height={600}
               className="h-24 w-auto shrink-0 sm:h-30"

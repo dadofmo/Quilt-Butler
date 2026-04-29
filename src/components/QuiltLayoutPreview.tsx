@@ -133,6 +133,8 @@ export function QuiltLayoutPreview({
             height={innerH}
             viewBox={`0 0 ${innerW} ${innerH}`}
             className="block"
+            role="img"
+            aria-label="QuiltButler quilt visualizer showing fabric color preview of finished quilt layout"
           >
             {/* No tileSize: each shape independently shows the fabric photo
                 scaled to its bounds — the same way a quilter cuts each strip
