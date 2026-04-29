@@ -168,9 +168,9 @@ function ResultsStepInner() {
                   Quilting basics — read this once
                 </div>
                 <p className="text-muted-foreground mt-1 text-xs">
-                  The sewing steps below use these terms. They're the same for
-                  every pattern, so once you've got these you can follow any of
-                  the per-step instructions.
+                  The cutting &amp; sewing steps below use these terms. They're
+                  the same for every pattern, so once you've got these you can
+                  follow any pattern's steps.
                 </p>
                 <dl className="mt-3 space-y-2 text-sm">
                   {result.basics.map((b) => (
@@ -185,9 +185,14 @@ function ResultsStepInner() {
               </div>
             )}
             {result.notes && (
-              <ul className="text-muted-foreground mt-3 list-disc space-y-1 pl-5 text-sm">
-                {result.notes.map((n, i) => <li key={i}>{n}</li>)}
-              </ul>
+              <div className="mt-4">
+                <h3 className="text-foreground text-sm font-semibold">
+                  Cutting &amp; sewing steps
+                </h3>
+                <ul className="text-muted-foreground mt-2 list-disc space-y-1 pl-5 text-sm">
+                  {result.notes.map((n, i) => <li key={i}>{n}</li>)}
+                </ul>
+              </div>
             )}
           </Section>
 
