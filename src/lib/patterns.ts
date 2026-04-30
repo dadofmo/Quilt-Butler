@@ -163,6 +163,28 @@ export const PATTERNS: PatternDef[] = [
     ],
   },
   {
+    id: "pinwheel",
+    name: "Pinwheel",
+    hasMath: true,
+    intro:
+      "Each Pinwheel block is made from 4 Half Square Triangle units arranged in a 2×2 grid so the blade triangles all spin clockwise around the center, creating the iconic pinwheel illusion. Pick a bold fabric for the blades and a contrasting fabric for the background.",
+    sections: [
+      {
+        id: "blades",
+        label: "Pinwheel blades",
+        defaultFabric: "A",
+        hint: "The 4 spinning triangles per block — usually a bold print or solid so the pinwheel reads clearly against the background.",
+      },
+      {
+        id: "bg",
+        label: "Background",
+        defaultFabric: "B",
+        hint: "The other half of each HST unit — pick something that contrasts strongly with your blades so the pinwheel pops.",
+      },
+      borderSection,
+    ],
+  },
+  {
     id: "plus-block",
     name: "Plus Block",
     hasMath: true,
