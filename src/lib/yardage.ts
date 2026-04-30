@@ -242,6 +242,36 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Now cut along the drawn line in the middle (the line itself, not the stitches). You'll get two pieces, each with a Fabric ${t1} triangle and a Fabric ${t2} triangle already sewn together along the diagonal. Unfold each piece and press the seam toward the darker fabric. Each pair of squares makes 2 finished half-square triangle blocks, for ${blockCount} blocks total.`,
     );
+  } else if (s.pattern === "pinwheel") {
+    // Pinwheel = 2×2 grid of HST units per block. The HST cut size is based
+    // on the HALF-block (each HST finishes at blockSize/2) plus 7/8" for
+    // the diagonal seam.
+    const halfFinished = s.blockSize / 2;
+    const cut = halfFinished + HST_EXTRA;
+    const hstUnits = blockCount * 4; // 4 HSTs per Pinwheel block
+    const squaresEach = Math.ceil(hstUnits / 2); // 1 square pair → 2 HSTs
+    const blades = (s.assignments["blades"] ?? "A") as FabricKey;
+    const bg = (s.assignments["bg"] ?? "B") as FabricKey;
+    addSquares(reqs[blades], "Blade squares", squaresEach, cut, s.fabricWidth);
+    addSquares(reqs[bg], "Background squares", squaresEach, cut, s.fabricWidth);
+    notes.push(
+      `Each Pinwheel block = 4 Half Square Triangle units arranged in a 2×2 grid so the blades spin around the center. Across all ${blockCount} blocks: ${hstUnits} HST units total.`,
+    );
+    notes.push(
+      `Cut ${squaresEach} squares of Fabric ${blades} (blades) and ${squaresEach} squares of Fabric ${bg} (background), all at ${cut}" × ${cut}" (each HST finishes at ${halfFinished.toFixed(2)}" — half the block size — plus 7/8" extra for the diagonal seam).`,
+    );
+    notes.push(
+      `To make the HST units: take one Fabric ${blades} square and one Fabric ${bg} square and place them right sides together (RST). On the back of the top square, draw a straight diagonal line from one corner to the opposite corner.`,
+    );
+    notes.push(
+      `Sew a 1/4" seam down the LEFT side of the drawn line, then a second 1/4" seam down the RIGHT side. Cut along the drawn line in the middle (the line itself, not the stitches). Each pair of squares yields 2 finished HST units. Press the seam toward the darker fabric.`,
+    );
+    notes.push(
+      `Trim each finished HST unit to ${(halfFinished + SEAM).toFixed(2)}" square so it finishes at ${halfFinished.toFixed(2)}" once sewn into the block.`,
+    );
+    notes.push(
+      `Pinwheel assembly: lay out 4 trimmed HST units in a 2×2 grid. Rotate each unit so the blade triangles all point the same rotational direction (clockwise) around the center. Sew the top pair together, sew the bottom pair together, then join the two rows. Press the final center seams open to reduce bulk where all 4 points meet — this helps the block lie flat.`,
+    );
   } else if (s.pattern === "rail-fence") {
     // Each block = 3 rails. Each rail finishes at (blockSize/3) tall × blockSize wide.
     // Cut size: (blockSize/3 + 0.5)" tall × (blockSize + 0.5)" long.
