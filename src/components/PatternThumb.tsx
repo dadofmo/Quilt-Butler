@@ -194,5 +194,27 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
           )}
         </svg>
       );
+    case "pinwheel": {
+      // 2×2 grid of HST units. Blade (dark = C.a) triangle in each quadrant
+      // has its right angle at the OUTER corner of the block; the hypotenuse
+      // runs toward the center, creating the spinning pinwheel look.
+      // Background (light = C.b) fills the opposite half of each quadrant.
+      return (
+        <svg {...common}>
+          {/* TL quadrant (0-45, 0-45) — outer corner (0,0) */}
+          <polygon points="0,0 45,0 45,45" fill={C.b} />
+          <polygon points="0,0 45,45 0,45" fill={C.a} />
+          {/* TR quadrant (45-90, 0-45) — outer corner (90,0) */}
+          <polygon points="45,0 90,0 90,45" fill={C.a} />
+          <polygon points="45,0 90,45 45,45" fill={C.b} />
+          {/* BR quadrant (45-90, 45-90) — outer corner (90,90) */}
+          <polygon points="90,45 90,90 45,90" fill={C.a} />
+          <polygon points="90,45 45,90 45,45" fill={C.b} />
+          {/* BL quadrant (0-45, 45-90) — outer corner (0,90) */}
+          <polygon points="0,45 45,45 0,90" fill={C.b} />
+          <polygon points="45,45 45,90 0,90" fill={C.a} />
+        </svg>
+      );
+    }
   }
 }
