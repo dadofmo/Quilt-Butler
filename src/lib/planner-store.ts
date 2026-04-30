@@ -10,7 +10,8 @@ export type PatternId =
   | "flying-geese"
   | "disappearing-nine-patch"
   | "squares-on-point"
-  | "plus-block";
+  | "plus-block"
+  | "pinwheel";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"

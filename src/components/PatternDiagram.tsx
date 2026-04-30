@@ -355,5 +355,28 @@ function renderInner(
         </>
       );
     }
+    case "pinwheel": {
+      const blades = get("blades", "A");
+      const bg = get("bg", "B");
+      // 2×2 HST grid; blade right angle at each outer corner so the four
+      // blades pinwheel around the center. Mirrors the PatternThumb tile
+      // and the yardage math (4 HSTs per Pinwheel block).
+      return (
+        <>
+          {/* TL quadrant — outer corner (0,0) */}
+          <polygon points="0,0 100,0 0,100" fill={blades} />
+          <polygon points="100,0 100,100 0,100" fill={bg} />
+          {/* TR quadrant — outer corner (200,0) */}
+          <polygon points="100,0 200,0 200,100" fill={blades} />
+          <polygon points="100,0 200,100 100,100" fill={bg} />
+          {/* BR quadrant — outer corner (200,200) */}
+          <polygon points="200,100 200,200 100,200" fill={blades} />
+          <polygon points="100,100 200,100 100,200" fill={bg} />
+          {/* BL quadrant — outer corner (0,200) */}
+          <polygon points="0,100 100,200 0,200" fill={blades} />
+          <polygon points="0,100 100,100 100,200" fill={bg} />
+        </>
+      );
+    }
   }
 }
