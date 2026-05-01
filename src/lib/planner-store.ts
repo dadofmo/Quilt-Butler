@@ -52,9 +52,12 @@ const initial: PlannerState = {
   quiltWidth: 50,
   quiltHeight: 65,
   sizePreset: "throw",
-  fabricWidth: 44,
-  blockSize: 12,
-  borderWidth: 3,
+  // Left blank by default so the user explicitly enters fabric width, block size,
+  // and border on Step 2 instead of seeing prepopulated values. SizePage treats
+  // a stored 0 as "not yet set" and shows an empty input.
+  fabricWidth: 0,
+  blockSize: 0,
+  borderWidth: 0,
   assignments: {},
   safetyBuffer: true,
   fabricNames: {},

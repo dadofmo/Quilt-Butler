@@ -31,14 +31,22 @@ function SizeStepInner() {
   // Fabric width is free-form (in inches) so users can enter whatever their bolt is —
   // 42, 44, 54, 58, 60, 108 (wide-back), etc. Stored as text while typing so partial
   // values like "44." don't coerce to NaN mid-keystroke.
-  const [fabricWidthText, setFabricWidthText] = useState(String(planner.fabricWidth));
+  // Initial values come from the planner store, but a stored 0 means "not yet
+  // set" — show an empty input so the user enters their own value rather than
+  // seeing a prepopulated default.
+  const [fabricWidthText, setFabricWidthText] = useState(
+    planner.fabricWidth ? String(planner.fabricWidth) : "",
+  );
   // Block size is now a free-text decimal — store as string while typing so
   // the user can type "4." or "4.5" without us coercing to NaN/0 mid-keystroke.
-  const [blockSizeText, setBlockSizeText] = useState(String(planner.blockSize));
-  // Border width is now free-form text (in inches) so quilters can enter
-  // any width — 0, 2.5, 4.5, etc. Stored as text while typing so partial
-  // values like "2." don't coerce to NaN mid-keystroke.
-  const [borderText, setBorderText] = useState(String(planner.borderWidth));
+  const [blockSizeText, setBlockSizeText] = useState(
+    planner.blockSize ? String(planner.blockSize) : "",
+  );
+  // Border width is free-form text (in inches) so quilters can enter any width
+  // — 0, 2.5, 4.5, etc. Blank by default so nothing is prepopulated.
+  const [borderText, setBorderText] = useState(
+    planner.borderWidth ? String(planner.borderWidth) : "",
+  );
 
   if (!planner.pattern) {
     return (
