@@ -195,26 +195,23 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     case "pinwheel": {
-      // 2×2 grid of HST units. The blade (dark = C.a) triangle in each
-      // quadrant has its right angle at the OUTER corner of the block, with
-      // its two legs running along the block's outer edges; the hypotenuse
-      // cuts diagonally toward the center. Drawn this way, the four blades
-      // pinwheel around the center point. Background (C.b) fills the
-      // opposite triangle of each quadrant.
+      // Traditional pinwheel: 2×2 HST grid where each blade right-angle
+      // rotates clockwise around the block so all 4 blade hypotenuses meet
+      // at the center — that's what creates the spinning illusion.
       return (
         <svg {...common}>
-          {/* TL quadrant — outer corner (0,0) */}
-          <polygon points="0,0 45,0 0,45" fill={C.a} />
-          <polygon points="45,0 45,45 0,45" fill={C.b} />
-          {/* TR quadrant — outer corner (90,0) */}
-          <polygon points="45,0 90,0 90,45" fill={C.a} />
-          <polygon points="45,0 90,45 45,45" fill={C.b} />
-          {/* BR quadrant — outer corner (90,90) */}
-          <polygon points="90,45 90,90 45,90" fill={C.a} />
-          <polygon points="45,45 90,45 45,90" fill={C.b} />
-          {/* BL quadrant — outer corner (0,90) */}
-          <polygon points="0,45 45,90 0,90" fill={C.a} />
-          <polygon points="0,45 45,45 45,90" fill={C.b} />
+          {/* TL quadrant: blade right-angle at BL (0,45) */}
+          <polygon points="0,0 0,45 45,45" fill={C.a} />
+          <polygon points="0,0 45,0 45,45" fill={C.b} />
+          {/* TR quadrant: blade right-angle at TL (45,0) */}
+          <polygon points="45,0 90,0 45,45" fill={C.a} />
+          <polygon points="90,0 90,45 45,45" fill={C.b} />
+          {/* BR quadrant: blade right-angle at TR (90,45) */}
+          <polygon points="45,45 90,45 90,90" fill={C.a} />
+          <polygon points="45,45 90,90 45,90" fill={C.b} />
+          {/* BL quadrant: blade right-angle at BR (45,90) */}
+          <polygon points="45,45 45,90 0,90" fill={C.a} />
+          <polygon points="0,45 45,45 0,90" fill={C.b} />
         </svg>
       );
     }
