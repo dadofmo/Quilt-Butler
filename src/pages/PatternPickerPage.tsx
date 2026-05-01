@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { PatternThumb } from "@/components/PatternThumb";
+import { FabricRollIcon, PATTERN_DIFFICULTY } from "@/components/FabricRollIcon";
 import { PATTERNS, getPattern } from "@/lib/patterns";
 import { setPlanner } from "@/lib/planner-store";
 import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
