@@ -2,7 +2,6 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { PatternThumb } from "@/components/PatternThumb";
-import { FabricRollIcon, PATTERN_DIFFICULTY } from "@/components/FabricRollIcon";
 import { PATTERNS, getPattern } from "@/lib/patterns";
 import { setPlanner } from "@/lib/planner-store";
 import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
@@ -62,26 +61,13 @@ function PatternPickerInner() {
       <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:grid-cols-3 sm:gap-4">
         {PATTERNS.map((p) => {
           const ready = p.hasMath;
-          const rating = PATTERN_DIFFICULTY[p.id];
           return (
-            <div key={p.id} className="flex flex-col items-center gap-1.5">
-              <div
-                className={
-                  "flex items-center gap-1.5 text-xs font-medium text-muted-foreground " +
-                  (ready ? "" : "opacity-40")
-                }
-                title={`Difficulty: ${rating} of 5 (${rating} yard${rating > 1 ? "s" : ""})`}
-              >
-                <FabricRollIcon rating={rating} size={26} />
-                <span className="tabular-nums">
-                  {rating} yd<span className="sr-only"> difficulty out of 5</span>
-                </span>
-              </div>
+            <div key={p.id} className="flex flex-col items-center">
               <button
                 onClick={() => ready && choose(p.id)}
                 disabled={!ready}
                 aria-disabled={!ready}
-                aria-label={`${p.name} — difficulty ${rating} of 5`}
+                aria-label={p.name}
                 className={
                   "group relative flex w-full flex-col items-center gap-3 rounded-xl border-2 border-border bg-card p-4 text-center transition-all focus:outline-none focus:ring-2 focus:ring-ring " +
                   (ready
