@@ -53,7 +53,7 @@ function PatternPickerInner() {
           width={900}
           height={600}
           fetchPriority="high"
-          className="h-auto w-full max-w-sm sm:max-w-md"
+          className="h-64 w-auto sm:h-80"
         />
       </div>
       <h1 className="text-foreground text-2xl font-semibold sm:text-3xl">Pick a quilt pattern</h1>
