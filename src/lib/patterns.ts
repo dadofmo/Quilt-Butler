@@ -206,6 +206,40 @@ export const PATTERNS: PatternDef[] = [
       borderSection,
     ],
   },
+  {
+    id: "churn-dash",
+    name: "Churn Dash",
+    hasMath: true,
+    intro:
+      "The Churn Dash is a classic 3×3 block made of three unit types: four Half Square Triangle corners, four rectangular bar units on the sides, and one solid center square. It uses two fabrics — a dark and a light — arranged so the dark pieces appear to spin around the center like a churn dash butter-making tool.",
+    sections: [
+      {
+        id: "center",
+        label: "Center square",
+        defaultFabric: "A",
+        hint: "The solid square in the middle of the block — usually your boldest fabric.",
+      },
+      {
+        id: "corners",
+        label: "Corner triangles",
+        defaultFabric: "A",
+        hint: "The four Half Square Triangle corners — typically the same fabric as the center square.",
+      },
+      {
+        id: "bars",
+        label: "Side bars",
+        defaultFabric: "A",
+        hint: "The four rectangular units on each side of the block — creates the spinning handle effect.",
+      },
+      {
+        id: "bg",
+        label: "Background",
+        defaultFabric: "B",
+        hint: "The light half of the corners and side bars — pick something that contrasts with your dark fabric.",
+      },
+      borderSection,
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
