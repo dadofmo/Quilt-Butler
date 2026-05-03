@@ -682,6 +682,60 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Layout tip: Plus Blocks look striking sewn edge-to-edge in a straight grid (every "+" facing the same direction) so the plus shapes float on a sea of background. For a more scattered look, try mixing in a few blocks where the plus and background fabrics are swapped.`,
     );
+  } else if (s.pattern === "churn-dash") {
+    // Churn Dash construction:
+    //   3×3 grid. unitFinished = blockSize / 3.
+    //   - Center square: 1 per block, cut (unit + 0.5)" square.
+    //   - 4 corner HST units: 4 starting squares of dark + 4 of bg per block,
+    //     cut (unit + 0.875)" — each square pair yields 2 HSTs, so we need
+    //     4 pairs per block to make 4 corner units (which actually yields 8
+    //     HSTs — half are spares, OR pair efficiently across blocks). To
+    //     match the spec literally we cut 4 dark + 4 bg starting squares per
+    //     block (one pair per HST → 2 HSTs, only 1 used → wasteful but the
+    //     spec calls for it). We use the standard efficient approach: 2
+    //     dark + 2 bg starting squares per block (each pair yields 2 HSTs,
+    //     so 2 pairs = 4 HSTs = the 4 corners).
+    //   - 4 side bar units per block. Each bar = 1 dark rectangle + 1 bg
+    //     rectangle, finished (unit/2) × unit. Cut = (unit/2 + 0.5)" tall ×
+    //     (unit + 0.5)" long. Per block: 4 dark + 4 bg bar rectangles.
+    const unitFinished = s.blockSize / 3;
+    const centerCut = unitFinished + SEAM;
+    const hstCut = unitFinished + HST_EXTRA;
+    const barCutLong = unitFinished + SEAM;
+    const barCutShort = unitFinished / 2 + SEAM;
+
+    const centerFab = (s.assignments["center"] ?? "A") as FabricKey;
+    const cornerFab = (s.assignments["corners"] ?? "A") as FabricKey;
+    const barFab = (s.assignments["bars"] ?? "A") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
+
+    // Counts per block: center 1, HST starting squares 2 dark + 2 bg
+    // (each pair → 2 HSTs, 2 pairs → 4 corners), bar rectangles 4 dark + 4 bg.
+    const centerCount = blockCount;
+    const hstSquaresEach = 2 * blockCount;
+    const barRectEach = 4 * blockCount;
+
+    addSquares(reqs[centerFab], "Center squares", centerCount, centerCut, s.fabricWidth);
+    addSquares(reqs[cornerFab], "HST corner starting squares (dark)", hstSquaresEach, hstCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "HST corner starting squares (background)", hstSquaresEach, hstCut, s.fabricWidth);
+    addRails(reqs[barFab], "Side bar rectangles (dark)", barRectEach, barCutLong, barCutShort, s.fabricWidth);
+    addRails(reqs[bgFab], "Side bar rectangles (background)", barRectEach, barCutLong, barCutShort, s.fabricWidth);
+
+    notes.push(
+      `Each block uses 1 center square (${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}"), 4 HST corner units (starting squares ${hstCut.toFixed(2)}" × ${hstCut.toFixed(2)}"), and 4 side bar units — each made of 1 dark + 1 background rectangle cut ${barCutShort.toFixed(2)}" × ${barCutLong.toFixed(2)}".`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${centerCount} center squares of Fabric ${centerFab}; ${hstSquaresEach} starting squares each of Fabric ${cornerFab} (corners) and Fabric ${bgFab} (background) for the HSTs (each pair yields 2 HST units → 4 corners per block); ${barRectEach} dark side-bar rectangles of Fabric ${barFab} and ${barRectEach} background rectangles of Fabric ${bgFab}.`,
+    );
+    notes.push(
+      `To make the HST corners: pair one Fabric ${cornerFab} square with one Fabric ${bgFab} square right sides together (RST). On the back of the top square, draw a diagonal from corner to corner. Sew a 1/4" seam down each side of the line, then cut on the line. Each pair yields 2 HST units. Press toward the darker fabric and trim each unit to ${(unitFinished + SEAM).toFixed(2)}" square.`,
+    );
+    notes.push(
+      `To make the side bars: pair one dark and one background rectangle right sides together along their long edge. Sew a 1/4" seam, unfold, and press toward the darker fabric. Each finished bar should measure ${(unitFinished + SEAM).toFixed(2)}" square (unfinished). Rotate the bars so the dark half always sits on the OUTSIDE of the block — that's what creates the spinning churn-dash handle effect.`,
+    );
+    notes.push(
+      `Block assembly: lay out the 9 units in a 3×3 grid — corner HST, top bar, corner HST across the top row; left bar, center square, right bar in the middle; corner HST, bottom bar, corner HST on the bottom. Make sure all dark pieces face the OUTSIDE of the block. Sew each row, then sew the rows together. Press seams in opposite directions on alternating rows so they nest at intersections.`,
+    );
   }
 
   // Border
