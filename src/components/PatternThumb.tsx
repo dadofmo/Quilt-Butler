@@ -217,5 +217,40 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "churn-dash": {
+      // 3×3 grid, unit=30. Corner HSTs: diagonal from outer corner toward
+      // center, dark triangle on outer side. Side bars split into dark+light
+      // halves with dark on the outside. Center solid dark.
+      return (
+        <svg {...common}>
+          {/* TL corner HST */}
+          <polygon points="0,0 30,0 0,30" fill={C.a} />
+          <polygon points="30,0 30,30 0,30" fill={C.b} />
+          {/* TR corner HST */}
+          <polygon points="60,0 90,0 90,30" fill={C.a} />
+          <polygon points="60,0 90,30 60,30" fill={C.b} />
+          {/* BL corner HST */}
+          <polygon points="0,60 30,90 0,90" fill={C.a} />
+          <polygon points="0,60 30,60 30,90" fill={C.b} />
+          {/* BR corner HST */}
+          <polygon points="90,60 90,90 60,90" fill={C.a} />
+          <polygon points="60,60 90,60 60,90" fill={C.b} />
+          {/* Top bar — dark top, light bottom */}
+          <rect x={30} y={0} width={30} height={15} fill={C.a} />
+          <rect x={30} y={15} width={30} height={15} fill={C.b} />
+          {/* Bottom bar — dark bottom, light top */}
+          <rect x={30} y={75} width={30} height={15} fill={C.a} />
+          <rect x={30} y={60} width={30} height={15} fill={C.b} />
+          {/* Left bar — dark left, light right */}
+          <rect x={0} y={30} width={15} height={30} fill={C.a} />
+          <rect x={15} y={30} width={15} height={30} fill={C.b} />
+          {/* Right bar — dark right, light left */}
+          <rect x={75} y={30} width={15} height={30} fill={C.a} />
+          <rect x={60} y={30} width={15} height={30} fill={C.b} />
+          {/* Center */}
+          <rect x={30} y={30} width={30} height={30} fill={C.a} />
+        </svg>
+      );
+    }
   }
 }

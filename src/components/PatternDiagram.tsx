@@ -380,5 +380,69 @@ function renderInner(
         </>
       );
     }
+    case "churn-dash": {
+      const center = get("center", "A");
+      const corners = get("corners", "A");
+      const bars = get("bars", "A");
+      const bg = get("bg", "B");
+      const u = 200 / 3;
+      // Corner HSTs: diagonal from outer corner to inner corner, dark on outer.
+      // Side bars: rectangle split into dark+light halves with dark on outside.
+      const cornerHst = (gx: number, gy: number, key: string) => {
+        const x = gx * u;
+        const y = gy * u;
+        // Outer corner of this cell (away from block center)
+        const outerX = gx === 0 ? x : x + u;
+        const outerY = gy === 0 ? y : y + u;
+        const innerX = gx === 0 ? x + u : x;
+        const innerY = gy === 0 ? y + u : y;
+        // Two adjacent edge corners along the diagonal axis
+        const edgeAX = outerX;
+        const edgeAY = innerY;
+        const edgeBX = innerX;
+        const edgeBY = outerY;
+        return (
+          <g key={key}>
+            <polygon
+              points={`${outerX},${outerY} ${edgeAX},${edgeAY} ${edgeBX},${edgeBY}`}
+              fill={corners}
+            />
+            <polygon
+              points={`${innerX},${innerY} ${edgeAX},${edgeAY} ${edgeBX},${edgeBY}`}
+              fill={bg}
+            />
+          </g>
+        );
+      };
+      return (
+        <>
+          {cornerHst(0, 0, "tl")}
+          {cornerHst(2, 0, "tr")}
+          {cornerHst(0, 2, "bl")}
+          {cornerHst(2, 2, "br")}
+          {/* Top bar (1,0): dark top half */}
+          <rect x={u} y={0} width={u} height={u / 2} fill={bars} />
+          <rect x={u} y={u / 2} width={u} height={u / 2} fill={bg} />
+          {/* Bottom bar (1,2): dark bottom half */}
+          <rect x={u} y={2 * u + u / 2} width={u} height={u / 2} fill={bars} />
+          <rect x={u} y={2 * u} width={u} height={u / 2} fill={bg} />
+          {/* Left bar (0,1): dark left half */}
+          <rect x={0} y={u} width={u / 2} height={u} fill={bars} />
+          <rect x={u / 2} y={u} width={u / 2} height={u} fill={bg} />
+          {/* Right bar (2,1): dark right half */}
+          <rect x={2 * u + u / 2} y={u} width={u / 2} height={u} fill={bars} />
+          <rect x={2 * u} y={u} width={u / 2} height={u} fill={bg} />
+          {/* Center */}
+          <rect x={u} y={u} width={u} height={u} fill={center} />
+          {/* Subtle 3×3 grid lines */}
+          <g stroke="white" strokeWidth={1} opacity={0.6}>
+            <line x1={u} y1={0} x2={u} y2={200} />
+            <line x1={2 * u} y1={0} x2={2 * u} y2={200} />
+            <line x1={0} y1={u} x2={200} y2={u} />
+            <line x1={0} y1={2 * u} x2={200} y2={2 * u} />
+          </g>
+        </>
+      );
+    }
   }
 }
