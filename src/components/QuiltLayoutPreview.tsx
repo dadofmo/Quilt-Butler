@@ -423,6 +423,54 @@ function MiniBlock({
         </>
       );
     }
+    case "churn-dash": {
+      const center = get("center", "A");
+      const corners = get("corners", "A");
+      const bars = get("bars", "A");
+      const bg = get("bg", "B");
+      const u = 200 / 3;
+      const cornerHst = (gx: number, gy: number, key: string) => {
+        const x = gx * u;
+        const y = gy * u;
+        const outerX = gx === 0 ? x : x + u;
+        const outerY = gy === 0 ? y : y + u;
+        const innerX = gx === 0 ? x + u : x;
+        const innerY = gy === 0 ? y + u : y;
+        const edgeAX = outerX;
+        const edgeAY = innerY;
+        const edgeBX = innerX;
+        const edgeBY = outerY;
+        return (
+          <g key={key}>
+            <polygon
+              points={`${outerX},${outerY} ${edgeAX},${edgeAY} ${edgeBX},${edgeBY}`}
+              fill={corners}
+            />
+            <polygon
+              points={`${innerX},${innerY} ${edgeAX},${edgeAY} ${edgeBX},${edgeBY}`}
+              fill={bg}
+            />
+          </g>
+        );
+      };
+      return (
+        <>
+          {cornerHst(0, 0, "tl")}
+          {cornerHst(2, 0, "tr")}
+          {cornerHst(0, 2, "bl")}
+          {cornerHst(2, 2, "br")}
+          <rect x={u} y={0} width={u} height={u / 2} fill={bars} />
+          <rect x={u} y={u / 2} width={u} height={u / 2} fill={bg} />
+          <rect x={u} y={2 * u + u / 2} width={u} height={u / 2} fill={bars} />
+          <rect x={u} y={2 * u} width={u} height={u / 2} fill={bg} />
+          <rect x={0} y={u} width={u / 2} height={u} fill={bars} />
+          <rect x={u / 2} y={u} width={u / 2} height={u} fill={bg} />
+          <rect x={2 * u + u / 2} y={u} width={u / 2} height={u} fill={bars} />
+          <rect x={2 * u} y={u} width={u / 2} height={u} fill={bg} />
+          <rect x={u} y={u} width={u} height={u} fill={center} />
+        </>
+      );
+    }
     case "pinwheel": {
       const blades = get("blades", "A");
       const bg = get("bg", "B");
