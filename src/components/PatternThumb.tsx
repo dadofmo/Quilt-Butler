@@ -34,6 +34,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Plus Block quilt block diagram showing cross shaped block layout",
   pinwheel:
     "Pinwheel quilt block diagram showing four half square triangle units arranged with blades spinning clockwise around the center",
+  "churn-dash":
+    "Churn Dash quilt block diagram showing 3x3 layout with four corner half square triangles, four side rectangular bar units, and a solid center square",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {

@@ -11,7 +11,8 @@ export type PatternId =
   | "disappearing-nine-patch"
   | "squares-on-point"
   | "plus-block"
-  | "pinwheel";
+  | "pinwheel"
+  | "churn-dash";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
