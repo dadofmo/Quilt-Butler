@@ -736,6 +736,56 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Block assembly: lay out the 9 units in a 3×3 grid — corner HST, top bar, corner HST across the top row; left bar, center square, right bar in the middle; corner HST, bottom bar, corner HST on the bottom. Make sure all dark pieces face the OUTSIDE of the block. Sew each row, then sew the rows together. Press seams in opposite directions on alternating rows so they nest at intersections.`,
     );
+  } else if (s.pattern === "bear-paw") {
+    // Bear Paw construction:
+    //   4×4 grid. unitFinished = blockSize / 4.
+    //   - Center pad: 1 per block, 2u × 2u (occupies the 2×2 center). Cut
+    //     (2u + 0.5)" square.
+    //   - 8 HST claw units per block (4 pairs of starting squares). Each
+    //     starting square cut (u + 0.875)". Per spec: 8 claw + 8 background
+    //     starting squares per block (each pair → 2 HSTs, so 8 pairs → 16
+    //     HSTs; the spec calls for this even though only 8 are used per
+    //     block — the surplus stays in the cut count for the user).
+    //   - 4 small claw corner squares per block. Cut (u + 0.5)".
+    const unitFinished = s.blockSize / 4;
+    const padCut = 2 * unitFinished + SEAM;
+    const hstCut = unitFinished + HST_EXTRA;
+    const cornerCut = unitFinished + SEAM;
+
+    const padFab = (s.assignments["center"] ?? "A") as FabricKey;
+    const clawFab = (s.assignments["claws"] ?? "B") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "C") as FabricKey;
+
+    const padCount = blockCount;
+    const hstStartingEach = 8 * blockCount; // per spec: 8 per block per fabric
+    const cornerCount = 4 * blockCount;
+
+    addSquares(reqs[padFab], "Center paw pad squares", padCount, padCut, s.fabricWidth);
+    addSquares(reqs[clawFab], "HST claw starting squares", hstStartingEach, hstCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "HST background starting squares", hstStartingEach, hstCut, s.fabricWidth);
+    addSquares(reqs[clawFab], "Small claw corner squares", cornerCount, cornerCut, s.fabricWidth);
+
+    notes.push(
+      `Each block is built on a 4×4 grid where each small unit = ${unitFinished.toFixed(2)}" finished.`,
+    );
+    notes.push(
+      `Each block uses: 1 large center pad square (${padCut.toFixed(2)}" × ${padCut.toFixed(2)}", finished ${(2 * unitFinished).toFixed(2)}"), 8 HST claw units (4 pairs of claw + background starting squares cut ${hstCut.toFixed(2)}" × ${hstCut.toFixed(2)}"), and 4 small corner squares (${cornerCut.toFixed(2)}" × ${cornerCut.toFixed(2)}").`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${padCount} center pad squares of Fabric ${padFab}, ${hstStartingEach} HST starting squares of Fabric ${clawFab}, ${cornerCount} corner squares of Fabric ${clawFab}, and ${hstStartingEach} HST starting squares of Fabric ${bgFab}.`,
+    );
+    notes.push(
+      `Step 1 — Make the HST claw units: pair one Fabric ${clawFab} starting square with one Fabric ${bgFab} starting square right sides together (RST). On the back of the lighter square draw a diagonal corner-to-corner. Sew a scant 1/4" each side of the line, cut along the line, press toward the claw fabric, and trim each unit to ${(unitFinished + SEAM).toFixed(2)}" square (finished ${unitFinished.toFixed(2)}"). Each pair yields 2 HST units.`,
+    );
+    notes.push(
+      `Step 2 — Lay out the 4×4 grid before sewing anything: place the large center pad in the middle (covering the 2×2 center). Place the 8 HST units around it with the claw triangles ALL pointing toward the center of the block. Place the 4 small claw corner squares in the four outer corners.`,
+    );
+    notes.push(
+      `Step 3 — Sew into 4 rows of 4 units, then join the rows. Press seams in opposite directions on alternating rows so they nest at intersections.`,
+    );
+    notes.push(
+      `Pro tip: when you place four finished Bear Paw blocks together their small corner squares will meet in the center creating a beautiful secondary star or square design — this is the magic of the Bear Paw pattern.`,
+    );
   }
 
   // Border
@@ -777,7 +827,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "disappearing-nine-patch" ||
     s.pattern === "squares-on-point" ||
     s.pattern === "plus-block" ||
-    s.pattern === "churn-dash";
+    s.pattern === "churn-dash" ||
+    s.pattern === "bear-paw";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
