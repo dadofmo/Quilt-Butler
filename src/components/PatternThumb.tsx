@@ -36,6 +36,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Pinwheel quilt block diagram showing four half square triangle units arranged with blades spinning clockwise around the center",
   "churn-dash":
     "Churn Dash quilt block diagram showing 3x3 layout with four corner half square triangles, four side rectangular bar units, and a solid center square",
+  "bear-paw":
+    "Bear Paw quilt block diagram showing 4x4 layout with a large 2x2 center paw pad, eight surrounding half square triangle claw units, and four small corner squares",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -249,6 +251,63 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
           <rect x={60} y={30} width={15} height={30} fill={C.b} />
           {/* Center */}
           <rect x={30} y={30} width={30} height={30} fill={C.a} />
+      </svg>
+      );
+    }
+    case "bear-paw": {
+      // 4×4 grid, unit u=22.5. Claw=A (yellow/dark), pad=C (blue), bg=B.
+      // Note: thumbnail uses fixed colors C.b (yellow) for claw and C.a (blue) for pad
+      // to match the prompt's example illustration.
+      const u = 90 / 4;
+      const claw = C.b;
+      const pad = C.a;
+      const bg = C.c;
+      const cells: { r: number; c: number }[] = [];
+      const hstCells = [
+        [0, 1], [0, 2], [1, 0], [1, 3], [2, 0], [2, 3], [3, 1], [3, 2],
+      ];
+      const corners = [[0, 0], [0, 3], [3, 0], [3, 3]];
+      const cx = 2 * u;
+      const cy = 2 * u;
+      return (
+        <svg {...common}>
+          {/* Center 2×2 pad */}
+          <rect x={u} y={u} width={2 * u} height={2 * u} fill={pad} />
+          {/* 4 corner claw squares */}
+          {corners.map(([r, c], i) => (
+            <rect key={`c${i}`} x={c * u} y={r * u} width={u} height={u} fill={claw} />
+          ))}
+          {/* 8 HST claw cells */}
+          {hstCells.map(([r, c], i) => {
+            const x = c * u;
+            const y = r * u;
+            const pts = [
+              { x, y },
+              { x: x + u, y },
+              { x, y: y + u },
+              { x: x + u, y: y + u },
+            ];
+            // Right angle at corner closest to block center
+            const inner = pts.reduce((a, b) =>
+              Math.hypot(a.x - cx, a.y - cy) <= Math.hypot(b.x - cx, b.y - cy) ? a : b,
+            );
+            const outer = pts.reduce((a, b) =>
+              Math.hypot(a.x - cx, a.y - cy) >= Math.hypot(b.x - cx, b.y - cy) ? a : b,
+            );
+            const edges = pts.filter((p) => p !== inner && p !== outer);
+            return (
+              <g key={`h${i}`}>
+                <polygon
+                  points={`${inner.x},${inner.y} ${edges[0].x},${edges[0].y} ${edges[1].x},${edges[1].y}`}
+                  fill={claw}
+                />
+                <polygon
+                  points={`${outer.x},${outer.y} ${edges[0].x},${edges[0].y} ${edges[1].x},${edges[1].y}`}
+                  fill={bg}
+                />
+              </g>
+            );
+          })}
         </svg>
       );
     }
