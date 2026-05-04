@@ -12,7 +12,8 @@ export type PatternId =
   | "squares-on-point"
   | "plus-block"
   | "pinwheel"
-  | "churn-dash";
+  | "churn-dash"
+  | "bear-paw";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"

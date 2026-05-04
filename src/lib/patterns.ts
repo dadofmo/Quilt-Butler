@@ -240,6 +240,34 @@ export const PATTERNS: PatternDef[] = [
       borderSection,
     ],
   },
+  {
+    id: "bear-paw",
+    name: "Bear Paw",
+    hasMath: true,
+    intro:
+      "The Bear Paw is a 4×4 block made from three unit types: one large center paw pad square, eight Half Square Triangle claw units surrounding the pad, and four small claw squares at each corner. It uses three fabrics — a center pad fabric, a claw fabric for the triangles and corner squares, and a background fabric. When four Bear Paw blocks are placed together the corner squares meet in the center creating a beautiful secondary design.",
+    sections: [
+      {
+        id: "center",
+        label: "Center paw pad",
+        defaultFabric: "A",
+        hint: "The large square in the center of the block — the main paw pad. Usually your boldest or most distinctive fabric.",
+      },
+      {
+        id: "claws",
+        label: "Claw fabric",
+        defaultFabric: "B",
+        hint: "The four corner squares and the triangles in the eight HST units — creates the claw and toe effect around the pad.",
+      },
+      {
+        id: "bg",
+        label: "Background",
+        defaultFabric: "C",
+        hint: "The light triangle in each HST unit — the negative space that makes the claws stand out. Usually a light solid or low-volume print.",
+      },
+      { ...borderSection, defaultFabric: "D" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
