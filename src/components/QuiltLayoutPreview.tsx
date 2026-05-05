@@ -509,7 +509,7 @@ function MiniBlock({
         <>
           <rect x={u} y={u} width={2 * u} height={2 * u} fill={pad} />
           {corners.map(([r, c], i) => (
-            <rect key={`c${i}`} x={c * u} y={r * u} width={u} height={u} fill={claw} />
+            <rect key={`c${i}`} x={c * u} y={r * u} width={u} height={u} fill={bg} />
           ))}
           {hstCells.map(([r, c], i) => {
             const x = c * u;

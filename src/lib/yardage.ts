@@ -763,7 +763,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     addSquares(reqs[padFab], "Center paw pad squares", padCount, padCut, s.fabricWidth);
     addSquares(reqs[clawFab], "HST claw starting squares", hstStartingEach, hstCut, s.fabricWidth);
     addSquares(reqs[bgFab], "HST background starting squares", hstStartingEach, hstCut, s.fabricWidth);
-    addSquares(reqs[clawFab], "Small claw corner squares", cornerCount, cornerCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Background corner squares", cornerCount, cornerCut, s.fabricWidth);
 
     notes.push(
       `Each block is built on a 4×4 grid where each small unit = ${unitFinished.toFixed(2)}" finished.`,
@@ -772,19 +772,19 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Each block uses: 1 large center pad square (${padCut.toFixed(2)}" × ${padCut.toFixed(2)}", finished ${(2 * unitFinished).toFixed(2)}"), 8 HST claw units (4 pairs of claw + background starting squares cut ${hstCut.toFixed(2)}" × ${hstCut.toFixed(2)}"), and 4 small corner squares (${cornerCut.toFixed(2)}" × ${cornerCut.toFixed(2)}").`,
     );
     notes.push(
-      `Across all ${blockCount} blocks: ${padCount} center pad squares of Fabric ${padFab}, ${hstStartingEach} HST starting squares of Fabric ${clawFab}, ${cornerCount} corner squares of Fabric ${clawFab}, and ${hstStartingEach} HST starting squares of Fabric ${bgFab}.`,
+      `Across all ${blockCount} blocks: ${padCount} center pad squares of Fabric ${padFab}, ${hstStartingEach} HST starting squares of Fabric ${clawFab}, ${hstStartingEach} HST starting squares of Fabric ${bgFab}, and ${cornerCount} background corner squares of Fabric ${bgFab}.`,
     );
     notes.push(
       `Step 1 — Make the HST claw units: pair one Fabric ${clawFab} starting square with one Fabric ${bgFab} starting square right sides together (RST). On the back of the lighter square draw a diagonal corner-to-corner. Sew a scant 1/4" each side of the line, cut along the line, press toward the claw fabric, and trim each unit to ${(unitFinished + SEAM).toFixed(2)}" square (finished ${unitFinished.toFixed(2)}"). Each pair yields 2 HST units.`,
     );
     notes.push(
-      `Step 2 — Lay out the 4×4 grid before sewing anything: place the large center pad in the middle (covering the 2×2 center). Place the 8 HST units around it with the claw triangles ALL pointing toward the center of the block. Place the 4 small claw corner squares in the four outer corners.`,
+      `Step 2 — Lay out the 4×4 grid before sewing anything: place the large center pad in the middle (covering the 2×2 center). Place the 8 HST units around it with the claw triangles ALL pointing toward the center of the block. Place the 4 small background squares in the four outer corners of the block.`,
     );
     notes.push(
       `Step 3 — Sew into 4 rows of 4 units, then join the rows. Press seams in opposite directions on alternating rows so they nest at intersections.`,
     );
     notes.push(
-      `Pro tip: when you place four finished Bear Paw blocks together their small corner squares will meet in the center creating a beautiful secondary star or square design — this is the magic of the Bear Paw pattern.`,
+      `Pro tip: because the four outer corners of each block are background fabric, when four Bear Paw blocks meet they form a continuous background "sashing" cross between the paws — that's what gives the classic Bear Paw layout its airy, floating feel.`,
     );
   }
 

@@ -262,7 +262,7 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       const claw = C.b;
       const pad = C.a;
       const bg = C.c;
-      const cells: { r: number; c: number }[] = [];
+      
       const hstCells = [
         [0, 1], [0, 2], [1, 0], [1, 3], [2, 0], [2, 3], [3, 1], [3, 2],
       ];
@@ -273,9 +273,9 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         <svg {...common}>
           {/* Center 2×2 pad */}
           <rect x={u} y={u} width={2 * u} height={2 * u} fill={pad} />
-          {/* 4 corner claw squares */}
+          {/* 4 background corner squares */}
           {corners.map(([r, c], i) => (
-            <rect key={`c${i}`} x={c * u} y={r * u} width={u} height={u} fill={claw} />
+            <rect key={`c${i}`} x={c * u} y={r * u} width={u} height={u} fill={bg} />
           ))}
           {/* 8 HST claw cells */}
           {hstCells.map(([r, c], i) => {
