@@ -1,4 +1,5 @@
 import type { PatternId } from "@/lib/planner-store";
+import { BearPawBlockSvg } from "./BearPawBlockSvg";
 
 interface Props {
   pattern: PatternId;
@@ -254,62 +255,11 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       </svg>
       );
     }
-    case "bear-paw": {
-      // 4×4 grid, unit u=22.5. Claw=A (yellow/dark), pad=C (blue), bg=B.
-      // Note: thumbnail uses fixed colors C.b (yellow) for claw and C.a (blue) for pad
-      // to match the prompt's example illustration.
-      const u = 90 / 4;
-      const claw = C.b;
-      const pad = C.a;
-      const bg = C.c;
-      
-      const hstCells = [
-        [0, 1], [0, 2], [1, 0], [1, 3], [2, 0], [2, 3], [3, 1], [3, 2],
-      ];
-      const corners = [[0, 0], [0, 3], [3, 0], [3, 3]];
-      const cx = 2 * u;
-      const cy = 2 * u;
+    case "bear-paw":
       return (
         <svg {...common}>
-          {/* Center 2×2 pad */}
-          <rect x={u} y={u} width={2 * u} height={2 * u} fill={pad} />
-          {/* 4 background corner squares */}
-          {corners.map(([r, c], i) => (
-            <rect key={`c${i}`} x={c * u} y={r * u} width={u} height={u} fill={bg} />
-          ))}
-          {/* 8 HST claw cells */}
-          {hstCells.map(([r, c], i) => {
-            const x = c * u;
-            const y = r * u;
-            const pts = [
-              { x, y },
-              { x: x + u, y },
-              { x, y: y + u },
-              { x: x + u, y: y + u },
-            ];
-            // Right angle at corner closest to block center
-            const inner = pts.reduce((a, b) =>
-              Math.hypot(a.x - cx, a.y - cy) <= Math.hypot(b.x - cx, b.y - cy) ? a : b,
-            );
-            const outer = pts.reduce((a, b) =>
-              Math.hypot(a.x - cx, a.y - cy) >= Math.hypot(b.x - cx, b.y - cy) ? a : b,
-            );
-            const edges = pts.filter((p) => p !== inner && p !== outer);
-            return (
-              <g key={`h${i}`}>
-                <polygon
-                  points={`${inner.x},${inner.y} ${edges[0].x},${edges[0].y} ${edges[1].x},${edges[1].y}`}
-                  fill={claw}
-                />
-                <polygon
-                  points={`${outer.x},${outer.y} ${edges[0].x},${edges[0].y} ${edges[1].x},${edges[1].y}`}
-                  fill={bg}
-                />
-              </g>
-            );
-          })}
+          <BearPawBlockSvg pad={C.a} claw={C.b} bg={C.c} size={90} showGrid />
         </svg>
       );
-    }
   }
 }
