@@ -741,12 +741,13 @@ export function calculateYardage(s: PlannerState): CalcResult {
     //   4×4 grid. unitFinished = blockSize / 4.
     //   - Center pad: 1 per block, 2u × 2u (occupies the 2×2 center). Cut
     //     (2u + 0.5)" square.
-    //   - 8 HST claw units per block (4 pairs of starting squares). Each
-    //     starting square cut (u + 0.875)". Per spec: 8 claw + 8 background
-    //     starting squares per block (each pair → 2 HSTs, so 8 pairs → 16
-    //     HSTs; the spec calls for this even though only 8 are used per
-    //     block — the surplus stays in the cut count for the user).
-    //   - 4 small claw corner squares per block. Cut (u + 0.5)".
+    //   - 8 HST claw units per block = 4 square pairs. Using the standard
+    //     2-at-a-time HST method, that means 4 claw starting squares + 4
+    //     background starting squares per block, each cut (u + 0.875)".
+    //   - 4 small background corner squares per block. Cut (u + 0.5)".
+    // IMPORTANT: keep this in sync with BearPawBlockSvg. The uploaded May 3
+    // reference shows a diamond of 8 inward-facing claw triangles around the
+    // center pad, with ALL 4 outer corners in background fabric.
     const unitFinished = s.blockSize / 4;
     const padCut = 2 * unitFinished + SEAM;
     const hstCut = unitFinished + HST_EXTRA;
@@ -757,7 +758,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const bgFab = (s.assignments["bg"] ?? "C") as FabricKey;
 
     const padCount = blockCount;
-    const hstStartingEach = 8 * blockCount; // per spec: 8 per block per fabric
+    const hstStartingEach = 4 * blockCount; // 4 square pairs per block → 8 HST units
     const cornerCount = 4 * blockCount;
 
     addSquares(reqs[padFab], "Center paw pad squares", padCount, padCut, s.fabricWidth);
@@ -772,7 +773,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Each block uses: 1 large center pad square (${padCut.toFixed(2)}" × ${padCut.toFixed(2)}", finished ${(2 * unitFinished).toFixed(2)}"), 8 HST claw units (4 pairs of claw + background starting squares cut ${hstCut.toFixed(2)}" × ${hstCut.toFixed(2)}"), and 4 small corner squares (${cornerCut.toFixed(2)}" × ${cornerCut.toFixed(2)}").`,
     );
     notes.push(
-      `Across all ${blockCount} blocks: ${padCount} center pad squares of Fabric ${padFab}, ${hstStartingEach} HST starting squares of Fabric ${clawFab}, ${hstStartingEach} HST starting squares of Fabric ${bgFab}, and ${cornerCount} background corner squares of Fabric ${bgFab}.`,
+      `Across all ${blockCount} blocks: ${padCount} center pad squares of Fabric ${padFab}, ${hstStartingEach} HST starting squares of Fabric ${clawFab}, ${hstStartingEach} HST starting squares of Fabric ${bgFab} (together making ${8 * blockCount} finished HST units total), and ${cornerCount} background corner squares of Fabric ${bgFab}.`,
     );
     notes.push(
       `Step 1 — Make the HST claw units: pair one Fabric ${clawFab} starting square with one Fabric ${bgFab} starting square right sides together (RST). On the back of the lighter square draw a diagonal corner-to-corner. Sew a scant 1/4" each side of the line, cut along the line, press toward the claw fabric, and trim each unit to ${(unitFinished + SEAM).toFixed(2)}" square (finished ${unitFinished.toFixed(2)}"). Each pair yields 2 HST units.`,
