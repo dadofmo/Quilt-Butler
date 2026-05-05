@@ -245,7 +245,7 @@ export const PATTERNS: PatternDef[] = [
     name: "Bear Paw",
     hasMath: true,
     intro:
-      "The Bear Paw is a 4×4 block made from three unit types: one large center paw pad square, eight Half Square Triangle claw units surrounding the pad, and four small claw squares at each corner. It uses three fabrics — a center pad fabric, a claw fabric for the triangles and corner squares, and a background fabric. When four Bear Paw blocks are placed together the corner squares meet in the center creating a beautiful secondary design.",
+      "The Bear Paw is a 4×4 block made from three unit types: one large center paw pad square (covering the 2×2 middle), eight Half Square Triangle claw units surrounding the pad with their triangles pointing toward center, and four small background squares in the four outer corners of the block. It uses three fabrics — a center pad fabric, a claw fabric for just the HST triangles, and a background fabric used for both the light side of each HST and the four corner squares.",
     sections: [
       {
         id: "center",
@@ -255,15 +255,15 @@ export const PATTERNS: PatternDef[] = [
       },
       {
         id: "claws",
-        label: "Claw fabric",
+        label: "Claw triangles",
         defaultFabric: "B",
-        hint: "The four corner squares and the triangles in the eight HST units — creates the claw and toe effect around the pad.",
+        hint: "The triangles in the eight HST units that form the claws around the paw pad. The four small corner squares are background fabric, not claw fabric.",
       },
       {
         id: "bg",
         label: "Background",
         defaultFabric: "C",
-        hint: "The light triangle in each HST unit — the negative space that makes the claws stand out. Usually a light solid or low-volume print.",
+        hint: "The light triangle in each HST unit AND the four small corner squares of the block — the negative space that makes the claws stand out. Usually a light solid or low-volume print.",
       },
       { ...borderSection, defaultFabric: "D" },
     ],

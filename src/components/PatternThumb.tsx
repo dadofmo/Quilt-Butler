@@ -262,7 +262,7 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       const claw = C.b;
       const pad = C.a;
       const bg = C.c;
-      const cells: { r: number; c: number }[] = [];
+      
       const hstCells = [
         [0, 1], [0, 2], [1, 0], [1, 3], [2, 0], [2, 3], [3, 1], [3, 2],
       ];
