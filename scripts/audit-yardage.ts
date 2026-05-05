@@ -510,6 +510,37 @@ console.log("\n=== Plus Block: 9\" block ===");
 }
 
 // =========================================================================
+// BEAR PAW
+// =========================================================================
+console.log("\n=== Bear Paw: 50×65, 12\" block, no border ===");
+{
+  const s = { ...base(), pattern: "bear-paw" as const, blockSize: 12, borderWidth: 0 };
+  // 4×5 = 20 blocks. unitFinished = 3.
+  // A pad: 20 squares at 6.5". Per strip floor(42.5/6.5)=6. Strips=4. Inches=26.
+  // B claw: 80 starting squares at 3.875". Per strip floor(42.5/3.875)=10. Strips=8. Inches=31.
+  // C bg: 80 starting squares at 3.875" (=31") + 80 corner squares at 3.5".
+  //       Per strip floor(42.5/3.5)=12. Strips=7. Inches=24.5. Total=55.5.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("BP A pad count", a.pieces[0].count, 20);
+  check("BP A pad cut", a.pieces[0].w, 6.5);
+  check("BP A strips", a.strips[0].count, 4);
+  check("BP A inches", a.totalInches, 26);
+  check("BP B claw HST squares", b.pieces[0].count, 80);
+  check("BP B claw cut", b.pieces[0].w, 3.875);
+  check("BP B strips", b.strips[0].count, 8);
+  check("BP B inches", b.totalInches, 31);
+  check("BP C bucket count", c.pieces.length, 2);
+  check("BP C HST background count", c.pieces[0].count, 80);
+  check("BP C corner count", c.pieces[1].count, 80);
+  check("BP C corner cut", c.pieces[1].w, 3.5);
+  check("BP C inches", c.totalInches, 55.5);
+  check("BP basics glossary attached", r.basics?.length ?? 0, 5);
+}
+
+// =========================================================================
 // BORDER MATH
 // =========================================================================
 console.log("\n=== Border: 60×80 inner, 4\" border, 9P pattern ===");
