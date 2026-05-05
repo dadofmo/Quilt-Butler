@@ -459,9 +459,9 @@ function renderInner(
         <>
           {/* Center 2×2 pad */}
           <rect x={u} y={u} width={2 * u} height={2 * u} fill={pad} />
-          {/* 4 corner claw squares */}
+          {/* 4 background corner squares */}
           {corners.map(([r, c], i) => (
-            <rect key={`c${i}`} x={c * u} y={r * u} width={u} height={u} fill={claw} />
+            <rect key={`c${i}`} x={c * u} y={r * u} width={u} height={u} fill={bg} />
           ))}
           {/* 8 HST claw cells — claw triangle's right-angle at the corner
               closest to block center, light triangle pointing outward. */}
