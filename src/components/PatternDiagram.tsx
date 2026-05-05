@@ -1,6 +1,7 @@
 import type { FabricKey, PatternId, SectionAssignments } from "@/lib/planner-store";
 import { fabricFill } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
+import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
 
 interface Props {
@@ -448,63 +449,7 @@ function renderInner(
       const pad = get("center", "A");
       const claw = get("claws", "B");
       const bg = get("bg", "C");
-      const u = 200 / 4;
-      const cx = 2 * u;
-      const cy = 2 * u;
-      const hstCells = [
-        [0, 1], [0, 2], [1, 0], [1, 3], [2, 0], [2, 3], [3, 1], [3, 2],
-      ];
-      const corners = [[0, 0], [0, 3], [3, 0], [3, 3]];
-      return (
-        <>
-          {/* Center 2×2 pad */}
-          <rect x={u} y={u} width={2 * u} height={2 * u} fill={pad} />
-          {/* 4 background corner squares */}
-          {corners.map(([r, c], i) => (
-            <rect key={`c${i}`} x={c * u} y={r * u} width={u} height={u} fill={bg} />
-          ))}
-          {/* 8 HST claw cells — claw triangle's right-angle at the corner
-              closest to block center, light triangle pointing outward. */}
-          {hstCells.map(([r, c], i) => {
-            const x = c * u;
-            const y = r * u;
-            const pts = [
-              { x, y },
-              { x: x + u, y },
-              { x, y: y + u },
-              { x: x + u, y: y + u },
-            ];
-            const inner = pts.reduce((a, b) =>
-              Math.hypot(a.x - cx, a.y - cy) <= Math.hypot(b.x - cx, b.y - cy) ? a : b,
-            );
-            const outer = pts.reduce((a, b) =>
-              Math.hypot(a.x - cx, a.y - cy) >= Math.hypot(b.x - cx, b.y - cy) ? a : b,
-            );
-            const edges = pts.filter((p) => p !== inner && p !== outer);
-            return (
-              <g key={`h${i}`}>
-                <polygon
-                  points={`${inner.x},${inner.y} ${edges[0].x},${edges[0].y} ${edges[1].x},${edges[1].y}`}
-                  fill={claw}
-                />
-                <polygon
-                  points={`${outer.x},${outer.y} ${edges[0].x},${edges[0].y} ${edges[1].x},${edges[1].y}`}
-                  fill={bg}
-                />
-              </g>
-            );
-          })}
-          {/* Subtle 4×4 grid lines */}
-          <g stroke="white" strokeWidth={1} opacity={0.6}>
-            {[1, 2, 3].map((i) => (
-              <line key={`v${i}`} x1={i * u} y1={0} x2={i * u} y2={200} />
-            ))}
-            {[1, 2, 3].map((j) => (
-              <line key={`h${j}`} x1={0} y1={j * u} x2={200} y2={j * u} />
-            ))}
-          </g>
-        </>
-      );
+      return <BearPawBlockSvg pad={pad} claw={claw} bg={bg} showGrid />;
     }
   }
 }
