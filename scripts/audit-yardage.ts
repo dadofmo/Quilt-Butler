@@ -514,29 +514,43 @@ console.log("\n=== Plus Block: 9\" block ===");
 // =========================================================================
 console.log("\n=== Bear Paw: 50×65, 12\" block, no border ===");
 {
-  const s = { ...base(), pattern: "bear-paw" as const, blockSize: 12, borderWidth: 0 };
-  // 4×5 = 20 blocks. unitFinished = 3.
-  // A pad: 20 squares at 6.5". Per strip floor(42.5/6.5)=6. Strips=4. Inches=26.
-  // B claw: 80 starting squares at 3.875". Per strip floor(42.5/3.875)=10. Strips=8. Inches=31.
-  // C bg: 80 starting squares at 3.875" (=31") + 80 corner squares at 3.5".
-  //       Per strip floor(42.5/3.5)=12. Strips=7. Inches=24.5. Total=55.5.
+  const s = {
+    ...base(),
+    pattern: "bear-paw" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    assignments: { pad: "A" as FabricKey, claws: "B" as FabricKey, bg: "C" as FabricKey },
+  };
+  // 4×5 = 20 blocks. s=1.5, u=1.75. padCut=4, cornerCut=2.25, hstCut=2.625,
+  // sashShort=2, sashLong=5.75, centerCut=2. Usable=42.5.
+  // A pad: 80 sq @4". perStrip=10. strips=8. inches=32.
+  // B claw: 320 HST @2.625" → perStrip=16, strips=20, inches=52.5
+  //         20 center @2" → perStrip=21, strips=1, inches=2. Total B=54.5.
+  // C bg:   320 HST @2.625" → 20 strips, 52.5"
+  //         80 corners @2.25" → perStrip=18, strips=5, inches=11.25
+  //         80 sashing 2"×5.75" → perStrip=7, strips=12, inches=24. Total=87.75
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
   const b = r.fabrics.find(f => f.fabric === "B")!;
   const c = r.fabrics.find(f => f.fabric === "C")!;
-  check("BP A pad count", a.pieces[0].count, 20);
-  check("BP A pad cut", a.pieces[0].w, 6.5);
-  check("BP A strips", a.strips[0].count, 4);
-  check("BP A inches", a.totalInches, 26);
-  check("BP B claw HST squares", b.pieces[0].count, 80);
-  check("BP B claw cut", b.pieces[0].w, 3.875);
-  check("BP B strips", b.strips[0].count, 8);
-  check("BP B inches", b.totalInches, 31);
-  check("BP C bucket count", c.pieces.length, 2);
-  check("BP C HST background count", c.pieces[0].count, 80);
+  check("BP A pad count", a.pieces[0].count, 80);
+  check("BP A pad cut", a.pieces[0].w, 4);
+  check("BP A strips", a.strips[0].count, 8);
+  check("BP A inches", a.totalInches, 32);
+  check("BP B buckets", b.pieces.length, 2);
+  check("BP B claw HST count", b.pieces[0].count, 320);
+  check("BP B claw HST cut", b.pieces[0].w, 2.625);
+  check("BP B center count", b.pieces[1].count, 20);
+  check("BP B center cut", b.pieces[1].w, 2);
+  check("BP B inches", b.totalInches, 54.5);
+  check("BP C buckets", c.pieces.length, 3);
+  check("BP C HST bg count", c.pieces[0].count, 320);
   check("BP C corner count", c.pieces[1].count, 80);
-  check("BP C corner cut", c.pieces[1].w, 3.5);
-  check("BP C inches", c.totalInches, 55.5);
+  check("BP C corner cut", c.pieces[1].w, 2.25);
+  check("BP C sashing count", c.pieces[2].count, 80);
+  check("BP C sashing W", c.pieces[2].w, 5.75);
+  check("BP C sashing H", c.pieces[2].h, 2);
+  check("BP C inches", c.totalInches, 87.75);
   check("BP basics glossary attached", r.basics?.length ?? 0, 5);
 }
 

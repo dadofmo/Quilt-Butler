@@ -245,25 +245,25 @@ export const PATTERNS: PatternDef[] = [
     name: "Bear Paw",
     hasMath: true,
     intro:
-      "The Bear Paw is a 4×4 block made from three unit types: one large center paw pad square (covering the 2×2 middle), eight Half Square Triangle claw units surrounding the pad with their triangles pointing toward center, and four small background squares in the four outer corners of the block. It uses three fabrics — a center pad fabric, a claw fabric for just the HST triangles, and a background fabric used for both the light side of each HST and the four corner squares.",
+      "The Bear Paw block is made of four individual paw units arranged around a central connecting square with sashing between them. Each paw unit has one large pad square, four Half Square Triangle claw units arranged in an L-shape around the pad, and one background corner square. The claws on all four paws face outward creating the bear paw effect. When multiple Bear Paw blocks are placed together in a quilt they create beautiful secondary star patterns.",
     sections: [
       {
-        id: "center",
-        label: "Center paw pad",
+        id: "pad",
+        label: "Paw pads",
         defaultFabric: "A",
-        hint: "The large square in the center of the block — the main paw pad. Usually your boldest or most distinctive fabric.",
+        hint: "The large square that forms the base of each paw — your main fabric. You will need four per block.",
       },
       {
         id: "claws",
-        label: "Claw triangles",
+        label: "Claw fabric",
         defaultFabric: "B",
-        hint: "The triangles in the eight HST units that form the claws around the paw pad. The four small corner squares are background fabric, not claw fabric.",
+        hint: "The triangles in each HST unit and the small center square — creates the claw and toe effect. Usually a bold contrasting color.",
       },
       {
         id: "bg",
         label: "Background",
         defaultFabric: "C",
-        hint: "The light triangle in each HST unit AND the four small corner squares of the block — the negative space that makes the claws stand out. Usually a light solid or low-volume print.",
+        hint: "The corner squares, sashing strips between paws, and the background triangle in each HST unit. Usually a light neutral fabric.",
       },
       { ...borderSection, defaultFabric: "D" },
     ],

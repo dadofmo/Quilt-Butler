@@ -1,4 +1,24 @@
-type Corner = "tl" | "tr" | "bl" | "br";
+/**
+ * Traditional Bear Paw block SVG.
+ *
+ * The block is a 3×3 arrangement of major components:
+ *   [PAW][V-SASH][PAW]
+ *   [H-SASH][CENTER][H-SASH]
+ *   [PAW][V-SASH][PAW]
+ *
+ * Each PAW UNIT is itself a 3×3 mini-grid where a 2×2 pad is in the inner
+ * (center-facing) corner of the paw, an L of 4 HST claws wraps around two
+ * outer edges of the pad, and a single bg corner square sits at the outer
+ * corner of the paw. Each paw is rotated so its claws + bg corner face the
+ * outer corner of the block.
+ *
+ * Geometry: the block is sized so paw size : sashing : paw = 3u : s : 3u
+ * where u = 7B/48 and s = B/8. With B=12 this gives 5.25" + 1.5" + 5.25"
+ * = 12" exactly. We use the same ratios in SVG units: paw fraction = 0.4375
+ * (= 3u/B = 21/48), sash fraction = 0.125 (= s/B = 6/48).
+ */
+
+type Orient = "tl" | "tr" | "bl" | "br";
 
 interface BearPawBlockSvgProps {
   pad: string;
@@ -11,40 +31,148 @@ interface BearPawBlockSvgProps {
   gridOpacity?: number;
 }
 
-const CORNER_CELLS = [
-  { row: 0, col: 0 },
-  { row: 0, col: 3 },
-  { row: 3, col: 0 },
-  { row: 3, col: 3 },
-] as const;
-
-const HST_CELLS = [
-  { row: 0, col: 1, outer: "tl" },
-  { row: 0, col: 2, outer: "tr" },
-  { row: 1, col: 0, outer: "tl" },
-  { row: 1, col: 3, outer: "tr" },
-  { row: 2, col: 0, outer: "bl" },
-  { row: 2, col: 3, outer: "br" },
-  { row: 3, col: 1, outer: "bl" },
-  { row: 3, col: 2, outer: "br" },
-] as const satisfies ReadonlyArray<{ row: number; col: number; outer: Corner }>;
-
-function hstPoints(x: number, y: number, u: number, outer: Corner) {
-  const tl = `${x},${y}`;
-  const tr = `${x + u},${y}`;
-  const bl = `${x},${y + u}`;
-  const br = `${x + u},${y + u}`;
-
-  switch (outer) {
-    case "tl":
-      return { bg: `${tl} ${tr} ${bl}`, claw: `${br} ${tr} ${bl}` };
-    case "tr":
-      return { bg: `${tr} ${tl} ${br}`, claw: `${bl} ${tl} ${br}` };
-    case "bl":
-      return { bg: `${bl} ${tl} ${br}`, claw: `${tr} ${tl} ${br}` };
-    case "br":
-      return { bg: `${br} ${tr} ${bl}`, claw: `${tl} ${tr} ${bl}` };
+// For each paw orientation, declare:
+//   bgCorner = which (row,col) cell holds the small bg corner square
+//   pad      = which 2×2 cell range is the paw pad (rRange, cRange)
+//   claws    = list of (row, col, clawCornerOfCell) for the 4 HST claw cells
+const PAW_LAYOUT: Record<
+  Orient,
+  {
+    bgCorner: [number, number];
+    padR: [number, number];
+    padC: [number, number];
+    claws: Array<[number, number, Orient]>;
   }
+> = {
+  tl: {
+    bgCorner: [0, 0],
+    padR: [1, 2],
+    padC: [1, 2],
+    claws: [
+      [0, 1, "tl"],
+      [0, 2, "tr"],
+      [1, 0, "tl"],
+      [2, 0, "bl"],
+    ],
+  },
+  tr: {
+    bgCorner: [0, 2],
+    padR: [1, 2],
+    padC: [0, 1],
+    claws: [
+      [0, 1, "tr"],
+      [0, 0, "tl"],
+      [1, 2, "tr"],
+      [2, 2, "br"],
+    ],
+  },
+  bl: {
+    bgCorner: [2, 0],
+    padR: [0, 1],
+    padC: [1, 2],
+    claws: [
+      [2, 1, "bl"],
+      [2, 2, "br"],
+      [1, 0, "bl"],
+      [0, 0, "tl"],
+    ],
+  },
+  br: {
+    bgCorner: [2, 2],
+    padR: [0, 1],
+    padC: [0, 1],
+    claws: [
+      [2, 1, "br"],
+      [2, 0, "bl"],
+      [1, 2, "br"],
+      [0, 2, "tr"],
+    ],
+  },
+};
+
+function hstPoints(x: number, y: number, cu: number, corner: Orient) {
+  const tl = `${x},${y}`;
+  const tr = `${x + cu},${y}`;
+  const bl = `${x},${y + cu}`;
+  const br = `${x + cu},${y + cu}`;
+  switch (corner) {
+    case "tl":
+      return { claw: `${tl} ${tr} ${bl}`, bg: `${tr} ${br} ${bl}` };
+    case "tr":
+      return { claw: `${tr} ${tl} ${br}`, bg: `${tl} ${bl} ${br}` };
+    case "bl":
+      return { claw: `${bl} ${tl} ${br}`, bg: `${tl} ${tr} ${br}` };
+    case "br":
+      return { claw: `${br} ${tr} ${bl}`, bg: `${tr} ${tl} ${bl}` };
+  }
+}
+
+function PawUnit({
+  x,
+  y,
+  size,
+  orient,
+  pad,
+  claw,
+  bg,
+  showGrid,
+  gridStroke,
+  gridStrokeWidth,
+  gridOpacity,
+}: {
+  x: number;
+  y: number;
+  size: number;
+  orient: Orient;
+  pad: string;
+  claw: string;
+  bg: string;
+  showGrid: boolean;
+  gridStroke: string;
+  gridStrokeWidth: number;
+  gridOpacity: number;
+}) {
+  const cu = size / 3;
+  const layout = PAW_LAYOUT[orient];
+  const padX = x + layout.padC[0] * cu;
+  const padY = y + layout.padR[0] * cu;
+  const padW = (layout.padC[1] - layout.padC[0] + 1) * cu;
+  const padH = (layout.padR[1] - layout.padR[0] + 1) * cu;
+  const [bcR, bcC] = layout.bgCorner;
+
+  return (
+    <g>
+      {/* Pad (2×2 inside the paw) */}
+      <rect x={padX} y={padY} width={padW} height={padH} fill={pad} />
+      {/* Background corner square */}
+      <rect x={x + bcC * cu} y={y + bcR * cu} width={cu} height={cu} fill={bg} />
+      {/* HST claw cells */}
+      {layout.claws.map(([r, c, corner], i) => {
+        const cx = x + c * cu;
+        const cy = y + r * cu;
+        const pts = hstPoints(cx, cy, cu, corner);
+        return (
+          <g key={`claw-${i}`}>
+            <polygon points={pts.bg} fill={bg} />
+            <polygon points={pts.claw} fill={claw} />
+          </g>
+        );
+      })}
+      {showGrid && (
+        <g
+          stroke={gridStroke}
+          strokeWidth={gridStrokeWidth}
+          opacity={gridOpacity}
+          fill="none"
+        >
+          <line x1={x + cu} y1={y} x2={x + cu} y2={y + size} />
+          <line x1={x + 2 * cu} y1={y} x2={x + 2 * cu} y2={y + size} />
+          <line x1={x} y1={y + cu} x2={x + size} y2={y + cu} />
+          <line x1={x} y1={y + 2 * cu} x2={x + size} y2={y + 2 * cu} />
+        </g>
+      )}
+    </g>
+  );
 }
 
 export function BearPawBlockSvg({
@@ -55,39 +183,83 @@ export function BearPawBlockSvg({
   showGrid = false,
   gridStroke = "white",
   gridStrokeWidth = 1,
-  gridOpacity = 0.6,
+  gridOpacity = 0.55,
 }: BearPawBlockSvgProps) {
-  const u = size / 4;
-
+  // Block layout: paw : sash : paw → fractions 0.4375 / 0.125 / 0.4375.
+  const pawSize = size * 0.4375;
+  const sash = size * 0.125;
+  const pawA = 0; // first paw start (x or y)
+  const pawB = pawSize + sash; // second paw start
+  // Sashing + center fill the whole block in bg first; then we overlay paws.
   return (
     <>
-      <rect x={u} y={u} width={2 * u} height={2 * u} fill={pad} />
-
-      {CORNER_CELLS.map(({ row, col }) => (
-        <rect key={`corner-${row}-${col}`} x={col * u} y={row * u} width={u} height={u} fill={bg} />
-      ))}
-
-      {HST_CELLS.map(({ row, col, outer }) => {
-        const x = col * u;
-        const y = row * u;
-        const points = hstPoints(x, y, u, outer);
-
-        return (
-          <g key={`hst-${row}-${col}`}>
-            <polygon points={points.bg} fill={bg} />
-            <polygon points={points.claw} fill={claw} />
-          </g>
-        );
-      })}
-
+      <rect x={0} y={0} width={size} height={size} fill={bg} />
+      <PawUnit
+        x={pawA}
+        y={pawA}
+        size={pawSize}
+        orient="tl"
+        pad={pad}
+        claw={claw}
+        bg={bg}
+        showGrid={showGrid}
+        gridStroke={gridStroke}
+        gridStrokeWidth={gridStrokeWidth}
+        gridOpacity={gridOpacity}
+      />
+      <PawUnit
+        x={pawB}
+        y={pawA}
+        size={pawSize}
+        orient="tr"
+        pad={pad}
+        claw={claw}
+        bg={bg}
+        showGrid={showGrid}
+        gridStroke={gridStroke}
+        gridStrokeWidth={gridStrokeWidth}
+        gridOpacity={gridOpacity}
+      />
+      <PawUnit
+        x={pawA}
+        y={pawB}
+        size={pawSize}
+        orient="bl"
+        pad={pad}
+        claw={claw}
+        bg={bg}
+        showGrid={showGrid}
+        gridStroke={gridStroke}
+        gridStrokeWidth={gridStrokeWidth}
+        gridOpacity={gridOpacity}
+      />
+      <PawUnit
+        x={pawB}
+        y={pawB}
+        size={pawSize}
+        orient="br"
+        pad={pad}
+        claw={claw}
+        bg={bg}
+        showGrid={showGrid}
+        gridStroke={gridStroke}
+        gridStrokeWidth={gridStrokeWidth}
+        gridOpacity={gridOpacity}
+      />
+      {/* Center small claw-fabric square */}
+      <rect x={pawSize} y={pawSize} width={sash} height={sash} fill={claw} />
       {showGrid && (
-        <g stroke={gridStroke} strokeWidth={gridStrokeWidth} opacity={gridOpacity}>
-          <line x1={u} y1={0} x2={u} y2={size} />
-          <line x1={2 * u} y1={0} x2={2 * u} y2={size} />
-          <line x1={3 * u} y1={0} x2={3 * u} y2={size} />
-          <line x1={0} y1={u} x2={size} y2={u} />
-          <line x1={0} y1={2 * u} x2={size} y2={2 * u} />
-          <line x1={0} y1={3 * u} x2={size} y2={3 * u} />
+        <g
+          stroke={gridStroke}
+          strokeWidth={gridStrokeWidth}
+          opacity={gridOpacity}
+          fill="none"
+        >
+          {/* Outline major sashing channels */}
+          <line x1={pawSize} y1={0} x2={pawSize} y2={size} />
+          <line x1={pawSize + sash} y1={0} x2={pawSize + sash} y2={size} />
+          <line x1={0} y1={pawSize} x2={size} y2={pawSize} />
+          <line x1={0} y1={pawSize + sash} x2={size} y2={pawSize + sash} />
         </g>
       )}
     </>

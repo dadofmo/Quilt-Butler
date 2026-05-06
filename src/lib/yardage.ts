@@ -737,55 +737,61 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Block assembly: lay out the 9 units in a 3×3 grid — corner HST, top bar, corner HST across the top row; left bar, center square, right bar in the middle; corner HST, bottom bar, corner HST on the bottom. Make sure all dark pieces face the OUTSIDE of the block. Sew each row, then sew the rows together. Press seams in opposite directions on alternating rows so they nest at intersections.`,
     );
   } else if (s.pattern === "bear-paw") {
-    // Bear Paw construction:
-    //   4×4 grid. unitFinished = blockSize / 4.
-    //   - Center pad: 1 per block, 2u × 2u (occupies the 2×2 center). Cut
-    //     (2u + 0.5)" square.
-    //   - 8 HST claw units per block = 4 square pairs. Using the standard
-    //     2-at-a-time HST method, that means 4 claw starting squares + 4
-    //     background starting squares per block, each cut (u + 0.875)".
-    //   - 4 small background corner squares per block. Cut (u + 0.5)".
-    // IMPORTANT: keep this in sync with BearPawBlockSvg. The uploaded May 3
-    // reference shows a diamond of 8 inward-facing claw triangles around the
-    // center pad, with ALL 4 outer corners in background fabric.
-    const unitFinished = s.blockSize / 4;
-    const padCut = 2 * unitFinished + SEAM;
-    const hstCut = unitFinished + HST_EXTRA;
-    const cornerCut = unitFinished + SEAM;
+    // Traditional Bear Paw construction (4 paw units + center sq + sashing).
+    //
+    // Base measurements for finished block size B:
+    //   sashing finished width  s = B / 8         (rounded to 1/8")
+    //   small unit finished     u = (B - s) / 6   (rounded to 1/16")
+    //
+    // Cut sizes (all add 0.5" total seam allowance to finished):
+    //   pad         = (2u) + 0.5"             (one per paw, 4 per block)
+    //   bg corner   = u + 0.5"                (one per paw, 4 per block)
+    //   sashing rect= (s + 0.5") × (3u + 0.5")(4 per block)
+    //   center      = s + 0.5"                (1 per block, claw fabric)
+    //   HST start   = u + 0.875"              (16 claw + 16 bg per block)
+    const roundTo = (v: number, step: number) => Math.round(v / step) * step;
+    const sFinished = roundTo(s.blockSize / 8, 0.125);
+    const uFinished = roundTo((s.blockSize - sFinished) / 6, 0.0625);
 
-    const padFab = (s.assignments["center"] ?? "A") as FabricKey;
+    const padCut = 2 * uFinished + SEAM;
+    const cornerCut = uFinished + SEAM;
+    const hstCut = uFinished + HST_EXTRA;
+    const sashShort = sFinished + SEAM;
+    const sashLong = 3 * uFinished + SEAM;
+    const centerCut = sFinished + SEAM;
+
+    const padFab = (s.assignments["pad"] ?? "A") as FabricKey;
     const clawFab = (s.assignments["claws"] ?? "B") as FabricKey;
     const bgFab = (s.assignments["bg"] ?? "C") as FabricKey;
 
-    const padCount = blockCount;
-    const hstStartingEach = 4 * blockCount; // 4 square pairs per block → 8 HST units
+    const padCount = 4 * blockCount;
+    const hstClawCount = 16 * blockCount;
+    const centerCount = blockCount;
+    const hstBgCount = 16 * blockCount;
     const cornerCount = 4 * blockCount;
+    const sashCount = 4 * blockCount;
 
-    addSquares(reqs[padFab], "Center paw pad squares", padCount, padCut, s.fabricWidth);
-    addSquares(reqs[clawFab], "HST claw starting squares", hstStartingEach, hstCut, s.fabricWidth);
-    addSquares(reqs[bgFab], "HST background starting squares", hstStartingEach, hstCut, s.fabricWidth);
+    addSquares(reqs[padFab], "Paw pad squares", padCount, padCut, s.fabricWidth);
+    addSquares(reqs[clawFab], "Claw HST starting squares", hstClawCount, hstCut, s.fabricWidth);
+    addSquares(reqs[clawFab], "Center squares", centerCount, centerCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Background HST starting squares", hstBgCount, hstCut, s.fabricWidth);
     addSquares(reqs[bgFab], "Background corner squares", cornerCount, cornerCut, s.fabricWidth);
+    addRails(reqs[bgFab], "Sashing rectangles", sashCount, sashLong, sashShort, s.fabricWidth);
 
     notes.push(
-      `Each block is built on a 4×4 grid where each small unit = ${unitFinished.toFixed(2)}" finished.`,
+      `Each block contains 4 paw units, each with 1 large pad, 4 HST claw units, and 1 background corner square, plus 4 sashing rectangles and 1 center square. Small unit u = ${uFinished.toFixed(4)}" finished, sashing s = ${sFinished.toFixed(3)}" finished.`,
     );
     notes.push(
-      `Each block uses: 1 large center pad square (${padCut.toFixed(2)}" × ${padCut.toFixed(2)}", finished ${(2 * unitFinished).toFixed(2)}"), 8 HST claw units (4 pairs of claw + background starting squares cut ${hstCut.toFixed(2)}" × ${hstCut.toFixed(2)}"), and 4 small corner squares (${cornerCut.toFixed(2)}" × ${cornerCut.toFixed(2)}").`,
+      `Each block uses: 4 pad squares at ${padCut.toFixed(2)}" × ${padCut.toFixed(2)}", 16 claw HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}", 1 center square at ${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}", 16 background HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}", 4 background corner squares at ${cornerCut.toFixed(2)}" × ${cornerCut.toFixed(2)}", and 4 sashing rectangles at ${sashShort.toFixed(2)}" × ${sashLong.toFixed(2)}".`,
     );
     notes.push(
-      `Across all ${blockCount} blocks: ${padCount} center pad squares of Fabric ${padFab}, ${hstStartingEach} HST starting squares of Fabric ${clawFab}, ${hstStartingEach} HST starting squares of Fabric ${bgFab} (together making ${8 * blockCount} finished HST units total), and ${cornerCount} background corner squares of Fabric ${bgFab}.`,
+      `Across all ${blockCount} blocks: ${padCount} pad squares (Fabric ${padFab}); ${hstClawCount} claw HST starting squares + ${centerCount} center squares (Fabric ${clawFab}); ${hstBgCount} background HST starting squares + ${cornerCount} background corner squares + ${sashCount} sashing rectangles (Fabric ${bgFab}).`,
     );
     notes.push(
-      `Step 1 — Make the HST claw units: pair one Fabric ${clawFab} starting square with one Fabric ${bgFab} starting square right sides together (RST). On the back of the lighter square draw a diagonal corner-to-corner. Sew a scant 1/4" each side of the line, cut along the line, press toward the claw fabric, and trim each unit to ${(unitFinished + SEAM).toFixed(2)}" square (finished ${unitFinished.toFixed(2)}"). Each pair yields 2 HST units.`,
+      `HST construction: pair one Fabric ${clawFab} starting square with one Fabric ${bgFab} starting square right sides together (RST). Draw a diagonal corner-to-corner on the back of the lighter square. Sew a scant 1/4" each side of the line, cut on the line, press toward the claw fabric, and trim each unit to ${(uFinished + SEAM).toFixed(4)}" square (finished ${uFinished.toFixed(4)}"). Each pair yields 2 HST units.`,
     );
     notes.push(
-      `Step 2 — Lay out the 4×4 grid before sewing anything: place the large center pad in the middle (covering the 2×2 center). Place the 8 HST units around it with the claw triangles ALL pointing toward the center of the block. Place the 4 small background squares in the four outer corners of the block.`,
-    );
-    notes.push(
-      `Step 3 — Sew into 4 rows of 4 units, then join the rows. Press seams in opposite directions on alternating rows so they nest at intersections.`,
-    );
-    notes.push(
-      `Pro tip: because the four outer corners of each block are background fabric, when four Bear Paw blocks meet they form a continuous background "sashing" cross between the paws — that's what gives the classic Bear Paw layout its airy, floating feel.`,
+      `Bear Paw Assembly Tip: Build this block in two stages. Stage one — make all four paw units. For each paw: sew two HST units side by side and attach to the top of your pad square. Sew two HST units in a column with your background corner square on top and attach to the left side of your pad. Press seams toward the pad. Rotate each paw to face outward as shown in the diagram. Stage two — assemble the block. Arrange your four paws with sashing rectangles between them and the center square in the middle. Sew into three rows then join the rows. Pro tip: press your sashing seams toward the sashing fabric so they nest cleanly when you join the rows.`,
     );
   }
 
