@@ -6,11 +6,11 @@
  *   [H-SASH][CENTER][H-SASH]
  *   [PAW][V-SASH][PAW]
  *
- * Each PAW UNIT is itself a 3×3 mini-grid where a 2×2 pad is in the inner
- * (center-facing) corner of the paw, an L of 4 HST claws wraps around two
- * outer edges of the pad, and a single bg corner square sits at the outer
- * corner of the paw. Each paw is rotated so its claws + bg corner face the
- * outer corner of the block.
+ * Each PAW UNIT is itself a 3×3 mini-grid where a 2×2 pad is in the INNER
+ * (center-facing) corner of the paw, an L of 4 HST claws runs along the two
+ * OUTER edges only, and a single bg corner square sits at the outermost
+ * corner. The background half of every HST points inward toward the sashing.
+ * This file is the single source of truth for that traditional construction.
  *
  * Geometry: the block is sized so paw size : sashing : paw = 3u : s : 3u
  * where u = 7B/48 and s = B/8. With B=12 this gives 5.25" + 1.5" + 5.25"
@@ -24,6 +24,7 @@ interface BearPawBlockSvgProps {
   pad: string;
   claw: string;
   bg: string;
+  centerAccent: string;
   size?: number;
   showGrid?: boolean;
   gridStroke?: string;
@@ -179,6 +180,7 @@ export function BearPawBlockSvg({
   pad,
   claw,
   bg,
+  centerAccent,
   size = 200,
   showGrid = false,
   gridStroke = "white",
@@ -246,8 +248,8 @@ export function BearPawBlockSvg({
         gridStrokeWidth={gridStrokeWidth}
         gridOpacity={gridOpacity}
       />
-      {/* Center small claw-fabric square */}
-      <rect x={pawSize} y={pawSize} width={sash} height={sash} fill={claw} />
+      {/* Center connector square — separate fabric option from the paw claws. */}
+      <rect x={pawSize} y={pawSize} width={sash} height={sash} fill={centerAccent} />
       {showGrid && (
         <g
           stroke={gridStroke}
