@@ -38,7 +38,7 @@ const PATTERN_ALT: Record<PatternId, string> = {
   "churn-dash":
     "Churn Dash quilt block diagram showing 3x3 layout with four corner half square triangles, four side rectangular bar units, and a solid center square",
   "bear-paw":
-    "Bear Paw quilt block diagram showing 4x4 layout with a large 2x2 center paw pad, eight surrounding half square triangle claw units, and four small corner squares",
+    "Bear Paw quilt block diagram showing four traditional paw units around sashing with a separate center accent square",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -258,7 +258,7 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     case "bear-paw":
       return (
         <svg {...common}>
-          <BearPawBlockSvg pad={C.a} claw={C.b} bg={C.c} size={90} showGrid />
+          <BearPawBlockSvg pad={C.a} claw={C.b} bg={C.c} centerAccent={C.d} size={90} showGrid />
         </svg>
       );
   }

@@ -245,7 +245,7 @@ export const PATTERNS: PatternDef[] = [
     name: "Bear Paw",
     hasMath: true,
     intro:
-      "The Bear Paw block is made of four individual paw units arranged around a central connecting square with sashing between them. Each paw unit has one large pad square, four Half Square Triangle claw units arranged in an L-shape around the pad, and one background corner square. The claws on all four paws face outward creating the bear paw effect. When multiple Bear Paw blocks are placed together in a quilt they create beautiful secondary star patterns.",
+      "The Bear Paw block is made of four traditional paw units arranged around a small center accent square with sashing between them. Each paw unit has one large pad square tucked into the inner corner, four Half Square Triangle claw units along the two outer edges, and one background corner square at the outermost corner. The claws on all four paws face outward creating the bear paw effect.",
     sections: [
       {
         id: "pad",
@@ -257,13 +257,19 @@ export const PATTERNS: PatternDef[] = [
         id: "claws",
         label: "Claw fabric",
         defaultFabric: "B",
-        hint: "The triangles in each HST unit and the small center square — creates the claw and toe effect. Usually a bold contrasting color.",
+        hint: "The triangles in each HST unit that form the claws along the outer edges of each paw. Usually a bold contrasting color.",
       },
       {
         id: "bg",
         label: "Background",
         defaultFabric: "C",
         hint: "The corner squares, sashing strips between paws, and the background triangle in each HST unit. Usually a light neutral fabric.",
+      },
+      {
+        id: "center-accent",
+        label: "Center accent square",
+        defaultFabric: "D",
+        hint: "The small square where the four sashing strips meet in the center of the block — often a fun accent color that ties the whole block together.",
       },
       { ...borderSection, defaultFabric: "D" },
     ],

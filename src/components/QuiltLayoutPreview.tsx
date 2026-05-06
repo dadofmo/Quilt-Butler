@@ -496,10 +496,11 @@ function MiniBlock({
       );
     }
     case "bear-paw": {
-      const pad = get("center", "A");
+      const pad = get("pad", "A");
       const claw = get("claws", "B");
       const bg = get("bg", "C");
-      return <BearPawBlockSvg pad={pad} claw={claw} bg={bg} />;
+      const centerAccent = get("center-accent", "D");
+      return <BearPawBlockSvg pad={pad} claw={claw} bg={bg} centerAccent={centerAccent} />;
     }
   }
 }

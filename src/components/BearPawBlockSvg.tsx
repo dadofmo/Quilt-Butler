@@ -6,11 +6,11 @@
  *   [H-SASH][CENTER][H-SASH]
  *   [PAW][V-SASH][PAW]
  *
- * Each PAW UNIT is itself a 3×3 mini-grid where a 2×2 pad is in the inner
- * (center-facing) corner of the paw, an L of 4 HST claws wraps around two
- * outer edges of the pad, and a single bg corner square sits at the outer
- * corner of the paw. Each paw is rotated so its claws + bg corner face the
- * outer corner of the block.
+ * Each PAW UNIT is itself a 3×3 mini-grid where a 2×2 pad is in the INNER
+ * (center-facing) corner of the paw, an L of 4 HST claws runs along the two
+ * OUTER edges only, and a single bg corner square sits at the outermost
+ * corner. The background half of every HST points inward toward the sashing.
+ * This file is the single source of truth for that traditional construction.
  *
  * Geometry: the block is sized so paw size : sashing : paw = 3u : s : 3u
  * where u = 7B/48 and s = B/8. With B=12 this gives 5.25" + 1.5" + 5.25"
@@ -19,11 +19,13 @@
  */
 
 type Orient = "tl" | "tr" | "bl" | "br";
+type Edge = "top" | "right" | "bottom" | "left";
 
 interface BearPawBlockSvgProps {
   pad: string;
   claw: string;
   bg: string;
+  centerAccent: string;
   size?: number;
   showGrid?: boolean;
   gridStroke?: string;
@@ -34,14 +36,14 @@ interface BearPawBlockSvgProps {
 // For each paw orientation, declare:
 //   bgCorner = which (row,col) cell holds the small bg corner square
 //   pad      = which 2×2 cell range is the paw pad (rRange, cRange)
-//   claws    = list of (row, col, clawCornerOfCell) for the 4 HST claw cells
+//   claws    = list of (row, col, outwardEdgeOfCell) for the 4 HST claw cells
 const PAW_LAYOUT: Record<
   Orient,
   {
     bgCorner: [number, number];
     padR: [number, number];
     padC: [number, number];
-    claws: Array<[number, number, Orient]>;
+    claws: Array<[number, number, Edge]>;
   }
 > = {
   tl: {
@@ -49,10 +51,10 @@ const PAW_LAYOUT: Record<
     padR: [1, 2],
     padC: [1, 2],
     claws: [
-      [0, 1, "tl"],
-      [0, 2, "tr"],
-      [1, 0, "tl"],
-      [2, 0, "bl"],
+      [0, 1, "top"],
+      [0, 2, "top"],
+      [1, 0, "left"],
+      [2, 0, "left"],
     ],
   },
   tr: {
@@ -60,10 +62,10 @@ const PAW_LAYOUT: Record<
     padR: [1, 2],
     padC: [0, 1],
     claws: [
-      [0, 1, "tr"],
-      [0, 0, "tl"],
-      [1, 2, "tr"],
-      [2, 2, "br"],
+      [0, 0, "top"],
+      [0, 1, "top"],
+      [1, 2, "right"],
+      [2, 2, "right"],
     ],
   },
   bl: {
@@ -71,10 +73,10 @@ const PAW_LAYOUT: Record<
     padR: [0, 1],
     padC: [1, 2],
     claws: [
-      [2, 1, "bl"],
-      [2, 2, "br"],
-      [1, 0, "bl"],
-      [0, 0, "tl"],
+      [2, 1, "bottom"],
+      [2, 2, "bottom"],
+      [0, 0, "left"],
+      [1, 0, "left"],
     ],
   },
   br: {
@@ -82,28 +84,28 @@ const PAW_LAYOUT: Record<
     padR: [0, 1],
     padC: [0, 1],
     claws: [
-      [2, 1, "br"],
-      [2, 0, "bl"],
-      [1, 2, "br"],
-      [0, 2, "tr"],
+      [0, 2, "right"],
+      [1, 2, "right"],
+      [2, 0, "bottom"],
+      [2, 1, "bottom"],
     ],
   },
 };
 
-function hstPoints(x: number, y: number, cu: number, corner: Orient) {
+function hstPoints(x: number, y: number, cu: number, edge: Edge) {
   const tl = `${x},${y}`;
   const tr = `${x + cu},${y}`;
   const bl = `${x},${y + cu}`;
   const br = `${x + cu},${y + cu}`;
-  switch (corner) {
-    case "tl":
-      return { claw: `${tl} ${tr} ${bl}`, bg: `${tr} ${br} ${bl}` };
-    case "tr":
-      return { claw: `${tr} ${tl} ${br}`, bg: `${tl} ${bl} ${br}` };
-    case "bl":
-      return { claw: `${bl} ${tl} ${br}`, bg: `${tl} ${tr} ${br}` };
-    case "br":
-      return { claw: `${br} ${tr} ${bl}`, bg: `${tr} ${tl} ${bl}` };
+  switch (edge) {
+    case "top":
+      return { claw: `${tl} ${tr} ${br}`, bg: `${tl} ${bl} ${br}` };
+    case "right":
+      return { claw: `${tr} ${br} ${bl}`, bg: `${tl} ${tr} ${bl}` };
+    case "bottom":
+      return { claw: `${bl} ${br} ${tr}`, bg: `${tl} ${tr} ${bl}` };
+    case "left":
+      return { claw: `${tl} ${bl} ${br}`, bg: `${tl} ${tr} ${br}` };
   }
 }
 
@@ -179,6 +181,7 @@ export function BearPawBlockSvg({
   pad,
   claw,
   bg,
+  centerAccent,
   size = 200,
   showGrid = false,
   gridStroke = "white",
@@ -246,8 +249,8 @@ export function BearPawBlockSvg({
         gridStrokeWidth={gridStrokeWidth}
         gridOpacity={gridOpacity}
       />
-      {/* Center small claw-fabric square */}
-      <rect x={pawSize} y={pawSize} width={sash} height={sash} fill={claw} />
+      {/* Center connector square — separate fabric option from the paw claws. */}
+      <rect x={pawSize} y={pawSize} width={sash} height={sash} fill={centerAccent} />
       {showGrid && (
         <g
           stroke={gridStroke}
