@@ -245,7 +245,7 @@ export const PATTERNS: PatternDef[] = [
     name: "Bear Paw",
     hasMath: true,
     intro:
-      "The Bear Paw block is made of four individual paw units arranged around a central connecting square with sashing between them. Each paw unit has one large pad square, four Half Square Triangle claw units arranged in an L-shape around the pad, and one background corner square. The claws on all four paws face outward creating the bear paw effect. When multiple Bear Paw blocks are placed together in a quilt they create beautiful secondary star patterns.",
+      "The Bear Paw block is made of four traditional paw units arranged around a small center accent square with sashing between them. Each paw unit has one large pad square tucked into the inner corner, four Half Square Triangle claw units along the two outer edges, and one background corner square at the outermost corner. The claws on all four paws face outward creating the bear paw effect.",
     sections: [
       {
         id: "pad",
