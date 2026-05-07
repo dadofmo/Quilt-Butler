@@ -76,8 +76,8 @@ const PAW_LAYOUT: Record<
     padR: [0, 1],
     padC: [1, 2],
     claws: [
-      [2, 1, "tr"],
-      [2, 2, "tr"],
+      [2, 1, "tl"],
+      [2, 2, "tl"],
       [0, 0, "br"],
       [1, 0, "br"],
     ],
