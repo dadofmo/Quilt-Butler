@@ -19,7 +19,8 @@
  */
 
 type Orient = "tl" | "tr" | "bl" | "br";
-type Edge = "top" | "right" | "bottom" | "left";
+// Corner where the yellow (claw) right-angle sits in the HST cell.
+type Corner = "tl" | "tr" | "bl" | "br";
 
 interface BearPawBlockSvgProps {
   pad: string;
