@@ -37,14 +37,16 @@ interface BearPawBlockSvgProps {
 // For each paw orientation, declare:
 //   bgCorner = which (row,col) cell holds the small bg corner square
 //   pad      = which 2×2 cell range is the paw pad (rRange, cRange)
-//   claws    = list of (row, col, outwardEdgeOfCell) for the 4 HST claw cells
+//   claws    = list of (row, col, clawRightAngleCornerOfCell) for the 4 HST claw cells.
+//   The "corner" is where the yellow (claw) right angle sits inside the HST cell;
+//   the background half is the opposite triangle. Right angle points toward the pad.
 const PAW_LAYOUT: Record<
   Orient,
   {
     bgCorner: [number, number];
     padR: [number, number];
     padC: [number, number];
-    claws: Array<[number, number, Edge]>;
+    claws: Array<[number, number, Corner]>;
   }
 > = {
   tl: {
@@ -52,10 +54,10 @@ const PAW_LAYOUT: Record<
     padR: [1, 2],
     padC: [1, 2],
     claws: [
-      [0, 1, "bottom"],
-      [0, 2, "bottom"],
-      [1, 0, "right"],
-      [2, 0, "right"],
+      [0, 1, "bl"],
+      [0, 2, "bl"],
+      [1, 0, "tr"],
+      [2, 0, "tr"],
     ],
   },
   tr: {
@@ -63,10 +65,10 @@ const PAW_LAYOUT: Record<
     padR: [1, 2],
     padC: [0, 1],
     claws: [
-      [0, 0, "bottom"],
-      [0, 1, "bottom"],
-      [1, 2, "left"],
-      [2, 2, "left"],
+      [0, 0, "br"],
+      [0, 1, "br"],
+      [1, 2, "tl"],
+      [2, 2, "tl"],
     ],
   },
   bl: {
@@ -74,10 +76,10 @@ const PAW_LAYOUT: Record<
     padR: [0, 1],
     padC: [1, 2],
     claws: [
-      [2, 1, "top"],
-      [2, 2, "top"],
-      [0, 0, "right"],
-      [1, 0, "right"],
+      [2, 1, "tr"],
+      [2, 2, "tr"],
+      [0, 0, "br"],
+      [1, 0, "br"],
     ],
   },
   br: {
@@ -85,29 +87,31 @@ const PAW_LAYOUT: Record<
     padR: [0, 1],
     padC: [0, 1],
     claws: [
-      [0, 2, "left"],
-      [1, 2, "left"],
-      [2, 0, "top"],
-      [2, 1, "top"],
+      [0, 2, "bl"],
+      [1, 2, "bl"],
+      [2, 0, "tr"],
+      [2, 1, "tr"],
     ],
   },
 };
 
-function hstPoints(x: number, y: number, cu: number, edge: Edge) {
+function hstPoints(x: number, y: number, cu: number, corner: Corner) {
   const tl = `${x},${y}`;
   const tr = `${x + cu},${y}`;
   const bl = `${x},${y + cu}`;
   const br = `${x + cu},${y + cu}`;
-  switch (edge) {
-    case "top":
-      return { claw: `${tl} ${tr} ${br}`, bg: `${tl} ${bl} ${br}` };
-    case "right":
-      return { claw: `${tr} ${br} ${bl}`, bg: `${tl} ${tr} ${bl}` };
-    case "bottom":
-      return { claw: `${bl} ${br} ${tr}`, bg: `${tl} ${tr} ${bl}` };
-    case "left":
+  switch (corner) {
+    case "tl":
+      return { claw: `${tl} ${tr} ${bl}`, bg: `${tr} ${br} ${bl}` };
+    case "tr":
+      return { claw: `${tl} ${tr} ${br}`, bg: `${tl} ${br} ${bl}` };
+    case "bl":
       return { claw: `${tl} ${bl} ${br}`, bg: `${tl} ${tr} ${br}` };
+    case "br":
+      return { claw: `${tr} ${br} ${bl}`, bg: `${tl} ${tr} ${bl}` };
   }
+}
+
 }
 
 function PawUnit({
