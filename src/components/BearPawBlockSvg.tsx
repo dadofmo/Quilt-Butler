@@ -112,7 +112,6 @@ function hstPoints(x: number, y: number, cu: number, corner: Corner) {
   }
 }
 
-}
 
 function PawUnit({
   x,
