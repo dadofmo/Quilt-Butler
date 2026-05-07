@@ -51,10 +51,10 @@ const PAW_LAYOUT: Record<
     padR: [1, 2],
     padC: [1, 2],
     claws: [
-      [0, 1, "top"],
-      [0, 2, "top"],
-      [1, 0, "left"],
-      [2, 0, "left"],
+      [0, 1, "bottom"],
+      [0, 2, "bottom"],
+      [1, 0, "right"],
+      [2, 0, "right"],
     ],
   },
   tr: {
@@ -62,10 +62,10 @@ const PAW_LAYOUT: Record<
     padR: [1, 2],
     padC: [0, 1],
     claws: [
-      [0, 0, "top"],
-      [0, 1, "top"],
-      [1, 2, "right"],
-      [2, 2, "right"],
+      [0, 0, "bottom"],
+      [0, 1, "bottom"],
+      [1, 2, "left"],
+      [2, 2, "left"],
     ],
   },
   bl: {
@@ -73,10 +73,10 @@ const PAW_LAYOUT: Record<
     padR: [0, 1],
     padC: [1, 2],
     claws: [
-      [2, 1, "bottom"],
-      [2, 2, "bottom"],
-      [0, 0, "left"],
-      [1, 0, "left"],
+      [2, 1, "top"],
+      [2, 2, "top"],
+      [0, 0, "right"],
+      [1, 0, "right"],
     ],
   },
   br: {
@@ -84,10 +84,10 @@ const PAW_LAYOUT: Record<
     padR: [0, 1],
     padC: [0, 1],
     claws: [
-      [0, 2, "right"],
-      [1, 2, "right"],
-      [2, 0, "bottom"],
-      [2, 1, "bottom"],
+      [0, 2, "left"],
+      [1, 2, "left"],
+      [2, 0, "top"],
+      [2, 1, "top"],
     ],
   },
 };
