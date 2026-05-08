@@ -513,12 +513,14 @@ function QuiltLayoutDiagram({
   blocksAcross,
   blocksDown,
   border,
+  sashing = 0,
 }: {
   quiltW: number;
   quiltH: number;
   blocksAcross: number;
   blocksDown: number;
   border: number;
+  sashing?: number;
 }) {
   const MAX = 180;
   if (quiltW <= 0 || quiltH <= 0) return null;
@@ -529,8 +531,10 @@ function QuiltLayoutDiagram({
   const borderPxY = (border / quiltH) * h;
   const innerW = w - borderPxX * 2;
   const innerH = h - borderPxY * 2;
-  const cellW = innerW / Math.max(1, blocksAcross);
-  const cellH = innerH / Math.max(1, blocksDown);
+  const sashPxX = sashing > 0 ? (sashing / quiltW) * w : 0;
+  const sashPxY = sashing > 0 ? (sashing / quiltH) * h : 0;
+  const cellW = (innerW - Math.max(0, blocksAcross - 1) * sashPxX) / Math.max(1, blocksAcross);
+  const cellH = (innerH - Math.max(0, blocksDown - 1) * sashPxY) / Math.max(1, blocksDown);
 
   return (
     <div className="flex flex-col items-center gap-2">
