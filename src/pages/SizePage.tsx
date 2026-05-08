@@ -77,6 +77,11 @@ function SizeStepInner() {
   const borderNum = Number(borderText);
   const borderValid = borderText.trim() !== "" && !isNaN(borderNum) && borderNum >= 0;
   const border = borderValid ? borderNum : 0;
+  const sashingNum = Number(sashingText);
+  const sashingValid =
+    !isBearPaw ||
+    (sashingText.trim() !== "" && !isNaN(sashingNum) && sashingNum > 0);
+  const sashing = isBearPaw && sashingValid ? sashingNum : 0;
 
   const fit = useMemo(() => {
     if (!blockSizeValid) return null;
