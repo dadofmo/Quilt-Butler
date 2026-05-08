@@ -563,29 +563,21 @@ function QuiltLayoutDiagram({
           height={innerH}
           fill="oklch(0.95 0.02 250)"
         />
-        {/* Block grid lines */}
-        {Array.from({ length: blocksAcross + 1 }).map((_, i) => (
-          <line
-            key={`v-${i}`}
-            x1={borderPxX + i * cellW}
-            y1={borderPxY}
-            x2={borderPxX + i * cellW}
-            y2={borderPxY + innerH}
-            stroke="oklch(0.55 0.02 250)"
-            strokeWidth={1}
-          />
-        ))}
-        {Array.from({ length: blocksDown + 1 }).map((_, j) => (
-          <line
-            key={`h-${j}`}
-            x1={borderPxX}
-            y1={borderPxY + j * cellH}
-            x2={borderPxX + innerW}
-            y2={borderPxY + j * cellH}
-            stroke="oklch(0.55 0.02 250)"
-            strokeWidth={1}
-          />
-        ))}
+        {/* Block grid lines (drawn at edges of each block, accounting for sashing gaps) */}
+        {Array.from({ length: blocksAcross + 1 }).map((_, i) => {
+          const x = borderPxX + i * cellW + Math.max(0, i) * sashPxX - (i === blocksAcross ? sashPxX : 0);
+          const x2 = i === 0 ? borderPxX : x;
+          return (
+            <line key={`v-${i}`} x1={x2} y1={borderPxY} x2={x2} y2={borderPxY + innerH} stroke="oklch(0.55 0.02 250)" strokeWidth={1} />
+          );
+        })}
+        {Array.from({ length: blocksDown + 1 }).map((_, j) => {
+          const y = borderPxY + j * cellH + Math.max(0, j) * sashPxY - (j === blocksDown ? sashPxY : 0);
+          const y2 = j === 0 ? borderPxY : y;
+          return (
+            <line key={`h-${j}`} x1={borderPxX} y1={y2} x2={borderPxX + innerW} y2={y2} stroke="oklch(0.55 0.02 250)" strokeWidth={1} />
+          );
+        })}
         {/* Outer outline */}
         <rect
           x={0.5}
