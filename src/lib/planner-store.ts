@@ -34,6 +34,9 @@ export interface PlannerState {
   fabricWidth: number;
   blockSize: number; // inches (decimal allowed)
   borderWidth: number; // inches, 0 for none
+  /** Sashing width between blocks (inches). Currently only used by Bear Paw,
+   *  where it is permanent (default 2") and cannot be 0. */
+  sashingWidth: number;
   assignments: SectionAssignments;
   safetyBuffer: boolean;
   fabricNames: Partial<Record<FabricKey, string>>;
@@ -60,6 +63,7 @@ const initial: PlannerState = {
   fabricWidth: 0,
   blockSize: 0,
   borderWidth: 0,
+  sashingWidth: 2,
   assignments: {},
   safetyBuffer: true,
   fabricNames: {},
