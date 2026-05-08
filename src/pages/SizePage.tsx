@@ -330,14 +330,13 @@ function SizeStepInner() {
             suggestions for getting to the desired size when the math
             doesn't divide evenly (including a layout-altering combo option). */}
         {fit && (() => {
-          const actualW = fit.blocksAcross * blockSizeNum + 2 * border;
-          const actualH = fit.blocksDown * blockSizeNum + 2 * border;
+          const actualW = fit.blocksAcross * blockSizeNum + Math.max(0, fit.blocksAcross - 1) * sashing + 2 * border;
+          const actualH = fit.blocksDown * blockSizeNum + Math.max(0, fit.blocksDown - 1) * sashing + 2 * border;
           const matchesDesired = fit.perfect;
           const comboOptions = fit.comboSuggestions;
           return (
             <Field label="Finished quilt size">
               <div className="bg-card border-input rounded-xl border-2 p-4">
-                {/* Visual quilt layout preview */}
                 <div className="mb-4 flex justify-center">
                   <QuiltLayoutDiagram
                     quiltW={actualW}
@@ -345,6 +344,7 @@ function SizeStepInner() {
                     blocksAcross={fit.blocksAcross}
                     blocksDown={fit.blocksDown}
                     border={border}
+                    sashing={sashing}
                   />
                 </div>
                 {(() => {
