@@ -303,6 +303,28 @@ function SizeStepInner() {
           )}
         </Field>
 
+        {isBearPaw && (
+          <Field label="Sashing between blocks (in inches)">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={sashingText}
+              onChange={(e) => setSashingText(e.target.value)}
+              placeholder="e.g. 2"
+              aria-invalid={!sashingValid}
+              className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+            />
+            <p className="text-muted-foreground mt-2 text-xs leading-snug">
+              Sashing separates each Bear Paw block — common widths are 1.5&quot;, 2&quot;, 2.5&quot;, or 3&quot;.
+            </p>
+            {!sashingValid && (
+              <p className="text-destructive mt-2 text-sm font-medium">
+                Please enter a positive number (Bear Paw always uses sashing).
+              </p>
+            )}
+          </Field>
+        )}
+
         {/* Finished quilt size — actual size produced by the current block +
             border choices, with a visual layout preview, plus bullet
             suggestions for getting to the desired size when the math
