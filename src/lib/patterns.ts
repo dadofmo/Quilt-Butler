@@ -271,6 +271,18 @@ export const PATTERNS: PatternDef[] = [
         defaultFabric: "D",
         hint: "The small square where the four sashing strips meet in the center of the block — often a fun accent color that ties the whole block together.",
       },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "The strips of fabric that separate each Bear Paw block — usually your background fabric or a coordinating neutral.",
+      },
+      {
+        id: "cornerstone",
+        label: "Cornerstone squares",
+        defaultFabric: "E",
+        hint: "The small accent squares where sashing strips meet at each intersection — a classic Bear Paw detail.",
+      },
       { ...borderSection, defaultFabric: "D" },
     ],
   },
