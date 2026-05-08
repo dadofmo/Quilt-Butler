@@ -9,7 +9,7 @@ function base(): PlannerState {
   return {
     pattern: null,
     quiltWidth: 50, quiltHeight: 65, sizePreset: "throw",
-    fabricWidth: 44, blockSize: 12, borderWidth: 0,
+    fabricWidth: 44, blockSize: 12, borderWidth: 0, sashingWidth: 0,
     assignments: {}, safetyBuffer: false,
     fabricNames: {}, fabricPhotos: {},
     patchworkFabricCount: 4, patchworkGrid: {},

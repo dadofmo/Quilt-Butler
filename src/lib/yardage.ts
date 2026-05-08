@@ -839,7 +839,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
       : s.quiltHeight - 2 * s.borderWidth;
     const borderDefault = (getPattern(s.pattern)?.sections.find((sec) => sec.id === "border")?.defaultFabric ?? "C") as FabricKey;
     const borderFab = (s.assignments["border"] ?? borderDefault) as FabricKey;
-    const b = borderInches(s.quiltWidth - 2 * s.borderWidth, s.quiltHeight - 2 * s.borderWidth, s.borderWidth, s.fabricWidth);
+    const b = borderInches(finishedInnerW, finishedInnerH, s.borderWidth, s.fabricWidth);
     if (b.stripCount > 0) {
       reqs[borderFab].strips.push({
         stripWidth: b.stripWidth,
