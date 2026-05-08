@@ -9,7 +9,7 @@ function base(): PlannerState {
   return {
     pattern: null,
     quiltWidth: 50, quiltHeight: 65, sizePreset: "throw",
-    fabricWidth: 44, blockSize: 12, borderWidth: 0,
+    fabricWidth: 44, blockSize: 12, borderWidth: 0, sashingWidth: 0,
     assignments: {}, safetyBuffer: false,
     fabricNames: {}, fabricPhotos: {},
     patchworkFabricCount: 4, patchworkGrid: {},
@@ -512,45 +512,30 @@ console.log("\n=== Plus Block: 9\" block ===");
 // =========================================================================
 // BEAR PAW
 // =========================================================================
-console.log("\n=== Bear Paw: 50×65, 12\" block, no border ===");
+console.log("\n=== Bear Paw: 50×65, 12\" block, 2\" sashing, no border ===");
 {
   const s = {
     ...base(),
     pattern: "bear-paw" as const,
     blockSize: 12,
     borderWidth: 0,
-    assignments: { pad: "A" as FabricKey, claws: "B" as FabricKey, bg: "C" as FabricKey },
+    sashingWidth: 2,
+    assignments: { pad: "A" as FabricKey, claws: "B" as FabricKey, bg: "C" as FabricKey, sashing: "F" as FabricKey, cornerstone: "G" as FabricKey },
   };
-  // 4×5 = 20 blocks. s=1.5, u=1.75. padCut=4, cornerCut=2.25, hstCut=2.625,
-  // sashShort=2, sashLong=5.75, centerCut=2. Usable=42.5.
-  // A pad: 80 sq @4". perStrip=10. strips=8. inches=32.
-  // B claw: 320 HST @2.625" → perStrip=16, strips=20, inches=52.5
-  //         20 center @2" → perStrip=21, strips=1, inches=2. Total B=54.5.
-  // C bg:   320 HST @2.625" → 20 strips, 52.5"
-  //         80 corners @2.25" → perStrip=18, strips=5, inches=11.25
-  //         80 sashing 2"×5.75" → perStrip=7, strips=12, inches=24. Total=87.75
+  // With sashing 2": cols = floor((50+2)/(12+2)) = floor(52/14) = 3,
+  // rows = floor((65+2)/14) = floor(67/14) = 4. blocks = 12.
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
-  const b = r.fabrics.find(f => f.fabric === "B")!;
-  const c = r.fabrics.find(f => f.fabric === "C")!;
-  check("BP A pad count", a.pieces[0].count, 80);
-  check("BP A pad cut", a.pieces[0].w, 4);
-  check("BP A strips", a.strips[0].count, 8);
-  check("BP A inches", a.totalInches, 32);
-  check("BP B buckets", b.pieces.length, 2);
-  check("BP B claw HST count", b.pieces[0].count, 320);
-  check("BP B claw HST cut", b.pieces[0].w, 2.625);
-  check("BP B center count", b.pieces[1].count, 20);
-  check("BP B center cut", b.pieces[1].w, 2);
-  check("BP B inches", b.totalInches, 54.5);
-  check("BP C buckets", c.pieces.length, 3);
-  check("BP C HST bg count", c.pieces[0].count, 320);
-  check("BP C corner count", c.pieces[1].count, 80);
-  check("BP C corner cut", c.pieces[1].w, 2.25);
-  check("BP C sashing count", c.pieces[2].count, 80);
-  check("BP C sashing W", c.pieces[2].w, 5.75);
-  check("BP C sashing H", c.pieces[2].h, 2);
-  check("BP C inches", c.totalInches, 87.75);
+  check("BP A pad count (12 blocks * 4)", a.pieces[0].count, 48);
+  // Sashing F: vSash=(3-1)*4=8, hSash=(4-1)*3=9, total=17 strips at 2.5"x12.5"
+  const f = r.fabrics.find(x => x.fabric === "F")!;
+  check("BP sashing strip count", f.pieces[0].count, 17);
+  check("BP sashing cut length", f.pieces[0].w, 12.5);
+  check("BP sashing cut width", f.pieces[0].h, 2.5);
+  // Cornerstones G: (3-1)*(4-1)=6 squares at 2.5"
+  const g = r.fabrics.find(x => x.fabric === "G")!;
+  check("BP cornerstone count", g.pieces[0].count, 6);
+  check("BP cornerstone cut size", g.pieces[0].w, 2.5);
   check("BP basics glossary attached", r.basics?.length ?? 0, 5);
 }
 

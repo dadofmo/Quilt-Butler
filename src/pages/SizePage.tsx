@@ -47,6 +47,10 @@ function SizeStepInner() {
   const [borderText, setBorderText] = useState(
     planner.borderWidth ? String(planner.borderWidth) : "",
   );
+  const isBearPaw = planner.pattern === "bear-paw";
+  const [sashingText, setSashingText] = useState(
+    planner.sashingWidth ? String(planner.sashingWidth) : "2",
+  );
 
   if (!planner.pattern) {
     return (
@@ -73,20 +77,33 @@ function SizeStepInner() {
   const borderNum = Number(borderText);
   const borderValid = borderText.trim() !== "" && !isNaN(borderNum) && borderNum >= 0;
   const border = borderValid ? borderNum : 0;
+  const sashingNum = Number(sashingText);
+  const sashingValid =
+    !isBearPaw ||
+    (sashingText.trim() !== "" && !isNaN(sashingNum) && sashingNum > 0);
+  const sashing = isBearPaw && sashingValid ? sashingNum : 0;
 
   const fit = useMemo(() => {
     if (!blockSizeValid) return null;
+    if (isBearPaw && !sashingValid) return null;
     const quiltW = Number(w) || 0;
     const quiltH = Number(h) || 0;
     const innerW = quiltW - 2 * border;
     const innerH = quiltH - 2 * border;
     if (innerW <= 0 || innerH <= 0) return null;
-    const acrossExact = innerW / blockSizeNum;
-    const downExact = innerH / blockSizeNum;
+    // With sashing between blocks: cols*block + (cols-1)*sashing = innerW
+    // → cols = (innerW + sashing) / (block + sashing). Sashing=0 reduces to innerW/block.
+    const effInnerW = innerW + sashing;
+    const effInnerH = innerH + sashing;
+    const effBlock = blockSizeNum + sashing;
+    const acrossExact = effInnerW / effBlock;
+    const downExact = effInnerH / effBlock;
     const blocksAcross = Math.floor(acrossExact);
     const blocksDown = Math.floor(downExact);
-    const remW = +(innerW - blocksAcross * blockSizeNum).toFixed(2);
-    const remH = +(innerH - blocksDown * blockSizeNum).toFixed(2);
+    const usedW = blocksAcross * blockSizeNum + Math.max(0, blocksAcross - 1) * sashing;
+    const usedH = blocksDown * blockSizeNum + Math.max(0, blocksDown - 1) * sashing;
+    const remW = +(innerW - usedW).toFixed(2);
+    const remH = +(innerH - usedH).toFixed(2);
     const perfect = remW === 0 && remH === 0;
 
     const isInt = (x: number) => Math.abs(x - Math.round(x)) < 0.001;
@@ -96,112 +113,72 @@ function SizeStepInner() {
     // take months to sew and is not a beginner-friendly suggestion.
     const MAX_BLOCKS = 100;
 
-    // ----- Block-size suggestions: keep CURRENT border, find block sizes that
-    // divide both inner dimensions evenly. Search 2.0–15.0 in 0.25" steps so
-    // we always find something useful (not just from a tiny preset list).
+    const fitsCols = (block: number, b: number) => {
+      const iw = quiltW - 2 * b + sashing;
+      const ih = quiltH - 2 * b + sashing;
+      const eb = block + sashing;
+      const aw = iw / eb;
+      const ah = ih / eb;
+      return { aw, ah };
+    };
+
     type BlockSuggestion = { size: number; across: number; down: number; total: number };
     const blockSuggestions: BlockSuggestion[] = [];
     if (!perfect) {
       for (let s4 = 8; s4 <= 60; s4++) {
-        const s = s4 / 4; // 2.0 .. 15.0
+        const s = s4 / 4;
         if (Math.abs(s - blockSizeNum) < 0.001) continue;
-        const aw = innerW / s;
-        const ah = innerH / s;
+        const { aw, ah } = fitsCols(s, border);
         if (isInt(aw) && isInt(ah) && Math.round(aw) >= 1 && Math.round(ah) >= 1) {
           const total = Math.round(aw) * Math.round(ah);
           if (total > MAX_BLOCKS) continue;
-          blockSuggestions.push({
-            size: s,
-            across: Math.round(aw),
-            down: Math.round(ah),
-            total,
-          });
+          blockSuggestions.push({ size: s, across: Math.round(aw), down: Math.round(ah), total });
         }
       }
-      // Closest to current block size first.
       blockSuggestions.sort((a, b) => Math.abs(a.size - blockSizeNum) - Math.abs(b.size - blockSizeNum));
     }
 
-    // ----- Border suggestions: keep CURRENT block size, find a border width
-    // that makes BOTH inner dimensions multiples of the block. Search 0–10"
-    // in 0.25" steps. May come up empty for some quilt sizes.
     type BorderSuggestion = { border: number; across: number; down: number; total: number };
     const borderSuggestions: BorderSuggestion[] = [];
     if (!perfect) {
       for (let b2 = 0; b2 <= 40; b2++) {
         const b = b2 / 4;
         if (Math.abs(b - border) < 0.001) continue;
-        const iw = quiltW - 2 * b;
-        const ih = quiltH - 2 * b;
-        if (iw <= 0 || ih <= 0) continue;
-        const aw = iw / blockSizeNum;
-        const ah = ih / blockSizeNum;
+        if (quiltW - 2 * b <= 0 || quiltH - 2 * b <= 0) continue;
+        const { aw, ah } = fitsCols(blockSizeNum, b);
         if (isInt(aw) && isInt(ah) && Math.round(aw) >= 1 && Math.round(ah) >= 1) {
           const total = Math.round(aw) * Math.round(ah);
           if (total > MAX_BLOCKS) continue;
-          borderSuggestions.push({
-            border: b,
-            across: Math.round(aw),
-            down: Math.round(ah),
-            total,
-          });
+          borderSuggestions.push({ border: b, across: Math.round(aw), down: Math.round(ah), total });
         }
       }
       borderSuggestions.sort((a, b) => Math.abs(a.border - border) - Math.abs(b.border - border));
     }
 
-    // ----- Combo suggestions: when single-variable changes don't yield enough
-    // (or when the user's combo is unusual), find (block, border) pairs that
-    // both fit. Score by "closeness to user's current choices" so suggestions
-    // feel like small adjustments instead of starting from scratch.
     type ComboSuggestion = {
-      block: number;
-      border: number;
-      across: number;
-      down: number;
-      total: number;
-      score: number;
+      block: number; border: number; across: number; down: number; total: number; score: number;
     };
-    // Minimum reasonable finished block size for beginners — anything
-    // smaller produces tiny pieces that are tedious to cut and sew.
     const MIN_BLOCK = 4;
     const MAX_COMBO_OPTIONS = 10;
     const comboSuggestions: ComboSuggestion[] = [];
     if (!perfect) {
       for (let b2 = 0; b2 <= 40; b2++) {
         const bd = b2 / 4;
-        const iw = quiltW - 2 * bd;
-        const ih = quiltH - 2 * bd;
-        if (iw <= 0 || ih <= 0) continue;
-        // Start from MIN_BLOCK (in quarter-inch increments) so we never
-        // suggest impractically small blocks.
+        if (quiltW - 2 * bd <= 0 || quiltH - 2 * bd <= 0) continue;
         for (let s4 = MIN_BLOCK * 4; s4 <= 60; s4++) {
           const s = s4 / 4;
-          const aw = iw / s;
-          const ah = ih / s;
+          const { aw, ah } = fitsCols(s, bd);
           if (isInt(aw) && isInt(ah) && Math.round(aw) >= 1 && Math.round(ah) >= 1) {
             const total = Math.round(aw) * Math.round(ah);
             if (total > MAX_BLOCKS) continue;
-            // Score by closeness to the user's current choices so the
-            // smallest adjustments float to the top.
-            const score =
-              Math.abs(s - blockSizeNum) * 1.5 + Math.abs(bd - border) * 1.0;
-            comboSuggestions.push({
-              block: s,
-              border: bd,
-              across: Math.round(aw),
-              down: Math.round(ah),
-              total,
-              score,
-            });
+            const score = Math.abs(s - blockSizeNum) * 1.5 + Math.abs(bd - border) * 1.0;
+            comboSuggestions.push({ block: s, border: bd, across: Math.round(aw), down: Math.round(ah), total, score });
           }
         }
       }
       comboSuggestions.sort((a, b) => a.score - b.score);
     }
 
-    // Take the top N closest options (capped) and re-sort by block size
-    // ascending so the list reads smallest → largest for easier scanning.
     const diversifiedCombos: ComboSuggestion[] = comboSuggestions
       .slice(0, MAX_COMBO_OPTIONS)
       .sort((a, b) => a.block - b.block);
@@ -221,7 +198,7 @@ function SizeStepInner() {
       borderSuggestions: borderSuggestions.slice(0, 3),
       comboSuggestions: diversifiedCombos,
     };
-  }, [blockSizeValid, blockSizeNum, w, h, border]);
+  }, [blockSizeValid, blockSizeNum, w, h, border, sashing, isBearPaw, sashingValid]);
 
   const applyBorder = (b: number) => {
     setBorderText(String(b));
@@ -233,6 +210,7 @@ function SizeStepInner() {
 
   const next = () => {
     if (!blockSizeValid || !fabricWidthValid || !borderValid) return;
+    if (isBearPaw && !sashingValid) return;
     setPlanner({
       sizePreset: preset,
       quiltWidth: Number(w) || 0,
@@ -240,6 +218,7 @@ function SizeStepInner() {
       fabricWidth: fabricWidthNum,
       blockSize: blockSizeNum,
       borderWidth: border,
+      sashingWidth: isBearPaw ? sashingNum : planner.sashingWidth,
     });
     navigate("/fabrics");
   };
@@ -324,19 +303,40 @@ function SizeStepInner() {
           )}
         </Field>
 
+        {isBearPaw && (
+          <Field label="Sashing between blocks (in inches)">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={sashingText}
+              onChange={(e) => setSashingText(e.target.value)}
+              placeholder="e.g. 2"
+              aria-invalid={!sashingValid}
+              className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+            />
+            <p className="text-muted-foreground mt-2 text-xs leading-snug">
+              Sashing separates each Bear Paw block — common widths are 1.5&quot;, 2&quot;, 2.5&quot;, or 3&quot;.
+            </p>
+            {!sashingValid && (
+              <p className="text-destructive mt-2 text-sm font-medium">
+                Please enter a positive number (Bear Paw always uses sashing).
+              </p>
+            )}
+          </Field>
+        )}
+
         {/* Finished quilt size — actual size produced by the current block +
             border choices, with a visual layout preview, plus bullet
             suggestions for getting to the desired size when the math
             doesn't divide evenly (including a layout-altering combo option). */}
         {fit && (() => {
-          const actualW = fit.blocksAcross * blockSizeNum + 2 * border;
-          const actualH = fit.blocksDown * blockSizeNum + 2 * border;
+          const actualW = fit.blocksAcross * blockSizeNum + Math.max(0, fit.blocksAcross - 1) * sashing + 2 * border;
+          const actualH = fit.blocksDown * blockSizeNum + Math.max(0, fit.blocksDown - 1) * sashing + 2 * border;
           const matchesDesired = fit.perfect;
           const comboOptions = fit.comboSuggestions;
           return (
             <Field label="Finished quilt size">
               <div className="bg-card border-input rounded-xl border-2 p-4">
-                {/* Visual quilt layout preview */}
                 <div className="mb-4 flex justify-center">
                   <QuiltLayoutDiagram
                     quiltW={actualW}
@@ -344,6 +344,7 @@ function SizeStepInner() {
                     blocksAcross={fit.blocksAcross}
                     blocksDown={fit.blocksDown}
                     border={border}
+                    sashing={sashing}
                   />
                 </div>
                 {(() => {
@@ -512,12 +513,14 @@ function QuiltLayoutDiagram({
   blocksAcross,
   blocksDown,
   border,
+  sashing = 0,
 }: {
   quiltW: number;
   quiltH: number;
   blocksAcross: number;
   blocksDown: number;
   border: number;
+  sashing?: number;
 }) {
   const MAX = 180;
   if (quiltW <= 0 || quiltH <= 0) return null;
@@ -528,8 +531,10 @@ function QuiltLayoutDiagram({
   const borderPxY = (border / quiltH) * h;
   const innerW = w - borderPxX * 2;
   const innerH = h - borderPxY * 2;
-  const cellW = innerW / Math.max(1, blocksAcross);
-  const cellH = innerH / Math.max(1, blocksDown);
+  const sashPxX = sashing > 0 ? (sashing / quiltW) * w : 0;
+  const sashPxY = sashing > 0 ? (sashing / quiltH) * h : 0;
+  const cellW = (innerW - Math.max(0, blocksAcross - 1) * sashPxX) / Math.max(1, blocksAcross);
+  const cellH = (innerH - Math.max(0, blocksDown - 1) * sashPxY) / Math.max(1, blocksDown);
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -558,29 +563,21 @@ function QuiltLayoutDiagram({
           height={innerH}
           fill="oklch(0.95 0.02 250)"
         />
-        {/* Block grid lines */}
-        {Array.from({ length: blocksAcross + 1 }).map((_, i) => (
-          <line
-            key={`v-${i}`}
-            x1={borderPxX + i * cellW}
-            y1={borderPxY}
-            x2={borderPxX + i * cellW}
-            y2={borderPxY + innerH}
-            stroke="oklch(0.55 0.02 250)"
-            strokeWidth={1}
-          />
-        ))}
-        {Array.from({ length: blocksDown + 1 }).map((_, j) => (
-          <line
-            key={`h-${j}`}
-            x1={borderPxX}
-            y1={borderPxY + j * cellH}
-            x2={borderPxX + innerW}
-            y2={borderPxY + j * cellH}
-            stroke="oklch(0.55 0.02 250)"
-            strokeWidth={1}
-          />
-        ))}
+        {/* Block grid lines (drawn at edges of each block, accounting for sashing gaps) */}
+        {Array.from({ length: blocksAcross + 1 }).map((_, i) => {
+          const x = borderPxX + i * cellW + Math.max(0, i) * sashPxX - (i === blocksAcross ? sashPxX : 0);
+          const x2 = i === 0 ? borderPxX : x;
+          return (
+            <line key={`v-${i}`} x1={x2} y1={borderPxY} x2={x2} y2={borderPxY + innerH} stroke="oklch(0.55 0.02 250)" strokeWidth={1} />
+          );
+        })}
+        {Array.from({ length: blocksDown + 1 }).map((_, j) => {
+          const y = borderPxY + j * cellH + Math.max(0, j) * sashPxY - (j === blocksDown ? sashPxY : 0);
+          const y2 = j === 0 ? borderPxY : y;
+          return (
+            <line key={`h-${j}`} x1={borderPxX} y1={y2} x2={borderPxX + innerW} y2={y2} stroke="oklch(0.55 0.02 250)" strokeWidth={1} />
+          );
+        })}
         {/* Outer outline */}
         <rect
           x={0.5}

@@ -143,10 +143,16 @@ export function calculateYardage(s: PlannerState): CalcResult {
     {} as Record<FabricKey, FabricRequirement>,
   );
 
+  const isBearPaw = s.pattern === "bear-paw";
+  const sashWidth = isBearPaw ? Math.max(0.0001, s.sashingWidth || 2) : 0;
   const innerW = s.quiltWidth - 2 * s.borderWidth;
   const innerH = s.quiltHeight - 2 * s.borderWidth;
-  const blocksAcross = Math.max(1, Math.floor(innerW / s.blockSize));
-  const blocksDown = Math.max(1, Math.floor(innerH / s.blockSize));
+  const blocksAcross = isBearPaw
+    ? Math.max(1, Math.floor((innerW + sashWidth) / (s.blockSize + sashWidth)))
+    : Math.max(1, Math.floor(innerW / s.blockSize));
+  const blocksDown = isBearPaw
+    ? Math.max(1, Math.floor((innerH + sashWidth) / (s.blockSize + sashWidth)))
+    : Math.max(1, Math.floor(innerH / s.blockSize));
   const blockCount = blocksAcross * blocksDown;
   const notes: string[] = [
     `${blocksAcross} × ${blocksDown} = ${blockCount} blocks (${s.blockSize}" finished)`,
@@ -793,13 +799,47 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Bear Paw Assembly Tip: Build this block in two stages. Stage one — make all four paw units. For each paw: sew two HST units side by side (claw triangles pointing toward the pad) and attach to the side of your pad square that faces the block center. Sew two more HST units in a column (again, claws pointing toward the pad) with your background corner square at the outer end and attach to the other inner-facing side of your pad. Press seams toward the pad. Stage two — assemble the block. Arrange your four paws so the pad in each paw sits against the center, with sashing rectangles between paws and the center square in the middle. Sew into three rows then join the rows. Pro tip: press your sashing seams toward the sashing fabric so they nest cleanly when you join the rows.`,
     );
+    // Between-block sashing + cornerstones (Bear Paw is always sashed).
+    const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+    const cornerFabKey = (s.assignments["cornerstone"] ?? "E") as FabricKey;
+    const sashCutW = sashWidth + SEAM;
+    const sashCutL = s.blockSize + SEAM;
+    const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+    const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+    const totalSash = vSash + hSash;
+    if (totalSash > 0) {
+      addRails(reqs[sashFab], "Between-block sashing strips", totalSash, sashCutL, sashCutW, s.fabricWidth);
+    }
+    const cornerCutSize = sashWidth + SEAM;
+    const totalCorners = Math.max(0, blocksAcross - 1) * Math.max(0, blocksDown - 1);
+    if (totalCorners > 0) {
+      addSquares(reqs[cornerFabKey], "Cornerstone squares", totalCorners, cornerCutSize, s.fabricWidth);
+    }
+    notes.push(
+      `Between-block sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}). Place between finished Bear Paw blocks when assembling.`,
+    );
+    if (totalCorners > 0) {
+      notes.push(
+        `Cornerstone squares: cut ${totalCorners} squares at ${cornerCutSize.toFixed(2)}" × ${cornerCutSize.toFixed(2)}" (Fabric ${cornerFabKey}). Place at each intersection where sashing strips meet.`,
+      );
+    }
+    notes.push(
+      `Quilt assembly tip: after finishing all your Bear Paw blocks lay them out on the floor in your ${blocksAcross} × ${blocksDown} grid. Place sashing strips between each block and cornerstone squares at every intersection point. Sew blocks and vertical sashing strips into rows first. Then sew horizontal sashing strips and cornerstones into connector rows. Alternate block rows and connector rows when joining the full quilt top together — this is called a sashing setting and gives each Bear Paw block its own distinct space.`,
+    );
   }
 
   // Border
   if (s.borderWidth > 0) {
+    // For Bear Paw the inner (sashed) dimensions are bigger than blocks*blockSize.
+    const finishedInnerW = isBearPaw
+      ? blocksAcross * s.blockSize + Math.max(0, blocksAcross - 1) * sashWidth
+      : s.quiltWidth - 2 * s.borderWidth;
+    const finishedInnerH = isBearPaw
+      ? blocksDown * s.blockSize + Math.max(0, blocksDown - 1) * sashWidth
+      : s.quiltHeight - 2 * s.borderWidth;
     const borderDefault = (getPattern(s.pattern)?.sections.find((sec) => sec.id === "border")?.defaultFabric ?? "C") as FabricKey;
     const borderFab = (s.assignments["border"] ?? borderDefault) as FabricKey;
-    const b = borderInches(s.quiltWidth - 2 * s.borderWidth, s.quiltHeight - 2 * s.borderWidth, s.borderWidth, s.fabricWidth);
+    const b = borderInches(finishedInnerW, finishedInnerH, s.borderWidth, s.fabricWidth);
     if (b.stripCount > 0) {
       reqs[borderFab].strips.push({
         stripWidth: b.stripWidth,
