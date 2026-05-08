@@ -47,6 +47,10 @@ function SizeStepInner() {
   const [borderText, setBorderText] = useState(
     planner.borderWidth ? String(planner.borderWidth) : "",
   );
+  const isBearPaw = planner.pattern === "bear-paw";
+  const [sashingText, setSashingText] = useState(
+    planner.sashingWidth ? String(planner.sashingWidth) : "2",
+  );
 
   if (!planner.pattern) {
     return (
