@@ -198,7 +198,7 @@ function SizeStepInner() {
       borderSuggestions: borderSuggestions.slice(0, 3),
       comboSuggestions: diversifiedCombos,
     };
-  }, [blockSizeValid, blockSizeNum, w, h, border]);
+  }, [blockSizeValid, blockSizeNum, w, h, border, sashing, isBearPaw, sashingValid]);
 
   const applyBorder = (b: number) => {
     setBorderText(String(b));
@@ -210,6 +210,7 @@ function SizeStepInner() {
 
   const next = () => {
     if (!blockSizeValid || !fabricWidthValid || !borderValid) return;
+    if (isBearPaw && !sashingValid) return;
     setPlanner({
       sizePreset: preset,
       quiltWidth: Number(w) || 0,
@@ -217,6 +218,7 @@ function SizeStepInner() {
       fabricWidth: fabricWidthNum,
       blockSize: blockSizeNum,
       borderWidth: border,
+      sashingWidth: isBearPaw ? sashingNum : planner.sashingWidth,
     });
     navigate("/fabrics");
   };
