@@ -143,10 +143,16 @@ export function calculateYardage(s: PlannerState): CalcResult {
     {} as Record<FabricKey, FabricRequirement>,
   );
 
+  const isBearPaw = s.pattern === "bear-paw";
+  const sashWidth = isBearPaw ? Math.max(0.0001, s.sashingWidth || 2) : 0;
   const innerW = s.quiltWidth - 2 * s.borderWidth;
   const innerH = s.quiltHeight - 2 * s.borderWidth;
-  const blocksAcross = Math.max(1, Math.floor(innerW / s.blockSize));
-  const blocksDown = Math.max(1, Math.floor(innerH / s.blockSize));
+  const blocksAcross = isBearPaw
+    ? Math.max(1, Math.floor((innerW + sashWidth) / (s.blockSize + sashWidth)))
+    : Math.max(1, Math.floor(innerW / s.blockSize));
+  const blocksDown = isBearPaw
+    ? Math.max(1, Math.floor((innerH + sashWidth) / (s.blockSize + sashWidth)))
+    : Math.max(1, Math.floor(innerH / s.blockSize));
   const blockCount = blocksAcross * blocksDown;
   const notes: string[] = [
     `${blocksAcross} × ${blocksDown} = ${blockCount} blocks (${s.blockSize}" finished)`,
