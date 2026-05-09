@@ -16,6 +16,12 @@ interface Props {
   quiltWidth: number;
   quiltHeight: number;
   borderWidth: number;
+  /** Sashing width (in) between blocks. 0 = no sashing. */
+  sashingWidth?: number;
+  /** Sashing fabric (defaults to "C" if omitted). */
+  sashingFabric?: FabricKey;
+  /** Cornerstone fabric (defaults to "E" if omitted). */
+  cornerstoneFabric?: FabricKey;
   photos?: Partial<Record<FabricKey, string>>;
 }
 
@@ -29,6 +35,9 @@ export function QuiltLayoutPreview({
   quiltWidth,
   quiltHeight,
   borderWidth,
+  sashingWidth = 0,
+  sashingFabric = "C",
+  cornerstoneFabric = "E",
   photos,
 }: Props) {
   const blockCount = blocksAcross * blocksDown;
@@ -42,8 +51,13 @@ export function QuiltLayoutPreview({
   const borderPxY = hasBorder ? (borderWidth / quiltHeight) * thumbH : 0;
   const innerW = thumbW - borderPxX * 2;
   const innerH = thumbH - borderPxY * 2;
-  const cellW = innerW / blocksAcross;
-  const cellH = innerH / blocksDown;
+  const sashPxX = sashingWidth > 0 ? (sashingWidth / quiltWidth) * thumbW : 0;
+  const sashPxY = sashingWidth > 0 ? (sashingWidth / quiltHeight) * thumbH : 0;
+  const cellW = (innerW - Math.max(0, blocksAcross - 1) * sashPxX) / Math.max(1, blocksAcross);
+  const cellH = (innerH - Math.max(0, blocksDown - 1) * sashPxY) / Math.max(1, blocksDown);
+
+  const sashingFill = fabricFill(sashingFabric, photos);
+  const cornerFill = fabricFill(cornerstoneFabric, photos);
 
   const borderPhoto = hasBorder ? photos?.[borderFabric] : undefined;
   const borderColor = hasBorder ? FABRIC_COLORS[borderFabric] : "transparent";
