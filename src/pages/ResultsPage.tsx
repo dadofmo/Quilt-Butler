@@ -954,15 +954,16 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                     narrow strips without ever losing critical info. */}
                 {(() => {
                   const labelAvailW = usedW - 30; // px available to the right of the badge
+                  const tag = r.groupLabel ? `${r.groupLabel} — ` : "";
                   const fullLabel = r.isBorder
                     ? `Border strip — ${fabricWidth}" wide (full fabric width), no sub-cuts`
-                    : `sub-cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${r.subCutWidth?.toFixed(2)}" → finished piece ${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}"`;
+                    : `${tag}sub-cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${r.subCutWidth?.toFixed(2)}" → finished piece ${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}"`;
                   const midLabel = r.isBorder
                     ? `Border — full ${fabricWidth}" width`
-                    : `sub-cut ${r.subCutCount} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`;
+                    : `${tag}sub-cut ${r.subCutCount} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`;
                   const shortLabel = r.isBorder
                     ? `Border (full width)`
-                    : `sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
+                    : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
                   // Roughly 5px per char at 10px font; pick the longest version that fits.
                   const label =
                     labelAvailW > fullLabel.length * 5
