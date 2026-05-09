@@ -539,6 +539,37 @@ console.log("\n=== Bear Paw: 50×65, 12\" block, 2\" sashing, no border ===");
   check("BP basics glossary attached", r.basics?.length ?? 0, 5);
 }
 
+console.log("\n=== Bear Paw: sashing & background share fabric C — totals must merge ===");
+{
+  const s = {
+    ...base(),
+    pattern: "bear-paw" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 2,
+    // Default assignments: bg=C, sashing=C, cornerstone=C — all merge into Fabric C
+    assignments: { pad: "A" as FabricKey, claws: "B" as FabricKey, bg: "C" as FabricKey, sashing: "C" as FabricKey, cornerstone: "C" as FabricKey },
+  };
+  const r = calculateYardage(s);
+  // Sanity: only 3 fabric requirements (A pad, B claws+center, C bg+sashing+cornerstone).
+  check("BP merged-C fabric requirement count", r.fabrics.length, 3);
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  // Independent expected calc:
+  //   bg HST starting squares: 16 * 12 = 192
+  //   bg corner squares:        4  * 12 = 48
+  //   sashing rectangles:       4  * 12 = 48 (in-block sashing)
+  //   between-block sashing:    17  (2*4 + 3*3)
+  //   cornerstone squares:      6   ((3-1)*(4-1))
+  // Total piece groups in C should be 5 (each addSquares/addRails appends one bucket).
+  check("BP merged-C bucket count", c.pieces.length, 5);
+  const total = c.pieces.reduce((acc, p) => acc + p.count, 0);
+  check("BP merged-C total pieces (192+48+48+17+6)", total, 192 + 48 + 48 + 17 + 6);
+  // totalInches must equal sum of each bucket's strip-pack contribution; just
+  // assert it's > 0 and yards rounded up to 0.25.
+  if (c.totalInches <= 0) failures.push("BP merged-C inches not positive");
+  if ((c.yards * 4) % 1 !== 0) failures.push("BP merged-C yards not on a 0.25 boundary");
+}
+
 // =========================================================================
 // BORDER MATH
 // =========================================================================
