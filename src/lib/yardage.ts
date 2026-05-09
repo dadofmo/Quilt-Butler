@@ -796,9 +796,9 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `HST construction: pair one Fabric ${clawFab} starting square with one Fabric ${bgFab} starting square right sides together (RST). Draw a diagonal corner-to-corner on the back of the lighter square. Sew a scant 1/4" each side of the line, cut on the line, press toward the claw fabric, and trim each unit to ${(uFinished + SEAM).toFixed(4)}" square (finished ${uFinished.toFixed(4)}"). Each pair yields 2 HST units.`,
     );
-    notes.push(
-      `Bear Paw Assembly Tip: Build this block in two stages. Stage one — make all four paw units. For each paw: sew two HST units side by side (claw triangles pointing toward the pad) and attach to the side of your pad square that faces the block center. Sew two more HST units in a column (again, claws pointing toward the pad) with your background corner square at the outer end and attach to the other inner-facing side of your pad. Press seams toward the pad. Stage two — assemble the block. Arrange your four paws so the pad in each paw sits against the center, with sashing rectangles between paws and the center square in the middle. Sew into three rows then join the rows. Pro tip: press your sashing seams toward the sashing fabric so they nest cleanly when you join the rows.`,
-    );
+    // Combined assembly tip — block construction AND quilt-top setting in one
+    // tip box so the quilter sees the whole story end-to-end.
+    // (Filled in below after sashing variables are computed.)
     // Between-block sashing + cornerstones (Bear Paw is always sashed).
     const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
     const cornerFabKey = (s.assignments["cornerstone"] ?? "E") as FabricKey;
