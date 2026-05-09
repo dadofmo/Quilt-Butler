@@ -177,12 +177,22 @@ function FabricsStepInner() {
       {!isPatchwork && (
         <div className="bg-card mb-6 rounded-xl border-2 border-border p-4">
           {(() => {
+            const isBearPaw = pattern.id === "bear-paw";
+            const sashing = isBearPaw ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
-            const blocksAcross = Math.max(1, Math.floor(innerW / planner.blockSize));
-            const blocksDown = Math.max(1, Math.floor(innerH / planner.blockSize));
+            const blocksAcross = isBearPaw
+              ? Math.max(1, Math.floor((innerW + sashing) / (planner.blockSize + sashing)))
+              : Math.max(1, Math.floor(innerW / planner.blockSize));
+            const blocksDown = isBearPaw
+              ? Math.max(1, Math.floor((innerH + sashing) / (planner.blockSize + sashing)))
+              : Math.max(1, Math.floor(innerH / planner.blockSize));
             const borderDefault = (pattern.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey;
             const borderFabric = (planner.assignments["border"] ?? borderDefault) as FabricKey;
+            const sashingDefault = (pattern.sections.find((s) => s.id === "sashing")?.defaultFabric ?? "C") as FabricKey;
+            const cornerstoneDefault = (pattern.sections.find((s) => s.id === "cornerstone")?.defaultFabric ?? "E") as FabricKey;
+            const sashingFabric = (planner.assignments["sashing"] ?? sashingDefault) as FabricKey;
+            const cornerstoneFabric = (planner.assignments["cornerstone"] ?? cornerstoneDefault) as FabricKey;
             return (
               <>
                 <QuiltLayoutPreview
@@ -195,6 +205,9 @@ function FabricsStepInner() {
                   quiltWidth={planner.quiltWidth}
                   quiltHeight={planner.quiltHeight}
                   borderWidth={planner.borderWidth}
+                  sashingWidth={sashing}
+                  sashingFabric={sashingFabric}
+                  cornerstoneFabric={cornerstoneFabric}
                   photos={planner.fabricPhotos}
                 />
                 <p className="text-muted-foreground mt-4 text-center text-xs leading-relaxed">
@@ -202,6 +215,9 @@ function FabricsStepInner() {
                   <strong>{blocksAcross * blocksDown} times</strong> and arranged in a{" "}
                   {blocksAcross} × {blocksDown} grid to make your finished quilt.
                   {hasBorder && " The border wraps around the outside."}
+                  {isBearPaw && sashing > 0 && (
+                    <> Each block is separated by <strong>{sashing}&quot; sashing</strong> with cornerstone squares at the intersections.</>
+                  )}
                 </p>
               </>
             );

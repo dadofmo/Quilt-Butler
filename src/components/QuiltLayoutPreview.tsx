@@ -16,6 +16,12 @@ interface Props {
   quiltWidth: number;
   quiltHeight: number;
   borderWidth: number;
+  /** Sashing width (in) between blocks. 0 = no sashing. */
+  sashingWidth?: number;
+  /** Sashing fabric (defaults to "C" if omitted). */
+  sashingFabric?: FabricKey;
+  /** Cornerstone fabric (defaults to "E" if omitted). */
+  cornerstoneFabric?: FabricKey;
   photos?: Partial<Record<FabricKey, string>>;
 }
 
@@ -29,6 +35,9 @@ export function QuiltLayoutPreview({
   quiltWidth,
   quiltHeight,
   borderWidth,
+  sashingWidth = 0,
+  sashingFabric = "C",
+  cornerstoneFabric = "E",
   photos,
 }: Props) {
   const blockCount = blocksAcross * blocksDown;
@@ -42,8 +51,13 @@ export function QuiltLayoutPreview({
   const borderPxY = hasBorder ? (borderWidth / quiltHeight) * thumbH : 0;
   const innerW = thumbW - borderPxX * 2;
   const innerH = thumbH - borderPxY * 2;
-  const cellW = innerW / blocksAcross;
-  const cellH = innerH / blocksDown;
+  const sashPxX = sashingWidth > 0 ? (sashingWidth / quiltWidth) * thumbW : 0;
+  const sashPxY = sashingWidth > 0 ? (sashingWidth / quiltHeight) * thumbH : 0;
+  const cellW = (innerW - Math.max(0, blocksAcross - 1) * sashPxX) / Math.max(1, blocksAcross);
+  const cellH = (innerH - Math.max(0, blocksDown - 1) * sashPxY) / Math.max(1, blocksDown);
+
+  const sashingFill = fabricFill(sashingFabric, photos);
+  const cornerFill = fabricFill(cornerstoneFabric, photos);
 
   const borderPhoto = hasBorder ? photos?.[borderFabric] : undefined;
   const borderColor = hasBorder ? FABRIC_COLORS[borderFabric] : "transparent";
@@ -142,16 +156,23 @@ export function QuiltLayoutPreview({
                 from the bolt. Every block looks identical and matches the
                 "1 block" preview. */}
             <FabricPatternDefs photos={photos} />
+            {/* Sashing background fills the inner rectangle so all gaps
+                between blocks (and around the inside edge) show the sashing
+                fabric color. The block tiles draw on top, leaving sashing
+                visible only in the gaps. */}
+            {sashingWidth > 0 && (
+              <rect x={0} y={0} width={innerW} height={innerH} fill={sashingFill} />
+            )}
             {Array.from({ length: blocksDown }).map((_, j) =>
               Array.from({ length: blocksAcross }).map((_, i) => {
-                // Rail Fence convention: rotate every other block 90° so the
-                // rails alternate horizontal/vertical and form a woven fence.
                 const rotate = pattern === "rail-fence" && (i + j) % 2 === 1;
+                const bx = i * cellW + i * sashPxX;
+                const by = j * cellH + j * sashPxY;
                 return (
                   <svg
                     key={`${i}-${j}`}
-                    x={i * cellW}
-                    y={j * cellH}
+                    x={bx}
+                    y={by}
                     width={cellW}
                     height={cellH}
                     viewBox="0 0 200 200"
@@ -176,30 +197,54 @@ export function QuiltLayoutPreview({
                 );
               }),
             )}
-            {Array.from({ length: blocksAcross + 1 }).map((_, i) => (
-              <line
-                key={`v-${i}`}
-                x1={i * cellW}
-                y1={0}
-                x2={i * cellW}
-                y2={innerH}
-                stroke="white"
-                strokeWidth={2}
-                vectorEffect="non-scaling-stroke"
-              />
-            ))}
-            {Array.from({ length: blocksDown + 1 }).map((_, j) => (
-              <line
-                key={`h-${j}`}
-                x1={0}
-                y1={j * cellH}
-                x2={innerW}
-                y2={j * cellH}
-                stroke="white"
-                strokeWidth={2}
-                vectorEffect="non-scaling-stroke"
-              />
-            ))}
+            {/* Cornerstone squares at every interior sashing intersection. */}
+            {sashingWidth > 0 &&
+              Array.from({ length: Math.max(0, blocksAcross - 1) }).map((_, ci) =>
+                Array.from({ length: Math.max(0, blocksDown - 1) }).map((_, cj) => {
+                  const cx = (ci + 1) * cellW + ci * sashPxX;
+                  const cy = (cj + 1) * cellH + cj * sashPxY;
+                  return (
+                    <rect
+                      key={`cs-${ci}-${cj}`}
+                      x={cx}
+                      y={cy}
+                      width={sashPxX}
+                      height={sashPxY}
+                      fill={cornerFill}
+                    />
+                  );
+                }),
+              )}
+            {/* Hairline grid (only when there's no sashing — sashing already
+                provides visible separation between blocks). */}
+            {sashingWidth === 0 && (
+              <>
+                {Array.from({ length: blocksAcross + 1 }).map((_, i) => (
+                  <line
+                    key={`v-${i}`}
+                    x1={i * cellW}
+                    y1={0}
+                    x2={i * cellW}
+                    y2={innerH}
+                    stroke="white"
+                    strokeWidth={2}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ))}
+                {Array.from({ length: blocksDown + 1 }).map((_, j) => (
+                  <line
+                    key={`h-${j}`}
+                    x1={0}
+                    y1={j * cellH}
+                    x2={innerW}
+                    y2={j * cellH}
+                    stroke="white"
+                    strokeWidth={2}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ))}
+              </>
+            )}
           </svg>
         </div>
         <p className="text-muted-foreground max-w-[220px] text-center text-[11px]">

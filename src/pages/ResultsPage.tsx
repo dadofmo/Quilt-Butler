@@ -645,19 +645,19 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
     perStripMax?: number; // max squares this strip could fit
     isBorder: boolean;
     stripIndex: number; // 1-based across all strips
+    groupLabel?: string; // piece-group label (e.g. "Sashing", "Cornerstone squares")
   };
   const rows: Row[] = [];
   let y = 0;
   let stripIdx = 0;
   // Track totals per strip-group to know how many squares to cut from the LAST strip
-  req.strips.forEach((strip) => {
+  req.strips.forEach((strip, gi) => {
     const piece = strip.pieces[0];
     const isBorder = piece?.w === fabricWidth;
-    // Use the same selvage allowance as yardage.ts so the diagram never
-    // draws more sub-cuts per strip than the calculator allocated fabric for.
     const perStripMax = piece && !isBorder ? piecesPerStrip(piece.w, fabricWidth) : undefined;
     const totalNeeded = piece && !isBorder ? piece.count : 0;
     let cutSoFar = 0;
+    const groupLabel = req.pieces[gi]?.label;
     for (let i = 0; i < strip.count; i++) {
       stripIdx += 1;
       const remaining = totalNeeded - cutSoFar;
@@ -672,6 +672,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
         perStripMax,
         isBorder,
         stripIndex: stripIdx,
+        groupLabel,
       });
       y += strip.stripWidth;
     }
@@ -953,15 +954,16 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                     narrow strips without ever losing critical info. */}
                 {(() => {
                   const labelAvailW = usedW - 30; // px available to the right of the badge
+                  const tag = r.groupLabel ? `${r.groupLabel} — ` : "";
                   const fullLabel = r.isBorder
                     ? `Border strip — ${fabricWidth}" wide (full fabric width), no sub-cuts`
-                    : `sub-cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${r.subCutWidth?.toFixed(2)}" → finished piece ${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}"`;
+                    : `${tag}sub-cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${r.subCutWidth?.toFixed(2)}" → finished piece ${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}"`;
                   const midLabel = r.isBorder
                     ? `Border — full ${fabricWidth}" width`
-                    : `sub-cut ${r.subCutCount} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`;
+                    : `${tag}sub-cut ${r.subCutCount} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`;
                   const shortLabel = r.isBorder
                     ? `Border (full width)`
-                    : `sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
+                    : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
                   // Roughly 5px per char at 10px font; pick the longest version that fits.
                   const label =
                     labelAvailW > fullLabel.length * 5
