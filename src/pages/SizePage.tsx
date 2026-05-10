@@ -535,8 +535,10 @@ function QuiltLayoutDiagram({
   const innerH = h - borderPxY * 2;
   const sashPxX = sashing > 0 ? (sashing / quiltW) * w : 0;
   const sashPxY = sashing > 0 ? (sashing / quiltH) * h : 0;
-  const cellW = (innerW - Math.max(0, blocksAcross - 1) * sashPxX) / Math.max(1, blocksAcross);
-  const cellH = (innerH - Math.max(0, blocksDown - 1) * sashPxY) / Math.max(1, blocksDown);
+  // Full-perimeter sashing: (cols+1) sashing strips horizontally, (rows+1) vertically.
+  const perim = sashing > 0 ? 1 : 0;
+  const cellW = (innerW - (blocksAcross + perim) * sashPxX) / Math.max(1, blocksAcross);
+  const cellH = (innerH - (blocksDown + perim) * sashPxY) / Math.max(1, blocksDown);
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -557,7 +559,8 @@ function QuiltLayoutDiagram({
             fill="oklch(0.85 0.05 250)"
           />
         )}
-        {/* Inner area: fill with sashing color so gaps between blocks show through */}
+        {/* Inner area: fill with sashing color so gaps between blocks (and the
+            outer perimeter sashing) show through */}
         <rect
           x={borderPxX}
           y={borderPxY}
@@ -565,13 +568,13 @@ function QuiltLayoutDiagram({
           height={innerH}
           fill={sashing > 0 ? "oklch(0.88 0.04 90)" : "oklch(0.95 0.02 250)"}
         />
-        {/* Block tiles */}
+        {/* Block tiles — offset by one sashing strip when there is perimeter sashing */}
         {Array.from({ length: blocksDown }).map((_, j) =>
           Array.from({ length: blocksAcross }).map((_, i) => (
             <rect
               key={`b-${i}-${j}`}
-              x={borderPxX + i * (cellW + sashPxX)}
-              y={borderPxY + j * (cellH + sashPxY)}
+              x={borderPxX + perim * sashPxX + i * (cellW + sashPxX)}
+              y={borderPxY + perim * sashPxY + j * (cellH + sashPxY)}
               width={cellW}
               height={cellH}
               fill="oklch(0.95 0.02 250)"
@@ -580,14 +583,14 @@ function QuiltLayoutDiagram({
             />
           )),
         )}
-        {/* Cornerstones at interior intersections */}
+        {/* Cornerstones at every sashing intersection — including outer corners */}
         {sashing > 0 &&
-          Array.from({ length: Math.max(0, blocksAcross - 1) }).map((_, ci) =>
-            Array.from({ length: Math.max(0, blocksDown - 1) }).map((_, cj) => (
+          Array.from({ length: blocksAcross + 1 }).map((_, ci) =>
+            Array.from({ length: blocksDown + 1 }).map((_, cj) => (
               <rect
                 key={`cs-${ci}-${cj}`}
-                x={borderPxX + (ci + 1) * cellW + ci * sashPxX}
-                y={borderPxY + (cj + 1) * cellH + cj * sashPxY}
+                x={borderPxX + ci * (cellW + sashPxX)}
+                y={borderPxY + cj * (cellH + sashPxY)}
                 width={sashPxX}
                 height={sashPxY}
                 fill="oklch(0.7 0.12 30)"
