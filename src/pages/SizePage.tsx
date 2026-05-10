@@ -91,17 +91,18 @@ function SizeStepInner() {
     const innerW = quiltW - 2 * border;
     const innerH = quiltH - 2 * border;
     if (innerW <= 0 || innerH <= 0) return null;
-    // With sashing between blocks: cols*block + (cols-1)*sashing = innerW
-    // → cols = (innerW + sashing) / (block + sashing). Sashing=0 reduces to innerW/block.
-    const effInnerW = innerW + sashing;
-    const effInnerH = innerH + sashing;
+    // Bear Paw uses FULL-PERIMETER sashing: cols*block + (cols+1)*sashing = innerW
+    // → cols = (innerW - sashing) / (block + sashing). Sashing=0 reduces to innerW/block.
+    const effInnerW = innerW - sashing;
+    const effInnerH = innerH - sashing;
     const effBlock = blockSizeNum + sashing;
     const acrossExact = effInnerW / effBlock;
     const downExact = effInnerH / effBlock;
     const blocksAcross = Math.floor(acrossExact);
     const blocksDown = Math.floor(downExact);
-    const usedW = blocksAcross * blockSizeNum + Math.max(0, blocksAcross - 1) * sashing;
-    const usedH = blocksDown * blockSizeNum + Math.max(0, blocksDown - 1) * sashing;
+    const perimSashCount = sashing > 0 ? 1 : 0;
+    const usedW = blocksAcross * blockSizeNum + (blocksAcross + perimSashCount) * sashing;
+    const usedH = blocksDown * blockSizeNum + (blocksDown + perimSashCount) * sashing;
     const remW = +(innerW - usedW).toFixed(2);
     const remH = +(innerH - usedH).toFixed(2);
     const perfect = remW === 0 && remH === 0;
@@ -114,8 +115,8 @@ function SizeStepInner() {
     const MAX_BLOCKS = 100;
 
     const fitsCols = (block: number, b: number) => {
-      const iw = quiltW - 2 * b + sashing;
-      const ih = quiltH - 2 * b + sashing;
+      const iw = quiltW - 2 * b - sashing;
+      const ih = quiltH - 2 * b - sashing;
       const eb = block + sashing;
       const aw = iw / eb;
       const ah = ih / eb;
