@@ -801,32 +801,33 @@ export function calculateYardage(s: PlannerState): CalcResult {
     // Combined assembly tip — block construction AND quilt-top setting in one
     // tip box so the quilter sees the whole story end-to-end.
     // (Filled in below after sashing variables are computed.)
-    // Between-block sashing + cornerstones (Bear Paw is always sashed).
+    // Full-perimeter sashing + cornerstones (Bear Paw is always sashed).
     const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
     const cornerFabKey = (s.assignments["cornerstone"] ?? "E") as FabricKey;
     const sashCutW = sashWidth + SEAM;
     const sashCutL = s.blockSize + SEAM;
-    const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
-    const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+    // Full perimeter sashing grid: vertical strips between every column AND
+    // along the left/right edges, horizontal strips between every row AND
+    // along the top/bottom edges.
+    const vSash = (blocksAcross + 1) * blocksDown;
+    const hSash = (blocksDown + 1) * blocksAcross;
     const totalSash = vSash + hSash;
     if (totalSash > 0) {
-      addRails(reqs[sashFab], "Between-block sashing strips", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      addRails(reqs[sashFab], "Perimeter sashing strips", totalSash, sashCutL, sashCutW, s.fabricWidth);
     }
     const cornerCutSize = sashWidth + SEAM;
-    const totalCorners = Math.max(0, blocksAcross - 1) * Math.max(0, blocksDown - 1);
+    const totalCorners = (blocksAcross + 1) * (blocksDown + 1);
     if (totalCorners > 0) {
       addSquares(reqs[cornerFabKey], "Cornerstone squares", totalCorners, cornerCutSize, s.fabricWidth);
     }
     notes.push(
-      `Between-block sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}). Place between finished Bear Paw blocks when assembling.`,
+      `Full-perimeter sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${blocksAcross + 1} × ${blocksDown}) and ${hSash} horizontal (${blocksDown + 1} × ${blocksAcross}). Strips run between every block AND around the entire outer perimeter before the border.`,
     );
-    if (totalCorners > 0) {
-      notes.push(
-        `Cornerstone squares: cut ${totalCorners} squares at ${cornerCutSize.toFixed(2)}" × ${cornerCutSize.toFixed(2)}" (Fabric ${cornerFabKey}). Place at each intersection where sashing strips meet.`,
-      );
-    }
     notes.push(
-      `Bear Paw Assembly Tip — full quilt: STAGE 1 (block). Build all four paw units first. For each paw: sew two HST units side by side (claw triangles pointing toward the pad) and attach to the side of your pad square that faces the block center. Sew two more HST units in a column (again, claws pointing toward the pad) with your background corner square at the outer end and attach to the other inner-facing side of your pad. Press seams toward the pad. Then arrange the four paws so the pad in each paw sits against the center, with the small sashing rectangles between paws and the center square in the middle; sew into three rows then join the rows. Pro tip: press in-block sashing seams toward the sashing fabric so they nest cleanly. STAGE 2 (quilt top). After finishing all your Bear Paw blocks, lay them out on the floor in your ${blocksAcross} × ${blocksDown} grid. Place between-block sashing strips between each block${totalCorners > 0 ? " and cornerstone squares at every interior intersection point" : ""}. Sew blocks and vertical sashing strips into rows first. Then sew horizontal sashing strips${totalCorners > 0 ? " and cornerstones" : ""} into connector rows. Alternate block rows and connector rows when joining the full quilt top together — this is called a sashing setting and gives each Bear Paw block its own distinct space.`,
+      `Cornerstone squares: cut ${totalCorners} squares at ${cornerCutSize.toFixed(2)}" × ${cornerCutSize.toFixed(2)}" (Fabric ${cornerFabKey}) — placed at every sashing intersection including the four outer corners ((${blocksAcross + 1}) × (${blocksDown + 1}) grid).`,
+    );
+    notes.push(
+      `Bear Paw Assembly Tip — full quilt: STAGE 1 (block). Build all four paw units first. For each paw: sew two HST units side by side (claw triangles pointing toward the pad) and attach to the side of your pad square that faces the block center. Sew two more HST units in a column (again, claws pointing toward the pad) with your background corner square at the outer end and attach to the other inner-facing side of your pad. Press seams toward the pad. Then arrange the four paws so the pad in each paw sits against the center, with the small sashing rectangles between paws and the center square in the middle; sew into three rows then join the rows. Pro tip: press in-block sashing seams toward the sashing fabric so they nest cleanly. STAGE 2 (quilt top). After finishing all your Bear Paw blocks, lay them out on the floor in your ${blocksAcross} × ${blocksDown} grid. Build connector rows by alternating cornerstone, horizontal sashing, cornerstone, horizontal sashing, … (${blocksAcross + 1} cornerstones + ${blocksAcross} sashing strips per connector row, ${blocksDown + 1} connector rows total). Build block rows by alternating vertical sashing, block, vertical sashing, block, … (${blocksAcross + 1} sashing strips + ${blocksAcross} blocks per block row, ${blocksDown} block rows total). Then alternate connector row, block row, connector row, …, finishing with a connector row — this gives every Bear Paw block its own framed space and a sashing border around the entire quilt before the outer border is added.`,
     );
   }
 
