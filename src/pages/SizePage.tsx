@@ -91,17 +91,18 @@ function SizeStepInner() {
     const innerW = quiltW - 2 * border;
     const innerH = quiltH - 2 * border;
     if (innerW <= 0 || innerH <= 0) return null;
-    // With sashing between blocks: cols*block + (cols-1)*sashing = innerW
-    // → cols = (innerW + sashing) / (block + sashing). Sashing=0 reduces to innerW/block.
-    const effInnerW = innerW + sashing;
-    const effInnerH = innerH + sashing;
+    // Bear Paw uses FULL-PERIMETER sashing: cols*block + (cols+1)*sashing = innerW
+    // → cols = (innerW - sashing) / (block + sashing). Sashing=0 reduces to innerW/block.
+    const effInnerW = innerW - sashing;
+    const effInnerH = innerH - sashing;
     const effBlock = blockSizeNum + sashing;
     const acrossExact = effInnerW / effBlock;
     const downExact = effInnerH / effBlock;
     const blocksAcross = Math.floor(acrossExact);
     const blocksDown = Math.floor(downExact);
-    const usedW = blocksAcross * blockSizeNum + Math.max(0, blocksAcross - 1) * sashing;
-    const usedH = blocksDown * blockSizeNum + Math.max(0, blocksDown - 1) * sashing;
+    const perimSashCount = sashing > 0 ? 1 : 0;
+    const usedW = blocksAcross * blockSizeNum + (blocksAcross + perimSashCount) * sashing;
+    const usedH = blocksDown * blockSizeNum + (blocksDown + perimSashCount) * sashing;
     const remW = +(innerW - usedW).toFixed(2);
     const remH = +(innerH - usedH).toFixed(2);
     const perfect = remW === 0 && remH === 0;
@@ -114,8 +115,8 @@ function SizeStepInner() {
     const MAX_BLOCKS = 100;
 
     const fitsCols = (block: number, b: number) => {
-      const iw = quiltW - 2 * b + sashing;
-      const ih = quiltH - 2 * b + sashing;
+      const iw = quiltW - 2 * b - sashing;
+      const ih = quiltH - 2 * b - sashing;
       const eb = block + sashing;
       const aw = iw / eb;
       const ah = ih / eb;
@@ -330,8 +331,9 @@ function SizeStepInner() {
             suggestions for getting to the desired size when the math
             doesn't divide evenly (including a layout-altering combo option). */}
         {fit && (() => {
-          const actualW = fit.blocksAcross * blockSizeNum + Math.max(0, fit.blocksAcross - 1) * sashing + 2 * border;
-          const actualH = fit.blocksDown * blockSizeNum + Math.max(0, fit.blocksDown - 1) * sashing + 2 * border;
+          const perimSashAdj = sashing > 0 ? 1 : 0;
+          const actualW = fit.blocksAcross * blockSizeNum + (fit.blocksAcross + perimSashAdj) * sashing + 2 * border;
+          const actualH = fit.blocksDown * blockSizeNum + (fit.blocksDown + perimSashAdj) * sashing + 2 * border;
           const matchesDesired = fit.perfect;
           const comboOptions = fit.comboSuggestions;
           return (
@@ -533,8 +535,10 @@ function QuiltLayoutDiagram({
   const innerH = h - borderPxY * 2;
   const sashPxX = sashing > 0 ? (sashing / quiltW) * w : 0;
   const sashPxY = sashing > 0 ? (sashing / quiltH) * h : 0;
-  const cellW = (innerW - Math.max(0, blocksAcross - 1) * sashPxX) / Math.max(1, blocksAcross);
-  const cellH = (innerH - Math.max(0, blocksDown - 1) * sashPxY) / Math.max(1, blocksDown);
+  // Full-perimeter sashing: (cols+1) sashing strips horizontally, (rows+1) vertically.
+  const perim = sashing > 0 ? 1 : 0;
+  const cellW = (innerW - (blocksAcross + perim) * sashPxX) / Math.max(1, blocksAcross);
+  const cellH = (innerH - (blocksDown + perim) * sashPxY) / Math.max(1, blocksDown);
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -555,7 +559,8 @@ function QuiltLayoutDiagram({
             fill="oklch(0.85 0.05 250)"
           />
         )}
-        {/* Inner area: fill with sashing color so gaps between blocks show through */}
+        {/* Inner area: fill with sashing color so gaps between blocks (and the
+            outer perimeter sashing) show through */}
         <rect
           x={borderPxX}
           y={borderPxY}
@@ -563,13 +568,13 @@ function QuiltLayoutDiagram({
           height={innerH}
           fill={sashing > 0 ? "oklch(0.88 0.04 90)" : "oklch(0.95 0.02 250)"}
         />
-        {/* Block tiles */}
+        {/* Block tiles — offset by one sashing strip when there is perimeter sashing */}
         {Array.from({ length: blocksDown }).map((_, j) =>
           Array.from({ length: blocksAcross }).map((_, i) => (
             <rect
               key={`b-${i}-${j}`}
-              x={borderPxX + i * (cellW + sashPxX)}
-              y={borderPxY + j * (cellH + sashPxY)}
+              x={borderPxX + perim * sashPxX + i * (cellW + sashPxX)}
+              y={borderPxY + perim * sashPxY + j * (cellH + sashPxY)}
               width={cellW}
               height={cellH}
               fill="oklch(0.95 0.02 250)"
@@ -578,14 +583,14 @@ function QuiltLayoutDiagram({
             />
           )),
         )}
-        {/* Cornerstones at interior intersections */}
+        {/* Cornerstones at every sashing intersection — including outer corners */}
         {sashing > 0 &&
-          Array.from({ length: Math.max(0, blocksAcross - 1) }).map((_, ci) =>
-            Array.from({ length: Math.max(0, blocksDown - 1) }).map((_, cj) => (
+          Array.from({ length: blocksAcross + 1 }).map((_, ci) =>
+            Array.from({ length: blocksDown + 1 }).map((_, cj) => (
               <rect
                 key={`cs-${ci}-${cj}`}
-                x={borderPxX + (ci + 1) * cellW + ci * sashPxX}
-                y={borderPxY + (cj + 1) * cellH + cj * sashPxY}
+                x={borderPxX + ci * (cellW + sashPxX)}
+                y={borderPxY + cj * (cellH + sashPxY)}
                 width={sashPxX}
                 height={sashPxY}
                 fill="oklch(0.7 0.12 30)"

@@ -53,8 +53,10 @@ export function QuiltLayoutPreview({
   const innerH = thumbH - borderPxY * 2;
   const sashPxX = sashingWidth > 0 ? (sashingWidth / quiltWidth) * thumbW : 0;
   const sashPxY = sashingWidth > 0 ? (sashingWidth / quiltHeight) * thumbH : 0;
-  const cellW = (innerW - Math.max(0, blocksAcross - 1) * sashPxX) / Math.max(1, blocksAcross);
-  const cellH = (innerH - Math.max(0, blocksDown - 1) * sashPxY) / Math.max(1, blocksDown);
+  // Full-perimeter sashing: (cols+1) vertical + (rows+1) horizontal sashing strips.
+  const perim = sashingWidth > 0 ? 1 : 0;
+  const cellW = (innerW - (blocksAcross + perim) * sashPxX) / Math.max(1, blocksAcross);
+  const cellH = (innerH - (blocksDown + perim) * sashPxY) / Math.max(1, blocksDown);
 
   const sashingFill = fabricFill(sashingFabric, photos);
   const cornerFill = fabricFill(cornerstoneFabric, photos);
@@ -166,8 +168,8 @@ export function QuiltLayoutPreview({
             {Array.from({ length: blocksDown }).map((_, j) =>
               Array.from({ length: blocksAcross }).map((_, i) => {
                 const rotate = pattern === "rail-fence" && (i + j) % 2 === 1;
-                const bx = i * cellW + i * sashPxX;
-                const by = j * cellH + j * sashPxY;
+                const bx = perim * sashPxX + i * (cellW + sashPxX);
+                const by = perim * sashPxY + j * (cellH + sashPxY);
                 return (
                   <svg
                     key={`${i}-${j}`}
@@ -197,12 +199,12 @@ export function QuiltLayoutPreview({
                 );
               }),
             )}
-            {/* Cornerstone squares at every interior sashing intersection. */}
+            {/* Cornerstone squares at every sashing intersection — including the four outer corners. */}
             {sashingWidth > 0 &&
-              Array.from({ length: Math.max(0, blocksAcross - 1) }).map((_, ci) =>
-                Array.from({ length: Math.max(0, blocksDown - 1) }).map((_, cj) => {
-                  const cx = (ci + 1) * cellW + ci * sashPxX;
-                  const cy = (cj + 1) * cellH + cj * sashPxY;
+              Array.from({ length: blocksAcross + 1 }).map((_, ci) =>
+                Array.from({ length: blocksDown + 1 }).map((_, cj) => {
+                  const cx = ci * (cellW + sashPxX);
+                  const cy = cj * (cellH + sashPxY);
                   return (
                     <rect
                       key={`cs-${ci}-${cj}`}

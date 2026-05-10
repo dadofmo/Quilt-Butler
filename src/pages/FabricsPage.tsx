@@ -182,10 +182,10 @@ function FabricsStepInner() {
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
             const blocksAcross = isBearPaw
-              ? Math.max(1, Math.floor((innerW + sashing) / (planner.blockSize + sashing)))
+              ? Math.max(1, Math.floor((innerW - sashing) / (planner.blockSize + sashing)))
               : Math.max(1, Math.floor(innerW / planner.blockSize));
             const blocksDown = isBearPaw
-              ? Math.max(1, Math.floor((innerH + sashing) / (planner.blockSize + sashing)))
+              ? Math.max(1, Math.floor((innerH - sashing) / (planner.blockSize + sashing)))
               : Math.max(1, Math.floor(innerH / planner.blockSize));
             const borderDefault = (pattern.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey;
             const borderFabric = (planner.assignments["border"] ?? borderDefault) as FabricKey;

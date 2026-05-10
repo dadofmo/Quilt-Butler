@@ -522,19 +522,19 @@ console.log("\n=== Bear Paw: 50×65, 12\" block, 2\" sashing, no border ===");
     sashingWidth: 2,
     assignments: { pad: "A" as FabricKey, claws: "B" as FabricKey, bg: "C" as FabricKey, sashing: "F" as FabricKey, cornerstone: "G" as FabricKey },
   };
-  // With sashing 2": cols = floor((50+2)/(12+2)) = floor(52/14) = 3,
-  // rows = floor((65+2)/14) = floor(67/14) = 4. blocks = 12.
+  // Full-perimeter sashing 2": cols = floor((50-2)/(12+2)) = floor(48/14) = 3,
+  // rows = floor((65-2)/14) = floor(63/14) = 4. blocks = 12.
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
   check("BP A pad count (12 blocks * 4)", a.pieces[0].count, 48);
-  // Sashing F: vSash=(3-1)*4=8, hSash=(4-1)*3=9, total=17 strips at 2.5"x12.5"
+  // Sashing F: vSash=(3+1)*4=16, hSash=(4+1)*3=15, total=31 strips at 2.5"x12.5"
   const f = r.fabrics.find(x => x.fabric === "F")!;
-  check("BP sashing strip count", f.pieces[0].count, 17);
+  check("BP sashing strip count", f.pieces[0].count, 31);
   check("BP sashing cut length", f.pieces[0].w, 12.5);
   check("BP sashing cut width", f.pieces[0].h, 2.5);
-  // Cornerstones G: (3-1)*(4-1)=6 squares at 2.5"
+  // Cornerstones G: (3+1)*(4+1)=20 squares at 2.5"
   const g = r.fabrics.find(x => x.fabric === "G")!;
-  check("BP cornerstone count", g.pieces[0].count, 6);
+  check("BP cornerstone count", g.pieces[0].count, 20);
   check("BP cornerstone cut size", g.pieces[0].w, 2.5);
   check("BP basics glossary attached", r.basics?.length ?? 0, 5);
 }
@@ -558,12 +558,12 @@ console.log("\n=== Bear Paw: sashing & background share fabric C — totals must
   //   bg HST starting squares: 16 * 12 = 192
   //   bg corner squares:        4  * 12 = 48
   //   sashing rectangles:       4  * 12 = 48 (in-block sashing)
-  //   between-block sashing:    17  (2*4 + 3*3)
-  //   cornerstone squares:      6   ((3-1)*(4-1))
+  //   perimeter sashing:        31  ((3+1)*4 + (4+1)*3)
+  //   cornerstone squares:      20  ((3+1)*(4+1))
   // Total piece groups in C should be 5 (each addSquares/addRails appends one bucket).
   check("BP merged-C bucket count", c.pieces.length, 5);
   const total = c.pieces.reduce((acc, p) => acc + p.count, 0);
-  check("BP merged-C total pieces (192+48+48+17+6)", total, 192 + 48 + 48 + 17 + 6);
+  check("BP merged-C total pieces (192+48+48+31+20)", total, 192 + 48 + 48 + 31 + 20);
   // totalInches must equal sum of each bucket's strip-pack contribution; just
   // assert it's > 0 and yards rounded up to 0.25.
   if (c.totalInches <= 0) failures.push("BP merged-C inches not positive");
