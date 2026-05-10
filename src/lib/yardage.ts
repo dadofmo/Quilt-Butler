@@ -147,11 +147,13 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const sashWidth = isBearPaw ? Math.max(0.0001, s.sashingWidth || 2) : 0;
   const innerW = s.quiltWidth - 2 * s.borderWidth;
   const innerH = s.quiltHeight - 2 * s.borderWidth;
+  // Bear Paw uses full-perimeter sashing: cols*block + (cols+1)*sash = innerW
+  // → cols = floor((innerW - sash) / (block + sash)).
   const blocksAcross = isBearPaw
-    ? Math.max(1, Math.floor((innerW + sashWidth) / (s.blockSize + sashWidth)))
+    ? Math.max(1, Math.floor((innerW - sashWidth) / (s.blockSize + sashWidth)))
     : Math.max(1, Math.floor(innerW / s.blockSize));
   const blocksDown = isBearPaw
-    ? Math.max(1, Math.floor((innerH + sashWidth) / (s.blockSize + sashWidth)))
+    ? Math.max(1, Math.floor((innerH - sashWidth) / (s.blockSize + sashWidth)))
     : Math.max(1, Math.floor(innerH / s.blockSize));
   const blockCount = blocksAcross * blocksDown;
   const notes: string[] = [
