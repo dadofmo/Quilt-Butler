@@ -331,8 +331,9 @@ function SizeStepInner() {
             suggestions for getting to the desired size when the math
             doesn't divide evenly (including a layout-altering combo option). */}
         {fit && (() => {
-          const actualW = fit.blocksAcross * blockSizeNum + Math.max(0, fit.blocksAcross - 1) * sashing + 2 * border;
-          const actualH = fit.blocksDown * blockSizeNum + Math.max(0, fit.blocksDown - 1) * sashing + 2 * border;
+          const perimSashAdj = sashing > 0 ? 1 : 0;
+          const actualW = fit.blocksAcross * blockSizeNum + (fit.blocksAcross + perimSashAdj) * sashing + 2 * border;
+          const actualH = fit.blocksDown * blockSizeNum + (fit.blocksDown + perimSashAdj) * sashing + 2 * border;
           const matchesDesired = fit.perfect;
           const comboOptions = fit.comboSuggestions;
           return (
