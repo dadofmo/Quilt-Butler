@@ -168,8 +168,8 @@ export function QuiltLayoutPreview({
             {Array.from({ length: blocksDown }).map((_, j) =>
               Array.from({ length: blocksAcross }).map((_, i) => {
                 const rotate = pattern === "rail-fence" && (i + j) % 2 === 1;
-                const bx = i * cellW + i * sashPxX;
-                const by = j * cellH + j * sashPxY;
+                const bx = perim * sashPxX + i * (cellW + sashPxX);
+                const by = perim * sashPxY + j * (cellH + sashPxY);
                 return (
                   <svg
                     key={`${i}-${j}`}
@@ -199,12 +199,12 @@ export function QuiltLayoutPreview({
                 );
               }),
             )}
-            {/* Cornerstone squares at every interior sashing intersection. */}
+            {/* Cornerstone squares at every sashing intersection — including the four outer corners. */}
             {sashingWidth > 0 &&
-              Array.from({ length: Math.max(0, blocksAcross - 1) }).map((_, ci) =>
-                Array.from({ length: Math.max(0, blocksDown - 1) }).map((_, cj) => {
-                  const cx = (ci + 1) * cellW + ci * sashPxX;
-                  const cy = (cj + 1) * cellH + cj * sashPxY;
+              Array.from({ length: blocksAcross + 1 }).map((_, ci) =>
+                Array.from({ length: blocksDown + 1 }).map((_, cj) => {
+                  const cx = ci * (cellW + sashPxX);
+                  const cy = cj * (cellH + sashPxY);
                   return (
                     <rect
                       key={`cs-${ci}-${cj}`}
