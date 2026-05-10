@@ -833,12 +833,12 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
   // Border
   if (s.borderWidth > 0) {
-    // For Bear Paw the inner (sashed) dimensions are bigger than blocks*blockSize.
+    // For Bear Paw the inner (sashed) dimensions include sashing on all four sides.
     const finishedInnerW = isBearPaw
-      ? blocksAcross * s.blockSize + Math.max(0, blocksAcross - 1) * sashWidth
+      ? blocksAcross * s.blockSize + (blocksAcross + 1) * sashWidth
       : s.quiltWidth - 2 * s.borderWidth;
     const finishedInnerH = isBearPaw
-      ? blocksDown * s.blockSize + Math.max(0, blocksDown - 1) * sashWidth
+      ? blocksDown * s.blockSize + (blocksDown + 1) * sashWidth
       : s.quiltHeight - 2 * s.borderWidth;
     const borderDefault = (getPattern(s.pattern)?.sections.find((sec) => sec.id === "border")?.defaultFabric ?? "C") as FabricKey;
     const borderFab = (s.assignments["border"] ?? borderDefault) as FabricKey;
