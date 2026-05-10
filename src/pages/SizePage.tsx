@@ -555,29 +555,43 @@ function QuiltLayoutDiagram({
             fill="oklch(0.85 0.05 250)"
           />
         )}
-        {/* Inner block area background */}
+        {/* Inner area: fill with sashing color so gaps between blocks show through */}
         <rect
           x={borderPxX}
           y={borderPxY}
           width={innerW}
           height={innerH}
-          fill="oklch(0.95 0.02 250)"
+          fill={sashing > 0 ? "oklch(0.88 0.04 90)" : "oklch(0.95 0.02 250)"}
         />
-        {/* Block grid lines (drawn at edges of each block, accounting for sashing gaps) */}
-        {Array.from({ length: blocksAcross + 1 }).map((_, i) => {
-          const x = borderPxX + i * cellW + Math.max(0, i) * sashPxX - (i === blocksAcross ? sashPxX : 0);
-          const x2 = i === 0 ? borderPxX : x;
-          return (
-            <line key={`v-${i}`} x1={x2} y1={borderPxY} x2={x2} y2={borderPxY + innerH} stroke="oklch(0.55 0.02 250)" strokeWidth={1} />
-          );
-        })}
-        {Array.from({ length: blocksDown + 1 }).map((_, j) => {
-          const y = borderPxY + j * cellH + Math.max(0, j) * sashPxY - (j === blocksDown ? sashPxY : 0);
-          const y2 = j === 0 ? borderPxY : y;
-          return (
-            <line key={`h-${j}`} x1={borderPxX} y1={y2} x2={borderPxX + innerW} y2={y2} stroke="oklch(0.55 0.02 250)" strokeWidth={1} />
-          );
-        })}
+        {/* Block tiles */}
+        {Array.from({ length: blocksDown }).map((_, j) =>
+          Array.from({ length: blocksAcross }).map((_, i) => (
+            <rect
+              key={`b-${i}-${j}`}
+              x={borderPxX + i * (cellW + sashPxX)}
+              y={borderPxY + j * (cellH + sashPxY)}
+              width={cellW}
+              height={cellH}
+              fill="oklch(0.95 0.02 250)"
+              stroke="oklch(0.55 0.02 250)"
+              strokeWidth={1}
+            />
+          )),
+        )}
+        {/* Cornerstones at interior intersections */}
+        {sashing > 0 &&
+          Array.from({ length: Math.max(0, blocksAcross - 1) }).map((_, ci) =>
+            Array.from({ length: Math.max(0, blocksDown - 1) }).map((_, cj) => (
+              <rect
+                key={`cs-${ci}-${cj}`}
+                x={borderPxX + (ci + 1) * cellW + ci * sashPxX}
+                y={borderPxY + (cj + 1) * cellH + cj * sashPxY}
+                width={sashPxX}
+                height={sashPxY}
+                fill="oklch(0.7 0.12 30)"
+              />
+            )),
+          )}
         {/* Outer outline */}
         <rect
           x={0.5}
