@@ -44,23 +44,29 @@ function ResultsStepInner() {
   // so the header (and the size-mismatch note) always match what the quilter
   // will end up with — never just the originally-desired size.
   const sashing = planner.pattern === "bear-paw" ? (planner.sashingWidth ?? 0) : 0;
+  const isBearPaw = planner.pattern === "bear-paw";
   const innerW = planner.quiltWidth - 2 * planner.borderWidth;
   const innerH = planner.quiltHeight - 2 * planner.borderWidth;
+  // Bear Paw uses full-perimeter sashing: cols = floor((innerW - sash)/(block + sash)).
   const blocksAcross = Math.max(
     1,
-    Math.floor((innerW + sashing) / (planner.blockSize + sashing)),
+    isBearPaw
+      ? Math.floor((innerW - sashing) / (planner.blockSize + sashing))
+      : Math.floor(innerW / planner.blockSize),
   );
   const blocksDown = Math.max(
     1,
-    Math.floor((innerH + sashing) / (planner.blockSize + sashing)),
+    isBearPaw
+      ? Math.floor((innerH - sashing) / (planner.blockSize + sashing))
+      : Math.floor(innerH / planner.blockSize),
   );
   const actualW =
     blocksAcross * planner.blockSize +
-    Math.max(0, blocksAcross - 1) * sashing +
+    (isBearPaw ? (blocksAcross + 1) * sashing : 0) +
     2 * planner.borderWidth;
   const actualH =
     blocksDown * planner.blockSize +
-    Math.max(0, blocksDown - 1) * sashing +
+    (isBearPaw ? (blocksDown + 1) * sashing : 0) +
     2 * planner.borderWidth;
   const sizeMismatch =
     actualW !== planner.quiltWidth || actualH !== planner.quiltHeight;
