@@ -299,7 +299,7 @@ function MaterialsCard({ m }: { m: MaterialsRequirement }) {
             <td className="px-4 py-3 font-semibold">Backing fabric</td>
             <td className="text-muted-foreground px-4 py-3 text-sm">
               Finished piece needed: <strong className="text-foreground">{m.backing.widthIn}" × {m.backing.heightIn}"</strong>
-              {" "}({m.backing.overhang}" overhang on every side).
+              {" "}(5–6" overhang on each side).
               {m.backing.widths > 1 && (
                 <> Seam <strong className="text-foreground">{m.backing.widths} widths</strong> of fabric together (each {m.backing.heightIn}" long) to get enough width.</>
               )}
