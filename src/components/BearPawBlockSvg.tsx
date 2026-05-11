@@ -164,19 +164,51 @@ function PawUnit({
           </g>
         );
       })}
-      {showGrid && (
-        <g
-          stroke={gridStroke}
-          strokeWidth={gridStrokeWidth}
-          opacity={gridOpacity}
-          fill="none"
-        >
-          <line x1={x + cu} y1={y} x2={x + cu} y2={y + size} />
-          <line x1={x + 2 * cu} y1={y} x2={x + 2 * cu} y2={y + size} />
-          <line x1={x} y1={y + cu} x2={x + size} y2={y + cu} />
-          <line x1={x} y1={y + 2 * cu} x2={x + size} y2={y + 2 * cu} />
-        </g>
-      )}
+      {showGrid && (() => {
+        // Draw cell grid lines, but skip segments that fall inside the 2×2
+        // pad (the pad is a single piece of fabric, so no internal seam).
+        const padX2 = padX + padW;
+        const padY2 = padY + padH;
+        const vSegs = (lx: number) => {
+          if (lx > padX && lx < padX2) {
+            return [
+              [y, padY],
+              [padY2, y + size],
+            ] as const;
+          }
+          return [[y, y + size]] as const;
+        };
+        const hSegs = (ly: number) => {
+          if (ly > padY && ly < padY2) {
+            return [
+              [x, padX],
+              [padX2, x + size],
+            ] as const;
+          }
+          return [[x, x + size]] as const;
+        };
+        const vLines = [x + cu, x + 2 * cu];
+        const hLines = [y + cu, y + 2 * cu];
+        return (
+          <g
+            stroke={gridStroke}
+            strokeWidth={gridStrokeWidth}
+            opacity={gridOpacity}
+            fill="none"
+          >
+            {vLines.flatMap((lx, i) =>
+              vSegs(lx).map(([y1, y2], j) => (
+                <line key={`v-${i}-${j}`} x1={lx} y1={y1} x2={lx} y2={y2} />
+              ))
+            )}
+            {hLines.flatMap((ly, i) =>
+              hSegs(ly).map(([x1, x2], j) => (
+                <line key={`h-${i}-${j}`} x1={x1} y1={ly} x2={x2} y2={ly} />
+              ))
+            )}
+          </g>
+        );
+      })()}
     </g>
   );
 }
