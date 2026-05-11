@@ -318,7 +318,7 @@ function MaterialsCard({ m }: { m: MaterialsRequirement }) {
           <tr className="border-t border-border align-top">
             <td className="px-4 py-3 font-semibold">Binding fabric</td>
             <td className="text-muted-foreground px-4 py-3 text-sm">
-              Cut <strong className="text-foreground">{m.binding.stripCount} strips at {m.binding.stripWidthIn}" wide</strong> across the width of fabric. Sew end-to-end to wrap the {m.binding.perimeterIn}" perimeter (+ ~10" for joining/corners).
+              Cut <strong className="text-foreground">{m.binding.stripCount} strips at {m.binding.stripWidthIn}" wide</strong> across the width of fabric. Sew end-to-end to make approximately {m.binding.bindingLengthIn}" of binding — enough to wrap the {m.binding.perimeterIn}" perimeter plus extra for joining and corners.
               {" "}You can use one of your top fabrics — but it'll need this much extra.
             </td>
             <td className="px-4 py-3 text-right font-semibold whitespace-nowrap">{m.binding.yards} yd</td>
