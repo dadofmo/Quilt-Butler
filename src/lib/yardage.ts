@@ -932,6 +932,7 @@ export function calculateMaterials(s: PlannerState): MaterialsRequirement {
       perimeterIn: 2 * (s.quiltWidth + s.quiltHeight),
       stripWidthIn,
       stripCount,
+      bindingLengthIn: Math.round(stripCount * usableBinding),
       yards: bindingYards,
     },
   };
