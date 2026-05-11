@@ -299,7 +299,7 @@ function MaterialsCard({ m }: { m: MaterialsRequirement }) {
             <td className="px-4 py-3 font-semibold">Backing fabric</td>
             <td className="text-muted-foreground px-4 py-3 text-sm">
               Finished piece needed: <strong className="text-foreground">{m.backing.widthIn}" × {m.backing.heightIn}"</strong>
-              {" "}({m.backing.overhang}" overhang on every side).
+              {" "}(5–6" overhang on each side).
               {m.backing.widths > 1 && (
                 <> Seam <strong className="text-foreground">{m.backing.widths} widths</strong> of fabric together (each {m.backing.heightIn}" long) to get enough width.</>
               )}
@@ -318,7 +318,7 @@ function MaterialsCard({ m }: { m: MaterialsRequirement }) {
           <tr className="border-t border-border align-top">
             <td className="px-4 py-3 font-semibold">Binding fabric</td>
             <td className="text-muted-foreground px-4 py-3 text-sm">
-              Cut <strong className="text-foreground">{m.binding.stripCount} strips at {m.binding.stripWidthIn}" wide</strong> across the width of fabric. Sew end-to-end to wrap the {m.binding.perimeterIn}" perimeter (+ ~10" for joining/corners).
+              Cut <strong className="text-foreground">{m.binding.stripCount} strips at {m.binding.stripWidthIn}" wide</strong> across the width of fabric. Sew end-to-end to make approximately {m.binding.bindingLengthIn}" of binding — enough to wrap the {m.binding.perimeterIn}" perimeter plus extra for joining and corners.
               {" "}You can use one of your top fabrics — but it'll need this much extra.
             </td>
             <td className="px-4 py-3 text-right font-semibold whitespace-nowrap">{m.binding.yards} yd</td>
@@ -551,7 +551,7 @@ function ShoppingList({
               id="binding"
               label="Binding fabric"
               whatItIs="the narrow strip that wraps around the raw edges of the quilt to finish them neatly"
-              detail={`Cut ${materials.binding.stripCount} strips at ${materials.binding.stripWidthIn}" wide. Sewn together they wrap the ${materials.binding.perimeterIn}" edge of your quilt (plus ~10" extra for corners and joining).`}
+              detail={`Cut ${materials.binding.stripCount} strips at ${materials.binding.stripWidthIn}" wide. Sewn end-to-end they make approximately ${materials.binding.bindingLengthIn}" of binding — enough to wrap the ${materials.binding.perimeterIn}" perimeter plus extra for joining and corners.`}
               qty={materials.binding.yards}
               unit="yd"
               price={itemPrices["binding"] ?? ""}
