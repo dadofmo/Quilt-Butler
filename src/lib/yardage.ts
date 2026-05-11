@@ -115,6 +115,7 @@ export interface MaterialsRequirement {
     perimeterIn: number;
     stripWidthIn: number;
     stripCount: number;
+    bindingLengthIn: number;
     yards: number;
   };
 }
