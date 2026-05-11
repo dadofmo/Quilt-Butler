@@ -551,7 +551,7 @@ function ShoppingList({
               id="binding"
               label="Binding fabric"
               whatItIs="the narrow strip that wraps around the raw edges of the quilt to finish them neatly"
-              detail={`Cut ${materials.binding.stripCount} strips at ${materials.binding.stripWidthIn}" wide. Sewn together they wrap the ${materials.binding.perimeterIn}" edge of your quilt (plus ~10" extra for corners and joining).`}
+              detail={`Cut ${materials.binding.stripCount} strips at ${materials.binding.stripWidthIn}" wide. Sewn end-to-end they make approximately ${materials.binding.bindingLengthIn}" of binding — enough to wrap the ${materials.binding.perimeterIn}" perimeter plus extra for joining and corners.`}
               qty={materials.binding.yards}
               unit="yd"
               price={itemPrices["binding"] ?? ""}
