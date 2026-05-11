@@ -49,8 +49,11 @@ export function StepShell({ step, title, subtitle, backTo, children }: Props) {
             <img
               src={quiltButlerLogo}
               alt="QuiltButler quilt planner and fabric calculator logo"
-              width={900}
-              height={600}
+              width={512}
+              height={512}
+              fetchPriority="high"
+              loading="eager"
+              decoding="async"
               className="h-24 w-auto shrink-0 sm:h-30"
             />
           </div>
