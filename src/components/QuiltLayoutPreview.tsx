@@ -266,10 +266,12 @@ function MiniBlock({
   pattern,
   assignments,
   photos,
+  irishPlain,
 }: {
   pattern: PatternId;
   assignments: SectionAssignments;
   photos?: Partial<Record<FabricKey, string>>;
+  irishPlain?: boolean;
 }) {
   // Fallback resolves through the pattern definition (single source of truth
   // in src/lib/patterns.ts) before the literal — so a section's defaultFabric
