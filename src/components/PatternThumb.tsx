@@ -263,5 +263,38 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
           <BearPawBlockSvg pad={C.a} claw={C.b} bg={C.c} centerAccent={C.d} size={90} showGrid />
         </svg>
       );
+    case "irish-chain": {
+      // Show a 2x2 mini-quilt: chain block (9-patch CBC/BCB/CBC) alternating
+      // with a plain background block — that's the visual signature.
+      const half = 45;
+      const u = half / 3;
+      const chain = (ox: number, oy: number) => (
+        <g key={`c-${ox}-${oy}`}>
+          {[0, 1, 2].flatMap((j) =>
+            [0, 1, 2].map((i) => (
+              <rect
+                key={`${i}-${j}`}
+                x={ox + i * u}
+                y={oy + j * u}
+                width={u}
+                height={u}
+                fill={(i + j) % 2 === 0 ? C.b : C.a}
+              />
+            )),
+          )}
+        </g>
+      );
+      const plain = (ox: number, oy: number) => (
+        <rect key={`p-${ox}-${oy}`} x={ox} y={oy} width={half} height={half} fill={C.a} />
+      );
+      return (
+        <svg {...common}>
+          {chain(0, 0)}
+          {plain(half, 0)}
+          {plain(0, half)}
+          {chain(half, half)}
+        </svg>
+      );
+    }
   }
 }
