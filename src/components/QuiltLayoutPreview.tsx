@@ -555,5 +555,29 @@ function MiniBlock({
       const centerAccent = get("center-accent", "D");
       return <BearPawBlockSvg pad={pad} claw={claw} bg={bg} centerAccent={centerAccent} />;
     }
+    case "irish-chain": {
+      const bg = get("background", "A");
+      const chain = get("chain", "B");
+      if (irishPlain) {
+        return <rect width={200} height={200} fill={bg} />;
+      }
+      const u = 200 / 3;
+      return (
+        <>
+          {[0, 1, 2].flatMap((j) =>
+            [0, 1, 2].map((i) => (
+              <rect
+                key={`${i}-${j}`}
+                x={i * u}
+                y={j * u}
+                width={u}
+                height={u}
+                fill={(i + j) % 2 === 0 ? chain : bg}
+              />
+            )),
+          )}
+        </>
+      );
+    }
   }
 }
