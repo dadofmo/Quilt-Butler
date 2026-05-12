@@ -170,6 +170,9 @@ export function QuiltLayoutPreview({
                 const rotate = pattern === "rail-fence" && (i + j) % 2 === 1;
                 const bx = perim * sashPxX + i * (cellW + sashPxX);
                 const by = perim * sashPxY + j * (cellH + sashPxY);
+                // Irish Chain alternates a chain block with a plain background
+                // block in a checkerboard — corner cell (0,0) is a chain block.
+                const irishPlain = pattern === "irish-chain" && (i + j) % 2 === 1;
                 return (
                   <svg
                     key={`${i}-${j}`}
@@ -193,6 +196,7 @@ export function QuiltLayoutPreview({
                         pattern={pattern}
                         assignments={assignments}
                         photos={photos}
+                        irishPlain={irishPlain}
                       />
                     )}
                   </svg>
