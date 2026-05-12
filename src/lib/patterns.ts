@@ -286,6 +286,28 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "D" },
     ],
   },
+  {
+    id: "irish-chain",
+    name: "Irish Chain",
+    hasMath: true,
+    intro:
+      "A classic two-fabric quilt built from alternating blocks: a 9-patch chain block (5 contrasting corner+center squares with 4 background squares between them) sewn next to a plain background block of the same size. Lined up in a checkerboard, the contrasting squares connect into long diagonal chains running across the whole quilt. Built efficiently from strip-pieced sets cut into 3-square units.",
+    sections: [
+      {
+        id: "background",
+        label: "Background fabric",
+        defaultFabric: "A",
+        hint: "The main fabric — fills the plain alternate blocks AND the 4 alternating squares inside each chain block. In the example, this is the blue.",
+      },
+      {
+        id: "chain",
+        label: "Chain (contrasting) fabric",
+        defaultFabric: "B",
+        hint: "The contrasting fabric that forms the diagonal chains across the quilt — the 5 corner+center squares in each chain block. In the example, this is the cream.",
+      },
+      borderSection,
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
