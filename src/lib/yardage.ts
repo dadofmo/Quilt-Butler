@@ -830,6 +830,72 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Bear Paw Assembly Tip — full quilt: STAGE 1 (block). Build all four paw units first. For each paw: sew two HST units side by side, orienting each HST so the background triangle sits in the outer corner and the claw triangle is tucked against the pad side — this makes the claws appear to fan outward — and attach to the side of your pad square that faces the block center. Sew two more HST units in a column the same way — background triangle at the outer end, claw triangle against the pad — then cap the outer end with your background corner square and attach to the other inner-facing side of your pad. Press seams toward the pad. Then arrange the four paws so the pad in each paw sits against the center, with the small sashing rectangles between paws and the center square in the middle; sew into three rows then join the rows. Pro tip: press in-block sashing seams toward the sashing fabric so they nest cleanly. STAGE 2 (quilt top). After finishing all your Bear Paw blocks, lay them out on the floor in your ${blocksAcross} × ${blocksDown} grid. Build connector rows by alternating cornerstone, horizontal sashing, cornerstone, horizontal sashing, … (${blocksAcross + 1} cornerstones + ${blocksAcross} sashing strips per connector row, ${blocksDown + 1} connector rows total). Build block rows by alternating vertical sashing, block, vertical sashing, block, … (${blocksAcross + 1} sashing strips + ${blocksAcross} blocks per block row, ${blocksDown} block rows total). Then alternate connector row, block row, connector row, …, finishing with a connector row — this gives every Bear Paw block its own framed space and a sashing border around the entire quilt before the outer border is added.`,
     );
+  } else if (s.pattern === "irish-chain") {
+    // Single Irish Chain: alternating chain blocks (3×3 9-patch with 5
+    // contrasting corner+center squares + 4 background squares) and plain
+    // background blocks of the same finished size, arranged in a checkerboard.
+    // The corner cell (0,0) is a chain block — that gives ceil(N/2) chain
+    // blocks and floor(N/2) plain blocks across the whole quilt.
+    const total = blockCount;
+    const chainBlocks = Math.ceil(total / 2);
+    const plainBlocks = Math.floor(total / 2);
+    const smallFinished = s.blockSize / 3;
+    const smallCut = smallFinished + SEAM;
+    const plainCut = s.blockSize + SEAM;
+
+    const bgFab = (s.assignments["background"] ?? "A") as FabricKey;
+    const chainFab = (s.assignments["chain"] ?? "B") as FabricKey;
+
+    const chainSmallCount = 5 * chainBlocks;
+    const bgSmallCount = 4 * chainBlocks;
+
+    addSquares(
+      reqs[chainFab],
+      "Chain (contrasting) small squares",
+      chainSmallCount,
+      smallCut,
+      s.fabricWidth,
+    );
+    if (bgSmallCount > 0) {
+      addSquares(
+        reqs[bgFab],
+        "Background small squares (inside chain blocks)",
+        bgSmallCount,
+        smallCut,
+        s.fabricWidth,
+      );
+    }
+    if (plainBlocks > 0) {
+      addSquares(
+        reqs[bgFab],
+        "Plain background blocks",
+        plainBlocks,
+        plainCut,
+        s.fabricWidth,
+      );
+    }
+
+    notes.push(
+      `Each ${s.blockSize}" finished block is one of two types: a CHAIN block (3×3 grid with 5 contrasting corner+center squares + 4 background squares between them) or a PLAIN background block (one solid square). They alternate in a checkerboard so the contrasting squares connect into long diagonal chains across the quilt.`,
+    );
+    notes.push(
+      `${blocksAcross} × ${blocksDown} = ${total} blocks total: ${chainBlocks} chain blocks (corner cell is a chain block) and ${plainBlocks} plain background blocks.`,
+    );
+    notes.push(
+      `Cut sizes: small squares (chain blocks) at ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}" (finished ${smallFinished.toFixed(2)}" + 1/2" seam allowance); plain blocks at ${plainCut.toFixed(2)}" × ${plainCut.toFixed(2)}" (finished ${s.blockSize}" + 1/2" seam allowance).`,
+    );
+    notes.push(
+      `Across all chain blocks: ${chainSmallCount} small squares of Fabric ${chainFab} (5 × ${chainBlocks}, the corner+center "chain" squares) and ${bgSmallCount} small squares of Fabric ${bgFab} (4 × ${chainBlocks}, the alternating squares). Plus ${plainBlocks} plain blocks of Fabric ${bgFab} at ${plainCut.toFixed(2)}".`,
+    );
+    notes.push(
+      `Strip-pieced shortcut (faster than cutting individual squares): instead of cutting all the small squares one at a time, cut full-width strips ${smallCut.toFixed(2)}" tall and sew them into "strip sets" of three strips each. Type 1 strip set = chain-background-chain (CBC). Type 2 strip set = background-chain-background (BCB). Sub-cut each finished strip set every ${smallCut.toFixed(2)}" across — each cut yields one pre-sewn 3-square row. Build each chain block by sewing together 2 CBC rows + 1 BCB row (CBC / BCB / CBC).`,
+    );
+    notes.push(
+      `How to sew ONE chain block: stack 2 CBC rows + 1 BCB row in the order CBC – BCB – CBC. Place the top CBC row on top of the BCB row right sides together (RST), lining up the bottom edge of the first row with the top edge of the second — the vertical seams between squares should match exactly (a pin through each seam intersection helps). Sew a 1/4" seam across, unfold, and press the seam toward the BCB row. Add the third CBC row to the bottom the same way. The 5 contrasting squares should now sit in the 4 corners + center, with the 4 background squares in the alternating positions.`,
+    );
+    notes.push(
+      `Quilt assembly: lay all the blocks out in your ${blocksAcross} × ${blocksDown} grid, alternating chain block, plain block, chain block, plain block, … so the corner is a chain block. Sew each row of blocks together with 1/4" seams (press seam allowances toward the plain blocks so they don't show through), then sew the rows together. The contrasting corner squares of adjacent chain blocks will meet at the row seams and form long diagonal chains running across the entire quilt — that's the Irish Chain.`,
+    );
   }
 
   // Border
