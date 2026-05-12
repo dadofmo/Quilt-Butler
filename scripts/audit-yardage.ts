@@ -679,6 +679,49 @@ console.log("\n=== UI/calc consistency: same selvage allowance everywhere ===");
 }
 
 // =========================================================================
+// IRISH CHAIN — single chain, 2 fabrics, alternating chain + plain blocks
+// =========================================================================
+console.log("\n=== Irish Chain: 81×81, 9\" block, no border (matches the 81×81 reference quilt) ===");
+{
+  const s = { ...base(), pattern: "irish-chain" as const, quiltWidth: 81, quiltHeight: 81, blockSize: 9, borderWidth: 0 };
+  // 9×9 = 81 blocks. chain = ceil(81/2)=41, plain = floor(81/2)=40.
+  // smallCut = 9/3 + 0.5 = 3.5". plainCut = 9 + 0.5 = 9.5".
+  // Chain (B): 5 * 41 = 205 small squares at 3.5". Per strip floor(42.5/3.5)=12.
+  //   Strips = ceil(205/12) = 18. Inches = 18*3.5 = 63.
+  // Background (A) small: 4 * 41 = 164 squares at 3.5". Strips = ceil(164/12)=14.
+  //   Inches = 14*3.5 = 49.
+  // Background (A) plain: 40 squares at 9.5". Per strip floor(42.5/9.5)=4.
+  //   Strips = ceil(40/4) = 10. Inches = 10*9.5 = 95.
+  // A total inches = 49 + 95 = 144.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("IC chain B count", b.pieces[0].count, 205);
+  check("IC chain B cut", b.pieces[0].w, 3.5);
+  check("IC chain B strips", b.strips[0].count, 18);
+  check("IC chain B inches", b.totalInches, 63);
+  check("IC bg A bucket count", a.pieces.length, 2);
+  check("IC bg A small count", a.pieces[0].count, 164);
+  check("IC bg A small cut", a.pieces[0].w, 3.5);
+  check("IC bg A plain count", a.pieces[1].count, 40);
+  check("IC bg A plain cut", a.pieces[1].w, 9.5);
+  check("IC bg A inches", a.totalInches, 144);
+  check("IC basics glossary attached", r.basics?.length ?? 0, 5);
+}
+
+console.log("\n=== Irish Chain: ODD count (3×3 = 9) — corner is chain ===");
+{
+  const s = { ...base(), pattern: "irish-chain" as const, quiltWidth: 27, quiltHeight: 27, blockSize: 9, borderWidth: 0 };
+  // 3×3 = 9 blocks → chain = 5, plain = 4. Chain B: 25 small. Bg A: 20 small + 4 plain.
+  const r = calculateYardage(s);
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("IC odd chain B count", b.pieces[0].count, 25);
+  check("IC odd bg A small count", a.pieces[0].count, 20);
+  check("IC odd bg A plain count", a.pieces[1].count, 4);
+}
+
+// =========================================================================
 // SUMMARY
 // =========================================================================
 console.log("\n=========================================");
