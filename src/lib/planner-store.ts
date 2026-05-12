@@ -13,7 +13,8 @@ export type PatternId =
   | "plus-block"
   | "pinwheel"
   | "churn-dash"
-  | "bear-paw";
+  | "bear-paw"
+  | "irish-chain";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"

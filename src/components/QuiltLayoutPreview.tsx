@@ -170,6 +170,9 @@ export function QuiltLayoutPreview({
                 const rotate = pattern === "rail-fence" && (i + j) % 2 === 1;
                 const bx = perim * sashPxX + i * (cellW + sashPxX);
                 const by = perim * sashPxY + j * (cellH + sashPxY);
+                // Irish Chain alternates a chain block with a plain background
+                // block in a checkerboard — corner cell (0,0) is a chain block.
+                const irishPlain = pattern === "irish-chain" && (i + j) % 2 === 1;
                 return (
                   <svg
                     key={`${i}-${j}`}
@@ -193,6 +196,7 @@ export function QuiltLayoutPreview({
                         pattern={pattern}
                         assignments={assignments}
                         photos={photos}
+                        irishPlain={irishPlain}
                       />
                     )}
                   </svg>
@@ -262,10 +266,12 @@ function MiniBlock({
   pattern,
   assignments,
   photos,
+  irishPlain,
 }: {
   pattern: PatternId;
   assignments: SectionAssignments;
   photos?: Partial<Record<FabricKey, string>>;
+  irishPlain?: boolean;
 }) {
   // Fallback resolves through the pattern definition (single source of truth
   // in src/lib/patterns.ts) before the literal — so a section's defaultFabric
@@ -548,6 +554,30 @@ function MiniBlock({
       const bg = get("bg", "C");
       const centerAccent = get("center-accent", "D");
       return <BearPawBlockSvg pad={pad} claw={claw} bg={bg} centerAccent={centerAccent} />;
+    }
+    case "irish-chain": {
+      const bg = get("background", "A");
+      const chain = get("chain", "B");
+      if (irishPlain) {
+        return <rect width={200} height={200} fill={bg} />;
+      }
+      const u = 200 / 3;
+      return (
+        <>
+          {[0, 1, 2].flatMap((j) =>
+            [0, 1, 2].map((i) => (
+              <rect
+                key={`${i}-${j}`}
+                x={i * u}
+                y={j * u}
+                width={u}
+                height={u}
+                fill={(i + j) % 2 === 0 ? chain : bg}
+              />
+            )),
+          )}
+        </>
+      );
     }
   }
 }

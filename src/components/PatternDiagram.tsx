@@ -452,5 +452,34 @@ function renderInner(
       const centerAccent = get("center-accent", "D");
       return <BearPawBlockSvg pad={pad} claw={claw} bg={bg} centerAccent={centerAccent} showGrid />;
     }
+    case "irish-chain": {
+      // Single chain block: 3×3 with the contrasting (chain) fabric in the
+      // 4 corners + center, background fabric in the 4 alternating squares.
+      const bg = get("background", "A");
+      const chain = get("chain", "B");
+      const u = 200 / 3;
+      return (
+        <>
+          {[0, 1, 2].flatMap((j) =>
+            [0, 1, 2].map((i) => (
+              <rect
+                key={`${i}-${j}`}
+                x={i * u}
+                y={j * u}
+                width={u}
+                height={u}
+                fill={(i + j) % 2 === 0 ? chain : bg}
+              />
+            )),
+          )}
+          <g stroke="white" strokeWidth={1} opacity={0.6}>
+            <line x1={u} y1={0} x2={u} y2={200} />
+            <line x1={2 * u} y1={0} x2={2 * u} y2={200} />
+            <line x1={0} y1={u} x2={200} y2={u} />
+            <line x1={0} y1={2 * u} x2={200} y2={2 * u} />
+          </g>
+        </>
+      );
+    }
   }
 }
