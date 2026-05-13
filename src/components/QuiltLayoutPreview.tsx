@@ -222,8 +222,10 @@ export function QuiltLayoutPreview({
                 }),
               )}
             {/* Hairline grid (only when there's no sashing — sashing already
-                provides visible separation between blocks). */}
-            {sashingWidth === 0 && (
+                provides visible separation between blocks). Skipped for
+                Irish Chain so the diagonal chain reads as continuous
+                across block boundaries. */}
+            {sashingWidth === 0 && pattern !== "irish-chain" && (
               <>
                 {Array.from({ length: blocksAcross + 1 }).map((_, i) => (
                   <line
