@@ -10,13 +10,18 @@ export default function PatternPicker() {
   return (
     <>
       <Helmet>
-        <title>QuiltButler — Free Quilt Planner | Yardage, Cutting Diagrams & Fabric Visualizer</title>
-        <meta name="description" content="Free quilt planning tool for all skill levels. Choose from 10+ patterns, get exact yardage requirements, visual cutting diagrams, a project cost estimate, and see your fabric choices come to life before you buy. No login required." />
+        <title>QuiltButler — Free Quilt Planner & Fabric Calculator</title>
+        <meta name="description" content="Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 10+ patterns, no login required." />
         <link rel="canonical" href="https://quiltbutler.com/" />
-        <meta property="og:title" content="QuiltButler — Free Quilt Planner | Yardage, Cutting Diagrams & Fabric Visualizer" />
-        <meta property="og:description" content="Free quilt planning tool for all skill levels. Choose from 10+ patterns, get exact yardage requirements, visual cutting diagrams, a project cost estimate, and see your fabric choices come to life before you buy. No login required." />
+        <meta property="og:title" content="QuiltButler — Free Quilt Planner & Fabric Calculator" />
+        <meta property="og:description" content="Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 10+ patterns, no login required." />
         <meta property="og:url" content="https://quiltbutler.com/" />
         <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebApplication",
+          "name": "QuiltButler",
+          "url": "https://quiltbutler.com/",
+          "description": "Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 10+ patterns, no login required.",
           "@context": "https://schema.org",
           "@type": "WebApplication",
           "name": "QuiltButler",
