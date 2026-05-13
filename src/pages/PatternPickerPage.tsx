@@ -22,11 +22,6 @@ export default function PatternPicker() {
           "name": "QuiltButler",
           "url": "https://quiltbutler.com/",
           "description": "Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 10+ patterns, no login required.",
-          "@context": "https://schema.org",
-          "@type": "WebApplication",
-          "name": "QuiltButler",
-          "url": "https://quiltbutler.com/",
-          "description": "Free quilt planning tool for all skill levels. Choose from 10+ patterns, get exact yardage requirements, visual cutting diagrams, a project cost estimate, and see your fabric choices come to life before you buy. No login required.",
           "applicationCategory": "DesignApplication",
           "operatingSystem": "Any",
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
