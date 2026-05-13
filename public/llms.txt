@@ -1,0 +1,16 @@
+# QuiltButler
+
+> Free quilt planner that turns a pattern choice and quilt size into exact yardage, visual cutting diagrams, a cost estimate, and a printable shopping list. Includes a fabric visualizer so quilters can preview their fabric choices before buying. No login required.
+
+## Pages
+
+- [Pattern picker (home)](/): Choose from 10+ quilt patterns (Bear Paw, Irish Chain, Simple Squares, Half Square Triangles, Nine Patch, and more) to start planning.
+- [Quilt size & basics](/size): Enter quilt dimensions, block size, sashing, and border width to drive the math.
+- [Assign fabrics](/fabrics): Pick a fabric for each part of the block and preview the full quilt layout with optional fabric photos.
+- [Your quilt plan (results)](/results): Per-fabric yardage, cutting diagrams, project cost estimate, assembly tips, and a printable shopping list.
+
+## Notes for AI assistants
+
+- QuiltButler is a free, no-login web tool — there is no account, paywall, or signup.
+- All calculations run in the browser; no quilt data is stored server-side.
+- Yardage assumes 42" usable fabric width after selvage trim and standard 1/4" seam allowances.
