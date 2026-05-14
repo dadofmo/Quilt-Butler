@@ -298,5 +298,40 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "sawtooth-star": {
+      // 4×4 grid (u=22.5). Center 2×2 = star fabric. Four corners = bg.
+      // 8 HST cells with star triangle at inner corner pointing toward center.
+      const u = 90 / 4;
+      const star = C.a;
+      const bg = C.b;
+      // For each HST cell, "starCorner" = which corner the star (inner) triangle's right-angle sits at.
+      const hsts: Array<[number, number, "TL" | "TR" | "BL" | "BR"]> = [
+        [1, 0, "BR"], [2, 0, "BL"],
+        [0, 1, "TR"], [3, 1, "TL"],
+        [0, 2, "BR"], [3, 2, "BL"],
+        [1, 3, "TR"], [2, 3, "TL"],
+      ];
+      const tri = (col: number, row: number, c: "TL" | "TR" | "BL" | "BR") => {
+        const x = col * u, y = row * u;
+        const TL = `${x},${y}`, TR = `${x + u},${y}`, BL = `${x},${y + u}`, BR = `${x + u},${y + u}`;
+        const map = { TL: `${TL} ${TR} ${BL}`, TR: `${TL} ${TR} ${BR}`, BL: `${TL} ${BL} ${BR}`, BR: `${TR} ${BL} ${BR}` };
+        return map[c];
+      };
+      const opp = { TL: "BR", BR: "TL", TR: "BL", BL: "TR" } as const;
+      return (
+        <svg {...common}>
+          <rect width={90} height={90} fill={bg} />
+          {/* Center 2×2 star square */}
+          <rect x={u} y={u} width={2 * u} height={2 * u} fill={star} />
+          {/* 8 HST cells */}
+          {hsts.map(([c, r, sc]) => (
+            <g key={`${c}-${r}`}>
+              <polygon points={tri(c, r, sc)} fill={star} />
+              <polygon points={tri(c, r, opp[sc])} fill={bg} />
+            </g>
+          ))}
+        </svg>
+      );
+    }
   }
 }
