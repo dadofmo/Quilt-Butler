@@ -580,6 +580,7 @@ function SizeStepInner() {
                     )}
                   </div>
                 )}
+              </div>
             </Field>
           );
         })()}
