@@ -514,7 +514,72 @@ function SizeStepInner() {
                     )}
                   </div>
                 )}
-              </div>
+                {fit.irishAsymmetric && (
+                  <div className="mt-3 rounded-lg border-2 border-amber-500/60 bg-amber-50 p-3 dark:bg-amber-950/30">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle
+                        className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400"
+                        aria-hidden="true"
+                      />
+                      <div>
+                        <p className="text-foreground text-sm font-semibold">
+                          Heads up — Irish Chain looks most balanced when both block counts are odd.
+                        </p>
+                        <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+                          Your current{" "}
+                          <strong className="text-foreground">
+                            {fit.blocksAcross} × {fit.blocksDown}
+                          </strong>{" "}
+                          layout puts chain blocks in only two corners, so the
+                          quilt won&apos;t read as symmetric. The options below
+                          give you an odd × odd grid (chains in all four corners,
+                          edge to edge) — sorted by closeness to your desired{" "}
+                          <strong className="text-foreground">
+                            {fit.quiltW}&quot; × {fit.quiltH}&quot;
+                          </strong>
+                          . Tap any option to apply it:
+                        </p>
+                      </div>
+                    </div>
+                    {fit.irishSuggestions.length > 0 ? (
+                      <ul className="mt-2 list-none space-y-1.5 pl-0 text-sm leading-relaxed">
+                        {fit.irishSuggestions.map((s, i) => {
+                          const dW = s.finishedW - fit.quiltW;
+                          const dH = s.finishedH - fit.quiltH;
+                          const exact = dW === 0 && dH === 0;
+                          const delta = exact
+                            ? "exact match to your desired size"
+                            : `${dW >= 0 ? "+" : ""}${dW}\" wide, ${dH >= 0 ? "+" : ""}${dH}\" tall vs your goal`;
+                          return (
+                            <li key={`${s.block}-${s.border}-${s.across}-${s.down}`} className="text-muted-foreground">
+                              <span className="text-foreground font-semibold">
+                                Option {i + 1}:{" "}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setBlockSizeText(String(s.block));
+                                  applyBorder(s.border);
+                                }}
+                                className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
+                              >
+                                {s.across} × {s.down} blocks · {s.block}&quot; block · {s.border}&quot; border
+                              </button>
+                              <span className="text-muted-foreground">
+                                {" "}→ {s.finishedW}&quot; × {s.finishedH}&quot; ({exact ? delta : delta})
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="text-muted-foreground mt-2 text-sm italic leading-relaxed">
+                        No odd × odd combinations fit at this quilt size — try
+                        nudging your desired width or height by a couple of inches.
+                      </p>
+                    )}
+                  </div>
+                )}
             </Field>
           );
         })()}
