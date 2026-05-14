@@ -184,6 +184,66 @@ function SizeStepInner() {
       .slice(0, MAX_COMBO_OPTIONS)
       .sort((a, b) => a.block - b.block);
 
+    // ----- Irish Chain symmetry suggestions -----
+    // Irish Chain alternates chain/plain blocks in a checkerboard. For chain
+    // blocks to land in all four corners (and chains to run edge-to-edge on
+    // every side), BOTH blocksAcross and blocksDown must be ODD. When the
+    // user's current layout has an even dimension we surface a separate
+    // amber warning with odd×odd block+border combos, sorted by closeness
+    // to their original desired finished size — so they get bump-down,
+    // bump-up, AND border-adjusted options in one list.
+    const isIrishChain = planner.pattern === "irish-chain";
+    const irishAsymmetric =
+      isIrishChain && (blocksAcross % 2 === 0 || blocksDown % 2 === 0);
+    type IrishSuggestion = {
+      block: number;
+      border: number;
+      across: number;
+      down: number;
+      total: number;
+      finishedW: number;
+      finishedH: number;
+      areaDelta: number; // finished area - desired area
+    };
+    const irishSuggestions: IrishSuggestion[] = [];
+    if (irishAsymmetric) {
+      const desiredArea = quiltW * quiltH;
+      const seen = new Set<string>();
+      for (let b2 = 0; b2 <= 40; b2++) {
+        const bd = b2 / 4;
+        if (quiltW - 2 * bd <= 0 || quiltH - 2 * bd <= 0) continue;
+        for (let s4 = MIN_BLOCK * 4; s4 <= 60; s4++) {
+          const s = s4 / 4;
+          const { aw, ah } = fitsCols(s, bd);
+          if (!isInt(aw) || !isInt(ah)) continue;
+          const acrossR = Math.round(aw);
+          const downR = Math.round(ah);
+          if (acrossR < 3 || downR < 3) continue;
+          if (acrossR % 2 === 0 || downR % 2 === 0) continue;
+          const total = acrossR * downR;
+          if (total > MAX_BLOCKS) continue;
+          const finishedW = acrossR * s + 2 * bd;
+          const finishedH = downR * s + 2 * bd;
+          const areaDelta = finishedW * finishedH - desiredArea;
+          const key = `${acrossR}x${downR}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          irishSuggestions.push({
+            block: s,
+            border: bd,
+            across: acrossR,
+            down: downR,
+            total,
+            finishedW,
+            finishedH,
+            areaDelta,
+          });
+        }
+      }
+      // Sort by absolute area distance from desired size — closest matches first.
+      irishSuggestions.sort((a, b) => Math.abs(a.areaDelta) - Math.abs(b.areaDelta));
+    }
+
     return {
       perfect,
       blocksAcross,
@@ -198,8 +258,10 @@ function SizeStepInner() {
       blockSuggestions: blockSuggestions.slice(0, 4),
       borderSuggestions: borderSuggestions.slice(0, 3),
       comboSuggestions: diversifiedCombos,
+      irishAsymmetric,
+      irishSuggestions: irishSuggestions.slice(0, 4),
     };
-  }, [blockSizeValid, blockSizeNum, w, h, border, sashing, isBearPaw, sashingValid]);
+  }, [blockSizeValid, blockSizeNum, w, h, border, sashing, isBearPaw, sashingValid, planner.pattern]);
 
   const applyBorder = (b: number) => {
     setBorderText(String(b));
