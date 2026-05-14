@@ -41,6 +41,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Bear Paw quilt block diagram showing four traditional paw units around sashing with a separate center accent square",
   "irish-chain":
     "Irish Chain quilt block diagram showing a 9-patch chain block with five contrasting corner and center squares forming diagonal chains across alternating background blocks",
+  "sawtooth-star":
+    "Sawtooth Star quilt block diagram showing a 4x4 grid with a large 2x2 center square, four background corner squares, and eight half square triangle units forming an eight pointed star",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
