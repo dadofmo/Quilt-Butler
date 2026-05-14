@@ -722,6 +722,33 @@ console.log("\n=== Irish Chain: ODD count (3×3 = 9) — corner is chain ===");
 }
 
 // =========================================================================
+// SAWTOOTH STAR — 4×4 grid, 1 center + 4 corners + 8 HSTs per block
+// =========================================================================
+console.log("\n=== Sawtooth Star: 50×65, 12\" block, no border ===");
+{
+  const s = { ...base(), pattern: "sawtooth-star" as const, blockSize: 12 };
+  // 4×5=20 blocks. u=3. centerCut=6.5, cornerCut=3.5, hstCut=3.875.
+  // Star A: 20 centers @6.5 (per strip floor(42.5/6.5)=6, strips=ceil(20/6)=4, inches=26)
+  //         + 160 HST squares @3.875 (per strip floor(42.5/3.875)=10, strips=16, inches=62) → 88
+  // BG B:  80 corners @3.5 (per strip 12, strips=7, inches=24.5)
+  //         + 160 HST squares @3.875 (strips=16, inches=62) → 86.5
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("SS-star A pieces buckets", a.pieces.length, 2);
+  check("SS-star A center count", a.pieces[0].count, 20);
+  check("SS-star A center cut", a.pieces[0].w, 6.5);
+  check("SS-star A HST count", a.pieces[1].count, 160);
+  check("SS-star A HST cut", a.pieces[1].w, 3.875);
+  check("SS-star A inches", a.totalInches, 88);
+  check("SS-star B pieces buckets", b.pieces.length, 2);
+  check("SS-star B corner count", b.pieces[0].count, 80);
+  check("SS-star B corner cut", b.pieces[0].w, 3.5);
+  check("SS-star B HST count", b.pieces[1].count, 160);
+  check("SS-star B inches", b.totalInches, 86.5);
+}
+
+// =========================================================================
 // SUMMARY
 // =========================================================================
 console.log("\n=========================================");

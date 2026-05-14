@@ -896,6 +896,47 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Quilt assembly: lay all the blocks out in your ${blocksAcross} × ${blocksDown} grid, alternating chain block, plain block, chain block, plain block, … so the corner is a chain block. Sew each row of blocks together with 1/4" seams (press seam allowances toward the plain blocks so they don't show through), then sew the rows together. The contrasting corner squares of adjacent chain blocks will meet at the row seams and form long diagonal chains running across the entire quilt — that's the Irish Chain.`,
     );
+  } else if (s.pattern === "sawtooth-star") {
+    // Sawtooth Star: 4×4 grid of equal units (u = blockSize / 4).
+    //   - 1 large star center square: 2u × 2u finished, cut (2u + 0.5)".
+    //   - 4 background corner squares: u × u finished, cut (u + 0.5)".
+    //   - 8 HST units forming the star points. Standard HST math: cut starting
+    //     squares at (u + 0.875)", pair one star + one bg → 2 HSTs per pair.
+    //     Per spec: 8 star + 8 bg starting squares per block (pooled across
+    //     blocks for cutting efficiency).
+    const u = s.blockSize / 4;
+    const centerCut = 2 * u + SEAM;
+    const cornerCut = u + SEAM;
+    const hstCut = u + HST_EXTRA;
+
+    const starFab = (s.assignments["star"] ?? "A") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
+
+    const centerCount = blockCount;
+    const cornerCount = 4 * blockCount;
+    const hstStarCount = 8 * blockCount;
+    const hstBgCount = 8 * blockCount;
+
+    addSquares(reqs[starFab], "Star center squares", centerCount, centerCut, s.fabricWidth);
+    addSquares(reqs[starFab], "HST starting squares (star fabric)", hstStarCount, hstCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Background corner squares", cornerCount, cornerCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "HST starting squares (background)", hstBgCount, hstCut, s.fabricWidth);
+
+    notes.push(
+      `Each block uses a 4×4 grid where each small unit = ${u.toFixed(2)}" finished.`,
+    );
+    notes.push(
+      `Each block uses: 1 center square at ${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}" (star fabric), 8 HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" (star fabric), 4 corner squares at ${cornerCut.toFixed(2)}" × ${cornerCut.toFixed(2)}" (background), and 8 HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" (background).`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${centerCount} center squares and ${hstStarCount} HST starting squares of Fabric ${starFab} (star); ${cornerCount} corner squares and ${hstBgCount} HST starting squares of Fabric ${bgFab} (background).`,
+    );
+    notes.push(
+      `HST construction: pair one star starting square with one background starting square right sides together. Draw a diagonal line corner to corner on the lighter square. Sew a scant 1/4" on each side of the line. Cut apart on the line to yield 2 HST units. Press open and trim each unit to ${(u + SEAM).toFixed(3)}" square (finished ${u.toFixed(2)}"). Each block needs 8 HST units — 4 pairs yield exactly 8.`,
+    );
+    notes.push(
+      `Sawtooth Star Assembly Tip: Make all your HST units first. Pair each star starting square with a background starting square, draw the diagonal on the lighter fabric, sew 1/4" on each side of the line, cut apart, press open, and trim to ${(u + SEAM).toFixed(3)}" square. Each pair yields 2 HSTs so you need 4 pairs per block yielding exactly 8 units. Then lay out your 4×4 grid — large center square, 8 HST units with star triangles all pointing inward, 4 background corner squares. Sew into four rows of four units then join the rows. Press seams in alternating directions so they nest at the intersections for a perfectly flat block.`,
+    );
   }
 
   // Border
@@ -946,7 +987,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "plus-block" ||
     s.pattern === "churn-dash" ||
     s.pattern === "bear-paw" ||
-    s.pattern === "irish-chain";
+    s.pattern === "irish-chain" ||
+    s.pattern === "sawtooth-star";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

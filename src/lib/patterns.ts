@@ -308,6 +308,28 @@ export const PATTERNS: PatternDef[] = [
       borderSection,
     ],
   },
+  {
+    id: "sawtooth-star",
+    name: "Sawtooth Star",
+    hasMath: true,
+    intro:
+      "The Sawtooth Star is built on a 4×4 grid of equal units. The center four cells form one large star center square. The four corners are background squares. The eight remaining cells are Half Square Triangle units — each with a star-colored triangle pointing inward toward the center and a background triangle filling the outer corner. Together the eight HST units create the eight star points.",
+    sections: [
+      {
+        id: "star",
+        label: "Star fabric",
+        defaultFabric: "A",
+        hint: "The large center square and the star-colored triangles in the eight HST units — forms the star shape.",
+      },
+      {
+        id: "bg",
+        label: "Background",
+        defaultFabric: "B",
+        hint: "The four corner squares and the background triangles in each HST unit — the fabric behind the star.",
+      },
+      borderSection,
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
