@@ -184,6 +184,66 @@ function SizeStepInner() {
       .slice(0, MAX_COMBO_OPTIONS)
       .sort((a, b) => a.block - b.block);
 
+    // ----- Irish Chain symmetry suggestions -----
+    // Irish Chain alternates chain/plain blocks in a checkerboard. For chain
+    // blocks to land in all four corners (and chains to run edge-to-edge on
+    // every side), BOTH blocksAcross and blocksDown must be ODD. When the
+    // user's current layout has an even dimension we surface a separate
+    // amber warning with odd×odd block+border combos, sorted by closeness
+    // to their original desired finished size — so they get bump-down,
+    // bump-up, AND border-adjusted options in one list.
+    const isIrishChain = planner.pattern === "irish-chain";
+    const irishAsymmetric =
+      isIrishChain && (blocksAcross % 2 === 0 || blocksDown % 2 === 0);
+    type IrishSuggestion = {
+      block: number;
+      border: number;
+      across: number;
+      down: number;
+      total: number;
+      finishedW: number;
+      finishedH: number;
+      areaDelta: number; // finished area - desired area
+    };
+    const irishSuggestions: IrishSuggestion[] = [];
+    if (irishAsymmetric) {
+      const desiredArea = quiltW * quiltH;
+      const seen = new Set<string>();
+      for (let b2 = 0; b2 <= 40; b2++) {
+        const bd = b2 / 4;
+        if (quiltW - 2 * bd <= 0 || quiltH - 2 * bd <= 0) continue;
+        for (let s4 = MIN_BLOCK * 4; s4 <= 60; s4++) {
+          const s = s4 / 4;
+          const { aw, ah } = fitsCols(s, bd);
+          if (!isInt(aw) || !isInt(ah)) continue;
+          const acrossR = Math.round(aw);
+          const downR = Math.round(ah);
+          if (acrossR < 3 || downR < 3) continue;
+          if (acrossR % 2 === 0 || downR % 2 === 0) continue;
+          const total = acrossR * downR;
+          if (total > MAX_BLOCKS) continue;
+          const finishedW = acrossR * s + 2 * bd;
+          const finishedH = downR * s + 2 * bd;
+          const areaDelta = finishedW * finishedH - desiredArea;
+          const key = `${acrossR}x${downR}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          irishSuggestions.push({
+            block: s,
+            border: bd,
+            across: acrossR,
+            down: downR,
+            total,
+            finishedW,
+            finishedH,
+            areaDelta,
+          });
+        }
+      }
+      // Sort by absolute area distance from desired size — closest matches first.
+      irishSuggestions.sort((a, b) => Math.abs(a.areaDelta) - Math.abs(b.areaDelta));
+    }
+
     return {
       perfect,
       blocksAcross,
@@ -198,8 +258,10 @@ function SizeStepInner() {
       blockSuggestions: blockSuggestions.slice(0, 4),
       borderSuggestions: borderSuggestions.slice(0, 3),
       comboSuggestions: diversifiedCombos,
+      irishAsymmetric,
+      irishSuggestions: irishSuggestions.slice(0, 4),
     };
-  }, [blockSizeValid, blockSizeNum, w, h, border, sashing, isBearPaw, sashingValid]);
+  }, [blockSizeValid, blockSizeNum, w, h, border, sashing, isBearPaw, sashingValid, planner.pattern]);
 
   const applyBorder = (b: number) => {
     setBorderText(String(b));
@@ -448,6 +510,72 @@ function SizeStepInner() {
                         No reasonable block size + border combinations give an
                         exact fit at this quilt size. Try adjusting your desired
                         quilt size slightly.
+                      </p>
+                    )}
+                  </div>
+                )}
+                {fit.irishAsymmetric && (
+                  <div className="mt-3 rounded-lg border-2 border-amber-500/60 bg-amber-50 p-3 dark:bg-amber-950/30">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle
+                        className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600 dark:text-amber-400"
+                        aria-hidden="true"
+                      />
+                      <div>
+                        <p className="text-foreground text-sm font-semibold">
+                          Heads up — Irish Chain looks most balanced when both block counts are odd.
+                        </p>
+                        <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+                          Your current{" "}
+                          <strong className="text-foreground">
+                            {fit.blocksAcross} × {fit.blocksDown}
+                          </strong>{" "}
+                          layout puts chain blocks in only two corners, so the
+                          quilt won&apos;t read as symmetric. The options below
+                          give you an odd × odd grid (chains in all four corners,
+                          edge to edge) — sorted by closeness to your desired{" "}
+                          <strong className="text-foreground">
+                            {fit.quiltW}&quot; × {fit.quiltH}&quot;
+                          </strong>
+                          . Tap any option to apply it:
+                        </p>
+                      </div>
+                    </div>
+                    {fit.irishSuggestions.length > 0 ? (
+                      <ul className="mt-2 list-none space-y-1.5 pl-0 text-sm leading-relaxed">
+                        {fit.irishSuggestions.map((s, i) => {
+                          const dW = s.finishedW - fit.quiltW;
+                          const dH = s.finishedH - fit.quiltH;
+                          const exact = dW === 0 && dH === 0;
+                          const delta = exact
+                            ? "exact match to your desired size"
+                            : `${dW >= 0 ? "+" : ""}${dW}\" wide, ${dH >= 0 ? "+" : ""}${dH}\" tall vs your goal`;
+                          return (
+                            <li key={`${s.block}-${s.border}-${s.across}-${s.down}`} className="text-muted-foreground">
+                              <span className="text-foreground font-semibold">
+                                Option {i + 1}:{" "}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setBlockSizeText(String(s.block));
+                                  applyBorder(s.border);
+                                }}
+                                className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
+                              >
+                                {s.across} × {s.down} blocks · {s.block}&quot; block · {s.border}&quot; border
+                              </button>
+                              <span className="text-muted-foreground">
+                                {" "}→ {s.finishedW}&quot; × {s.finishedH}&quot; ({exact ? delta : delta})
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="text-muted-foreground mt-2 text-sm italic leading-relaxed">
+                        No odd × odd combinations fit at this quilt size — try
+                        nudging your desired width or height by a couple of inches.
                       </p>
                     )}
                   </div>
