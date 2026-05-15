@@ -48,6 +48,8 @@ function SizeStepInner() {
     planner.borderWidth ? String(planner.borderWidth) : "",
   );
   const isBearPaw = planner.pattern === "bear-paw";
+  const isNinePatch = planner.pattern === "nine-patch";
+  const isSashed = isBearPaw || isNinePatch;
   const [sashingText, setSashingText] = useState(
     planner.sashingWidth ? String(planner.sashingWidth) : "2",
   );
@@ -79,13 +81,13 @@ function SizeStepInner() {
   const border = borderValid ? borderNum : 0;
   const sashingNum = Number(sashingText);
   const sashingValid =
-    !isBearPaw ||
+    !isSashed ||
     (sashingText.trim() !== "" && !isNaN(sashingNum) && sashingNum > 0);
-  const sashing = isBearPaw && sashingValid ? sashingNum : 0;
+  const sashing = isSashed && sashingValid ? sashingNum : 0;
 
   const fit = useMemo(() => {
     if (!blockSizeValid) return null;
-    if (isBearPaw && !sashingValid) return null;
+    if (isSashed && !sashingValid) return null;
     const quiltW = Number(w) || 0;
     const quiltH = Number(h) || 0;
     const innerW = quiltW - 2 * border;
@@ -261,7 +263,7 @@ function SizeStepInner() {
       irishAsymmetric,
       irishSuggestions: irishSuggestions.slice(0, 4),
     };
-  }, [blockSizeValid, blockSizeNum, w, h, border, sashing, isBearPaw, sashingValid, planner.pattern]);
+  }, [blockSizeValid, blockSizeNum, w, h, border, sashing, isSashed, sashingValid, planner.pattern]);
 
   const applyBorder = (b: number) => {
     setBorderText(String(b));
@@ -273,7 +275,7 @@ function SizeStepInner() {
 
   const next = () => {
     if (!blockSizeValid || !fabricWidthValid || !borderValid) return;
-    if (isBearPaw && !sashingValid) return;
+    if (isSashed && !sashingValid) return;
     setPlanner({
       sizePreset: preset,
       quiltWidth: Number(w) || 0,
@@ -281,7 +283,7 @@ function SizeStepInner() {
       fabricWidth: fabricWidthNum,
       blockSize: blockSizeNum,
       borderWidth: border,
-      sashingWidth: isBearPaw ? sashingNum : planner.sashingWidth,
+      sashingWidth: isSashed ? sashingNum : planner.sashingWidth,
     });
     navigate("/fabrics");
   };
@@ -366,7 +368,7 @@ function SizeStepInner() {
           )}
         </Field>
 
-        {isBearPaw && (
+        {isSashed && (
           <Field label="Sashing between blocks (in inches)">
             <input
               type="text"
@@ -378,11 +380,11 @@ function SizeStepInner() {
               className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
             />
             <p className="text-muted-foreground mt-2 text-xs leading-snug">
-              Sashing separates each Bear Paw block — common widths are 1.5&quot;, 2&quot;, 2.5&quot;, or 3&quot;.
+              Sashing separates each {isBearPaw ? "Bear Paw" : "Nine Patch"} block — common widths are 1.5&quot;, 2&quot;, 2.5&quot;, or 3&quot;.
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">
-                Please enter a positive number (Bear Paw always uses sashing).
+                Please enter a positive number ({isBearPaw ? "Bear Paw" : "Nine Patch"} always uses sashing).
               </p>
             )}
           </Field>

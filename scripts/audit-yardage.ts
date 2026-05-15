@@ -48,22 +48,30 @@ console.log("\n=== Simple Squares: 50×65, 12.5\" block, 4-fabric checkerboard =
 // =========================================================================
 // NINE PATCH
 // =========================================================================
-console.log("\n=== Nine Patch: 50×65, 12\" block, no border ===");
+console.log("\n=== Nine Patch: 50×65, 12\" block, no border, 2\" sashing (default) ===");
 {
-  const s = { ...base(), pattern: "nine-patch" as const, blockSize: 12 };
-  // 4×5=20 blocks. Patch=12/3=4. Cut=4.5. Per strip floor(42.5/4.5)=9.
-  // A: 5*20=100 squares. Strips=ceil(100/9)=12. Inches=12*4.5=54.
-  // B: 4*20=80 squares. Strips=ceil(80/9)=9. Inches=9*4.5=40.5.
+  const s = { ...base(), pattern: "nine-patch" as const, blockSize: 12, sashingWidth: 2 };
+  // Sashed math: innerW=50, innerH=65, sash=2, block=12.
+  // across=floor((50-2)/14)=3, down=floor((65-2)/14)=4 → 12 blocks.
+  // Patch=4. Cut=4.5. Per strip floor(42.5/4.5)=9.
+  // A: 5*12=60 squares. Strips=ceil(60/9)=7. Inches=7*4.5=31.5.
+  // B: 4*12=48 squares. Strips=ceil(48/9)=6. Inches=6*4.5=27.
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
   const b = r.fabrics.find(f => f.fabric === "B")!;
-  check("9P A count", a.pieces[0].count, 100);
-  check("9P A strips", a.strips[0].count, 12);
-  check("9P A inches", a.totalInches, 54);
-  check("9P A yards", a.yards, ceilQuarter(54/36));
-  check("9P B count", b.pieces[0].count, 80);
-  check("9P B strips", b.strips[0].count, 9);
-  check("9P B inches", b.totalInches, 40.5);
+  check("9P A count", a.pieces[0].count, 60);
+  check("9P A strips", a.strips[0].count, 7);
+  check("9P A inches", a.totalInches, 31.5);
+  check("9P A yards", a.yards, ceilQuarter(31.5/36));
+  check("9P B count", b.pieces[0].count, 48);
+  check("9P B strips", b.strips[0].count, 6);
+  check("9P B inches", b.totalInches, 27);
+  // Sashing C: vSash=(3+1)*4=16, hSash=(4+1)*3=15, total=31 strips at 2.5"×12.5".
+  // Cornerstones D: (3+1)*(4+1)=20 squares at 2.5".
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  const d = r.fabrics.find(f => f.fabric === "D")!;
+  check("9P C sashing strip count", c.pieces[0].count, 31);
+  check("9P D cornerstone count", d.pieces[0].count, 20);
 }
 
 // =========================================================================
@@ -573,15 +581,17 @@ console.log("\n=== Bear Paw: sashing & background share fabric C — totals must
 // =========================================================================
 // BORDER MATH
 // =========================================================================
-console.log("\n=== Border: 60×80 inner, 4\" border, 9P pattern ===");
+console.log("\n=== Border: 68×88, 4\" border, 9P pattern, 2\" sashing ===");
 {
   const s = {
     ...base(), pattern: "nine-patch" as const,
     quiltWidth: 68, quiltHeight: 88, borderWidth: 4, blockSize: 10,
-    assignments: { center: "A" as FabricKey, outer: "B" as FabricKey, border: "C" as FabricKey },
+    sashingWidth: 2,
+    assignments: { center: "A" as FabricKey, outer: "B" as FabricKey, sashing: "F" as FabricKey, cornerstone: "G" as FabricKey, border: "C" as FabricKey },
   };
-  // Inner=60×80, blocks=6×8=48.
-  // Border: sides=2*80=160, topBot=2*(60+8)=136, total=296. Strips=ceil(296/42.5)=7. Cut=4.5. Inches=7*4.5=31.5.
+  // Inner=60×80. across=floor((60-2)/12)=4, down=floor((80-2)/12)=6 → 24 blocks.
+  // Sashed inner finished = 4*10+5*2=50 wide, 6*10+7*2=74 tall.
+  // Border: sides=2*74=148, topBot=2*(50+8)=116, total=264. Strips=ceil(264/42.5)=7. Cut=4.5. Inches=7*4.5=31.5.
   const r = calculateYardage(s);
   const c = r.fabrics.find(f => f.fabric === "C")!;
   const borderLine = c.pieces.find(p => p.label === "Border strips")!;
@@ -611,11 +621,11 @@ console.log("\n=== Materials: 60×80 ===");
 // =========================================================================
 console.log("\n=== Safety buffer: +10% ===");
 {
-  const s = { ...base(), pattern: "nine-patch" as const, blockSize: 12, safetyBuffer: true };
+  const s = { ...base(), pattern: "nine-patch" as const, blockSize: 12, sashingWidth: 2, safetyBuffer: true };
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
-  // Base inches=54. With buffer: 54*1.1=59.4, /36=1.65, ceilQuarter=1.75
-  check("9P A yards w/ buffer", a.yards, 1.75);
+  // Sashed nine-patch (3×4=12 blocks): A inches=31.5. With buffer: 31.5*1.1=34.65, /36=0.9625, ceilQuarter=1.0
+  check("9P A yards w/ buffer", a.yards, 1.0);
 }
 
 // =========================================================================
