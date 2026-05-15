@@ -178,13 +178,15 @@ function FabricsStepInner() {
         <div className="bg-card mb-6 rounded-xl border-2 border-border p-4">
           {(() => {
             const isBearPaw = pattern.id === "bear-paw";
-            const sashing = isBearPaw ? Math.max(0, planner.sashingWidth || 0) : 0;
+            const isNinePatch = pattern.id === "nine-patch";
+            const isSashed = isBearPaw || isNinePatch;
+            const sashing = isSashed ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
-            const blocksAcross = isBearPaw
+            const blocksAcross = isSashed
               ? Math.max(1, Math.floor((innerW - sashing) / (planner.blockSize + sashing)))
               : Math.max(1, Math.floor(innerW / planner.blockSize));
-            const blocksDown = isBearPaw
+            const blocksDown = isSashed
               ? Math.max(1, Math.floor((innerH - sashing) / (planner.blockSize + sashing)))
               : Math.max(1, Math.floor(innerH / planner.blockSize));
             const borderDefault = (pattern.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey;
@@ -215,7 +217,7 @@ function FabricsStepInner() {
                   <strong>{blocksAcross * blocksDown} times</strong> and arranged in a{" "}
                   {blocksAcross} × {blocksDown} grid to make your finished quilt.
                   {hasBorder && " The border wraps around the outside."}
-                  {isBearPaw && sashing > 0 && (
+                  {isSashed && sashing > 0 && (
                     <> Each block is separated by <strong>{sashing}&quot; sashing</strong> with cornerstone squares at the intersections.</>
                   )}
                 </p>
