@@ -275,7 +275,7 @@ function SizeStepInner() {
 
   const next = () => {
     if (!blockSizeValid || !fabricWidthValid || !borderValid) return;
-    if (isBearPaw && !sashingValid) return;
+    if (isSashed && !sashingValid) return;
     setPlanner({
       sizePreset: preset,
       quiltWidth: Number(w) || 0,
@@ -283,7 +283,7 @@ function SizeStepInner() {
       fabricWidth: fabricWidthNum,
       blockSize: blockSizeNum,
       borderWidth: border,
-      sashingWidth: isBearPaw ? sashingNum : planner.sashingWidth,
+      sashingWidth: isSashed ? sashingNum : planner.sashingWidth,
     });
     navigate("/fabrics");
   };
