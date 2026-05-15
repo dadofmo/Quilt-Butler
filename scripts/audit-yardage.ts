@@ -581,15 +581,17 @@ console.log("\n=== Bear Paw: sashing & background share fabric C — totals must
 // =========================================================================
 // BORDER MATH
 // =========================================================================
-console.log("\n=== Border: 60×80 inner, 4\" border, 9P pattern ===");
+console.log("\n=== Border: 68×88, 4\" border, 9P pattern, 2\" sashing ===");
 {
   const s = {
     ...base(), pattern: "nine-patch" as const,
     quiltWidth: 68, quiltHeight: 88, borderWidth: 4, blockSize: 10,
-    assignments: { center: "A" as FabricKey, outer: "B" as FabricKey, border: "C" as FabricKey },
+    sashingWidth: 2,
+    assignments: { center: "A" as FabricKey, outer: "B" as FabricKey, sashing: "F" as FabricKey, cornerstone: "G" as FabricKey, border: "C" as FabricKey },
   };
-  // Inner=60×80, blocks=6×8=48.
-  // Border: sides=2*80=160, topBot=2*(60+8)=136, total=296. Strips=ceil(296/42.5)=7. Cut=4.5. Inches=7*4.5=31.5.
+  // Inner=60×80. across=floor((60-2)/12)=4, down=floor((80-2)/12)=6 → 24 blocks.
+  // Sashed inner finished = 4*10+5*2=50 wide, 6*10+7*2=74 tall.
+  // Border: sides=2*74=148, topBot=2*(50+8)=116, total=264. Strips=ceil(264/42.5)=7. Cut=4.5. Inches=7*4.5=31.5.
   const r = calculateYardage(s);
   const c = r.fabrics.find(f => f.fabric === "C")!;
   const borderLine = c.pieces.find(p => p.label === "Border strips")!;
