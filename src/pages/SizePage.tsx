@@ -368,7 +368,7 @@ function SizeStepInner() {
           )}
         </Field>
 
-        {isBearPaw && (
+        {isSashed && (
           <Field label="Sashing between blocks (in inches)">
             <input
               type="text"
@@ -380,11 +380,11 @@ function SizeStepInner() {
               className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
             />
             <p className="text-muted-foreground mt-2 text-xs leading-snug">
-              Sashing separates each Bear Paw block — common widths are 1.5&quot;, 2&quot;, 2.5&quot;, or 3&quot;.
+              Sashing separates each {isBearPaw ? "Bear Paw" : "Nine Patch"} block — common widths are 1.5&quot;, 2&quot;, 2.5&quot;, or 3&quot;.
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">
-                Please enter a positive number (Bear Paw always uses sashing).
+                Please enter a positive number ({isBearPaw ? "Bear Paw" : "Nine Patch"} always uses sashing).
               </p>
             )}
           </Field>
