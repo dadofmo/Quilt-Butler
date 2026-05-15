@@ -621,11 +621,11 @@ console.log("\n=== Materials: 60×80 ===");
 // =========================================================================
 console.log("\n=== Safety buffer: +10% ===");
 {
-  const s = { ...base(), pattern: "nine-patch" as const, blockSize: 12, safetyBuffer: true };
+  const s = { ...base(), pattern: "nine-patch" as const, blockSize: 12, sashingWidth: 2, safetyBuffer: true };
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
-  // Base inches=54. With buffer: 54*1.1=59.4, /36=1.65, ceilQuarter=1.75
-  check("9P A yards w/ buffer", a.yards, 1.75);
+  // Sashed nine-patch (3×4=12 blocks): A inches=31.5. With buffer: 31.5*1.1=34.65, /36=0.9625, ceilQuarter=1.0
+  check("9P A yards w/ buffer", a.yards, 1.0);
 }
 
 // =========================================================================
