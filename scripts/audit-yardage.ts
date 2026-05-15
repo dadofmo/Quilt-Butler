@@ -48,22 +48,30 @@ console.log("\n=== Simple Squares: 50×65, 12.5\" block, 4-fabric checkerboard =
 // =========================================================================
 // NINE PATCH
 // =========================================================================
-console.log("\n=== Nine Patch: 50×65, 12\" block, no border ===");
+console.log("\n=== Nine Patch: 50×65, 12\" block, no border, 2\" sashing (default) ===");
 {
-  const s = { ...base(), pattern: "nine-patch" as const, blockSize: 12 };
-  // 4×5=20 blocks. Patch=12/3=4. Cut=4.5. Per strip floor(42.5/4.5)=9.
-  // A: 5*20=100 squares. Strips=ceil(100/9)=12. Inches=12*4.5=54.
-  // B: 4*20=80 squares. Strips=ceil(80/9)=9. Inches=9*4.5=40.5.
+  const s = { ...base(), pattern: "nine-patch" as const, blockSize: 12, sashingWidth: 2 };
+  // Sashed math: innerW=50, innerH=65, sash=2, block=12.
+  // across=floor((50-2)/14)=3, down=floor((65-2)/14)=4 → 12 blocks.
+  // Patch=4. Cut=4.5. Per strip floor(42.5/4.5)=9.
+  // A: 5*12=60 squares. Strips=ceil(60/9)=7. Inches=7*4.5=31.5.
+  // B: 4*12=48 squares. Strips=ceil(48/9)=6. Inches=6*4.5=27.
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
   const b = r.fabrics.find(f => f.fabric === "B")!;
-  check("9P A count", a.pieces[0].count, 100);
-  check("9P A strips", a.strips[0].count, 12);
-  check("9P A inches", a.totalInches, 54);
-  check("9P A yards", a.yards, ceilQuarter(54/36));
-  check("9P B count", b.pieces[0].count, 80);
-  check("9P B strips", b.strips[0].count, 9);
-  check("9P B inches", b.totalInches, 40.5);
+  check("9P A count", a.pieces[0].count, 60);
+  check("9P A strips", a.strips[0].count, 7);
+  check("9P A inches", a.totalInches, 31.5);
+  check("9P A yards", a.yards, ceilQuarter(31.5/36));
+  check("9P B count", b.pieces[0].count, 48);
+  check("9P B strips", b.strips[0].count, 6);
+  check("9P B inches", b.totalInches, 27);
+  // Sashing C: vSash=(3+1)*4=16, hSash=(4+1)*3=15, total=31 strips at 2.5"×12.5".
+  // Cornerstones D: (3+1)*(4+1)=20 squares at 2.5".
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  const d = r.fabrics.find(f => f.fabric === "D")!;
+  check("9P C sashing strip count", c.pieces[0].count, 31);
+  check("9P D cornerstone count", d.pieces[0].count, 20);
 }
 
 // =========================================================================
