@@ -306,10 +306,10 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       const bg = C.b;
       // For each HST cell, "starCorner" = which corner the star (inner) triangle's right-angle sits at.
       const hsts: Array<[number, number, "TL" | "TR" | "BL" | "BR"]> = [
-        [1, 0, "BR"], [2, 0, "BL"],
+        [1, 0, "BL"], [2, 0, "BR"],
         [0, 1, "TR"], [3, 1, "TL"],
         [0, 2, "BR"], [3, 2, "BL"],
-        [1, 3, "TR"], [2, 3, "TL"],
+        [1, 3, "TL"], [2, 3, "TR"],
       ];
       const tri = (col: number, row: number, c: "TL" | "TR" | "BL" | "BR") => {
         const x = col * u, y = row * u;
