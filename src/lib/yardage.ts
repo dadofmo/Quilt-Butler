@@ -1006,6 +1006,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   // glossary would be overkill there.
   const showBasics =
     s.pattern === "hst" ||
+    s.pattern === "nine-patch" ||
     s.pattern === "rail-fence" ||
     s.pattern === "log-cabin" ||
     s.pattern === "ohio-star" ||
