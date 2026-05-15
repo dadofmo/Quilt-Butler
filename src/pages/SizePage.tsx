@@ -81,13 +81,13 @@ function SizeStepInner() {
   const border = borderValid ? borderNum : 0;
   const sashingNum = Number(sashingText);
   const sashingValid =
-    !isBearPaw ||
+    !isSashed ||
     (sashingText.trim() !== "" && !isNaN(sashingNum) && sashingNum > 0);
-  const sashing = isBearPaw && sashingValid ? sashingNum : 0;
+  const sashing = isSashed && sashingValid ? sashingNum : 0;
 
   const fit = useMemo(() => {
     if (!blockSizeValid) return null;
-    if (isBearPaw && !sashingValid) return null;
+    if (isSashed && !sashingValid) return null;
     const quiltW = Number(w) || 0;
     const quiltH = Number(h) || 0;
     const innerW = quiltW - 2 * border;
