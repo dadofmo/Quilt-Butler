@@ -371,22 +371,26 @@ function SizeStepInner() {
         </Field>
 
         {isSashed && (
-          <Field label="Sashing between blocks (in inches)">
+          <Field label={`Sashing between blocks (in inches)${isNinePatch ? " — optional" : ""}`}>
             <input
               type="text"
               inputMode="decimal"
               value={sashingText}
               onChange={(e) => setSashingText(e.target.value)}
-              placeholder="e.g. 2"
+              placeholder={isNinePatch ? "e.g. 0 or 2" : "e.g. 2"}
               aria-invalid={!sashingValid}
               className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
             />
             <p className="text-muted-foreground mt-2 text-xs leading-snug">
-              Sashing separates each {isBearPaw ? "Bear Paw" : "Nine Patch"} block — common widths are 1.5&quot;, 2&quot;, 2.5&quot;, or 3&quot;.
+              {isNinePatch
+                ? "Sashing separates each Nine Patch block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
+                : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\"."}
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">
-                Please enter a positive number ({isBearPaw ? "Bear Paw" : "Nine Patch"} always uses sashing).
+                {isBearPaw
+                  ? "Please enter a positive number (Bear Paw always uses sashing)."
+                  : "Please enter 0 or a positive number."}
               </p>
             )}
           </Field>
