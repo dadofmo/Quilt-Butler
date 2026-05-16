@@ -20,7 +20,8 @@ interface Props {
   sashingWidth?: number;
   /** Sashing fabric (defaults to "C" if omitted). */
   sashingFabric?: FabricKey;
-  /** Cornerstone fabric (defaults to "E" if omitted). */
+  /** Cornerstone fabric. When undefined, no cornerstone squares are drawn
+   *  at sashing intersections (e.g. Nine Patch with optional sashing). */
   cornerstoneFabric?: FabricKey;
   photos?: Partial<Record<FabricKey, string>>;
 }
@@ -37,7 +38,7 @@ export function QuiltLayoutPreview({
   borderWidth,
   sashingWidth = 0,
   sashingFabric = "C",
-  cornerstoneFabric = "E",
+  cornerstoneFabric,
   photos,
 }: Props) {
   const blockCount = blocksAcross * blocksDown;
@@ -59,7 +60,7 @@ export function QuiltLayoutPreview({
   const cellH = (innerH - (blocksDown + perim) * sashPxY) / Math.max(1, blocksDown);
 
   const sashingFill = fabricFill(sashingFabric, photos);
-  const cornerFill = fabricFill(cornerstoneFabric, photos);
+  const cornerFill = cornerstoneFabric ? fabricFill(cornerstoneFabric, photos) : null;
 
   const borderPhoto = hasBorder ? photos?.[borderFabric] : undefined;
   const borderColor = hasBorder ? FABRIC_COLORS[borderFabric] : "transparent";
