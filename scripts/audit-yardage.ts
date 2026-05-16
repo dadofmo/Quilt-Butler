@@ -48,7 +48,7 @@ console.log("\n=== Simple Squares: 50×65, 12.5\" block, 4-fabric checkerboard =
 // =========================================================================
 // NINE PATCH
 // =========================================================================
-console.log("\n=== Nine Patch: 50×65, 12\" block, no border, 2\" sashing (default) ===");
+console.log("\n=== Nine Patch: 50×65, 12\" block, no border, 2\" sashing ===");
 {
   const s = { ...base(), pattern: "nine-patch" as const, blockSize: 12, sashingWidth: 2 };
   // Sashed math: innerW=50, innerH=65, sash=2, block=12.
@@ -67,11 +67,25 @@ console.log("\n=== Nine Patch: 50×65, 12\" block, no border, 2\" sashing (defau
   check("9P B strips", b.strips[0].count, 6);
   check("9P B inches", b.totalInches, 27);
   // Sashing C: vSash=(3+1)*4=16, hSash=(4+1)*3=15, total=31 strips at 2.5"×12.5".
-  // Cornerstones D: (3+1)*(4+1)=20 squares at 2.5".
+  // (Cornerstones removed — Nine Patch uses plain sashing, no cornerstones.)
   const c = r.fabrics.find(f => f.fabric === "C")!;
-  const d = r.fabrics.find(f => f.fabric === "D")!;
   check("9P C sashing strip count", c.pieces[0].count, 31);
-  check("9P D cornerstone count", d.pieces[0].count, 20);
+  check("9P no cornerstone D", r.fabrics.find(f => f.fabric === "D") ? 1 : 0, 0);
+}
+
+// =========================================================================
+// NINE PATCH — sashing off (0" sashing, optional)
+// =========================================================================
+console.log("\n=== Nine Patch: 50×65, 12\" block, no border, NO sashing ===");
+{
+  const s = { ...base(), pattern: "nine-patch" as const, blockSize: 12, sashingWidth: 0 };
+  // No sashing: across=floor(50/12)=4, down=floor(65/12)=5 → 20 blocks.
+  // A: 5*20=100 squares. Cut=4.5. Per strip=9. Strips=ceil(100/9)=12.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("9P (no sash) A count", a.pieces[0].count, 100);
+  check("9P (no sash) A strips", a.strips[0].count, 12);
+  check("9P (no sash) no sashing C", r.fabrics.find(f => f.fabric === "C") ? 1 : 0, 0);
 }
 
 // =========================================================================
