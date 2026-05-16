@@ -80,9 +80,11 @@ function SizeStepInner() {
   const borderValid = borderText.trim() !== "" && !isNaN(borderNum) && borderNum >= 0;
   const border = borderValid ? borderNum : 0;
   const sashingNum = Number(sashingText);
+  // Bear Paw requires positive sashing; Nine Patch allows 0 (no sashing).
+  const sashingMin = isBearPaw ? (n: number) => n > 0 : (n: number) => n >= 0;
   const sashingValid =
     !isSashed ||
-    (sashingText.trim() !== "" && !isNaN(sashingNum) && sashingNum > 0);
+    (sashingText.trim() !== "" && !isNaN(sashingNum) && sashingMin(sashingNum));
   const sashing = isSashed && sashingValid ? sashingNum : 0;
 
   const fit = useMemo(() => {
