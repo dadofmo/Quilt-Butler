@@ -146,8 +146,15 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
   const isBearPaw = s.pattern === "bear-paw";
   const isNinePatch = s.pattern === "nine-patch";
-  const isSashed = isBearPaw || isNinePatch;
-  const sashWidth = isSashed ? Math.max(0.0001, s.sashingWidth || 2) : 0;
+  // Bear Paw is always sashed (min 0.0001"). Nine Patch sashing is optional —
+  // a user-entered 0 means "no sashing" and the math collapses to plain blocks.
+  const ninePatchSash = isNinePatch ? Math.max(0, s.sashingWidth || 0) : 0;
+  const sashWidth = isBearPaw
+    ? Math.max(0.0001, s.sashingWidth || 2)
+    : isNinePatch
+      ? ninePatchSash
+      : 0;
+  const isSashed = sashWidth > 0;
   const innerW = s.quiltWidth - 2 * s.borderWidth;
   const innerH = s.quiltHeight - 2 * s.borderWidth;
   // Sashed patterns use full-perimeter sashing: cols*block + (cols+1)*sash = innerW
@@ -235,31 +242,28 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Across all ${blockCount} blocks: ${centerCount} squares of Fabric ${centerFab} (5 × ${blockCount}) and ${outerCount} squares of Fabric ${outerFab} (4 × ${blockCount}).`,
     );
 
-    // Full-perimeter sashing + cornerstones (Nine Patch is always sashed).
-    const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
-    const cornerFabKey = (s.assignments["cornerstone"] ?? "D") as FabricKey;
-    const sashCutW = sashWidth + SEAM;
-    const sashCutL = s.blockSize + SEAM;
-    const vSash = (blocksAcross + 1) * blocksDown;
-    const hSash = (blocksDown + 1) * blocksAcross;
-    const totalSash = vSash + hSash;
-    if (totalSash > 0) {
-      addRails(reqs[sashFab], "Perimeter sashing strips", totalSash, sashCutL, sashCutW, s.fabricWidth);
+    // Optional full-perimeter sashing (no cornerstones for Nine Patch).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = (blocksAcross + 1) * blocksDown;
+      const hSash = (blocksDown + 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Perimeter sashing strips", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Full-perimeter sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${blocksAcross + 1} × ${blocksDown}) and ${hSash} horizontal (${blocksDown + 1} × ${blocksAcross}). Strips run between every block AND around the entire outer perimeter before the border.`,
+      );
+      notes.push(
+        `Nine Patch Assembly Tip — full quilt: STAGE 1 (block). Sew each 3×3 nine-patch by joining the 9 small squares into 3 rows of 3, then joining the rows. Press seams toward the darker fabric so they nest. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Build connector rows from ${blocksAcross} horizontal sashing strips each (${blocksDown + 1} connector rows total). Build block rows by alternating vertical sashing, block, vertical sashing, block, … (${blocksAcross + 1} sashing strips + ${blocksAcross} blocks per block row, ${blocksDown} block rows total). Then alternate connector row, block row, connector row, …, finishing with a connector row — this gives every Nine Patch block its own framed space and a sashing border around the entire quilt before the outer border is added.`,
+      );
+    } else {
+      notes.push(
+        `Nine Patch Assembly Tip: Sew each 3×3 nine-patch by joining the 9 small squares into 3 rows of 3, then joining the rows. Press seams toward the darker fabric so they nest. Then lay your blocks out in the ${blocksAcross} × ${blocksDown} grid and join row by row to form the quilt top.`,
+      );
     }
-    const cornerCutSize = sashWidth + SEAM;
-    const totalCorners = (blocksAcross + 1) * (blocksDown + 1);
-    if (totalCorners > 0) {
-      addSquares(reqs[cornerFabKey], "Cornerstone squares", totalCorners, cornerCutSize, s.fabricWidth);
-    }
-    notes.push(
-      `Full-perimeter sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${blocksAcross + 1} × ${blocksDown}) and ${hSash} horizontal (${blocksDown + 1} × ${blocksAcross}). Strips run between every block AND around the entire outer perimeter before the border.`,
-    );
-    notes.push(
-      `Cornerstone squares: cut ${totalCorners} squares at ${cornerCutSize.toFixed(2)}" × ${cornerCutSize.toFixed(2)}" (Fabric ${cornerFabKey}) — placed at every sashing intersection including the four outer corners ((${blocksAcross + 1}) × (${blocksDown + 1}) grid).`,
-    );
-    notes.push(
-      `Nine Patch Assembly Tip — full quilt: STAGE 1 (block). Sew each 3×3 nine-patch by joining the 9 small squares into 3 rows of 3, then joining the rows. Press seams toward the darker fabric so they nest. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Build connector rows by alternating cornerstone, horizontal sashing, cornerstone, horizontal sashing, … (${blocksAcross + 1} cornerstones + ${blocksAcross} sashing strips per connector row, ${blocksDown + 1} connector rows total). Build block rows by alternating vertical sashing, block, vertical sashing, block, … (${blocksAcross + 1} sashing strips + ${blocksAcross} blocks per block row, ${blocksDown} block rows total). Then alternate connector row, block row, connector row, …, finishing with a connector row — this gives every Nine Patch block its own framed space and a sashing border around the entire quilt before the outer border is added.`,
-    );
   } else if (s.pattern === "hst") {
     const cut = s.blockSize + HST_EXTRA;
     const squaresEach = Math.ceil(blockCount / 2);

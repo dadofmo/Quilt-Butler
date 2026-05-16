@@ -27,7 +27,7 @@ export const PATTERNS: PatternDef[] = [
     id: "nine-patch",
     name: "Nine Patch",
     hasMath: true,
-    intro: "Each block is a 3×3 grid (9 small squares) using two fabrics in a checkerboard. Pick a fabric for the 5 corner+center squares and a contrasting fabric for the 4 squares between them. Blocks are separated by sashing strips with cornerstone squares at every intersection.",
+    intro: "Each block is a 3×3 grid (9 small squares) using two fabrics in a checkerboard. Pick a fabric for the 5 corner+center squares and a contrasting fabric for the 4 squares between them. Optionally add plain sashing strips between blocks for a framed look.",
     sections: [
       {
         id: "center",
@@ -45,15 +45,9 @@ export const PATTERNS: PatternDef[] = [
         id: "sashing",
         label: "Sashing between blocks",
         defaultFabric: "C",
-        hint: "The strips of fabric that separate each Nine Patch block — usually a calm neutral or coordinating solid.",
+        hint: "Optional strips of fabric that separate each Nine Patch block — set sashing to 0\" on the previous step if you don't want any.",
       },
-      {
-        id: "cornerstone",
-        label: "Cornerstone squares",
-        defaultFabric: "D",
-        hint: "The small accent squares where sashing strips meet at each intersection — a fun spot to add a pop of color.",
-      },
-      { ...borderSection, defaultFabric: "E" },
+      { ...borderSection, defaultFabric: "D" },
     ],
   },
   {
