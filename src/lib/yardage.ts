@@ -146,8 +146,15 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
   const isBearPaw = s.pattern === "bear-paw";
   const isNinePatch = s.pattern === "nine-patch";
-  const isSashed = isBearPaw || isNinePatch;
-  const sashWidth = isSashed ? Math.max(0.0001, s.sashingWidth || 2) : 0;
+  // Bear Paw is always sashed (min 0.0001"). Nine Patch sashing is optional —
+  // a user-entered 0 means "no sashing" and the math collapses to plain blocks.
+  const ninePatchSash = isNinePatch ? Math.max(0, s.sashingWidth || 0) : 0;
+  const sashWidth = isBearPaw
+    ? Math.max(0.0001, s.sashingWidth || 2)
+    : isNinePatch
+      ? ninePatchSash
+      : 0;
+  const isSashed = sashWidth > 0;
   const innerW = s.quiltWidth - 2 * s.borderWidth;
   const innerH = s.quiltHeight - 2 * s.borderWidth;
   // Sashed patterns use full-perimeter sashing: cols*block + (cols+1)*sash = innerW
