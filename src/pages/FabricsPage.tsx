@@ -195,6 +195,8 @@ function FabricsStepInner() {
             const cornerstoneDefault = (pattern.sections.find((s) => s.id === "cornerstone")?.defaultFabric ?? "E") as FabricKey;
             const sashingFabric = (planner.assignments["sashing"] ?? sashingDefault) as FabricKey;
             const cornerstoneFabric = (planner.assignments["cornerstone"] ?? cornerstoneDefault) as FabricKey;
+            // Nine Patch has no cornerstones (sashing only); Bear Paw has both.
+            const hasCornerstones = isBearPaw;
             return (
               <>
                 <QuiltLayoutPreview
@@ -209,7 +211,7 @@ function FabricsStepInner() {
                   borderWidth={planner.borderWidth}
                   sashingWidth={sashing}
                   sashingFabric={sashingFabric}
-                  cornerstoneFabric={cornerstoneFabric}
+                  cornerstoneFabric={hasCornerstones ? cornerstoneFabric : undefined}
                   photos={planner.fabricPhotos}
                 />
                 <p className="text-muted-foreground mt-4 text-center text-xs leading-relaxed">
@@ -218,7 +220,7 @@ function FabricsStepInner() {
                   {blocksAcross} × {blocksDown} grid to make your finished quilt.
                   {hasBorder && " The border wraps around the outside."}
                   {isSashed && sashing > 0 && (
-                    <> Each block is separated by <strong>{sashing}&quot; sashing</strong> with cornerstone squares at the intersections.</>
+                    <> Each block is separated by <strong>{sashing}&quot; sashing</strong>{hasCornerstones ? " with cornerstone squares at the intersections" : ""}.</>
                   )}
                 </p>
               </>
