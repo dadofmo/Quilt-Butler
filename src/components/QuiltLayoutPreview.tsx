@@ -205,7 +205,7 @@ export function QuiltLayoutPreview({
               }),
             )}
             {/* Cornerstone squares at every sashing intersection — including the four outer corners. */}
-            {sashingWidth > 0 &&
+            {sashingWidth > 0 && cornerFill &&
               Array.from({ length: blocksAcross + 1 }).map((_, ci) =>
                 Array.from({ length: blocksDown + 1 }).map((_, cj) => {
                   const cx = ci * (cellW + sashPxX);
