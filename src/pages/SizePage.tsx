@@ -723,7 +723,7 @@ function QuiltLayoutDiagram({
           )),
         )}
         {/* Cornerstones at every sashing intersection — including outer corners */}
-        {sashing > 0 &&
+        {sashing > 0 && showCornerstones &&
           Array.from({ length: blocksAcross + 1 }).map((_, ci) =>
             Array.from({ length: blocksDown + 1 }).map((_, cj) => (
               <rect
