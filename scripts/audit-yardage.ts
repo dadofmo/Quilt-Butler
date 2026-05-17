@@ -607,9 +607,11 @@ console.log("\n=== Bear Paw: 50×65, 12\" block, NO sashing (0\"), no border ===
   const a = r.fabrics.find(f => f.fabric === "A")!;
   check("BP-noSash A pad count (20*4)", a.pieces[0].count, 80);
   // No sashing/cornerstone buckets should exist on any fabric.
-  const hasSashBucket = r.fabrics.some(f => f.pieces.some(p => /sashing/i.test(p.label)));
+  // The in-block sashing rectangles between paws still exist (4 per block, on bg fabric).
+  // What must NOT exist: perimeter sashing strips or cornerstone squares.
+  const hasPerim = r.fabrics.some(f => f.pieces.some(p => /perimeter sashing/i.test(p.label)));
   const hasCornerBucket = r.fabrics.some(f => f.pieces.some(p => /cornerstone/i.test(p.label)));
-  if (hasSashBucket) failures.push("BP-noSash should not produce perimeter sashing pieces");
+  if (hasPerim) failures.push("BP-noSash should not produce perimeter sashing pieces");
   if (hasCornerBucket) failures.push("BP-noSash should not produce cornerstone pieces");
 }
 // =========================================================================
