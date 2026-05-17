@@ -418,7 +418,7 @@ function SizeStepInner() {
                     blocksDown={fit.blocksDown}
                     border={border}
                     sashing={sashing}
-                    showCornerstones={isBearPaw}
+                    showCornerstones={isBearPaw && sashing > 0}
                   />
                 </div>
                 {(() => {
