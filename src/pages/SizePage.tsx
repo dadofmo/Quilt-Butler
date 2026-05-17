@@ -653,6 +653,7 @@ function QuiltLayoutDiagram({
   blocksDown,
   border,
   sashing = 0,
+  showCornerstones = true,
 }: {
   quiltW: number;
   quiltH: number;
@@ -660,6 +661,7 @@ function QuiltLayoutDiagram({
   blocksDown: number;
   border: number;
   sashing?: number;
+  showCornerstones?: boolean;
 }) {
   const MAX = 180;
   if (quiltW <= 0 || quiltH <= 0) return null;
