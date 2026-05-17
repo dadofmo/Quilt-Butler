@@ -54,9 +54,18 @@ function FabricsStepInner() {
     return true;
   });
   const availableFabrics = fabricsForPattern(pattern, hasBorder);
-  // Fabrics actually used INSIDE the block (excluding the border) — used to
+  // Fabrics actually used INSIDE the block (excluding the border, and also
+  // excluding sashing/cornerstone sections when those aren't active) — used to
   // figure out which letter is the "next unused" one for an accent border.
-  const blockOnlyFabrics = fabricsForPattern(pattern, false);
+  const ALL_ORDER: FabricKey[] = ["A","B","C","D","E","F","G","H","I","J","K","L"];
+  const blockOnlyFabrics = ALL_ORDER.filter((f) =>
+    pattern.sections.some((s) => {
+      if (s.id === "border") return false;
+      if (s.id === "sashing" && !hasSashing) return false;
+      if (s.id === "cornerstone" && !hasCornerstonesSection) return false;
+      return s.defaultFabric === f;
+    }),
+  );
 
   const update = (sectionId: string, fab: FabricKey) => {
     setPlanner({ assignments: { ...planner.assignments, [sectionId]: fab } });
