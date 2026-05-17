@@ -213,8 +213,8 @@ function FabricsStepInner() {
             const cornerstoneDefault = (pattern.sections.find((s) => s.id === "cornerstone")?.defaultFabric ?? "E") as FabricKey;
             const sashingFabric = (planner.assignments["sashing"] ?? sashingDefault) as FabricKey;
             const cornerstoneFabric = (planner.assignments["cornerstone"] ?? cornerstoneDefault) as FabricKey;
-            // Nine Patch has no cornerstones (sashing only); Bear Paw has both.
-            const hasCornerstones = isBearPaw;
+            // Cornerstones only render when Bear Paw has sashing > 0.
+            const hasCornerstones = isBearPaw && sashing > 0;
             return (
               <>
                 <QuiltLayoutPreview
