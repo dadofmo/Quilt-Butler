@@ -417,6 +417,7 @@ function SizeStepInner() {
                     blocksDown={fit.blocksDown}
                     border={border}
                     sashing={sashing}
+                    showCornerstones={isBearPaw}
                   />
                 </div>
                 {(() => {
@@ -652,6 +653,7 @@ function QuiltLayoutDiagram({
   blocksDown,
   border,
   sashing = 0,
+  showCornerstones = true,
 }: {
   quiltW: number;
   quiltH: number;
@@ -659,6 +661,7 @@ function QuiltLayoutDiagram({
   blocksDown: number;
   border: number;
   sashing?: number;
+  showCornerstones?: boolean;
 }) {
   const MAX = 180;
   if (quiltW <= 0 || quiltH <= 0) return null;
@@ -720,7 +723,7 @@ function QuiltLayoutDiagram({
           )),
         )}
         {/* Cornerstones at every sashing intersection — including outer corners */}
-        {sashing > 0 &&
+        {sashing > 0 && showCornerstones &&
           Array.from({ length: blocksAcross + 1 }).map((_, ci) =>
             Array.from({ length: blocksDown + 1 }).map((_, cj) => (
               <rect
