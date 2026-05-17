@@ -592,8 +592,28 @@ console.log("\n=== Bear Paw: sashing & background share fabric C — totals must
   if ((c.yards * 4) % 1 !== 0) failures.push("BP merged-C yards not on a 0.25 boundary");
 }
 
-// =========================================================================
-// BORDER MATH
+console.log("\n=== Bear Paw: 50×65, 12\" block, NO sashing (0\"), no border ===");
+{
+  const s = {
+    ...base(),
+    pattern: "bear-paw" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { pad: "A" as FabricKey, claws: "B" as FabricKey, bg: "C" as FabricKey },
+  };
+  // No sashing → cols=floor(50/12)=4, rows=floor(65/12)=5, blocks=20.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("BP-noSash A pad count (20*4)", a.pieces[0].count, 80);
+  // No sashing/cornerstone buckets should exist on any fabric.
+  // The in-block sashing rectangles between paws still exist (4 per block, on bg fabric).
+  // What must NOT exist: perimeter sashing strips or cornerstone squares.
+  const hasPerim = r.fabrics.some(f => f.pieces.some(p => /perimeter sashing/i.test(p.label)));
+  const hasCornerBucket = r.fabrics.some(f => f.pieces.some(p => /cornerstone/i.test(p.label)));
+  if (hasPerim) failures.push("BP-noSash should not produce perimeter sashing pieces");
+  if (hasCornerBucket) failures.push("BP-noSash should not produce cornerstone pieces");
+}
 // =========================================================================
 console.log("\n=== Border: 68×88, 4\" border, 9P pattern, 2\" sashing ===");
 {

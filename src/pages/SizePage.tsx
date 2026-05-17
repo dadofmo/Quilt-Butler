@@ -83,11 +83,11 @@ function SizeStepInner() {
   const borderValid = borderText.trim() !== "" && !isNaN(borderNum) && borderNum >= 0;
   const border = borderValid ? borderNum : 0;
   const sashingNum = Number(sashingText);
-  // Bear Paw requires positive sashing; Nine Patch allows 0 (no sashing).
-  const sashingMin = isBearPaw ? (n: number) => n > 0 : (n: number) => n >= 0;
+  // Both Bear Paw and Nine Patch allow 0 (no sashing) — math collapses to a
+  // straight block-on-block layout when sashing is 0.
   const sashingValid =
     !isSashed ||
-    (sashingText.trim() !== "" && !isNaN(sashingNum) && sashingMin(sashingNum));
+    (sashingText.trim() !== "" && !isNaN(sashingNum) && sashingNum >= 0);
   const sashing = isSashed && sashingValid ? sashingNum : 0;
 
   const fit = useMemo(() => {
@@ -374,26 +374,24 @@ function SizeStepInner() {
         </Field>
 
         {isSashed && (
-          <Field label={`Sashing between blocks (in inches)${isNinePatch ? " — optional" : ""}`}>
+          <Field label="Sashing between blocks (in inches) — optional">
             <input
               type="text"
               inputMode="decimal"
               value={sashingText}
               onChange={(e) => setSashingText(e.target.value)}
-              placeholder={isNinePatch ? "e.g. 0 or 2" : "e.g. 2"}
+              placeholder="e.g. 0 or 2"
               aria-invalid={!sashingValid}
               className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
             />
             <p className="text-muted-foreground mt-2 text-xs leading-snug">
               {isNinePatch
                 ? "Sashing separates each Nine Patch block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
-                : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\"."}
+                : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">
-                {isBearPaw
-                  ? "Please enter a positive number (Bear Paw always uses sashing)."
-                  : "Please enter 0 or a positive number."}
+                Please enter 0 or a positive number.
               </p>
             )}
           </Field>
@@ -420,7 +418,7 @@ function SizeStepInner() {
                     blocksDown={fit.blocksDown}
                     border={border}
                     sashing={sashing}
-                    showCornerstones={isBearPaw}
+                    showCornerstones={isBearPaw && sashing > 0}
                   />
                 </div>
                 {(() => {
