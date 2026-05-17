@@ -51,7 +51,10 @@ function SizeStepInner() {
   const isNinePatch = planner.pattern === "nine-patch";
   const isSashed = isBearPaw || isNinePatch;
   const [sashingText, setSashingText] = useState(
-    planner.sashingWidth ? String(planner.sashingWidth) : "2",
+    // Preserve 0 explicitly (Nine Patch may legitimately use no sashing).
+    typeof planner.sashingWidth === "number" && !isNaN(planner.sashingWidth)
+      ? String(planner.sashingWidth)
+      : "2",
   );
 
   if (!planner.pattern) {

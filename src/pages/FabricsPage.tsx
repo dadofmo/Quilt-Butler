@@ -43,7 +43,16 @@ function FabricsStepInner() {
   }
 
   const hasBorder = planner.borderWidth > 0;
-  const sections = pattern.sections.filter((s) => s.id !== "border" || hasBorder);
+  const isBearPawPattern = pattern.id === "bear-paw";
+  const isNinePatchPattern = pattern.id === "nine-patch";
+  const hasSashing = (isBearPawPattern || isNinePatchPattern) && (planner.sashingWidth || 0) > 0;
+  const hasCornerstonesSection = isBearPawPattern && hasSashing;
+  const sections = pattern.sections.filter((s) => {
+    if (s.id === "border") return hasBorder;
+    if (s.id === "sashing") return hasSashing;
+    if (s.id === "cornerstone") return hasCornerstonesSection;
+    return true;
+  });
   const availableFabrics = fabricsForPattern(pattern, hasBorder);
   // Fabrics actually used INSIDE the block (excluding the border) — used to
   // figure out which letter is the "next unused" one for an accent border.
