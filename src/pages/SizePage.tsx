@@ -98,18 +98,16 @@ function SizeStepInner() {
     const innerW = quiltW - 2 * border;
     const innerH = quiltH - 2 * border;
     if (innerW <= 0 || innerH <= 0) return null;
-    // Bear Paw uses FULL-PERIMETER sashing: cols*block + (cols+1)*sashing = innerW
-    // → cols = (innerW - sashing) / (block + sashing). Sashing=0 reduces to innerW/block.
-    const effInnerW = innerW - sashing;
-    const effInnerH = innerH - sashing;
-    const effBlock = blockSizeNum + sashing;
-    const acrossExact = effInnerW / effBlock;
-    const downExact = effInnerH / effBlock;
-    const blocksAcross = Math.floor(acrossExact);
-    const blocksDown = Math.floor(downExact);
-    const perimSashCount = sashing > 0 ? 1 : 0;
-    const usedW = blocksAcross * blockSizeNum + (blocksAcross + perimSashCount) * sashing;
-    const usedH = blocksDown * blockSizeNum + (blocksDown + perimSashCount) * sashing;
+    // Keep the block grid driven by the chosen block size + border, then add
+    // optional sashing BETWEEN blocks. That means changing sashing from 0 → 2
+    // keeps the same block count and makes the quilt larger, which matches the
+    // quilting workflow and the field label.
+    const blocksAcross = Math.max(1, Math.floor(innerW / blockSizeNum));
+    const blocksDown = Math.max(1, Math.floor(innerH / blockSizeNum));
+    const sashCols = Math.max(0, blocksAcross - 1);
+    const sashRows = Math.max(0, blocksDown - 1);
+    const usedW = blocksAcross * blockSizeNum + sashCols * sashing;
+    const usedH = blocksDown * blockSizeNum + sashRows * sashing;
     const remW = +(innerW - usedW).toFixed(2);
     const remH = +(innerH - usedH).toFixed(2);
     const perfect = remW === 0 && remH === 0;
@@ -122,8 +120,8 @@ function SizeStepInner() {
     const MAX_BLOCKS = 100;
 
     const fitsCols = (block: number, b: number) => {
-      const iw = quiltW - 2 * b - sashing;
-      const ih = quiltH - 2 * b - sashing;
+      const iw = quiltW - 2 * b + sashing;
+      const ih = quiltH - 2 * b + sashing;
       const eb = block + sashing;
       const aw = iw / eb;
       const ah = ih / eb;
@@ -402,9 +400,10 @@ function SizeStepInner() {
             suggestions for getting to the desired size when the math
             doesn't divide evenly (including a layout-altering combo option). */}
         {fit && (() => {
-          const perimSashAdj = sashing > 0 ? 1 : 0;
-          const actualW = fit.blocksAcross * blockSizeNum + (fit.blocksAcross + perimSashAdj) * sashing + 2 * border;
-          const actualH = fit.blocksDown * blockSizeNum + (fit.blocksDown + perimSashAdj) * sashing + 2 * border;
+          const sashCols = Math.max(0, fit.blocksAcross - 1);
+          const sashRows = Math.max(0, fit.blocksDown - 1);
+          const actualW = fit.blocksAcross * blockSizeNum + sashCols * sashing + 2 * border;
+          const actualH = fit.blocksDown * blockSizeNum + sashRows * sashing + 2 * border;
           const matchesDesired = fit.perfect;
           const comboOptions = fit.comboSuggestions;
           return (
@@ -456,8 +455,8 @@ function SizeStepInner() {
                   }
                   return (
                     <p className="text-foreground text-sm leading-relaxed">
-                      With a <strong>{blockSizeNum}&quot;</strong> block and{" "}
-                      <strong>{border}&quot;</strong> border, your finished quilt will be{" "}
+                      With a <strong>{blockSizeNum}&quot;</strong> block, <strong>{border}&quot;</strong> border
+                      {sashing > 0 && <> and <strong>{sashing}&quot;</strong> sashing</>}, your finished quilt will be{" "}
                       <strong>{actualW}&quot; × {actualH}&quot;</strong>{" "}
                       ({fit.blocksAcross} × {fit.blocksDown} ={" "}
                       {fit.total} blocks){sizeNote}
@@ -486,7 +485,7 @@ function SizeStepInner() {
                     {comboOptions.length > 0 ? (
                       <>
                         <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                          These block size + border combinations give an exact{" "}
+                          These block size + border{sashing > 0 ? " + sashing" : ""} combinations give an exact{" "}
                           <strong className="text-foreground">
                             {fit.quiltW}&quot; × {fit.quiltH}&quot;
                           </strong>{" "}
@@ -506,7 +505,7 @@ function SizeStepInner() {
                                 }}
                                 className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
                               >
-                                {c.block}&quot; block with a {c.border}&quot; border
+                                {c.block}&quot; block with a {c.border}&quot; border{sashing > 0 ? ` and ${sashing}" sashing` : ""}
                               </button>
                               <span className="text-muted-foreground">
                                 {" "}({c.across} × {c.down} = {c.total} blocks)
@@ -675,10 +674,10 @@ function QuiltLayoutDiagram({
   const innerH = h - borderPxY * 2;
   const sashPxX = sashing > 0 ? (sashing / quiltW) * w : 0;
   const sashPxY = sashing > 0 ? (sashing / quiltH) * h : 0;
-  // Full-perimeter sashing: (cols+1) sashing strips horizontally, (rows+1) vertically.
-  const perim = sashing > 0 ? 1 : 0;
-  const cellW = (innerW - (blocksAcross + perim) * sashPxX) / Math.max(1, blocksAcross);
-  const cellH = (innerH - (blocksDown + perim) * sashPxY) / Math.max(1, blocksDown);
+  const sashCols = Math.max(0, blocksAcross - 1);
+  const sashRows = Math.max(0, blocksDown - 1);
+  const cellW = (innerW - sashCols * sashPxX) / Math.max(1, blocksAcross);
+  const cellH = (innerH - sashRows * sashPxY) / Math.max(1, blocksDown);
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -699,8 +698,7 @@ function QuiltLayoutDiagram({
             fill="oklch(0.85 0.05 250)"
           />
         )}
-        {/* Inner area: fill with sashing color so gaps between blocks (and the
-            outer perimeter sashing) show through */}
+        {/* Inner area: fill with sashing color so the gaps between blocks show through */}
         <rect
           x={borderPxX}
           y={borderPxY}
@@ -708,13 +706,13 @@ function QuiltLayoutDiagram({
           height={innerH}
           fill={sashing > 0 ? "oklch(0.88 0.04 90)" : "oklch(0.95 0.02 250)"}
         />
-        {/* Block tiles — offset by one sashing strip when there is perimeter sashing */}
+        {/* Block tiles with optional interior sashing gaps */}
         {Array.from({ length: blocksDown }).map((_, j) =>
           Array.from({ length: blocksAcross }).map((_, i) => (
             <rect
               key={`b-${i}-${j}`}
-              x={borderPxX + perim * sashPxX + i * (cellW + sashPxX)}
-              y={borderPxY + perim * sashPxY + j * (cellH + sashPxY)}
+              x={borderPxX + i * (cellW + sashPxX)}
+              y={borderPxY + j * (cellH + sashPxY)}
               width={cellW}
               height={cellH}
               fill="oklch(0.95 0.02 250)"
@@ -723,14 +721,14 @@ function QuiltLayoutDiagram({
             />
           )),
         )}
-        {/* Cornerstones at every sashing intersection — including outer corners */}
+        {/* Cornerstones only at interior sashing intersections */}
         {sashing > 0 && showCornerstones &&
-          Array.from({ length: blocksAcross + 1 }).map((_, ci) =>
-            Array.from({ length: blocksDown + 1 }).map((_, cj) => (
+          Array.from({ length: Math.max(0, blocksAcross - 1) }).map((_, ci) =>
+            Array.from({ length: Math.max(0, blocksDown - 1) }).map((_, cj) => (
               <rect
                 key={`cs-${ci}-${cj}`}
-                x={borderPxX + ci * (cellW + sashPxX)}
-                y={borderPxY + cj * (cellH + sashPxY)}
+                x={borderPxX + (ci + 1) * cellW + ci * sashPxX}
+                y={borderPxY + (cj + 1) * cellH + cj * sashPxY}
                 width={sashPxX}
                 height={sashPxY}
                 fill="oklch(0.7 0.12 30)"
