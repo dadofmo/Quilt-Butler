@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from "react";
 
+const STORAGE_KEY = "quiltbutler-planner-state";
+
 export type PatternId =
   | "simple-squares"
   | "nine-patch"
@@ -76,7 +78,28 @@ const initial: PlannerState = {
   itemPrices: {},
 };
 
-let state: PlannerState = initial;
+function loadPlannerState(): PlannerState {
+  if (typeof window === "undefined") return initial;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return initial;
+    const parsed = JSON.parse(raw) as Partial<PlannerState>;
+    return { ...initial, ...parsed };
+  } catch {
+    return initial;
+  }
+}
+
+function persistPlannerState(next: PlannerState) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  } catch {
+    // Ignore storage failures and keep the in-memory store working.
+  }
+}
+
+let state: PlannerState = loadPlannerState();
 const listeners = new Set<() => void>();
 
 const subscribe = (cb: () => void) => {
@@ -94,11 +117,13 @@ export function usePlanner(): PlannerState {
 
 export function setPlanner(patch: Partial<PlannerState>) {
   state = { ...state, ...patch };
+  persistPlannerState(state);
   listeners.forEach((l) => l());
 }
 
 export function resetPlanner() {
   state = initial;
+  persistPlannerState(state);
   listeners.forEach((l) => l());
 }
 
