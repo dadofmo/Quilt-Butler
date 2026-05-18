@@ -51,26 +51,23 @@ function ResultsStepInner() {
   const useSashedMath = sashing > 0;
   const innerW = planner.quiltWidth - 2 * planner.borderWidth;
   const innerH = planner.quiltHeight - 2 * planner.borderWidth;
-  // Sashed math: cols = floor((innerW - sash)/(block + sash)).
+  // Optional sashing sits BETWEEN blocks, so it adds size without changing the
+  // block grid selected by the block size + border inputs.
   const blocksAcross = Math.max(
     1,
-    useSashedMath
-      ? Math.floor((innerW - sashing) / (planner.blockSize + sashing))
-      : Math.floor(innerW / planner.blockSize),
+    Math.floor(innerW / planner.blockSize),
   );
   const blocksDown = Math.max(
     1,
-    useSashedMath
-      ? Math.floor((innerH - sashing) / (planner.blockSize + sashing))
-      : Math.floor(innerH / planner.blockSize),
+    Math.floor(innerH / planner.blockSize),
   );
   const actualW =
     blocksAcross * planner.blockSize +
-    (useSashedMath ? (blocksAcross + 1) * sashing : 0) +
+    (useSashedMath ? Math.max(0, blocksAcross - 1) * sashing : 0) +
     2 * planner.borderWidth;
   const actualH =
     blocksDown * planner.blockSize +
-    (useSashedMath ? (blocksDown + 1) * sashing : 0) +
+    (useSashedMath ? Math.max(0, blocksDown - 1) * sashing : 0) +
     2 * planner.borderWidth;
   const sizeMismatch =
     actualW !== planner.quiltWidth || actualH !== planner.quiltHeight;
@@ -122,8 +119,8 @@ function ResultsStepInner() {
           {sizeMismatch && (
             <div className="bg-accent/60 text-foreground rounded-xl border-2 border-primary/40 p-4 text-sm leading-relaxed">
               <strong>Heads up:</strong> your finished quilt will be{" "}
-              <strong>{actualW}" × {actualH}"</strong> with a {planner.blockSize}" block and{" "}
-              {planner.borderWidth}" border — not the {planner.quiltWidth}" ×{" "}
+              <strong>{actualW}" × {actualH}"</strong> with a {planner.blockSize}" block, {planner.borderWidth}" border
+              {useSashedMath ? `, and ${sashing}" sashing` : ""} — not the {planner.quiltWidth}" ×{" "}
               {planner.quiltHeight}" you originally chose. All the math below is for the actual{" "}
               {actualW}" × {actualH}" size.{" "}
               <Link to="/size" className="text-primary font-semibold underline">
