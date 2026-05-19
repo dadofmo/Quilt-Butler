@@ -45,9 +45,10 @@ function ResultsStepInner() {
   // will end up with — never just the originally-desired size.
   const isBearPaw = planner.pattern === "bear-paw";
   const isNinePatch = planner.pattern === "nine-patch";
-  // Both Bear Paw and Nine Patch sashing are optional (0 = none).
+  const isHst = planner.pattern === "hst";
+  // Bear Paw, Nine Patch, and HST sashing are all optional (0 = none).
   const rawSash = planner.sashingWidth ?? 0;
-  const sashing = (isBearPaw || isNinePatch) ? Math.max(0, rawSash) : 0;
+  const sashing = (isBearPaw || isNinePatch || isHst) ? Math.max(0, rawSash) : 0;
   const useSashedMath = sashing > 0;
   const innerW = planner.quiltWidth - 2 * planner.borderWidth;
   const innerH = planner.quiltHeight - 2 * planner.borderWidth;
