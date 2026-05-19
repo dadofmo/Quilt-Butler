@@ -624,15 +624,17 @@ console.log("\n=== Border: 68×88, 4\" border, 9P pattern, 2\" sashing ===");
     sashingWidth: 2,
     assignments: { center: "A" as FabricKey, outer: "B" as FabricKey, sashing: "F" as FabricKey, cornerstone: "G" as FabricKey, border: "C" as FabricKey },
   };
-  // Inner=60×80. across=floor((60-2)/12)=4, down=floor((80-2)/12)=6 → 24 blocks.
-  // Sashed inner finished = 4*10+5*2=50 wide, 6*10+7*2=74 tall.
-  // Border: sides=2*74=148, topBot=2*(50+8)=116, total=264. Strips=ceil(264/42.5)=7. Cut=4.5. Inches=7*4.5=31.5.
+  // Inner before border = 60×80. Between-blocks sashing math:
+  // across=floor(60/10)=6, down=floor(80/10)=8 → 48 blocks.
+  // Sashed inner finished = 6*10+(6-1)*2 = 70 wide, 8*10+(8-1)*2 = 94 tall.
+  // Border: sides=2*94=188, topBot=2*(70+8)=156, total=344.
+  // Strips=ceil(344/42.5)=9. Cut=4.5. Inches=9*4.5=40.5.
   const r = calculateYardage(s);
   const c = r.fabrics.find(f => f.fabric === "C")!;
   const borderLine = c.pieces.find(p => p.label === "Border strips")!;
-  check("Border strip count", borderLine.count, 7);
+  check("Border strip count", borderLine.count, 9);
   check("Border cut height", borderLine.h, 4.5);
-  check("Border total inches", c.totalInches, 31.5);
+  check("Border total inches", c.totalInches, 40.5);
 }
 
 // =========================================================================
