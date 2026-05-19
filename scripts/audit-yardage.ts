@@ -577,16 +577,16 @@ console.log("\n=== Bear Paw: sashing & background share fabric C — totals must
   // Sanity: only 3 fabric requirements (A pad, B claws+center, C bg+sashing+cornerstone).
   check("BP merged-C fabric requirement count", r.fabrics.length, 3);
   const c = r.fabrics.find(f => f.fabric === "C")!;
-  // Independent expected calc:
-  //   bg HST starting squares: 16 * 12 = 192
-  //   bg corner squares:        4  * 12 = 48
-  //   sashing rectangles:       4  * 12 = 48 (in-block sashing)
-  //   perimeter sashing:        31  ((3+1)*4 + (4+1)*3)
-  //   cornerstone squares:      20  ((3+1)*(4+1))
+  // Independent expected calc (20 blocks, between-blocks sashing):
+  //   bg HST starting squares: 16 * 20 = 320
+  //   bg corner squares:        4 * 20 = 80
+  //   in-block sashing rects:   4 * 20 = 80
+  //   perimeter sashing:        31  ((4-1)*5 + (5-1)*4)
+  //   cornerstone squares:      12  ((4-1)*(5-1))
   // Total piece groups in C should be 5 (each addSquares/addRails appends one bucket).
   check("BP merged-C bucket count", c.pieces.length, 5);
   const total = c.pieces.reduce((acc, p) => acc + p.count, 0);
-  check("BP merged-C total pieces (192+48+48+31+20)", total, 192 + 48 + 48 + 31 + 20);
+  check("BP merged-C total pieces (320+80+80+31+12)", total, 320 + 80 + 80 + 31 + 12);
   // totalInches must equal sum of each bucket's strip-pack contribution; just
   // assert it's > 0 and yards rounded up to 0.25.
   if (c.totalInches <= 0) failures.push("BP merged-C inches not positive");
