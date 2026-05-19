@@ -54,11 +54,17 @@ export const PATTERNS: PatternDef[] = [
     id: "hst",
     name: "Half Square Triangles",
     hasMath: true,
-    intro: "Each block is a square split diagonally into two triangles of different fabrics. Pick a fabric for each triangle.",
+    intro: "Each block is a square split diagonally into two triangles of different fabrics. Pick a fabric for each triangle. Optionally add plain sashing strips between blocks for a framed look.",
     sections: [
       { id: "tri1", label: "Triangle A", defaultFabric: "A", hint: "One half of every block." },
       { id: "tri2", label: "Triangle B", defaultFabric: "B", hint: "The other half — pick a contrasting fabric." },
-      borderSection,
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips of fabric that separate each HST block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "D" },
     ],
   },
   {
