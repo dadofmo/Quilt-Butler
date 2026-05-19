@@ -545,19 +545,19 @@ console.log("\n=== Bear Paw: 50×65, 12\" block, 2\" sashing, no border ===");
     sashingWidth: 2,
     assignments: { pad: "A" as FabricKey, claws: "B" as FabricKey, bg: "C" as FabricKey, sashing: "F" as FabricKey, cornerstone: "G" as FabricKey },
   };
-  // Full-perimeter sashing 2": cols = floor((50-2)/(12+2)) = floor(48/14) = 3,
-  // rows = floor((65-2)/14) = floor(63/14) = 4. blocks = 12.
+  // Between-blocks sashing: block count driven by quilt/block, sashing grows the quilt.
+  // cols=floor(50/12)=4, rows=floor(65/12)=5 → 20 blocks.
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
-  check("BP A pad count (12 blocks * 4)", a.pieces[0].count, 48);
-  // Sashing F: vSash=(3+1)*4=16, hSash=(4+1)*3=15, total=31 strips at 2.5"x12.5"
+  check("BP A pad count (20 blocks * 4)", a.pieces[0].count, 80);
+  // Sashing F (between blocks only): vSash=(4-1)*5=15, hSash=(5-1)*4=16, total=31.
   const f = r.fabrics.find(x => x.fabric === "F")!;
   check("BP sashing strip count", f.pieces[0].count, 31);
   check("BP sashing cut length", f.pieces[0].w, 12.5);
   check("BP sashing cut width", f.pieces[0].h, 2.5);
-  // Cornerstones G: (3+1)*(4+1)=20 squares at 2.5"
+  // Cornerstones G (interior intersections only): (4-1)*(5-1)=12 squares at 2.5"
   const g = r.fabrics.find(x => x.fabric === "G")!;
-  check("BP cornerstone count", g.pieces[0].count, 20);
+  check("BP cornerstone count", g.pieces[0].count, 12);
   check("BP cornerstone cut size", g.pieces[0].w, 2.5);
   check("BP basics glossary attached", r.basics?.length ?? 0, 5);
 }
