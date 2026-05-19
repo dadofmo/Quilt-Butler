@@ -54,10 +54,12 @@ export function QuiltLayoutPreview({
   const innerH = thumbH - borderPxY * 2;
   const sashPxX = sashingWidth > 0 ? (sashingWidth / quiltWidth) * thumbW : 0;
   const sashPxY = sashingWidth > 0 ? (sashingWidth / quiltHeight) * thumbH : 0;
-  // Full-perimeter sashing: (cols+1) vertical + (rows+1) horizontal sashing strips.
-  const perim = sashingWidth > 0 ? 1 : 0;
-  const cellW = (innerW - (blocksAcross + perim) * sashPxX) / Math.max(1, blocksAcross);
-  const cellH = (innerH - (blocksDown + perim) * sashPxY) / Math.max(1, blocksDown);
+  // Between-blocks sashing only (no outer perimeter sashing): N blocks have
+  // (N-1) sashing strips between them.
+  const sashCols = Math.max(0, blocksAcross - 1);
+  const sashRows = Math.max(0, blocksDown - 1);
+  const cellW = (innerW - sashCols * sashPxX) / Math.max(1, blocksAcross);
+  const cellH = (innerH - sashRows * sashPxY) / Math.max(1, blocksDown);
 
   const sashingFill = fabricFill(sashingFabric, photos);
   const cornerFill = cornerstoneFabric ? fabricFill(cornerstoneFabric, photos) : null;
@@ -169,8 +171,8 @@ export function QuiltLayoutPreview({
             {Array.from({ length: blocksDown }).map((_, j) =>
               Array.from({ length: blocksAcross }).map((_, i) => {
                 const rotate = pattern === "rail-fence" && (i + j) % 2 === 1;
-                const bx = perim * sashPxX + i * (cellW + sashPxX);
-                const by = perim * sashPxY + j * (cellH + sashPxY);
+                const bx = i * (cellW + sashPxX);
+                const by = j * (cellH + sashPxY);
                 // Irish Chain alternates a chain block with a plain background
                 // block in a checkerboard — corner cell (0,0) is a chain block.
                 const irishPlain = pattern === "irish-chain" && (i + j) % 2 === 1;
@@ -204,12 +206,13 @@ export function QuiltLayoutPreview({
                 );
               }),
             )}
-            {/* Cornerstone squares at every sashing intersection — including the four outer corners. */}
+            {/* Cornerstone squares at interior sashing intersections only
+                (no outer perimeter cornerstones). */}
             {sashingWidth > 0 && cornerFill &&
-              Array.from({ length: blocksAcross + 1 }).map((_, ci) =>
-                Array.from({ length: blocksDown + 1 }).map((_, cj) => {
-                  const cx = ci * (cellW + sashPxX);
-                  const cy = cj * (cellH + sashPxY);
+              Array.from({ length: sashCols }).map((_, ci) =>
+                Array.from({ length: sashRows }).map((_, cj) => {
+                  const cx = (ci + 1) * cellW + ci * sashPxX;
+                  const cy = (cj + 1) * cellH + cj * sashPxY;
                   return (
                     <rect
                       key={`cs-${ci}-${cj}`}
