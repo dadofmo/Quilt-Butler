@@ -54,10 +54,12 @@ export function QuiltLayoutPreview({
   const innerH = thumbH - borderPxY * 2;
   const sashPxX = sashingWidth > 0 ? (sashingWidth / quiltWidth) * thumbW : 0;
   const sashPxY = sashingWidth > 0 ? (sashingWidth / quiltHeight) * thumbH : 0;
-  // Full-perimeter sashing: (cols+1) vertical + (rows+1) horizontal sashing strips.
-  const perim = sashingWidth > 0 ? 1 : 0;
-  const cellW = (innerW - (blocksAcross + perim) * sashPxX) / Math.max(1, blocksAcross);
-  const cellH = (innerH - (blocksDown + perim) * sashPxY) / Math.max(1, blocksDown);
+  // Between-blocks sashing only (no outer perimeter sashing): N blocks have
+  // (N-1) sashing strips between them.
+  const sashCols = Math.max(0, blocksAcross - 1);
+  const sashRows = Math.max(0, blocksDown - 1);
+  const cellW = (innerW - sashCols * sashPxX) / Math.max(1, blocksAcross);
+  const cellH = (innerH - sashRows * sashPxY) / Math.max(1, blocksDown);
 
   const sashingFill = fabricFill(sashingFabric, photos);
   const cornerFill = cornerstoneFabric ? fabricFill(cornerstoneFabric, photos) : null;
