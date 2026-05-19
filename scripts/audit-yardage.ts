@@ -51,23 +51,24 @@ console.log("\n=== Simple Squares: 50×65, 12.5\" block, 4-fabric checkerboard =
 console.log("\n=== Nine Patch: 50×65, 12\" block, no border, 2\" sashing ===");
 {
   const s = { ...base(), pattern: "nine-patch" as const, blockSize: 12, sashingWidth: 2 };
-  // Sashed math: innerW=50, innerH=65, sash=2, block=12.
-  // across=floor((50-2)/14)=3, down=floor((65-2)/14)=4 → 12 blocks.
+  // Between-blocks sashing math: block count is driven by quilt size / block size
+  // (sashing is added BETWEEN blocks and grows the finished quilt).
+  // across=floor(50/12)=4, down=floor(65/12)=5 → 20 blocks.
   // Patch=4. Cut=4.5. Per strip floor(42.5/4.5)=9.
-  // A: 5*12=60 squares. Strips=ceil(60/9)=7. Inches=7*4.5=31.5.
-  // B: 4*12=48 squares. Strips=ceil(48/9)=6. Inches=6*4.5=27.
+  // A: 5*20=100 squares. Strips=ceil(100/9)=12. Inches=12*4.5=54.
+  // B: 4*20=80 squares.  Strips=ceil(80/9)=9.   Inches=9*4.5=40.5.
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
   const b = r.fabrics.find(f => f.fabric === "B")!;
-  check("9P A count", a.pieces[0].count, 60);
-  check("9P A strips", a.strips[0].count, 7);
-  check("9P A inches", a.totalInches, 31.5);
-  check("9P A yards", a.yards, ceilQuarter(31.5/36));
-  check("9P B count", b.pieces[0].count, 48);
-  check("9P B strips", b.strips[0].count, 6);
-  check("9P B inches", b.totalInches, 27);
-  // Sashing C: vSash=(3+1)*4=16, hSash=(4+1)*3=15, total=31 strips at 2.5"×12.5".
-  // (Cornerstones removed — Nine Patch uses plain sashing, no cornerstones.)
+  check("9P A count", a.pieces[0].count, 100);
+  check("9P A strips", a.strips[0].count, 12);
+  check("9P A inches", a.totalInches, 54);
+  check("9P A yards", a.yards, ceilQuarter(54/36));
+  check("9P B count", b.pieces[0].count, 80);
+  check("9P B strips", b.strips[0].count, 9);
+  check("9P B inches", b.totalInches, 40.5);
+  // Sashing C (between blocks only, no cornerstones for Nine Patch):
+  // vSash=(4-1)*5=15, hSash=(5-1)*4=16, total=31 strips at 2.5"×12.5".
   const c = r.fabrics.find(f => f.fabric === "C")!;
   check("9P C sashing strip count", c.pieces[0].count, 31);
   check("9P no cornerstone D", r.fabrics.find(f => f.fabric === "D") ? 1 : 0, 0);
@@ -544,19 +545,19 @@ console.log("\n=== Bear Paw: 50×65, 12\" block, 2\" sashing, no border ===");
     sashingWidth: 2,
     assignments: { pad: "A" as FabricKey, claws: "B" as FabricKey, bg: "C" as FabricKey, sashing: "F" as FabricKey, cornerstone: "G" as FabricKey },
   };
-  // Full-perimeter sashing 2": cols = floor((50-2)/(12+2)) = floor(48/14) = 3,
-  // rows = floor((65-2)/14) = floor(63/14) = 4. blocks = 12.
+  // Between-blocks sashing: block count driven by quilt/block, sashing grows the quilt.
+  // cols=floor(50/12)=4, rows=floor(65/12)=5 → 20 blocks.
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
-  check("BP A pad count (12 blocks * 4)", a.pieces[0].count, 48);
-  // Sashing F: vSash=(3+1)*4=16, hSash=(4+1)*3=15, total=31 strips at 2.5"x12.5"
+  check("BP A pad count (20 blocks * 4)", a.pieces[0].count, 80);
+  // Sashing F (between blocks only): vSash=(4-1)*5=15, hSash=(5-1)*4=16, total=31.
   const f = r.fabrics.find(x => x.fabric === "F")!;
   check("BP sashing strip count", f.pieces[0].count, 31);
   check("BP sashing cut length", f.pieces[0].w, 12.5);
   check("BP sashing cut width", f.pieces[0].h, 2.5);
-  // Cornerstones G: (3+1)*(4+1)=20 squares at 2.5"
+  // Cornerstones G (interior intersections only): (4-1)*(5-1)=12 squares at 2.5"
   const g = r.fabrics.find(x => x.fabric === "G")!;
-  check("BP cornerstone count", g.pieces[0].count, 20);
+  check("BP cornerstone count", g.pieces[0].count, 12);
   check("BP cornerstone cut size", g.pieces[0].w, 2.5);
   check("BP basics glossary attached", r.basics?.length ?? 0, 5);
 }
@@ -576,16 +577,16 @@ console.log("\n=== Bear Paw: sashing & background share fabric C — totals must
   // Sanity: only 3 fabric requirements (A pad, B claws+center, C bg+sashing+cornerstone).
   check("BP merged-C fabric requirement count", r.fabrics.length, 3);
   const c = r.fabrics.find(f => f.fabric === "C")!;
-  // Independent expected calc:
-  //   bg HST starting squares: 16 * 12 = 192
-  //   bg corner squares:        4  * 12 = 48
-  //   sashing rectangles:       4  * 12 = 48 (in-block sashing)
-  //   perimeter sashing:        31  ((3+1)*4 + (4+1)*3)
-  //   cornerstone squares:      20  ((3+1)*(4+1))
+  // Independent expected calc (20 blocks, between-blocks sashing):
+  //   bg HST starting squares: 16 * 20 = 320
+  //   bg corner squares:        4 * 20 = 80
+  //   in-block sashing rects:   4 * 20 = 80
+  //   perimeter sashing:        31  ((4-1)*5 + (5-1)*4)
+  //   cornerstone squares:      12  ((4-1)*(5-1))
   // Total piece groups in C should be 5 (each addSquares/addRails appends one bucket).
   check("BP merged-C bucket count", c.pieces.length, 5);
   const total = c.pieces.reduce((acc, p) => acc + p.count, 0);
-  check("BP merged-C total pieces (192+48+48+31+20)", total, 192 + 48 + 48 + 31 + 20);
+  check("BP merged-C total pieces (320+80+80+31+12)", total, 320 + 80 + 80 + 31 + 12);
   // totalInches must equal sum of each bucket's strip-pack contribution; just
   // assert it's > 0 and yards rounded up to 0.25.
   if (c.totalInches <= 0) failures.push("BP merged-C inches not positive");
@@ -623,15 +624,17 @@ console.log("\n=== Border: 68×88, 4\" border, 9P pattern, 2\" sashing ===");
     sashingWidth: 2,
     assignments: { center: "A" as FabricKey, outer: "B" as FabricKey, sashing: "F" as FabricKey, cornerstone: "G" as FabricKey, border: "C" as FabricKey },
   };
-  // Inner=60×80. across=floor((60-2)/12)=4, down=floor((80-2)/12)=6 → 24 blocks.
-  // Sashed inner finished = 4*10+5*2=50 wide, 6*10+7*2=74 tall.
-  // Border: sides=2*74=148, topBot=2*(50+8)=116, total=264. Strips=ceil(264/42.5)=7. Cut=4.5. Inches=7*4.5=31.5.
+  // Inner before border = 60×80. Between-blocks sashing math:
+  // across=floor(60/10)=6, down=floor(80/10)=8 → 48 blocks.
+  // Sashed inner finished = 6*10+(6-1)*2 = 70 wide, 8*10+(8-1)*2 = 94 tall.
+  // Border: sides=2*94=188, topBot=2*(70+8)=156, total=344.
+  // Strips=ceil(344/42.5)=9. Cut=4.5. Inches=9*4.5=40.5.
   const r = calculateYardage(s);
   const c = r.fabrics.find(f => f.fabric === "C")!;
   const borderLine = c.pieces.find(p => p.label === "Border strips")!;
-  check("Border strip count", borderLine.count, 7);
+  check("Border strip count", borderLine.count, 9);
   check("Border cut height", borderLine.h, 4.5);
-  check("Border total inches", c.totalInches, 31.5);
+  check("Border total inches", c.totalInches, 40.5);
 }
 
 // =========================================================================
@@ -658,8 +661,8 @@ console.log("\n=== Safety buffer: +10% ===");
   const s = { ...base(), pattern: "nine-patch" as const, blockSize: 12, sashingWidth: 2, safetyBuffer: true };
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
-  // Sashed nine-patch (3×4=12 blocks): A inches=31.5. With buffer: 31.5*1.1=34.65, /36=0.9625, ceilQuarter=1.0
-  check("9P A yards w/ buffer", a.yards, 1.0);
+  // Sashed nine-patch (4×5=20 blocks): A inches=54. With buffer: 54*1.1=59.4, /36≈1.65, ceilQuarter=1.75
+  check("9P A yards w/ buffer", a.yards, 1.75);
 }
 
 // =========================================================================
