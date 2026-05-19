@@ -146,9 +146,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
   const isBearPaw = s.pattern === "bear-paw";
   const isNinePatch = s.pattern === "nine-patch";
-  // Both Bear Paw and Nine Patch sashing are optional — a user-entered 0
+  const isHst = s.pattern === "hst";
+  // Bear Paw, Nine Patch, and HST sashing are all optional — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch)
+  const sashWidth = (isBearPaw || isNinePatch || isHst)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -274,6 +275,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Now cut along the drawn line in the middle (the line itself, not the stitches). You'll get two pieces, each with a Fabric ${t1} triangle and a Fabric ${t2} triangle already sewn together along the diagonal. Unfold each piece and press the seam toward the darker fabric. Each pair of squares makes 2 finished half-square triangle blocks, for ${blockCount} blocks total.`,
     );
+
+    // Optional sashing between blocks only (no cornerstones for HST).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `HST Assembly Tip — full quilt: STAGE 1 (block). Make all ${blockCount} HST blocks following the cut-and-sew steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid, all rotated the same direction (or arranged to make your chosen secondary pattern). Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the blocks without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
   } else if (s.pattern === "pinwheel") {
     // Pinwheel = 2×2 grid of HST units per block. The HST cut size is based
     // on the HALF-block (each HST finishes at blockSize/2) plus 7/8" for

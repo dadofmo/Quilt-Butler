@@ -115,6 +115,21 @@ console.log("\n=== HST: ODD blocks (15) — must round up squaresEach ===");
   check("HST odd count", a.pieces[0].count, 8); // ceil(15/2)
 }
 
+console.log("\n=== HST: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = { ...base(), pattern: "hst" as const, blockSize: 12, sashingWidth: 2 };
+  // across=floor(50/12)=4, down=floor(65/12)=5 → 20 blocks. Cut=12.875.
+  // squaresEach=10. Per strip floor(42.5/12.875)=3. Strips=ceil(10/3)=4. Inches=4*12.875=51.5.
+  // Sashing C: vSash=(4-1)*5=15, hSash=(5-1)*4=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("HST(sash) A count", a.pieces[0].count, 10);
+  check("HST(sash) A inches", a.totalInches, 51.5);
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("HST(sash) C sashing strip count", c.pieces[0].count, 31);
+  check("HST(sash) no cornerstone D", r.fabrics.find(f => f.fabric === "D") ? 1 : 0, 0);
+}
+
 // =========================================================================
 // RAIL FENCE
 // =========================================================================

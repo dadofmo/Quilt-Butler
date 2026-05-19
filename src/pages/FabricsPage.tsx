@@ -45,7 +45,8 @@ function FabricsStepInner() {
   const hasBorder = planner.borderWidth > 0;
   const isBearPawPattern = pattern.id === "bear-paw";
   const isNinePatchPattern = pattern.id === "nine-patch";
-  const hasSashing = (isBearPawPattern || isNinePatchPattern) && (planner.sashingWidth || 0) > 0;
+  const isHstPattern = pattern.id === "hst";
+  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern) && (planner.sashingWidth || 0) > 0;
   const hasCornerstonesSection = isBearPawPattern && hasSashing;
   const sections = pattern.sections.filter((s) => {
     if (s.id === "border") return hasBorder;
@@ -197,7 +198,8 @@ function FabricsStepInner() {
           {(() => {
             const isBearPaw = pattern.id === "bear-paw";
             const isNinePatch = pattern.id === "nine-patch";
-            const isSashed = isBearPaw || isNinePatch;
+            const isHst = pattern.id === "hst";
+            const isSashed = isBearPaw || isNinePatch || isHst;
             const sashing = isSashed ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
