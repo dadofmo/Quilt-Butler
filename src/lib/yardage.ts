@@ -967,12 +967,13 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
   // Border
   if (s.borderWidth > 0) {
-    // For sashed patterns the inner (sashed) dimensions include sashing on all four sides.
+    // Sashing runs only BETWEEN blocks (not around the outer perimeter), so the
+    // inner finished dimensions add (blocks - 1) sashing strips, not (blocks + 1).
     const finishedInnerW = isSashed
-      ? blocksAcross * s.blockSize + (blocksAcross + 1) * sashWidth
+      ? blocksAcross * s.blockSize + Math.max(0, blocksAcross - 1) * sashWidth
       : s.quiltWidth - 2 * s.borderWidth;
     const finishedInnerH = isSashed
-      ? blocksDown * s.blockSize + (blocksDown + 1) * sashWidth
+      ? blocksDown * s.blockSize + Math.max(0, blocksDown - 1) * sashWidth
       : s.quiltHeight - 2 * s.borderWidth;
     const borderDefault = (getPattern(s.pattern)?.sections.find((sec) => sec.id === "border")?.defaultFabric ?? "C") as FabricKey;
     const borderFab = (s.assignments["border"] ?? borderDefault) as FabricKey;
