@@ -206,12 +206,13 @@ export function QuiltLayoutPreview({
                 );
               }),
             )}
-            {/* Cornerstone squares at every sashing intersection — including the four outer corners. */}
+            {/* Cornerstone squares at interior sashing intersections only
+                (no outer perimeter cornerstones). */}
             {sashingWidth > 0 && cornerFill &&
-              Array.from({ length: blocksAcross + 1 }).map((_, ci) =>
-                Array.from({ length: blocksDown + 1 }).map((_, cj) => {
-                  const cx = ci * (cellW + sashPxX);
-                  const cy = cj * (cellH + sashPxY);
+              Array.from({ length: sashCols }).map((_, ci) =>
+                Array.from({ length: sashRows }).map((_, cj) => {
+                  const cx = (ci + 1) * cellW + ci * sashPxX;
+                  const cy = (cj + 1) * cellH + cj * sashPxY;
                   return (
                     <rect
                       key={`cs-${ci}-${cj}`}
