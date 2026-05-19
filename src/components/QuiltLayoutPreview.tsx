@@ -171,8 +171,8 @@ export function QuiltLayoutPreview({
             {Array.from({ length: blocksDown }).map((_, j) =>
               Array.from({ length: blocksAcross }).map((_, i) => {
                 const rotate = pattern === "rail-fence" && (i + j) % 2 === 1;
-                const bx = perim * sashPxX + i * (cellW + sashPxX);
-                const by = perim * sashPxY + j * (cellH + sashPxY);
+                const bx = i * (cellW + sashPxX);
+                const by = j * (cellH + sashPxY);
                 // Irish Chain alternates a chain block with a plain background
                 // block in a checkerboard — corner cell (0,0) is a chain block.
                 const irishPlain = pattern === "irish-chain" && (i + j) % 2 === 1;
