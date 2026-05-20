@@ -4,7 +4,7 @@ import { StepShell } from "@/components/StepShell";
 import { PrintBlockLegend } from "@/components/PrintBlockLegend";
 import { FABRIC_COLORS, FABRIC_LABELS, setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
-import { getPattern } from "@/lib/patterns";
+import { getPattern, getEffectiveBorderDefault } from "@/lib/patterns";
 import { calculateYardage, describePieceShape, piecesPerStrip, usableFabricWidth, type FabricRequirement, type MaterialsRequirement } from "@/lib/yardage";
 import { Printer } from "lucide-react";
 
