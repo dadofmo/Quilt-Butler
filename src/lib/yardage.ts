@@ -995,7 +995,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const finishedInnerH = isSashed
       ? blocksDown * s.blockSize + Math.max(0, blocksDown - 1) * sashWidth
       : s.quiltHeight - 2 * s.borderWidth;
-    const borderDefault = (getPattern(s.pattern)?.sections.find((sec) => sec.id === "border")?.defaultFabric ?? "C") as FabricKey;
+    const patDef = getPattern(s.pattern);
+    const borderDefault = patDef
+      ? getEffectiveBorderDefault(patDef, isSashed, s.pattern === "bear-paw" && isSashed)
+      : ("C" as FabricKey);
     const borderFab = (s.assignments["border"] ?? borderDefault) as FabricKey;
     const b = borderInches(finishedInnerW, finishedInnerH, s.borderWidth, s.fabricWidth);
     if (b.stripCount > 0) {
