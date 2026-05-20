@@ -1,50 +1,48 @@
-## Goal
+# Lighthouse Performance Improvements
 
-When the user picks Irish Chain and their inputs produce an even block count in either dimension (e.g. 4 × 6), show an inline warning that explains the symmetry issue **and offers 2–3 concrete one-click fixes** — including options that adjust the border to stay closer to the desired finished size.
+The Lighthouse report flags three actionable buckets. Here's what to change.
 
-## Answers to your questions
+## 1. Improve image delivery (saves ~57 KiB, fixes LCP)
 
-**Yes, both bump-down and bump-up.** For a 4 × 6 starting point, the warning would offer the closest odd-on-each-side neighbors: **3 × 5** (smaller) and **5 × 7** (larger), so the user can pick whichever is closer to what they want.
+The logo `quilt-butler-logo.webp` is 67 KiB at 512×512 but renders at 256×256 (`h-64`) / 320×320 (`sm:h-80`). It's also the LCP element on the home page but Lighthouse can't discover it from HTML (it's imported via JS).
 
-**Yes, border-adjusted options too.** A bump from 4 → 5 across changes finished width by one block (e.g. +10" for a 10" block). The user's border is the natural lever to claw that back. So alongside each "bump blocks" option, we compute the border width that lands the new layout closest to their original desired finished size, and surface that as a combined "5 × 7 with a 2.5" border (80" × 80") — closest to your 80" × 80" goal" suggestion.
+**Changes:**
+- Re-encode the logo to a 640×640 WebP at higher compression (~10–15 KiB) using `sharp` via a one-off script, overwriting `src/assets/quilt-butler-logo.webp`. 640 covers `sm:h-80` at 2× DPR.
+- Set explicit `width`/`height` props on the `<img>` to match displayed size (256 / 320) so the intrinsic-vs-displayed mismatch warning goes away.
+- Add a `<link rel="preload" as="image" href="/assets/quilt-butler-logo-[hash].webp" fetchpriority="high">` in `index.html`. Since Vite hashes the filename, do the preload from `PatternPickerPage.tsx` via `<Helmet>` using the imported URL — that gets the resolved hashed path injected on the home route only.
 
-## What the warning looks like
+## 2. Reduce unused JavaScript (saves ~74 KiB first-party)
 
-Placement: directly below the existing "Finished quilt size" preview card on the Size step, only when `pattern === "irish-chain"` and `(blocksAcross % 2 === 0 || blocksDown % 2 === 0)`.
+Right now `App.tsx` statically imports all four page components, so the home route ships size/fabrics/results code too.
 
-```text
-⚠ Irish Chain looks most balanced when both block counts are odd.
-  Your current 4 × 6 layout puts chain blocks in only two corners.
+**Change:** Convert routes to `React.lazy` + `<Suspense>`:
 
-  Closest symmetric layouts:
-  ┌──────────────────────────────────────────────────────────────┐
-  │ ○ 3 × 5 blocks · 30" × 50"  ·  -1500 sq in vs your goal      │
-  │ ● 5 × 5 blocks · 50" × 50"  ·  closest to 60" × 60"  [Apply] │
-  │ ○ 5 × 7 blocks · 50" × 70"  ·  +1100 sq in                   │
-  │ ○ 5 × 5 + 5" border · 60" × 60"  ·  exact match     [Apply] │
-  └──────────────────────────────────────────────────────────────┘
+```tsx
+const PatternPickerPage = lazy(() => import("./pages/PatternPickerPage"));
+const SizePage = lazy(() => import("./pages/SizePage"));
+// ...
+<Suspense fallback={null}><Routes>...</Routes></Suspense>
 ```
 
-Each row is a one-click "Apply" that writes the new `blocksAcross / blocksDown` (via `blockSize` if needed) and `borderWidth` into the planner state, then refreshes the preview.
+Keep `PatternPickerPage` eager (it's the home/LCP route) by importing it normally, lazy-load only Size/Fabrics/Results. That trims the initial JS chunk noticeably.
 
-## Suggestion algorithm
+## 3. Render-blocking & network dependency tree (saves ~300 ms)
 
-Reuse the existing `fitsCols / isInt` helpers in `SizePage.tsx`. Filter to **odd × odd** results. Generate three buckets:
+- **Defer Google Tag Manager:** move the gtag `<script async>` and inline init to the end of `<body>`, or load it on `requestIdleCallback` / after first paint. Keep the two `<link rel="preconnect">` hints in `<head>`. This removes GTM from the critical path on first load.
+- The render-blocking CSS warning is just the bundled Tailwind CSS — that's already minimal and required for first paint. No safe action there beyond what Vite already does.
+- Network dependency tree warning resolves itself once GTM is deferred and the LCP image is preloaded.
 
-1. **Bump down** — nearest odd ≤ current in each dimension (here 3 × 5). Keep current block size and border.
-2. **Bump up** — nearest odd ≥ current in each dimension (here 5 × 7). Keep current block size and border.
-3. **Border-adjusted match** — for each candidate odd × odd block count near the user's target, sweep border widths in 0.25" steps and pick the combo whose finished size is closest (by area) to the user's desired `quiltW × quiltH`. Surface the single best one.
+## Out of scope / not worth chasing
 
-Sort by closeness of finished size to the user's stated desired size and show up to 3 options. Each option shows: block grid, finished dimensions, and a short delta phrase ("exact match" / "1" narrower" / "+200 sq in").
+- "Avoid long main-thread tasks (4 found)" — these are React hydration + GTM init. Lazy-loading routes + deferring GTM will reduce them; no further code change recommended.
+- GTM's own 154 KiB unused JS — that's Google's bundle, can't shrink it. Deferring it is the only lever.
 
-## Files to change
+## Technical summary of files touched
 
-- `src/pages/SizePage.tsx` — add Irish Chain symmetry detection in the existing `fit` memo, generate odd-only suggestions (reusing the math already there), render the warning card under the Finished Size preview, wire one-click apply handlers.
+- `src/assets/quilt-butler-logo.webp` — re-encoded smaller (one-off `sharp` script run via `code--exec`, no committed script).
+- `src/components/StepShell.tsx`, `src/pages/PatternPickerPage.tsx` — add `width`/`height` attrs on the logo `<img>`.
+- `src/pages/PatternPickerPage.tsx` — add `<Helmet>` `<link rel="preload" as="image" href={quiltButlerLogo} fetchpriority="high" />`.
+- `src/App.tsx` — `React.lazy` + `Suspense` for Size/Fabrics/Results.
+- `index.html` — move GTM script to end of `<body>`, keep preconnects in `<head>`.
 
-No changes to `yardage.ts`, `patterns.ts`, or the layout preview — this is purely a Size-step UX layer over math that already exists.
-
-## Out of scope
-
-- Auto-snapping (you can still build a 4 × 6 if you want — we recommend, never force).
-- Changing the Irish Chain math or visual rendering.
-- Warnings on other patterns (none of the current patterns have a comparable symmetry constraint).
+Expected result: LCP image discoverable & ~10× smaller, initial JS chunk ~25–30% smaller, GTM off the critical path → mobile perf score should jump meaningfully.
