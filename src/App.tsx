@@ -1,10 +1,12 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import PatternPickerPage from "./pages/PatternPickerPage";
-import SizePage from "./pages/SizePage";
-import FabricsPage from "./pages/FabricsPage";
-import ResultsPage from "./pages/ResultsPage";
+const SizePage = lazy(() => import("./pages/SizePage"));
+const FabricsPage = lazy(() => import("./pages/FabricsPage"));
+const ResultsPage = lazy(() => import("./pages/ResultsPage"));
 import { ScrollToTop } from "./components/ScrollToTop";
+
 
 function NotFound() {
   return (
