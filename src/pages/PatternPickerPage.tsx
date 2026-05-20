@@ -41,7 +41,14 @@ function PatternPickerInner() {
     const pattern = getPattern(id);
     if (!pattern) return;
     const assignments: Record<string, import("@/lib/planner-store").FabricKey> = {};
-    pattern.sections.forEach((s) => (assignments[s.id] = s.defaultFabric));
+    // Seed every section EXCEPT the border. The border default is resolved
+    // dynamically (getEffectiveBorderDefault) so it always matches the
+    // accent swatch shown on FabricsPage — and stays consistent if the user
+    // toggles sashing on/off later.
+    pattern.sections.forEach((s) => {
+      if (s.id === "border") return;
+      assignments[s.id] = s.defaultFabric;
+    });
     setPlanner({ pattern: id, assignments });
     navigate("/size");
   };
