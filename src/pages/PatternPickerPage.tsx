@@ -13,6 +13,7 @@ export default function PatternPicker() {
         <title>QuiltButler — Free Quilt Planner & Fabric Calculator</title>
         <meta name="description" content="Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 10+ patterns, no login required." />
         <link rel="canonical" href="https://quiltbutler.com/" />
+        <link rel="preload" as="image" href={quiltButlerLogo} fetchpriority="high" />
         <meta property="og:title" content="QuiltButler — Free Quilt Planner & Fabric Calculator" />
         <meta property="og:description" content="Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 10+ patterns, no login required." />
         <meta property="og:url" content="https://quiltbutler.com/" />
@@ -27,6 +28,7 @@ export default function PatternPicker() {
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
         })}</script>
       </Helmet>
+
       <PatternPickerInner />
     </>
   );
