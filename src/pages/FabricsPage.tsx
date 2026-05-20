@@ -11,7 +11,7 @@ import {
 } from "@/lib/planner-store";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { FabricSwatchOption } from "@/components/FabricSwatchOption";
-import { getPattern, fabricsForPattern } from "@/lib/patterns";
+import { getPattern, fabricsForPattern, getEffectiveBorderDefault } from "@/lib/patterns";
 
 export default function FabricsStep() {
   return (
@@ -173,7 +173,7 @@ function FabricsStepInner() {
           </div>
 
           {(() => {
-            const borderDefault = (pattern.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey;
+            const borderDefault = getEffectiveBorderDefault(pattern, false, false);
             const borderFabric = (planner.assignments["border"] ?? borderDefault) as FabricKey;
             return (
               <PatchworkPreview
@@ -205,14 +205,13 @@ function FabricsStepInner() {
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
             const blocksAcross = Math.max(1, Math.floor(innerW / planner.blockSize));
             const blocksDown = Math.max(1, Math.floor(innerH / planner.blockSize));
-            const borderDefault = (pattern.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey;
+            const hasCornerstones = isBearPaw && sashing > 0;
+            const borderDefault = getEffectiveBorderDefault(pattern, sashing > 0 && isSashed, hasCornerstones);
             const borderFabric = (planner.assignments["border"] ?? borderDefault) as FabricKey;
             const sashingDefault = (pattern.sections.find((s) => s.id === "sashing")?.defaultFabric ?? "C") as FabricKey;
             const cornerstoneDefault = (pattern.sections.find((s) => s.id === "cornerstone")?.defaultFabric ?? "E") as FabricKey;
             const sashingFabric = (planner.assignments["sashing"] ?? sashingDefault) as FabricKey;
             const cornerstoneFabric = (planner.assignments["cornerstone"] ?? cornerstoneDefault) as FabricKey;
-            // Cornerstones only render when Bear Paw has sashing > 0.
-            const hasCornerstones = isBearPaw && sashing > 0;
             return (
               <>
                 <QuiltLayoutPreview
@@ -249,7 +248,13 @@ function FabricsStepInner() {
           so the border + the canonical "all squares" fabric stay assignable). */}
       <div className="space-y-4">
           {sections.map((s) => {
-            const current = (planner.assignments[s.id] ?? s.defaultFabric) as FabricKey;
+            // Border uses the dynamic effective default (see getEffectiveBorderDefault)
+            // so the selected swatch always matches the "Your full quilt" preview.
+            const sectionDefault =
+              s.id === "border"
+                ? getEffectiveBorderDefault(pattern, hasSashing, hasCornerstonesSection)
+                : s.defaultFabric;
+            const current = (planner.assignments[s.id] ?? sectionDefault) as FabricKey;
             // For patchwork patterns, only show border picker here (the squares
             // section is driven by the tap-to-cycle preview above).
             if (isPatchwork && s.id !== "border") return null;

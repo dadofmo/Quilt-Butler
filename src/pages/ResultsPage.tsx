@@ -4,7 +4,7 @@ import { StepShell } from "@/components/StepShell";
 import { PrintBlockLegend } from "@/components/PrintBlockLegend";
 import { FABRIC_COLORS, FABRIC_LABELS, setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
-import { getPattern } from "@/lib/patterns";
+import { getPattern, getEffectiveBorderDefault } from "@/lib/patterns";
 import { calculateYardage, describePieceShape, piecesPerStrip, usableFabricWidth, type FabricRequirement, type MaterialsRequirement } from "@/lib/yardage";
 import { Printer } from "lucide-react";
 
@@ -113,7 +113,7 @@ function ResultsStepInner() {
             pattern={planner.pattern!}
             assignments={planner.assignments}
             hasBorder={planner.borderWidth > 0}
-            borderFabric={(planner.assignments.border ?? pattern?.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey}
+            borderFabric={(planner.assignments.border ?? (pattern ? getEffectiveBorderDefault(pattern, useSashedMath, isBearPaw && useSashedMath) : "C")) as FabricKey}
             photos={planner.fabricPhotos}
           />
 
