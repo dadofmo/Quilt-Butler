@@ -1,5 +1,5 @@
 import { ALL_FABRIC_KEYS, type FabricKey, type PlannerState } from "./planner-store";
-import { getPattern } from "./patterns";
+import { getPattern, getEffectiveBorderDefault } from "./patterns";
 
 export interface FabricRequirement {
   fabric: FabricKey;
