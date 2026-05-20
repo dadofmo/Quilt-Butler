@@ -365,3 +365,33 @@ export function fabricsForPattern(pattern: PatternDef, includeBorder: boolean): 
   });
   return order.filter((f) => used.has(f));
 }
+
+/**
+ * The default border fabric is the first letter NOT already used by any
+ * active block section. This keeps the "Your full quilt" preview's border
+ * color in lock-step with the swatch choices on FabricsPage — which always
+ * offers the block fabrics + the next free accent letter. Without this,
+ * patterns whose static border default (e.g. HST/Nine Patch "D") falls
+ * outside the available swatches caused the preview to render a color the
+ * user couldn't actually see selected.
+ *
+ * Pass hasSashing/hasCornerstones to exclude those section fabrics when
+ * they're not active for the current size selection.
+ */
+export function getEffectiveBorderDefault(
+  pattern: PatternDef,
+  hasSashing: boolean,
+  hasCornerstones: boolean,
+): FabricKey {
+  const order: FabricKey[] = [
+    "A","B","C","D","E","F","G","H","I","J","K","L",
+  ];
+  const used = new Set<FabricKey>();
+  pattern.sections.forEach((s) => {
+    if (s.id === "border") return;
+    if (s.id === "sashing" && !hasSashing) return;
+    if (s.id === "cornerstone" && !hasCornerstones) return;
+    used.add(s.defaultFabric);
+  });
+  return order.find((f) => !used.has(f)) ?? "C";
+}
