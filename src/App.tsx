@@ -39,13 +39,16 @@ export default function App() {
   return (
     <>
       <ScrollToTop />
-      <Routes>
-      <Route path="/" element={<PatternPickerPage />} />
-      <Route path="/size" element={<SizePage />} />
-      <Route path="/fabrics" element={<FabricsPage />} />
-      <Route path="/results" element={<ResultsPage />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+      <Suspense fallback={null}>
+        <Routes>
+          <Route path="/" element={<PatternPickerPage />} />
+          <Route path="/size" element={<SizePage />} />
+          <Route path="/fabrics" element={<FabricsPage />} />
+          <Route path="/results" element={<ResultsPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </>
   );
 }
+
