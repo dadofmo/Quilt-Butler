@@ -173,7 +173,7 @@ function FabricsStepInner() {
           </div>
 
           {(() => {
-            const borderDefault = (pattern.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey;
+            const borderDefault = getEffectiveBorderDefault(pattern, false, false);
             const borderFabric = (planner.assignments["border"] ?? borderDefault) as FabricKey;
             return (
               <PatchworkPreview
