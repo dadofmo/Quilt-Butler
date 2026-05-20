@@ -205,14 +205,13 @@ function FabricsStepInner() {
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
             const blocksAcross = Math.max(1, Math.floor(innerW / planner.blockSize));
             const blocksDown = Math.max(1, Math.floor(innerH / planner.blockSize));
-            const borderDefault = (pattern.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey;
+            const hasCornerstones = isBearPaw && sashing > 0;
+            const borderDefault = getEffectiveBorderDefault(pattern, sashing > 0 && isSashed, hasCornerstones);
             const borderFabric = (planner.assignments["border"] ?? borderDefault) as FabricKey;
             const sashingDefault = (pattern.sections.find((s) => s.id === "sashing")?.defaultFabric ?? "C") as FabricKey;
             const cornerstoneDefault = (pattern.sections.find((s) => s.id === "cornerstone")?.defaultFabric ?? "E") as FabricKey;
             const sashingFabric = (planner.assignments["sashing"] ?? sashingDefault) as FabricKey;
             const cornerstoneFabric = (planner.assignments["cornerstone"] ?? cornerstoneDefault) as FabricKey;
-            // Cornerstones only render when Bear Paw has sashing > 0.
-            const hasCornerstones = isBearPaw && sashing > 0;
             return (
               <>
                 <QuiltLayoutPreview
