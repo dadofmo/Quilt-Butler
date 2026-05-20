@@ -248,7 +248,13 @@ function FabricsStepInner() {
           so the border + the canonical "all squares" fabric stay assignable). */}
       <div className="space-y-4">
           {sections.map((s) => {
-            const current = (planner.assignments[s.id] ?? s.defaultFabric) as FabricKey;
+            // Border uses the dynamic effective default (see getEffectiveBorderDefault)
+            // so the selected swatch always matches the "Your full quilt" preview.
+            const sectionDefault =
+              s.id === "border"
+                ? getEffectiveBorderDefault(pattern, hasSashing, hasCornerstonesSection)
+                : s.defaultFabric;
+            const current = (planner.assignments[s.id] ?? sectionDefault) as FabricKey;
             // For patchwork patterns, only show border picker here (the squares
             // section is driven by the tap-to-cycle preview above).
             if (isPatchwork && s.id !== "border") return null;
