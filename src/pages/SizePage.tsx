@@ -50,7 +50,9 @@ function SizeStepInner() {
   const isBearPaw = planner.pattern === "bear-paw";
   const isNinePatch = planner.pattern === "nine-patch";
   const isHst = planner.pattern === "hst";
-  const isSashed = isBearPaw || isNinePatch || isHst;
+  const isSimpleSquares = planner.pattern === "simple-squares";
+  const isRailFence = planner.pattern === "rail-fence";
+  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence;
   const [sashingText, setSashingText] = useState(
     // Preserve 0 explicitly (Nine Patch may legitimately use no sashing).
     typeof planner.sashingWidth === "number" && !isNaN(planner.sashingWidth)
@@ -388,7 +390,11 @@ function SizeStepInner() {
                 ? "Sashing separates each Nine Patch block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
                 : isHst
                   ? "Sashing separates each Half Square Triangle block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
-                  : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
+                  : isSimpleSquares
+                    ? "Sashing separates each square — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
+                    : isRailFence
+                      ? "Sashing separates each Rail Fence block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
+                      : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">
