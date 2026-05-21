@@ -71,9 +71,15 @@ export const PATTERNS: PatternDef[] = [
     id: "simple-squares",
     name: "Simple Squares",
     hasMath: true,
-    intro: "A grid of identical squares — the easiest pattern for beginners. Pick one fabric for all the squares, plus an optional border fabric.",
+    intro: "A grid of identical squares — the easiest pattern for beginners. Pick one fabric for all the squares, plus an optional border fabric. Optionally add plain sashing strips between blocks for a framed look.",
     sections: [
       { id: "squares", label: "Squares", defaultFabric: "A", hint: "Every square in the grid uses this fabric." },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "B",
+        hint: "Optional strips of fabric that separate each square — set sashing to 0\" on the previous step if you don't want any.",
+      },
       // Simple Squares uses the patchwork palette (defaults to A–D, 4 fabrics),
       // so the border defaults to E — the next unused letter — so the frame
       // reads as a distinct accent color instead of blending into the grid.
@@ -84,11 +90,17 @@ export const PATTERNS: PatternDef[] = [
     id: "rail-fence",
     name: "Rail Fence",
     hasMath: true,
-    intro: "Each block is three parallel strips (rails) sewn together. Alternating blocks are rotated 90° so the rails form a woven 'fence' across the quilt. Pick a fabric for each rail.",
+    intro: "Each block is three parallel strips (rails) sewn together. Alternating blocks are rotated 90° so the rails form a woven 'fence' across the quilt. Pick a fabric for each rail. Optionally add plain sashing strips between blocks for a framed look.",
     sections: [
       { id: "rail1", label: "Top rail", defaultFabric: "A", hint: "One of the three strips in every block." },
       { id: "rail2", label: "Middle rail", defaultFabric: "B", hint: "The middle strip — pick something that contrasts with the top and bottom." },
       { id: "rail3", label: "Bottom rail", defaultFabric: "C", hint: "The third strip — together the three fabrics make the woven fence look." },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "E",
+        hint: "Optional strips of fabric that separate each Rail Fence block — set sashing to 0\" on the previous step if you don't want any.",
+      },
       { id: "border", label: "Border", defaultFabric: "D", hint: "The frame around the whole quilt." },
     ],
   },

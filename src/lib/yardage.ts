@@ -147,9 +147,12 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isBearPaw = s.pattern === "bear-paw";
   const isNinePatch = s.pattern === "nine-patch";
   const isHst = s.pattern === "hst";
-  // Bear Paw, Nine Patch, and HST sashing are all optional — a user-entered 0
-  // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst)
+  const isSimpleSquares = s.pattern === "simple-squares";
+  const isRailFence = s.pattern === "rail-fence";
+  // Bear Paw, Nine Patch, HST, Simple Squares, and Rail Fence sashing are all
+  // optional — a user-entered 0 means "no sashing" and the math collapses to
+  // plain blocks.
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
