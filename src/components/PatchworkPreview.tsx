@@ -23,6 +23,10 @@ interface Props {
   photos?: Partial<Record<FabricKey, string>>;
   /** Fabric assigned to the border — drives the visible frame around the grid. */
   borderFabric?: FabricKey;
+  /** Optional sashing width (in) between blocks. 0 = no sashing. */
+  sashingWidth?: number;
+  /** Sashing fabric — only used when sashingWidth > 0. */
+  sashingFabric?: FabricKey;
 }
 
 /**

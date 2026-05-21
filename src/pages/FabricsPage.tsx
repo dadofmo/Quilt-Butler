@@ -262,18 +262,18 @@ function FabricsStepInner() {
                 ? getEffectiveBorderDefault(pattern, hasSashing, hasCornerstonesSection)
                 : s.defaultFabric;
             const current = (planner.assignments[s.id] ?? sectionDefault) as FabricKey;
-            // For patchwork patterns, only show border picker here (the squares
-            // section is driven by the tap-to-cycle preview above).
-            if (isPatchwork && s.id !== "border") return null;
-            // Border choices = every fabric used in the BLOCK, plus one extra
-            // "accent" option (the next unused letter) for users who want a
-            // unique border fabric. For Simple Squares, the block fabrics are
-            // the user-chosen patchwork palette (A..N based on fabric count);
-            // for other patterns it's the fabrics the pattern defines.
+            // For patchwork patterns, only show border + sashing pickers here
+            // (the squares section is driven by the tap-to-cycle preview above).
+            if (isPatchwork && s.id !== "border" && s.id !== "sashing") return null;
+            // Border & sashing choices = every fabric used in the BLOCK, plus
+            // one extra "accent" option (the next unused letter) for a unique
+            // accent. For Simple Squares the block fabrics are the user's
+            // patchwork palette; for other patterns it's the pattern's fabrics.
             const isBorder = s.id === "border";
+            const isSashingSection = s.id === "sashing";
             const blockFabrics = isPatchwork ? palette : blockOnlyFabrics;
             const nextAccent = ALL_FABRIC_KEYS.find((f) => !blockFabrics.includes(f));
-            const choices = isBorder
+            const choices = (isBorder || isSashingSection)
               ? (nextAccent ? [...blockFabrics, nextAccent] : blockFabrics)
               : blockOnlyFabrics;
             return (
