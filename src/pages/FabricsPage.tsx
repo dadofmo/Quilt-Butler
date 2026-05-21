@@ -175,8 +175,10 @@ function FabricsStepInner() {
           </div>
 
           {(() => {
-            const borderDefault = getEffectiveBorderDefault(pattern, false, false);
+            const borderDefault = getEffectiveBorderDefault(pattern, hasSashing, false);
             const borderFabric = (planner.assignments["border"] ?? borderDefault) as FabricKey;
+            const sashingDefault = (pattern.sections.find((s) => s.id === "sashing")?.defaultFabric ?? "B") as FabricKey;
+            const sashingFabric = (planner.assignments["sashing"] ?? sashingDefault) as FabricKey;
             return (
               <PatchworkPreview
                 fabricCount={planner.patchworkFabricCount}
@@ -188,6 +190,8 @@ function FabricsStepInner() {
                 onChange={(g) => setPlanner({ patchworkGrid: g })}
                 photos={planner.fabricPhotos}
                 borderFabric={hasBorder ? borderFabric : undefined}
+                sashingWidth={hasSashing ? planner.sashingWidth : 0}
+                sashingFabric={hasSashing ? sashingFabric : undefined}
               />
             );
           })()}
@@ -201,7 +205,8 @@ function FabricsStepInner() {
             const isBearPaw = pattern.id === "bear-paw";
             const isNinePatch = pattern.id === "nine-patch";
             const isHst = pattern.id === "hst";
-            const isSashed = isBearPaw || isNinePatch || isHst;
+            const isRailFence = pattern.id === "rail-fence";
+            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence;
             const sashing = isSashed ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
