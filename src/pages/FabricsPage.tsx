@@ -46,7 +46,9 @@ function FabricsStepInner() {
   const isBearPawPattern = pattern.id === "bear-paw";
   const isNinePatchPattern = pattern.id === "nine-patch";
   const isHstPattern = pattern.id === "hst";
-  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern) && (planner.sashingWidth || 0) > 0;
+  const isSimpleSquaresPattern = pattern.id === "simple-squares";
+  const isRailFencePattern = pattern.id === "rail-fence";
+  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern || isSimpleSquaresPattern || isRailFencePattern) && (planner.sashingWidth || 0) > 0;
   const hasCornerstonesSection = isBearPawPattern && hasSashing;
   const sections = pattern.sections.filter((s) => {
     if (s.id === "border") return hasBorder;
@@ -173,8 +175,10 @@ function FabricsStepInner() {
           </div>
 
           {(() => {
-            const borderDefault = getEffectiveBorderDefault(pattern, false, false);
+            const borderDefault = getEffectiveBorderDefault(pattern, hasSashing, false);
             const borderFabric = (planner.assignments["border"] ?? borderDefault) as FabricKey;
+            const sashingDefault = (pattern.sections.find((s) => s.id === "sashing")?.defaultFabric ?? "B") as FabricKey;
+            const sashingFabric = (planner.assignments["sashing"] ?? sashingDefault) as FabricKey;
             return (
               <PatchworkPreview
                 fabricCount={planner.patchworkFabricCount}
@@ -186,6 +190,8 @@ function FabricsStepInner() {
                 onChange={(g) => setPlanner({ patchworkGrid: g })}
                 photos={planner.fabricPhotos}
                 borderFabric={hasBorder ? borderFabric : undefined}
+                sashingWidth={hasSashing ? planner.sashingWidth : 0}
+                sashingFabric={hasSashing ? sashingFabric : undefined}
               />
             );
           })()}
@@ -199,7 +205,8 @@ function FabricsStepInner() {
             const isBearPaw = pattern.id === "bear-paw";
             const isNinePatch = pattern.id === "nine-patch";
             const isHst = pattern.id === "hst";
-            const isSashed = isBearPaw || isNinePatch || isHst;
+            const isRailFence = pattern.id === "rail-fence";
+            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence;
             const sashing = isSashed ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
@@ -255,18 +262,18 @@ function FabricsStepInner() {
                 ? getEffectiveBorderDefault(pattern, hasSashing, hasCornerstonesSection)
                 : s.defaultFabric;
             const current = (planner.assignments[s.id] ?? sectionDefault) as FabricKey;
-            // For patchwork patterns, only show border picker here (the squares
-            // section is driven by the tap-to-cycle preview above).
-            if (isPatchwork && s.id !== "border") return null;
-            // Border choices = every fabric used in the BLOCK, plus one extra
-            // "accent" option (the next unused letter) for users who want a
-            // unique border fabric. For Simple Squares, the block fabrics are
-            // the user-chosen patchwork palette (A..N based on fabric count);
-            // for other patterns it's the fabrics the pattern defines.
+            // For patchwork patterns, only show border + sashing pickers here
+            // (the squares section is driven by the tap-to-cycle preview above).
+            if (isPatchwork && s.id !== "border" && s.id !== "sashing") return null;
+            // Border & sashing choices = every fabric used in the BLOCK, plus
+            // one extra "accent" option (the next unused letter) for a unique
+            // accent. For Simple Squares the block fabrics are the user's
+            // patchwork palette; for other patterns it's the pattern's fabrics.
             const isBorder = s.id === "border";
+            const isSashingSection = s.id === "sashing";
             const blockFabrics = isPatchwork ? palette : blockOnlyFabrics;
             const nextAccent = ALL_FABRIC_KEYS.find((f) => !blockFabrics.includes(f));
-            const choices = isBorder
+            const choices = (isBorder || isSashingSection)
               ? (nextAccent ? [...blockFabrics, nextAccent] : blockFabrics)
               : blockOnlyFabrics;
             return (

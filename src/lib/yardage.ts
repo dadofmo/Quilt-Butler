@@ -147,9 +147,12 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isBearPaw = s.pattern === "bear-paw";
   const isNinePatch = s.pattern === "nine-patch";
   const isHst = s.pattern === "hst";
-  // Bear Paw, Nine Patch, and HST sashing are all optional — a user-entered 0
-  // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst)
+  const isSimpleSquares = s.pattern === "simple-squares";
+  const isRailFence = s.pattern === "rail-fence";
+  // Bear Paw, Nine Patch, HST, Simple Squares, and Rail Fence sashing are all
+  // optional — a user-entered 0 means "no sashing" and the math collapses to
+  // plain blocks.
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -216,6 +219,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
       addSquares(reqs[squareFab], "Squares", blockCount, cut, s.fabricWidth);
       notes.push(
         `Cut ${blockCount} squares of Fabric ${squareFab} at ${cut}" (finished ${s.blockSize}" + 1/2" for seam allowance).`,
+      );
+    }
+
+    // Optional sashing between blocks (Simple Squares).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "B") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Simple Squares Assembly Tip — full quilt: lay your squares out in the ${blocksAcross} × ${blocksDown} grid. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the squares without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
       );
     }
   } else if (s.pattern === "nine-patch") {
@@ -371,6 +393,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Layout tip: rotate every other block 90° (alternating horizontal and vertical) when arranging — that's what gives Rail Fence its classic woven look.`,
     );
+
+    // Optional sashing between blocks (Rail Fence).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Rail Fence Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} 3-rail blocks following the steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid, rotating every other block 90° for the woven look. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. Add the outer border last if you're using one.`,
+      );
+    }
   } else if (s.pattern === "log-cabin") {
     // Log Cabin construction (traditional spiral, light/dark diagonal split):
     //   centerFinished = blockSize / 4   (the small "hearth" square)

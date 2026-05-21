@@ -23,6 +23,10 @@ interface Props {
   photos?: Partial<Record<FabricKey, string>>;
   /** Fabric assigned to the border — drives the visible frame around the grid. */
   borderFabric?: FabricKey;
+  /** Optional sashing width (in) between blocks. 0 = no sashing. */
+  sashingWidth?: number;
+  /** Sashing fabric — only used when sashingWidth > 0. */
+  sashingFabric?: FabricKey;
 }
 
 /**
@@ -62,6 +66,8 @@ export function PatchworkPreview({
   onChange,
   photos,
   borderFabric,
+  sashingWidth = 0,
+  sashingFabric,
 }: Props) {
   const { rows, cols } = useMemo(
     () => computeGridShape(quiltWidth, quiltHeight, blockSize, borderWidth),
@@ -76,7 +82,6 @@ export function PatchworkPreview({
   const cellFor = (r: number, c: number): FabricKey => {
     const key = `${r},${c}`;
     if (grid[key] && palette.includes(grid[key])) return grid[key];
-    // Default seed: simple checker-ish so first view isn't a wall of one color.
     return palette[(r + c) % palette.length];
   };
 
@@ -87,15 +92,28 @@ export function PatchworkPreview({
     onChange({ ...grid, [`${r},${c}`]: nextFab });
   };
 
-  // Outer frame = border + inner blocks. Sized so the border thickness is to
-  // scale relative to the blocks (e.g. a 3" border around 12" blocks renders
-  // as 3/12 of a block on each side).
-  const innerW = cols * blockSize;
-  const innerH = rows * blockSize;
+  // Outer frame = border + inner blocks + optional sashing BETWEEN blocks.
+  const showSash = sashingWidth > 0 && !!sashingFabric;
+  const sashCols = Math.max(0, cols - 1);
+  const sashRows = Math.max(0, rows - 1);
+  const innerW = cols * blockSize + (showSash ? sashCols * sashingWidth : 0);
+  const innerH = rows * blockSize + (showSash ? sashRows * sashingWidth : 0);
   const outerW = innerW + 2 * borderWidth;
   const outerH = innerH + 2 * borderWidth;
   const borderPct = borderWidth > 0 ? (borderWidth / outerW) * 100 : 0;
   const showBorder = borderWidth > 0 && !!borderFabric;
+
+  // Build column/row template tracks: alternating block | sashing | block ...
+  const colTracks: string[] = [];
+  for (let c = 0; c < cols; c++) {
+    colTracks.push(`${blockSize}fr`);
+    if (showSash && c < cols - 1) colTracks.push(`${sashingWidth}fr`);
+  }
+  const rowTracks: string[] = [];
+  for (let r = 0; r < rows; r++) {
+    rowTracks.push(`${blockSize}fr`);
+    if (showSash && r < rows - 1) rowTracks.push(`${sashingWidth}fr`);
+  }
 
   return (
     <div className="flex flex-col items-center gap-3">
@@ -118,7 +136,14 @@ export function PatchworkPreview({
         <div
           className="grid h-full w-full"
           style={{
-            gridTemplateColumns: `repeat(${cols}, 1fr)`,
+            gridTemplateColumns: colTracks.join(" "),
+            gridTemplateRows: rowTracks.join(" "),
+            ...(showSash && sashingFabric
+              ? {
+                  background: FABRIC_COLORS[sashingFabric],
+                  ...fabricBackgroundStyle(sashingFabric, photos),
+                }
+              : {}),
           }}
           role="grid"
           aria-label="Patchwork color preview — tap a square to cycle fabric"
@@ -126,6 +151,9 @@ export function PatchworkPreview({
           {Array.from({ length: rows }).flatMap((_, r) =>
             Array.from({ length: cols }).map((_, c) => {
               const fab = cellFor(r, c);
+              // Compute grid placement: each block sits on track (2*r+1, 2*c+1) when sashed.
+              const colTrack = showSash ? 2 * c + 1 : c + 1;
+              const rowTrack = showSash ? 2 * r + 1 : r + 1;
               return (
                 <button
                   key={`${r}-${c}`}
@@ -134,6 +162,8 @@ export function PatchworkPreview({
                   aria-label={`Row ${r + 1} column ${c + 1}, fabric ${fab}. Tap to change.`}
                   className="transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-ring"
                   style={{
+                    gridColumn: `${colTrack} / span 1`,
+                    gridRow: `${rowTrack} / span 1`,
                     background: FABRIC_COLORS[fab],
                     ...fabricBackgroundStyle(fab, photos),
                   }}

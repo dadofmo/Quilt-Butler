@@ -46,9 +46,11 @@ function ResultsStepInner() {
   const isBearPaw = planner.pattern === "bear-paw";
   const isNinePatch = planner.pattern === "nine-patch";
   const isHst = planner.pattern === "hst";
-  // Bear Paw, Nine Patch, and HST sashing are all optional (0 = none).
+  const isSimpleSquares = planner.pattern === "simple-squares";
+  const isRailFence = planner.pattern === "rail-fence";
+  // Bear Paw, Nine Patch, HST, Simple Squares, and Rail Fence sashing are all optional (0 = none).
   const rawSash = planner.sashingWidth ?? 0;
-  const sashing = (isBearPaw || isNinePatch || isHst) ? Math.max(0, rawSash) : 0;
+  const sashing = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence) ? Math.max(0, rawSash) : 0;
   const useSashedMath = sashing > 0;
   const innerW = planner.quiltWidth - 2 * planner.borderWidth;
   const innerH = planner.quiltHeight - 2 * planner.borderWidth;
