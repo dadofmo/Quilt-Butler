@@ -52,7 +52,9 @@ function SizeStepInner() {
   const isHst = planner.pattern === "hst";
   const isSimpleSquares = planner.pattern === "simple-squares";
   const isRailFence = planner.pattern === "rail-fence";
-  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence;
+  const isLogCabin = planner.pattern === "log-cabin";
+  const isOhioStar = planner.pattern === "ohio-star";
+  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar;
   const [sashingText, setSashingText] = useState(
     // Preserve 0 explicitly (Nine Patch may legitimately use no sashing).
     typeof planner.sashingWidth === "number" && !isNaN(planner.sashingWidth)
