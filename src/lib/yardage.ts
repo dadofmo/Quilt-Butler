@@ -607,6 +607,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Assemble the block as a 3×3 grid: row 1 = background corner, QST (star points up), background corner. Row 2 = QST (star points left), center square, QST (star points right). Row 3 = background corner, QST (star points down), background corner. Sew each row across, press, then sew the 3 rows together — the 8 star points should meet cleanly at the center square.`,
     );
 
+    // Optional sashing between blocks only (no cornerstones for Ohio Star).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Ohio Star Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} Ohio Star blocks following the QST + 3×3 steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the stars without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
+
   } else if (s.pattern === "flying-geese") {
     // Flying Geese construction (No-Waste 4-at-a-Time method):
     //   Each "goose" finishes 2:1 — twice as wide as it is tall. We stack
