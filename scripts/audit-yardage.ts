@@ -221,6 +221,18 @@ console.log("\n=== Log Cabin: light & dark share fabric A — buckets must merge
   check("LC merged A total logs", total, 240);
 }
 
+console.log("\n=== Log Cabin: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = { ...base(), pattern: "log-cabin" as const, blockSize: 12, sashingWidth: 2 };
+  // 4×5 = 20 blocks. Sashing D (default): between blocks only.
+  // vSash=(4-1)*5=15, hSash=(5-1)*4=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const d = r.fabrics.find(f => f.fabric === "D")!;
+  check("LC(sash) D sashing strip count", d.pieces[0].count, 31);
+  check("LC(sash) D strip width", d.pieces[0].h, 2.5);
+  check("LC(sash) D strip length", d.pieces[0].w, 12.5);
+}
+
 // =========================================================================
 // OHIO STAR
 // =========================================================================
