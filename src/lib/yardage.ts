@@ -149,10 +149,12 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isHst = s.pattern === "hst";
   const isSimpleSquares = s.pattern === "simple-squares";
   const isRailFence = s.pattern === "rail-fence";
-  // Bear Paw, Nine Patch, HST, Simple Squares, and Rail Fence sashing are all
-  // optional — a user-entered 0 means "no sashing" and the math collapses to
-  // plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence)
+  const isLogCabin = s.pattern === "log-cabin";
+  const isOhioStar = s.pattern === "ohio-star";
+  // Bear Paw, Nine Patch, HST, Simple Squares, Rail Fence, Log Cabin, and Ohio
+  // Star sashing are all optional — a user-entered 0 means "no sashing" and
+  // the math collapses to plain blocks.
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -507,6 +509,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Layout tip: arranging the finished blocks so all the dark corners point the same direction creates classic Log Cabin layouts called "Straight Furrows" or "Sunshine and Shadow." Try a few orientations on the floor (or a bed) before sewing the blocks together.`,
     );
+
+    // Optional sashing between blocks only (no cornerstones for Log Cabin).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Log Cabin Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} Log Cabin blocks following the spiral steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid, all rotated the same direction (or arranged into a Straight Furrows / Sunshine and Shadow layout). Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the blocks without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
   } else if (s.pattern === "ohio-star") {
     // Ohio Star construction:
     //   Each block = a 3×3 grid of "units", where unitFinished = blockSize / 3.
@@ -585,6 +606,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Assemble the block as a 3×3 grid: row 1 = background corner, QST (star points up), background corner. Row 2 = QST (star points left), center square, QST (star points right). Row 3 = background corner, QST (star points down), background corner. Sew each row across, press, then sew the 3 rows together — the 8 star points should meet cleanly at the center square.`,
     );
+
+    // Optional sashing between blocks only (no cornerstones for Ohio Star).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Ohio Star Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} Ohio Star blocks following the QST + 3×3 steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the stars without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
 
   } else if (s.pattern === "flying-geese") {
     // Flying Geese construction (No-Waste 4-at-a-Time method):

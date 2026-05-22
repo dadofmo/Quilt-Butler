@@ -48,7 +48,9 @@ function FabricsStepInner() {
   const isHstPattern = pattern.id === "hst";
   const isSimpleSquaresPattern = pattern.id === "simple-squares";
   const isRailFencePattern = pattern.id === "rail-fence";
-  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern || isSimpleSquaresPattern || isRailFencePattern) && (planner.sashingWidth || 0) > 0;
+  const isLogCabinPattern = pattern.id === "log-cabin";
+  const isOhioStarPattern = pattern.id === "ohio-star";
+  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern || isSimpleSquaresPattern || isRailFencePattern || isLogCabinPattern || isOhioStarPattern) && (planner.sashingWidth || 0) > 0;
   const hasCornerstonesSection = isBearPawPattern && hasSashing;
   const sections = pattern.sections.filter((s) => {
     if (s.id === "border") return hasBorder;
@@ -206,7 +208,9 @@ function FabricsStepInner() {
             const isNinePatch = pattern.id === "nine-patch";
             const isHst = pattern.id === "hst";
             const isRailFence = pattern.id === "rail-fence";
-            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence;
+            const isLogCabin = pattern.id === "log-cabin";
+            const isOhioStar = pattern.id === "ohio-star";
+            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence || isLogCabin || isOhioStar;
             const sashing = isSashed ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;

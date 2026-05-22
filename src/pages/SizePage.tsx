@@ -52,7 +52,9 @@ function SizeStepInner() {
   const isHst = planner.pattern === "hst";
   const isSimpleSquares = planner.pattern === "simple-squares";
   const isRailFence = planner.pattern === "rail-fence";
-  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence;
+  const isLogCabin = planner.pattern === "log-cabin";
+  const isOhioStar = planner.pattern === "ohio-star";
+  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar;
   const [sashingText, setSashingText] = useState(
     // Preserve 0 explicitly (Nine Patch may legitimately use no sashing).
     typeof planner.sashingWidth === "number" && !isNaN(planner.sashingWidth)
@@ -394,7 +396,11 @@ function SizeStepInner() {
                     ? "Sashing separates each square — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
                     : isRailFence
                       ? "Sashing separates each Rail Fence block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
-                      : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
+                      : isLogCabin
+                        ? "Sashing separates each Log Cabin block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
+                        : isOhioStar
+                          ? "Sashing separates each Ohio Star block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
+                          : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">

@@ -221,6 +221,18 @@ console.log("\n=== Log Cabin: light & dark share fabric A — buckets must merge
   check("LC merged A total logs", total, 240);
 }
 
+console.log("\n=== Log Cabin: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = { ...base(), pattern: "log-cabin" as const, blockSize: 12, sashingWidth: 2 };
+  // 4×5 = 20 blocks. Sashing D (default): between blocks only.
+  // vSash=(4-1)*5=15, hSash=(5-1)*4=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const d = r.fabrics.find(f => f.fabric === "D")!;
+  check("LC(sash) D sashing strip count", d.pieces[0].count, 31);
+  check("LC(sash) D strip width", d.pieces[0].h, 2.5);
+  check("LC(sash) D strip length", d.pieces[0].w, 12.5);
+}
+
 // =========================================================================
 // OHIO STAR
 // =========================================================================
@@ -308,6 +320,18 @@ console.log("\n=== Ohio Star: odd block size 4.25\" — non-integer unit must st
   const a = r.fabrics.find(f => f.fabric === "A")!;
   // 4×4 = 16 blocks. Star QST = 32 squares.
   check("OS odd-unit A count", a.pieces[0].count, 32);
+}
+
+console.log("\n=== Ohio Star: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = { ...base(), pattern: "ohio-star" as const, blockSize: 12, borderWidth: 0, sashingWidth: 2 };
+  // 4×5 = 20 blocks. Sashing C (default): between blocks only.
+  // vSash=15, hSash=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("OS(sash) C sashing strip count", c.pieces[0].count, 31);
+  check("OS(sash) C strip width", c.pieces[0].h, 2.5);
+  check("OS(sash) C strip length", c.pieces[0].w, 12.5);
 }
 
 // =========================================================================
