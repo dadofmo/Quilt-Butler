@@ -509,6 +509,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Layout tip: arranging the finished blocks so all the dark corners point the same direction creates classic Log Cabin layouts called "Straight Furrows" or "Sunshine and Shadow." Try a few orientations on the floor (or a bed) before sewing the blocks together.`,
     );
+
+    // Optional sashing between blocks only (no cornerstones for Log Cabin).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Log Cabin Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} Log Cabin blocks following the spiral steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid, all rotated the same direction (or arranged into a Straight Furrows / Sunshine and Shadow layout). Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the blocks without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
   } else if (s.pattern === "ohio-star") {
     // Ohio Star construction:
     //   Each block = a 3×3 grid of "units", where unitFinished = blockSize / 3.
