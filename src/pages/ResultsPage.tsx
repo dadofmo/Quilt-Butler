@@ -52,9 +52,10 @@ function ResultsStepInner() {
   const isOhioStar = planner.pattern === "ohio-star";
   const isFlyingGeese = planner.pattern === "flying-geese";
   const isD9P = planner.pattern === "disappearing-nine-patch";
-  // Bear Paw, Nine Patch, HST, Simple Squares, Rail Fence, Log Cabin, Ohio Star, Flying Geese, and Disappearing Nine Patch sashing are all optional (0 = none).
+  const isSquaresOnPoint = planner.pattern === "squares-on-point";
+  // All listed patterns support optional sashing (0 = none).
   const rawSash = planner.sashingWidth ?? 0;
-  const sashing = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P) ? Math.max(0, rawSash) : 0;
+  const sashing = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint) ? Math.max(0, rawSash) : 0;
   const useSashedMath = sashing > 0;
   const innerW = planner.quiltWidth - 2 * planner.borderWidth;
   const innerH = planner.quiltHeight - 2 * planner.borderWidth;
