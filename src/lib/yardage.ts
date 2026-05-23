@@ -151,10 +151,12 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isRailFence = s.pattern === "rail-fence";
   const isLogCabin = s.pattern === "log-cabin";
   const isOhioStar = s.pattern === "ohio-star";
-  // Bear Paw, Nine Patch, HST, Simple Squares, Rail Fence, Log Cabin, and Ohio
-  // Star sashing are all optional — a user-entered 0 means "no sashing" and
-  // the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar)
+  const isFlyingGeese = s.pattern === "flying-geese";
+  const isD9P = s.pattern === "disappearing-nine-patch";
+  // Bear Paw, Nine Patch, HST, Simple Squares, Rail Fence, Log Cabin, Ohio
+  // Star, Flying Geese, and Disappearing Nine Patch sashing are all optional —
+  // a user-entered 0 means "no sashing" and the math collapses to plain blocks.
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -691,6 +693,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Layout tip: arrange every block with the geese all flying the same direction for the classic "flock" look, OR alternate rows pointing up/down for a chevron pattern. Try a few orientations on the floor before sewing the rows together.`,
     );
+
+    // Optional sashing between blocks only (no cornerstones for Flying Geese).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Flying Geese Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} blocks following the no-waste geese steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid with all geese flying the same direction (or your chosen layout). Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the blocks without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
   } else if (s.pattern === "disappearing-nine-patch") {
     // Disappearing Nine Patch construction:
     //   Sew a standard 3×3 nine-patch, then slice it in half horizontally
@@ -734,6 +755,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Layout tip: D9P blocks look great in a straight grid (the chains line up across the whole quilt) OR rotated so every other block is turned 90° for a more scattered look. Try both on the floor before sewing the rows together.`,
     );
+
+    // Optional sashing between blocks only.
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Disappearing Nine Patch Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} D9P blocks following the slice-and-rotate steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the blocks without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
   } else if (s.pattern === "squares-on-point") {
     // Squares on Point construction (classic "square-in-a-square" unit):
     //   The on-point square's POINTS touch the midpoints of each block edge,
