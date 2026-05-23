@@ -207,6 +207,12 @@ export const PATTERNS: PatternDef[] = [
         defaultFabric: "B",
         hint: "The 4 corner triangles that frame the diamond — pick something that contrasts so the on-point shape stands out.",
       },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips of fabric that separate each Squares on Point block — set sashing to 0\" on the previous step if you don't want any.",
+      },
       borderSection,
     ],
   },

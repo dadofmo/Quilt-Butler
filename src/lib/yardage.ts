@@ -153,10 +153,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isOhioStar = s.pattern === "ohio-star";
   const isFlyingGeese = s.pattern === "flying-geese";
   const isD9P = s.pattern === "disappearing-nine-patch";
-  // Bear Paw, Nine Patch, HST, Simple Squares, Rail Fence, Log Cabin, Ohio
-  // Star, Flying Geese, and Disappearing Nine Patch sashing are all optional —
-  // a user-entered 0 means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P)
+  const isSquaresOnPoint = s.pattern === "squares-on-point";
+  // Sashing is optional across all patterns that support it — a user-entered 0
+  // means "no sashing" and the math collapses to plain blocks.
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -821,6 +821,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Layout tip: Squares on Point looks great as a straight grid (every diamond facing the same way) or alternating with plain background squares for a "diamonds floating in a sky" effect. Try a few layouts before sewing the rows together.`,
     );
+
+    // Optional sashing between blocks only.
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Squares on Point Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} square-in-a-square blocks following the steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the diamonds without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
   } else if (s.pattern === "plus-block") {
     // Plus Block construction:
     //   3×3 grid of equal squares. Center column + center row = the "+" (5

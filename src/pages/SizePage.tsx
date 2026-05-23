@@ -56,7 +56,8 @@ function SizeStepInner() {
   const isOhioStar = planner.pattern === "ohio-star";
   const isFlyingGeese = planner.pattern === "flying-geese";
   const isD9P = planner.pattern === "disappearing-nine-patch";
-  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P;
+  const isSquaresOnPoint = planner.pattern === "squares-on-point";
+  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint;
   const [sashingText, setSashingText] = useState(
     // Preserve 0 explicitly (Nine Patch may legitimately use no sashing).
     typeof planner.sashingWidth === "number" && !isNaN(planner.sashingWidth)
@@ -406,7 +407,9 @@ function SizeStepInner() {
                             ? "Sashing separates each Flying Geese block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
                             : isD9P
                               ? "Sashing separates each Disappearing Nine Patch block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
-                              : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
+                              : isSquaresOnPoint
+                                ? "Sashing separates each Squares on Point block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
+                                : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">
