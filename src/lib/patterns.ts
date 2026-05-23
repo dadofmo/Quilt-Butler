@@ -151,6 +151,12 @@ export const PATTERNS: PatternDef[] = [
     sections: [
       { id: "goose", label: "Geese (triangles)", defaultFabric: "A", hint: "The 2 large triangles per block — typically the boldest fabric so the 'geese' read clearly against the sky." },
       { id: "sky", label: "Sky (background)", defaultFabric: "B", hint: "Fills the corners on either side of every goose — pick something calm/light that contrasts with the geese." },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips of fabric that separate each Flying Geese block — set sashing to 0\" on the previous step if you don't want any.",
+      },
       borderSection,
     ],
   },
