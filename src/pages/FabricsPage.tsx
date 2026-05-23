@@ -50,7 +50,9 @@ function FabricsStepInner() {
   const isRailFencePattern = pattern.id === "rail-fence";
   const isLogCabinPattern = pattern.id === "log-cabin";
   const isOhioStarPattern = pattern.id === "ohio-star";
-  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern || isSimpleSquaresPattern || isRailFencePattern || isLogCabinPattern || isOhioStarPattern) && (planner.sashingWidth || 0) > 0;
+  const isFlyingGeesePattern = pattern.id === "flying-geese";
+  const isD9PPattern = pattern.id === "disappearing-nine-patch";
+  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern || isSimpleSquaresPattern || isRailFencePattern || isLogCabinPattern || isOhioStarPattern || isFlyingGeesePattern || isD9PPattern) && (planner.sashingWidth || 0) > 0;
   const hasCornerstonesSection = isBearPawPattern && hasSashing;
   const sections = pattern.sections.filter((s) => {
     if (s.id === "border") return hasBorder;
