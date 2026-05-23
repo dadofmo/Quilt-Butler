@@ -403,6 +403,17 @@ console.log("\n=== Flying Geese: non-integer block size 9\" ===");
   check("FG odd-unit A cut size", a.pieces[0].w, 10.25);
 }
 
+console.log("\n=== Flying Geese: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = { ...base(), pattern: "flying-geese" as const, blockSize: 12, borderWidth: 0, sashingWidth: 2 };
+  // 4×5 = 20 blocks. Sashing C (default): vSash=15, hSash=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("FG(sash) C sashing strip count", c.pieces[0].count, 31);
+  check("FG(sash) C strip width", c.pieces[0].h, 2.5);
+  check("FG(sash) C strip length", c.pieces[0].w, 12.5);
+}
+
 // =========================================================================
 // DISAPPEARING NINE PATCH
 // =========================================================================
