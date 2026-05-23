@@ -469,6 +469,17 @@ console.log("\n=== Disappearing Nine Patch: shared fabric on both sections ===")
   check("D9P shared A total strips", totalStrips, 23);
 }
 
+console.log("\n=== Disappearing Nine Patch: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = { ...base(), pattern: "disappearing-nine-patch" as const, blockSize: 12, borderWidth: 0, sashingWidth: 2 };
+  // 4×5 = 20 blocks. Sashing C: vSash=15, hSash=16, total=31 at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("D9P(sash) C sashing strip count", c.pieces[0].count, 31);
+  check("D9P(sash) C strip width", c.pieces[0].h, 2.5);
+  check("D9P(sash) C strip length", c.pieces[0].w, 12.5);
+}
+
 // =========================================================================
 // SQUARES ON POINT
 // =========================================================================
