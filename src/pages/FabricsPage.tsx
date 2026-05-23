@@ -212,7 +212,9 @@ function FabricsStepInner() {
             const isRailFence = pattern.id === "rail-fence";
             const isLogCabin = pattern.id === "log-cabin";
             const isOhioStar = pattern.id === "ohio-star";
-            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence || isLogCabin || isOhioStar;
+            const isFlyingGeese = pattern.id === "flying-geese";
+            const isD9P = pattern.id === "disappearing-nine-patch";
+            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P;
             const sashing = isSashed ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
