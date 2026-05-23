@@ -153,10 +153,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isOhioStar = s.pattern === "ohio-star";
   const isFlyingGeese = s.pattern === "flying-geese";
   const isD9P = s.pattern === "disappearing-nine-patch";
-  // Bear Paw, Nine Patch, HST, Simple Squares, Rail Fence, Log Cabin, Ohio
-  // Star, Flying Geese, and Disappearing Nine Patch sashing are all optional —
-  // a user-entered 0 means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P)
+  const isSquaresOnPoint = s.pattern === "squares-on-point";
+  // Sashing is optional across all patterns that support it — a user-entered 0
+  // means "no sashing" and the math collapses to plain blocks.
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
