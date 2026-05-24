@@ -639,6 +639,19 @@ console.log("\n=== Plus Block: 9\" block ===");
   check("PB 9\" B inches", b.totalInches, 14);
 }
 
+console.log("\n=== Plus Block: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = { ...base(), pattern: "plus-block" as const, blockSize: 12, borderWidth: 0, sashingWidth: 2 };
+  // 4×5 = 20 blocks. Sashing C (default): vSash=15, hSash=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("PB(sash) A plus count", a.pieces[0].count, 100);
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("PB(sash) C sashing strip count", c.pieces[0].count, 31);
+  check("PB(sash) C strip width", c.pieces[0].h, 2.5);
+  check("PB(sash) C strip length", c.pieces[0].w, 12.5);
+}
+
 // =========================================================================
 // BEAR PAW
 // =========================================================================
