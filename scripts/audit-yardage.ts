@@ -415,6 +415,40 @@ console.log("\n=== Flying Geese: 50×65, 12\" block, no border, 2\" sashing ==="
 }
 
 // =========================================================================
+// PINWHEEL
+// =========================================================================
+console.log("\n=== Pinwheel: 50×65, 12\" block, no border ===");
+{
+  const s = { ...base(), pattern: "pinwheel" as const, blockSize: 12, borderWidth: 0 };
+  // 4×5 = 20 blocks. halfFinished = 6. cut = 6.875.
+  // hstUnits = 20*4 = 80. squaresEach = ceil(80/2) = 40.
+  // Per strip floor(42.5/6.875) = 6. Strips = ceil(40/6) = 7.
+  // Inches = 7 * 6.875 = 48.125.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("PW A blade squares count", a.pieces[0].count, 40);
+  check("PW A cut size", a.pieces[0].w, 6.875);
+  check("PW A strips", a.strips[0].count, 7);
+  check("PW A inches", a.totalInches, 48.125);
+  check("PW B mirrors A", b.totalInches, 48.125);
+  check("PW basics glossary attached", r.basics?.length ?? 0, 5);
+}
+
+console.log("\n=== Pinwheel: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = { ...base(), pattern: "pinwheel" as const, blockSize: 12, borderWidth: 0, sashingWidth: 2 };
+  // 4×5 = 20 blocks. Sashing C (default): vSash=15, hSash=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("PW(sash) A blade squares count", a.pieces[0].count, 40);
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("PW(sash) C sashing strip count", c.pieces[0].count, 31);
+  check("PW(sash) C strip width", c.pieces[0].h, 2.5);
+  check("PW(sash) C strip length", c.pieces[0].w, 12.5);
+}
+
+// =========================================================================
 // DISAPPEARING NINE PATCH
 // =========================================================================
 console.log("\n=== Disappearing Nine Patch: 50×65, 12\" finished block, no border ===");
