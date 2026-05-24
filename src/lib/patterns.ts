@@ -221,7 +221,7 @@ export const PATTERNS: PatternDef[] = [
     name: "Pinwheel",
     hasMath: true,
     intro:
-      "Each Pinwheel block is made from 4 Half Square Triangle units arranged in a 2×2 grid so the blade triangles all spin clockwise around the center, creating the iconic pinwheel illusion. Pick a bold fabric for the blades and a contrasting fabric for the background.",
+      "Each Pinwheel block is made from 4 Half Square Triangle units arranged in a 2×2 grid so the blade triangles all spin clockwise around the center, creating the iconic pinwheel illusion. Pick a bold fabric for the blades and a contrasting fabric for the background. Optionally add plain sashing strips between blocks for a framed look.",
     sections: [
       {
         id: "blades",
@@ -235,6 +235,12 @@ export const PATTERNS: PatternDef[] = [
         defaultFabric: "B",
         hint: "The other half of each HST unit — pick something that contrasts strongly with your blades so the pinwheel pops.",
       },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips of fabric that separate each Pinwheel block — set sashing to 0\" on the previous step if you don't want any.",
+      },
       borderSection,
     ],
   },
@@ -243,7 +249,7 @@ export const PATTERNS: PatternDef[] = [
     name: "Plus Block",
     hasMath: true,
     intro:
-      "Each block is a 3×3 grid where the center column + center row form a bold '+' on a background. The 5 plus squares (center + 4 around it) use one fabric; the 4 corner squares use a contrasting background fabric.",
+      "Each block is a 3×3 grid where the center column + center row form a bold '+' on a background. The 5 plus squares (center + 4 around it) use one fabric; the 4 corner squares use a contrasting background fabric. Optionally add plain sashing strips between blocks for a framed look.",
     sections: [
       {
         id: "plus",
@@ -256,6 +262,12 @@ export const PATTERNS: PatternDef[] = [
         label: "Background corners (4 per block)",
         defaultFabric: "B",
         hint: "The 4 corner squares around the '+'. Pick something that contrasts with the plus fabric.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips of fabric that separate each Plus Block — set sashing to 0\" on the previous step if you don't want any.",
       },
       borderSection,
     ],

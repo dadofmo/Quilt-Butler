@@ -154,9 +154,11 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isFlyingGeese = s.pattern === "flying-geese";
   const isD9P = s.pattern === "disappearing-nine-patch";
   const isSquaresOnPoint = s.pattern === "squares-on-point";
+  const isPinwheel = s.pattern === "pinwheel";
+  const isPlusBlock = s.pattern === "plus-block";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -350,6 +352,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Pinwheel assembly: lay out 4 trimmed HST units in a 2×2 grid. Rotate each unit so the blade triangles all point the same rotational direction (clockwise) around the center. Sew the top pair together, sew the bottom pair together, then join the two rows. Press the final center seams open to reduce bulk where all 4 points meet — this helps the block lie flat.`,
     );
+
+    // Optional sashing between blocks (Pinwheel).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Pinwheel Assembly Tip — full quilt: STAGE 1 (block). Make all ${blockCount} pinwheel blocks following the HST steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid, all rotated so the blades spin the same direction (clockwise). Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the blocks without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
   } else if (s.pattern === "rail-fence") {
     // Each block = 3 rails. Each rail finishes at (blockSize/3) tall × blockSize wide.
     // Cut size: (blockSize/3 + 0.5)" tall × (blockSize + 0.5)" long.
@@ -874,6 +895,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Layout tip: Plus Blocks look striking sewn edge-to-edge in a straight grid (every "+" facing the same direction) so the plus shapes float on a sea of background. For a more scattered look, try mixing in a few blocks where the plus and background fabrics are swapped.`,
     );
+
+    // Optional sashing between blocks (Plus Block).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Plus Block Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} plus blocks following the 3×3 grid steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the blocks without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
   } else if (s.pattern === "churn-dash") {
     // Churn Dash construction:
     //   3×3 grid. unitFinished = blockSize / 3.

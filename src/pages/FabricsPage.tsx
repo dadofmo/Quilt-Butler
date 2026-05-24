@@ -53,7 +53,9 @@ function FabricsStepInner() {
   const isFlyingGeesePattern = pattern.id === "flying-geese";
   const isD9PPattern = pattern.id === "disappearing-nine-patch";
   const isSquaresOnPointPattern = pattern.id === "squares-on-point";
-  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern || isSimpleSquaresPattern || isRailFencePattern || isLogCabinPattern || isOhioStarPattern || isFlyingGeesePattern || isD9PPattern || isSquaresOnPointPattern) && (planner.sashingWidth || 0) > 0;
+  const isPinwheelPattern = pattern.id === "pinwheel";
+  const isPlusBlockPattern = pattern.id === "plus-block";
+  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern || isSimpleSquaresPattern || isRailFencePattern || isLogCabinPattern || isOhioStarPattern || isFlyingGeesePattern || isD9PPattern || isSquaresOnPointPattern || isPinwheelPattern || isPlusBlockPattern) && (planner.sashingWidth || 0) > 0;
   const hasCornerstonesSection = isBearPawPattern && hasSashing;
   const sections = pattern.sections.filter((s) => {
     if (s.id === "border") return hasBorder;
@@ -216,7 +218,9 @@ function FabricsStepInner() {
             const isFlyingGeese = pattern.id === "flying-geese";
             const isD9P = pattern.id === "disappearing-nine-patch";
             const isSquaresOnPoint = pattern.id === "squares-on-point";
-            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint;
+            const isPinwheel = pattern.id === "pinwheel";
+            const isPlusBlock = pattern.id === "plus-block";
+            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock;
             const sashing = isSashed ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;

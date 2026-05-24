@@ -57,7 +57,9 @@ function SizeStepInner() {
   const isFlyingGeese = planner.pattern === "flying-geese";
   const isD9P = planner.pattern === "disappearing-nine-patch";
   const isSquaresOnPoint = planner.pattern === "squares-on-point";
-  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint;
+  const isPinwheel = planner.pattern === "pinwheel";
+  const isPlusBlock = planner.pattern === "plus-block";
+  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock;
   const [sashingText, setSashingText] = useState(
     // Preserve 0 explicitly (Nine Patch may legitimately use no sashing).
     typeof planner.sashingWidth === "number" && !isNaN(planner.sashingWidth)
@@ -409,7 +411,11 @@ function SizeStepInner() {
                               ? "Sashing separates each Disappearing Nine Patch block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
                               : isSquaresOnPoint
                                 ? "Sashing separates each Squares on Point block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
-                                : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
+                                : isPinwheel
+                                  ? "Sashing separates each Pinwheel block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
+                                  : isPlusBlock
+                                    ? "Sashing separates each Plus Block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
+                                    : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">
