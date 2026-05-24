@@ -1215,6 +1215,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "flying-geese" ||
     s.pattern === "disappearing-nine-patch" ||
     s.pattern === "squares-on-point" ||
+    s.pattern === "pinwheel" ||
     s.pattern === "plus-block" ||
     s.pattern === "churn-dash" ||
     s.pattern === "bear-paw" ||
