@@ -915,6 +915,53 @@ console.log("\n=== Sawtooth Star: 50×65, 12\" block, no border ===");
   check("SS-star B inches", b.totalInches, 86.5);
 }
 
+console.log("\n=== Sawtooth Star: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = { ...base(), pattern: "sawtooth-star" as const, blockSize: 12, sashingWidth: 2 };
+  // 4×5=20 blocks. Sashing C: vSash=15, hSash=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("SS-star(sash) C strip count", c.pieces[0].count, 31);
+  check("SS-star(sash) C strip width", c.pieces[0].h, 2.5);
+  check("SS-star(sash) C strip length", c.pieces[0].w, 12.5);
+}
+
+// =========================================================================
+// CHURN DASH — 3×3 grid, 1 center + 4 HST corners + 4 bar units
+// =========================================================================
+console.log("\n=== Churn Dash: 50×65, 12\" block, no border ===");
+{
+  const s = { ...base(), pattern: "churn-dash" as const, blockSize: 12 };
+  // 4×5=20 blocks. unit=4. centerCut=4.5, hstCut=4.875, barLong=4.5, barShort=2.5.
+  // Default assignments: center=A, corners=A, bars=A, bg=B.
+  // A: 20 center @4.5 sq + 40 HST @4.875 sq + 40 bar rect (4.5×2.5)
+  // B: 40 HST @4.875 sq + 40 bar rect (4.5×2.5)
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  // A buckets (in order): center, HST corners, bar rectangles → 3
+  check("CD A bucket count", a.pieces.length, 3);
+  check("CD A center count", a.pieces[0].count, 20);
+  check("CD A HST count", a.pieces[1].count, 40);
+  check("CD A bar count", a.pieces[2].count, 80);
+  check("CD B bucket count", b.pieces.length, 2);
+  check("CD B HST count", b.pieces[0].count, 40);
+  check("CD B bar count", b.pieces[1].count, 80);
+}
+
+console.log("\n=== Churn Dash: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = { ...base(), pattern: "churn-dash" as const, blockSize: 12, sashingWidth: 2 };
+  // Sashing C: vSash=15, hSash=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("CD(sash) C strip count", c.pieces[0].count, 31);
+  check("CD(sash) C strip width", c.pieces[0].h, 2.5);
+  check("CD(sash) C strip length", c.pieces[0].w, 12.5);
+}
+
+
+
 // =========================================================================
 // SUMMARY
 // =========================================================================

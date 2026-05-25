@@ -156,9 +156,11 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isSquaresOnPoint = s.pattern === "squares-on-point";
   const isPinwheel = s.pattern === "pinwheel";
   const isPlusBlock = s.pattern === "plus-block";
+  const isChurnDash = s.pattern === "churn-dash";
+  const isSawtoothStar = s.pattern === "sawtooth-star";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -968,6 +970,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Block assembly: lay out the 9 units in a 3×3 grid — corner HST, top bar, corner HST across the top row; left bar, center square, right bar in the middle; corner HST, bottom bar, corner HST on the bottom. Make sure all dark pieces face the OUTSIDE of the block. Sew each row, then sew the rows together. Press seams in opposite directions on alternating rows so they nest at intersections.`,
     );
+
+    // Optional sashing between blocks (Churn Dash).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Churn Dash Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} Churn Dash blocks following the 3×3 unit steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the blocks without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
   } else if (s.pattern === "bear-paw") {
     // Traditional Bear Paw construction (4 paw units + center sq + sashing).
     //
@@ -1163,6 +1184,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Sawtooth Star Assembly Tip: Make all your HST units first. Pair each star starting square with a background starting square, draw the diagonal on the lighter fabric, sew 1/4" on each side of the line, cut apart, press open, and trim to ${(u + SEAM).toFixed(3)}" square. Each pair yields 2 HSTs so you need 4 pairs per block yielding exactly 8 units. Then lay out your 4×4 grid — large center square, 8 HST units with star triangles all pointing inward, 4 background corner squares. Sew into four rows of four units then join the rows. Press seams in alternating directions so they nest at the intersections for a perfectly flat block.`,
     );
+
+    // Optional sashing between blocks (Sawtooth Star).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Sawtooth Star Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} Sawtooth Star blocks following the 4×4 grid steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the stars without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
   }
 
   // Border

@@ -55,9 +55,11 @@ function ResultsStepInner() {
   const isSquaresOnPoint = planner.pattern === "squares-on-point";
   const isPinwheel = planner.pattern === "pinwheel";
   const isPlusBlock = planner.pattern === "plus-block";
+  const isChurnDash = planner.pattern === "churn-dash";
+  const isSawtoothStar = planner.pattern === "sawtooth-star";
   // All listed patterns support optional sashing (0 = none).
   const rawSash = planner.sashingWidth ?? 0;
-  const sashing = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock) ? Math.max(0, rawSash) : 0;
+  const sashing = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar) ? Math.max(0, rawSash) : 0;
   const useSashedMath = sashing > 0;
   const innerW = planner.quiltWidth - 2 * planner.borderWidth;
   const innerH = planner.quiltHeight - 2 * planner.borderWidth;
