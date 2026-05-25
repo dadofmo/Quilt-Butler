@@ -943,10 +943,10 @@ console.log("\n=== Churn Dash: 50×65, 12\" block, no border ===");
   check("CD A bucket count", a.pieces.length, 3);
   check("CD A center count", a.pieces[0].count, 20);
   check("CD A HST count", a.pieces[1].count, 40);
-  check("CD A bar count", a.pieces[2].count, 40);
+  check("CD A bar count", a.pieces[2].count, 80);
   check("CD B bucket count", b.pieces.length, 2);
   check("CD B HST count", b.pieces[0].count, 40);
-  check("CD B bar count", b.pieces[1].count, 40);
+  check("CD B bar count", b.pieces[1].count, 80);
 }
 
 console.log("\n=== Churn Dash: 50×65, 12\" block, no border, 2\" sashing ===");
