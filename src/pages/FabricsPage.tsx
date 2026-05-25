@@ -55,7 +55,9 @@ function FabricsStepInner() {
   const isSquaresOnPointPattern = pattern.id === "squares-on-point";
   const isPinwheelPattern = pattern.id === "pinwheel";
   const isPlusBlockPattern = pattern.id === "plus-block";
-  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern || isSimpleSquaresPattern || isRailFencePattern || isLogCabinPattern || isOhioStarPattern || isFlyingGeesePattern || isD9PPattern || isSquaresOnPointPattern || isPinwheelPattern || isPlusBlockPattern) && (planner.sashingWidth || 0) > 0;
+  const isChurnDashPattern = pattern.id === "churn-dash";
+  const isSawtoothStarPattern = pattern.id === "sawtooth-star";
+  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern || isSimpleSquaresPattern || isRailFencePattern || isLogCabinPattern || isOhioStarPattern || isFlyingGeesePattern || isD9PPattern || isSquaresOnPointPattern || isPinwheelPattern || isPlusBlockPattern || isChurnDashPattern || isSawtoothStarPattern) && (planner.sashingWidth || 0) > 0;
   const hasCornerstonesSection = isBearPawPattern && hasSashing;
   const sections = pattern.sections.filter((s) => {
     if (s.id === "border") return hasBorder;
@@ -220,7 +222,9 @@ function FabricsStepInner() {
             const isSquaresOnPoint = pattern.id === "squares-on-point";
             const isPinwheel = pattern.id === "pinwheel";
             const isPlusBlock = pattern.id === "plus-block";
-            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock;
+            const isChurnDash = pattern.id === "churn-dash";
+            const isSawtoothStar = pattern.id === "sawtooth-star";
+            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar;
             const sashing = isSashed ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
