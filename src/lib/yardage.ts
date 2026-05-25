@@ -1184,6 +1184,25 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Sawtooth Star Assembly Tip: Make all your HST units first. Pair each star starting square with a background starting square, draw the diagonal on the lighter fabric, sew 1/4" on each side of the line, cut apart, press open, and trim to ${(u + SEAM).toFixed(3)}" square. Each pair yields 2 HSTs so you need 4 pairs per block yielding exactly 8 units. Then lay out your 4×4 grid — large center square, 8 HST units with star triangles all pointing inward, 4 background corner squares. Sew into four rows of four units then join the rows. Press seams in alternating directions so they nest at the intersections for a perfectly flat block.`,
     );
+
+    // Optional sashing between blocks (Sawtooth Star).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Sawtooth Star Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} Sawtooth Star blocks following the 4×4 grid steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the stars without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
   }
 
   // Border
