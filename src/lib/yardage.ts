@@ -156,9 +156,11 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isSquaresOnPoint = s.pattern === "squares-on-point";
   const isPinwheel = s.pattern === "pinwheel";
   const isPlusBlock = s.pattern === "plus-block";
+  const isChurnDash = s.pattern === "churn-dash";
+  const isSawtoothStar = s.pattern === "sawtooth-star";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
