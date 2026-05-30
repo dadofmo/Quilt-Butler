@@ -220,10 +220,40 @@ export async function openCheckout({ onSuccess, onCancel }: CheckoutHandlers): P
 
   let didFinish = false;
   let stopWatch: (() => void) | null = null;
+  const startWindowRestoreWatch = () => {
+    if (typeof window === "undefined") return () => undefined;
+
+    const queueRestore = () => {
+      window.setTimeout(() => {
+        if (!hasVisibleFreemiusCheckout()) {
+          scheduleRestorePasses();
+        }
+      }, 0);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        queueRestore();
+      }
+    };
+
+    window.addEventListener("focus", queueRestore);
+    window.addEventListener("pageshow", queueRestore);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", queueRestore);
+      window.removeEventListener("pageshow", queueRestore);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  };
+
+  const stopWindowRestoreWatch = startWindowRestoreWatch();
   const finish = (reason: "success" | "cancel") => {
     if (didFinish) return;
     didFinish = true;
     stopWatch?.();
+    stopWindowRestoreWatch();
     try {
       handler.close();
     } catch {
