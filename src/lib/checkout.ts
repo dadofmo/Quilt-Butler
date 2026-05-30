@@ -91,24 +91,68 @@ export async function openCheckout({ onSuccess, onCancel }: CheckoutHandlers): P
     document.body.style.position = "";
     document.body.style.paddingRight = "";
     document.body.style.top = "";
+    document.body.style.height = "";
+    document.body.style.width = "";
     document.documentElement.style.overflow = "";
+    document.documentElement.style.position = "";
+    document.documentElement.style.height = "";
+    document.body.classList.remove("fs-checkout-open", "fs-modal-open", "modal-open");
+    document.documentElement.classList.remove("fs-checkout-open", "fs-modal-open");
+  };
+
+  // Watchdog: the hosted Freemius X button doesn't always fire `cancel`
+  // (confirmed on production). Poll for the checkout iframe to disappear
+  // or become hidden and restore page scroll regardless.
+  let stopWatch: (() => void) | null = null;
+  const startCloseWatchdog = () => {
+    if (typeof window === "undefined") return;
+    const isVisible = () => {
+      const iframes = document.querySelectorAll<HTMLIFrameElement>(
+        'iframe[src*="checkout.freemius.com"]',
+      );
+      for (const f of iframes) {
+        const r = f.getBoundingClientRect();
+        const s = window.getComputedStyle(f);
+        if (s.display !== "none" && s.visibility !== "hidden" && r.width > 0 && r.height > 0) {
+          return true;
+        }
+      }
+      return false;
+    };
+    let everVisible = false;
+    const id = window.setInterval(() => {
+      if (isVisible()) {
+        everVisible = true;
+      } else if (everVisible) {
+        restoreScroll();
+        stopWatch?.();
+      }
+    }, 250);
+    stopWatch = () => {
+      window.clearInterval(id);
+      stopWatch = null;
+    };
   };
 
   handler.open({
     name: "QuiltButler",
     licenses: 1,
     purchaseCompleted: () => {
+      stopWatch?.();
       restoreScroll();
       onSuccess();
     },
     success: () => {
       // Some Freemius flows fire `success` instead of purchaseCompleted.
+      stopWatch?.();
       restoreScroll();
       onSuccess();
     },
     cancel: () => {
+      stopWatch?.();
       restoreScroll();
       onCancel?.();
     },
   });
+  startCloseWatchdog();
 }
