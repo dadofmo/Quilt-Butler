@@ -152,6 +152,19 @@ function PatternPickerInner() {
           if (id) choose(id);
         }}
       />
+      {/* TEMP DEBUG — remove after owner finishes testing payment flow. */}
+      {hasFullLicense() && (
+        <button
+          type="button"
+          onClick={() => {
+            localStorage.removeItem("qb_license_v1");
+            window.location.reload();
+          }}
+          className="fixed bottom-3 right-3 z-50 rounded-md border border-border bg-background/90 px-3 py-1.5 text-xs text-muted-foreground shadow-sm hover:text-foreground"
+        >
+          Re-lock (testing)
+        </button>
+      )}
     </StepShell>
 
   );
