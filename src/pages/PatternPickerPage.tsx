@@ -6,7 +6,7 @@ import { PatternThumb } from "@/components/PatternThumb";
 import { PATTERNS, getPattern } from "@/lib/patterns";
 import { setPlanner } from "@/lib/planner-store";
 import { UnlockModal } from "@/components/UnlockModal";
-import { isUnlocked } from "@/lib/license";
+import { isUnlocked, hasFullLicense } from "@/lib/license";
 import { Lock } from "lucide-react";
 
 import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
