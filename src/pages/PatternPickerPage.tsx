@@ -89,7 +89,8 @@ function PatternPickerInner() {
           return (
             <div key={p.id} className="flex flex-col items-center">
               <button
-                onClick={() => ready && choose(p.id)}
+                onClick={() => ready && handleTileClick(p.id)}
+
                 disabled={!ready}
                 aria-disabled={!ready}
                 aria-label={p.name}
