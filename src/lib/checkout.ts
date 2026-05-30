@@ -69,6 +69,73 @@ export type CheckoutHandlers = {
   onCancel?: () => void;
 };
 
+export function restoreCheckoutPageState() {
+  if (typeof document === "undefined") return;
+
+  const bodyTop = Number.parseInt(document.body.style.top || "0", 10);
+  const shouldRestoreScrollPosition = Number.isFinite(bodyTop) && bodyTop !== 0;
+
+  document.body.style.overflow = "";
+  document.body.style.position = "";
+  document.body.style.paddingRight = "";
+  document.body.style.top = "";
+  document.body.style.height = "";
+  document.body.style.width = "";
+  document.body.style.pointerEvents = "";
+  document.body.style.touchAction = "";
+
+  document.documentElement.style.overflow = "";
+  document.documentElement.style.position = "";
+  document.documentElement.style.height = "";
+  document.documentElement.style.width = "";
+  document.documentElement.style.pointerEvents = "";
+  document.documentElement.style.touchAction = "";
+
+  document.body.classList.remove("fs-checkout-open", "fs-modal-open", "modal-open");
+  document.documentElement.classList.remove("fs-checkout-open", "fs-modal-open");
+
+  document.body.removeAttribute("data-scroll-locked");
+  document.body.removeAttribute("inert");
+  document.documentElement.removeAttribute("inert");
+  document.body.style.removeProperty("--removed-body-scroll-bar-size");
+
+  const viewportWidth = window.innerWidth || 0;
+  const viewportHeight = window.innerHeight || 0;
+  const cleanupCandidates = new Set<HTMLElement>();
+
+  document
+    .querySelectorAll<HTMLElement>('iframe[src*="checkout.freemius.com"], body > div, body > section')
+    .forEach((node) => {
+      const style = window.getComputedStyle(node);
+      const rect = node.getBoundingClientRect();
+      const isFreemiusFrame =
+        node.tagName === "IFRAME" &&
+        typeof (node as HTMLIFrameElement).src === "string" &&
+        (node as HTMLIFrameElement).src.includes("checkout.freemius.com");
+      const containsFreemiusFrame = !!node.querySelector?.('iframe[src*="checkout.freemius.com"]');
+      const looksLikeFullscreenOverlay =
+        (style.position === "fixed" || style.position === "absolute") &&
+        rect.width >= viewportWidth * 0.9 &&
+        rect.height >= viewportHeight * 0.9;
+      const isHiddenOverlay =
+        (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") &&
+        (style.position === "fixed" || style.position === "absolute");
+
+      if (isFreemiusFrame || containsFreemiusFrame || looksLikeFullscreenOverlay || isHiddenOverlay) {
+        cleanupCandidates.add(node);
+      }
+    });
+
+  cleanupCandidates.forEach((node) => {
+    if (node.id === "root") return;
+    node.remove();
+  });
+
+  if (shouldRestoreScrollPosition) {
+    window.scrollTo({ top: Math.abs(bodyTop) });
+  }
+}
+
 export async function openCheckout({ onSuccess, onCancel }: CheckoutHandlers): Promise<void> {
   await loadScript();
   if (!window.FS?.Checkout) throw new Error("Freemius Checkout unavailable");
@@ -82,28 +149,28 @@ export async function openCheckout({ onSuccess, onCancel }: CheckoutHandlers): P
     mode: FREEMIUS_MODE === "sandbox" ? "sandbox" : "live",
   });
 
-  const restoreScroll = () => {
-    // Freemius's checkout locks body scroll while open and sometimes
-    // forgets to fully restore it when closed via the X. Force-clear
-    // the styles it (and any wrapping modal) may have left behind.
-    if (typeof document === "undefined") return;
-    document.body.style.overflow = "";
-    document.body.style.position = "";
-    document.body.style.paddingRight = "";
-    document.body.style.top = "";
-    document.body.style.height = "";
-    document.body.style.width = "";
-    document.documentElement.style.overflow = "";
-    document.documentElement.style.position = "";
-    document.documentElement.style.height = "";
-    document.body.classList.remove("fs-checkout-open", "fs-modal-open", "modal-open");
-    document.documentElement.classList.remove("fs-checkout-open", "fs-modal-open");
+  let didFinish = false;
+  let stopWatch: (() => void) | null = null;
+  const finish = (reason: "success" | "cancel") => {
+    if (didFinish) return;
+    didFinish = true;
+    stopWatch?.();
+    try {
+      handler.close();
+    } catch {
+      // ignore cleanup failures from the hosted SDK
+    }
+    restoreCheckoutPageState();
+    if (reason === "success") {
+      onSuccess();
+      return;
+    }
+    onCancel?.();
   };
 
   // Watchdog: the hosted Freemius X button doesn't always fire `cancel`
   // (confirmed on production). Poll for the checkout iframe to disappear
   // or become hidden and restore page scroll regardless.
-  let stopWatch: (() => void) | null = null;
   const startCloseWatchdog = () => {
     if (typeof window === "undefined") return;
     const isVisible = () => {
@@ -124,8 +191,7 @@ export async function openCheckout({ onSuccess, onCancel }: CheckoutHandlers): P
       if (isVisible()) {
         everVisible = true;
       } else if (everVisible) {
-        restoreScroll();
-        stopWatch?.();
+        finish("cancel");
       }
     }, 250);
     stopWatch = () => {
@@ -138,20 +204,17 @@ export async function openCheckout({ onSuccess, onCancel }: CheckoutHandlers): P
     name: "QuiltButler",
     licenses: 1,
     purchaseCompleted: () => {
-      stopWatch?.();
-      restoreScroll();
-      onSuccess();
+      finish("success");
     },
     success: () => {
       // Some Freemius flows fire `success` instead of purchaseCompleted.
-      stopWatch?.();
-      restoreScroll();
-      onSuccess();
+      finish("success");
     },
     cancel: () => {
-      stopWatch?.();
-      restoreScroll();
-      onCancel?.();
+      finish("cancel");
+    },
+    canceled: () => {
+      finish("cancel");
     },
   });
   startCloseWatchdog();

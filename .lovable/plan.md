@@ -1,16 +1,20 @@
-1. Update the Freemius checkout integration so scroll cleanup does not rely only on Freemius callbacks.
-   - Add a stronger cleanup path in `src/lib/checkout.ts` that detects the hosted checkout closing even when the top-right X does not fire `cancel`.
-   - Use a DOM-based fallback (for example: observing checkout overlay removal/visibility change and restoring page scroll) so production behavior matches the success/cancel paths.
+## Plan
 
-2. Keep the page resilient if any overlay styles are left behind.
-   - Expand the existing restore routine to clear the relevant `body`/`html` lock styles and any leftover fixed-position/top offset values.
-   - If needed, also remove any inert empty Freemius backdrop element still intercepting scrolling after close.
+1. Rework the Freemius checkout cleanup so it does more than clear `body/html` overflow.
+   - Add one shared teardown routine in `src/lib/checkout.ts` that restores scroll styles, clears any leftover fixed-position/top-offset state, and removes any orphaned Freemius overlay/iframe/backdrop nodes still attached after the hosted X is clicked.
 
-3. Validate on the deployed flow.
-   - Reproduce the exact sequence on `quiltbutler.com`: open locked pattern, launch checkout, close with X, then verify the page scrolls normally.
-   - Confirm the normal purchase-success path still unlocks as before.
+2. Make the close detection more reliable for the hosted modal.
+   - Keep the existing success/cancel callbacks, but also watch for the Freemius modal DOM disappearing, becoming hidden, or leaving behind an inert overlay that still captures wheel/touch events.
+   - Run the teardown exactly once no matter which close path fires.
 
-Technical details
-- Files likely touched: `src/lib/checkout.ts` and only if necessary `src/components/UnlockModal.tsx`.
-- No backend or payment-config changes.
-- The bug appears to be specific to the hosted Freemius close control on production, which seems to bypass our current `cancel` cleanup path.
+3. Tighten the app-side modal cleanup.
+   - Update `src/components/UnlockModal.tsx` so unmount/close also restores the broader page scroll state and doesn’t rely on Freemius firing a specific callback.
+
+4. Validate against the exact user flow.
+   - Reproduce: open locked pattern → click “Unlock all patterns” → click the Freemius X → verify the QuiltButler page scrolls normally again on the published site and preview.
+
+## Technical details
+
+- Files likely touched: `src/lib/checkout.ts`, `src/components/UnlockModal.tsx`
+- Goal: fix only the post-close scroll lock; no payment-provider/config changes
+- I’ll target invisible leftover Freemius DOM/state, since the modal is disappearing visually but scroll is still blocked afterward.
