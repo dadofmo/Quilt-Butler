@@ -132,6 +132,16 @@ function PatternPickerInner() {
           QuiltButler is a free online quilt planning tool built for quilters of every skill level. Choose from multiple quilt patterns — from beginner-friendly Nine Patch and Half Square Triangles to more complex designs — with new patterns added regularly. Enter your quilt size and fabric choices to instantly receive exact yardage requirements, visual cutting diagrams, and a printable shopping list. Use the Quilt Visualizer to see how your fabric choices will look before you buy a single yard. Estimate your total project cost with the built-in cost calculator, and get helpful quilting tips along the way. No login required — just open QuiltButler and get your complete quilt plan. Happy Quilting!
         </p>
       </section>
+      <UnlockModal
+        open={pendingPattern !== null}
+        onOpenChange={(o) => { if (!o) setPendingPattern(null); }}
+        onUnlocked={() => {
+          const id = pendingPattern;
+          setPendingPattern(null);
+          if (id) choose(id);
+        }}
+      />
     </StepShell>
+
   );
 }
