@@ -74,6 +74,7 @@ export async function openCheckout({ onSuccess, onCancel }: CheckoutHandlers): P
   if (!window.FS?.Checkout) throw new Error("Freemius Checkout unavailable");
 
   const handler = window.FS.Checkout.configure({
+    plugin_id: FREEMIUS_CONFIG.product_id,
     product_id: FREEMIUS_CONFIG.product_id,
     plan_id: FREEMIUS_CONFIG.plan_id,
     pricing_id: FREEMIUS_CONFIG.pricing_id,
