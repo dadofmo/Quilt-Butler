@@ -7,6 +7,8 @@ import { PATTERNS, getPattern } from "@/lib/patterns";
 import { setPlanner } from "@/lib/planner-store";
 import { UnlockModal } from "@/components/UnlockModal";
 import { isUnlocked } from "@/lib/license";
+import { Lock } from "lucide-react";
+
 import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
 
 
@@ -86,14 +88,14 @@ function PatternPickerInner() {
       <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:grid-cols-3 sm:gap-4">
         {PATTERNS.map((p) => {
           const ready = p.hasMath;
+          const locked = ready && !isUnlocked(p.id);
           return (
             <div key={p.id} className="flex flex-col items-center">
               <button
                 onClick={() => ready && handleTileClick(p.id)}
-
                 disabled={!ready}
                 aria-disabled={!ready}
-                aria-label={p.name}
+                aria-label={locked ? `${p.name} (locked)` : p.name}
                 className={
                   "group relative flex w-full flex-col items-center gap-3 rounded-xl border-2 border-border bg-card p-4 text-center transition-all focus:outline-none focus:ring-2 focus:ring-ring " +
                   (ready
@@ -122,10 +124,19 @@ function PatternPickerInner() {
                     Coming soon
                   </span>
                 )}
+                {locked && (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md"
+                  >
+                    <Lock className="h-3.5 w-3.5" />
+                  </span>
+                )}
               </button>
             </div>
           );
         })}
+
       </div>
       <section className="mx-auto mt-16 max-w-2xl px-4 py-10 text-center sm:mt-20 sm:py-12">
         <p className="text-xs leading-relaxed text-muted-foreground/70 sm:text-sm">
