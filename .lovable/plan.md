@@ -1,44 +1,28 @@
-## Goal
+## Go live
 
-Give you a safe way to hand out free access without exposing anything stealable in the app's JavaScript, while keeping a fast test bypass for sandbox.
+Single change in `src/lib/freemius-config.ts`:
 
-## Approach
+```ts
+export const FREEMIUS_MODE: "sandbox" | "live" = "live";
+```
 
-### 1. Free gifting → Freemius coupons (no code changes needed)
+### What this flips
+- `openCheckout` passes `mode: "live"` to Freemius → real charges, real licenses, real payouts.
+- `applyBypassCode("#QBFREE")` returns `false` → the sandbox bypass is dead on the live site, even if someone finds the string in the bundle.
+- `TestModeBanner` (if it keys off `FREEMIUS_MODE === "sandbox"`) disappears.
+- Real purchases and 100%-off coupon redemptions still persist via `unlock("purchase")` → `localStorage`, unchanged.
 
-Freemius has a built-in coupon system. You create a 100% discount code in your Freemius dashboard (Pricing → Coupons → "Add Coupon"). Recipients enter the code during the Freemius checkout window that already opens from the Unlock modal. Total becomes $0, they "complete" the purchase, and the existing `purchaseCompleted` handler in `src/lib/checkout.ts` fires — their device gets a real persisted license, identical to a paying customer.
+### Pre-flight (your side, not code)
+- Freemius dashboard: payout/banking info complete, product 30617 / plan 50283 / pricing 66203 set to $7.99 live, public key `pk_f993d...` is the production key (it is in most Freemius setups — sandbox and live share the public key, mode is what switches).
+- Any gift coupons you want ready (e.g. `QBGIFT2026`, 100% off) created in the live coupon list — sandbox coupons do not carry over.
 
-Per-coupon controls in the Freemius dashboard:
-- Single-use vs. multi-use
-- Expiration date
-- Max redemptions
-- Per-user limits
-- Revoke at any time
-- Full redemption log
+### After deploy — smoke test
+1. Open the live site in a fresh incognito window. Padlocks visible.
+2. Click a locked pattern → Unlock modal → "Have a code?" → enter `#QBFREE` → should fail.
+3. Click "Unlock all patterns" → Freemius checkout should open in **live** mode (no sandbox banner inside the popup).
+4. Either close it, or run one real $7.99 purchase / 100%-off coupon to confirm `purchaseCompleted` still persists the license.
 
-Nothing about the coupon lives in your JS bundle, so it cannot be extracted by inspecting the site.
+### Files touched
+- `src/lib/freemius-config.ts` — one line.
 
-### 2. `#QBFREE` becomes sandbox-only session unlock
-
-Changes to `src/lib/license.ts`:
-- Add an in-memory `sessionUnlocked` flag (resets on page reload).
-- `applyBypassCode("#QBFREE")`:
-  - In sandbox mode → sets `sessionUnlocked = true`, does NOT write to `localStorage`. Padlocks reappear on next page load.
-  - In live mode → returns `false` (no-op). Code is worthless to anyone who finds it in the bundle on the live site.
-- `unlock("purchase")` continues to write to `localStorage` in both modes — real Freemius purchases (including coupon-redeemed ones) persist forever.
-- `isUnlocked(id)` returns true if the pattern is free, OR `sessionUnlocked` is true, OR a persisted license exists.
-- One-time migration: on load, if `qb_license_v1` exists with `source === "bypass"`, delete it. Cleans up any leftover unlock from earlier testing so padlocks come back automatically.
-
-No UI changes — `PatternPickerPage` already reacts to `isUnlocked()`.
-
-## What you'll do after this ships
-
-1. Log into your Freemius dashboard.
-2. Create a 100% coupon (e.g. `QBGIFT2026`).
-3. Share that code with whoever you want to gift access to. They redeem it inside the Freemius checkout window.
-
-## Files touched
-
-- `src/lib/license.ts` — session flag, sandbox-only bypass, bypass-source migration.
-
-That's it. The Unlock modal, checkout flow, and pattern picker UI stay as they are.
+That's the whole change.

@@ -1,7 +1,7 @@
 // Freemius paywall configuration.
 // To go live: change FREEMIUS_MODE from "sandbox" to "live". That's it.
 
-export const FREEMIUS_MODE: "sandbox" | "live" = "sandbox";
+export const FREEMIUS_MODE: "sandbox" | "live" = "live";
 
 export const FREEMIUS_CONFIG = {
   product_id: "30617",
