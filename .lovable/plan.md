@@ -1,23 +1,49 @@
-## Plan
+## Goal
+Add the approved legal pages, a site-wide footer, a one-time cookie banner, and a Freemius license-recovery link in both the unlock modal and the footer. No refund policy or refund language anywhere.
 
-1. Reproduce the issue on each live URL separately
-- Test the full incognito flow on `quiltbutler.com`, the Vercel deployment, and `quiltbutler.lovable.app`.
-- Confirm which exact domain still locks scroll after closing Freemius with the hosted X.
+## What gets built
 
-2. Compare what code each domain is actually serving
-- Check the built JS/CSS asset filenames and bundle contents on each domain.
-- Verify whether `quiltbutler.com` is still serving an older checkout bundle or cached HTML that misses the latest cleanup code.
-- If the domains differ, stop changing app code and fix the deployment/caching mismatch instead.
+1. **Two legal pages**, using the exact wording approved in chat
+   - `/terms` — Terms of Service (8 sections; §2 includes the email-consent paragraph)
+   - `/privacy` — Privacy Policy (includes "Occasional emails from QuiltButler"; no refund references)
+   - Centered prose, semantic headings, "Last updated: May 29, 2026"
+   - Each page sets its own `<title>` and meta description
 
-3. If the latest bundle is already live, patch the remaining close path
-- Inspect the live DOM after close for leftover fixed overlays, scroll-lock attributes, or a locked app container.
-- Tighten the cleanup so it restores scroll even if Freemius closes through an unreported path or leaves a hidden fullscreen wrapper behind.
-- Keep the change limited to checkout close handling only.
+2. **Site-wide footer** (mounted once in the shared layout)
+   - Links: Terms · Privacy · Support (`mailto:quiltbutler@gmail.com`) · Recover license
+   - "© QuiltButler" line, no personal name, no Refunds link
+   - "Recover license" opens `https://dashboard.freemius.com/license-recovery/30617/quilt-butler/` in a new tab
 
-4. Validate the exact user scenario before finishing
-- Re-run the incognito flow on the affected domain after the change.
-- Confirm the page scrolls immediately after clicking the Freemius X.
+3. **License-recovery link in the Unlock modal**
+   - New small secondary link directly under the existing "Already purchased? Enter your license key" row
+   - Label: *"Lost your license key? Recover it"*
+   - Opens the same Freemius recovery URL in a new tab (`target="_blank"`, `rel="noopener noreferrer"`)
+
+4. **One-time cookie banner**
+   - Bottom-of-screen, single "Got it" dismiss button
+   - Stores acknowledgment in `localStorage`; never shown again on that device
+   - Copy: "We use a few cookies for analytics and to remember your license on this device. See our Privacy Policy."
+   - Disclosure only — does not gate analytics
+
+5. **Routing**
+   - Register `/terms` and `/privacy` in the existing router as public routes
 
 ## Technical details
-- Most likely causes now are: stale deployment/cached bundle, domain mismatch between environments, or one remaining DOM wrapper outside the current cleanup selectors.
-- I will avoid more speculative code changes until I verify which bundle is live on the failing domain.
+
+- **New files**
+  - `src/pages/TermsPage.tsx`
+  - `src/pages/PrivacyPage.tsx`
+  - `src/components/SiteFooter.tsx`
+  - `src/components/CookieBanner.tsx`
+- **Edited files**
+  - `src/App.tsx` — add the two routes, mount `<SiteFooter />` and `<CookieBanner />` in the shared layout
+  - `src/components/UnlockModal.tsx` — add the "Lost your license key? Recover it" link
+  - `public/sitemap.xml` — add `/terms` and `/privacy`
+- **Recovery URL constant** — hardcoded once (e.g., in `src/lib/freemius-config.ts`) so the modal and footer share it
+- **Styling** — Tailwind + existing semantic tokens only (no hardcoded colors)
+- **Identity** — generic ("QuiltButler" / "a personal project" / `quiltbutler@gmail.com`); no personal name
+- No backend changes, no new dependencies, no changes to checkout/Freemius send flow
+
+## Out of scope
+- No Refund Policy page and no refund language anywhere
+- No email capture or marketing opt-in UI
