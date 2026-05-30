@@ -19,14 +19,29 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
   const [keyError, setKeyError] = useState<string | null>(null);
   const [keyLoading, setKeyLoading] = useState(false);
 
+  // Safety net: if this modal unmounts for any reason, make sure no
+  // leftover scroll-lock styles (from Freemius or Radix) remain on body.
+  useEffect(() => {
+    return () => {
+      if (typeof document === "undefined") return;
+      document.body.style.overflow = "";
+      document.body.style.position = "";
+      document.body.style.paddingRight = "";
+      document.body.style.top = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, []);
+
   const handleUnlock = async () => {
     setLoading(true);
+    // Close our Radix dialog before opening the Freemius overlay so the
+    // two scroll-lock systems don't tangle when the user closes Freemius.
+    onOpenChange(false);
     try {
       await openCheckout({
         onSuccess: () => {
           unlock("purchase");
           onUnlocked();
-          onOpenChange(false);
         },
         onCancel: () => {
           setLoading(false);
