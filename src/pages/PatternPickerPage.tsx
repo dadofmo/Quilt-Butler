@@ -1,10 +1,14 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { PatternThumb } from "@/components/PatternThumb";
 import { PATTERNS, getPattern } from "@/lib/patterns";
 import { setPlanner } from "@/lib/planner-store";
+import { UnlockModal } from "@/components/UnlockModal";
+import { isUnlocked } from "@/lib/license";
 import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
+
 
 export default function PatternPicker() {
   return (
@@ -36,6 +40,7 @@ export default function PatternPicker() {
 
 function PatternPickerInner() {
   const navigate = useNavigate();
+  const [pendingPattern, setPendingPattern] = useState<(typeof PATTERNS)[number]["id"] | null>(null);
 
   const choose = (id: (typeof PATTERNS)[number]["id"]) => {
     const pattern = getPattern(id);
@@ -52,6 +57,15 @@ function PatternPickerInner() {
     setPlanner({ pattern: id, assignments });
     navigate("/size");
   };
+
+  const handleTileClick = (id: (typeof PATTERNS)[number]["id"]) => {
+    if (isUnlocked(id)) {
+      choose(id);
+    } else {
+      setPendingPattern(id);
+    }
+  };
+
 
   return (
     <StepShell step={1} title="">
