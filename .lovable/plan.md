@@ -1,20 +1,23 @@
 ## Plan
 
-1. Rework the Freemius checkout cleanup so it does more than clear `body/html` overflow.
-   - Add one shared teardown routine in `src/lib/checkout.ts` that restores scroll styles, clears any leftover fixed-position/top-offset state, and removes any orphaned Freemius overlay/iframe/backdrop nodes still attached after the hosted X is clicked.
+1. Reproduce the issue on each live URL separately
+- Test the full incognito flow on `quiltbutler.com`, the Vercel deployment, and `quiltbutler.lovable.app`.
+- Confirm which exact domain still locks scroll after closing Freemius with the hosted X.
 
-2. Make the close detection more reliable for the hosted modal.
-   - Keep the existing success/cancel callbacks, but also watch for the Freemius modal DOM disappearing, becoming hidden, or leaving behind an inert overlay that still captures wheel/touch events.
-   - Run the teardown exactly once no matter which close path fires.
+2. Compare what code each domain is actually serving
+- Check the built JS/CSS asset filenames and bundle contents on each domain.
+- Verify whether `quiltbutler.com` is still serving an older checkout bundle or cached HTML that misses the latest cleanup code.
+- If the domains differ, stop changing app code and fix the deployment/caching mismatch instead.
 
-3. Tighten the app-side modal cleanup.
-   - Update `src/components/UnlockModal.tsx` so unmount/close also restores the broader page scroll state and doesn’t rely on Freemius firing a specific callback.
+3. If the latest bundle is already live, patch the remaining close path
+- Inspect the live DOM after close for leftover fixed overlays, scroll-lock attributes, or a locked app container.
+- Tighten the cleanup so it restores scroll even if Freemius closes through an unreported path or leaves a hidden fullscreen wrapper behind.
+- Keep the change limited to checkout close handling only.
 
-4. Validate against the exact user flow.
-   - Reproduce: open locked pattern → click “Unlock all patterns” → click the Freemius X → verify the QuiltButler page scrolls normally again on the published site and preview.
+4. Validate the exact user scenario before finishing
+- Re-run the incognito flow on the affected domain after the change.
+- Confirm the page scrolls immediately after clicking the Freemius X.
 
 ## Technical details
-
-- Files likely touched: `src/lib/checkout.ts`, `src/components/UnlockModal.tsx`
-- Goal: fix only the post-close scroll lock; no payment-provider/config changes
-- I’ll target invisible leftover Freemius DOM/state, since the modal is disappearing visually but scroll is still blocked afterward.
+- Most likely causes now are: stale deployment/cached bundle, domain mismatch between environments, or one remaining DOM wrapper outside the current cleanup selectors.
+- I will avoid more speculative code changes until I verify which bundle is live on the failing domain.
