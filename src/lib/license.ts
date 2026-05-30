@@ -1,7 +1,14 @@
-// Client-only license check. No backend, no network calls.
-// Real purchases (including 100%-off Freemius coupons) are persisted in
-// localStorage under qb_license_v1. The #QBFREE bypass code is sandbox-only
-// and unlocks for the current page session only — padlocks reappear on reload.
+// License state. Mostly client-only; license-key activation calls a
+// Vercel serverless function (/api/license-activate) that talks to
+// Freemius using the server-side FREEMIUS_SECRET_KEY.
+//
+// Customers receive a license key in their purchase email. They can
+// re-enter it on any device, any browser, after any cache clear — this
+// is the fail-safe path for iOS Safari storage purges, new phones, etc.
+//
+// Legacy: the in-browser purchaseCompleted callback still writes a
+// localStorage record with source "purchase" so existing buyers keep
+// access without re-entering anything.
 
 import { FREEMIUS_MODE } from "./freemius-config";
 
@@ -12,7 +19,9 @@ export const FREE_PATTERNS: readonly string[] = ["nine-patch"];
 
 type LicenseRecord = {
   unlocked: boolean;
-  source: "purchase" | "bypass";
+  source: "purchase" | "bypass" | "key" | "owner";
+  /** License key, if unlock came from key entry. */
+  licenseKey?: string;
   at: string; // ISO timestamp
 };
 
@@ -56,10 +65,11 @@ export function hasFullLicense(): boolean {
   return readLicense() !== null;
 }
 
-export function unlock(source: LicenseRecord["source"] = "purchase"): void {
+export function unlock(source: LicenseRecord["source"] = "purchase", licenseKey?: string): void {
   const record: LicenseRecord = {
     unlocked: true,
     source,
+    licenseKey,
     at: new Date().toISOString(),
   };
   try {
@@ -70,14 +80,46 @@ export function unlock(source: LicenseRecord["source"] = "purchase"): void {
 }
 
 /**
+ * Activate a license key against the server. On success, persists the
+ * unlock so it survives reloads on this device.
+ */
+export async function activateLicenseKey(
+  rawKey: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const licenseKey = rawKey.trim();
+  if (!licenseKey) {
+    return { ok: false, error: "Please enter your license key." };
+  }
+  try {
+    const res = await fetch("/api/license-activate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ licenseKey }),
+    });
+    const data = (await res.json().catch(() => ({}))) as {
+      ok?: boolean;
+      error?: string;
+      source?: "owner" | "freemius";
+    };
+    if (!res.ok || !data.ok) {
+      return {
+        ok: false,
+        error: data.error || "We couldn't activate that key. Please try again.",
+      };
+    }
+    unlock(data.source === "owner" ? "owner" : "key", licenseKey);
+    return { ok: true };
+  } catch {
+    return {
+      ok: false,
+      error: "Network error. Check your connection and try again.",
+    };
+  }
+}
+
+/**
  * Sandbox-only test bypass. In live mode this always returns false so the
- * code is worthless to anyone who finds it in the JS bundle. In sandbox it
- * flips an in-memory flag (no localStorage write) so padlocks reappear on
- * the next page load.
- *
- * For real free gifting, create a 100% discount coupon in the Freemius
- * dashboard — recipients enter it during checkout and get a real persisted
- * license via the normal purchaseCompleted flow.
+ * code is worthless to anyone who finds it in the JS bundle.
  */
 export function applyBypassCode(code: string): boolean {
   if (FREEMIUS_MODE !== "sandbox") return false;
