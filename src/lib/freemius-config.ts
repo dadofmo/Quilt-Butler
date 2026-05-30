@@ -10,5 +10,5 @@ export const FREEMIUS_CONFIG = {
   public_key: "pk_f993d14743e7f27a372ff2a194da1",
   // Display-only — the actual price charged is whatever you set in the
   // Freemius dashboard for the pricing above.
-  display_price: "$9",
+  display_price: "$7.99",
 } as const;
