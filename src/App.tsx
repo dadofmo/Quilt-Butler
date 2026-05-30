@@ -6,6 +6,8 @@ const SizePage = lazy(() => import("./pages/SizePage"));
 const FabricsPage = lazy(() => import("./pages/FabricsPage"));
 const ResultsPage = lazy(() => import("./pages/ResultsPage"));
 import { ScrollToTop } from "./components/ScrollToTop";
+import { TestModeBanner } from "./components/TestModeBanner";
+
 
 
 function NotFound() {
@@ -38,6 +40,7 @@ function NotFound() {
 export default function App() {
   return (
     <>
+      <TestModeBanner />
       <ScrollToTop />
       <Suspense fallback={null}>
         <Routes>
