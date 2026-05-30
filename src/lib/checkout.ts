@@ -69,6 +69,42 @@ export type CheckoutHandlers = {
   onCancel?: () => void;
 };
 
+function isVisibleElement(node: Element | null): node is HTMLElement {
+  if (!(node instanceof HTMLElement)) return false;
+  const style = window.getComputedStyle(node);
+  const rect = node.getBoundingClientRect();
+  return style.display !== "none" && style.visibility !== "hidden" && style.opacity !== "0" && rect.width > 0 && rect.height > 0;
+}
+
+function hasVisibleFreemiusCheckout() {
+  if (typeof document === "undefined") return false;
+  return Array.from(document.querySelectorAll('iframe[src*="checkout.freemius.com"]')).some((node) =>
+    isVisibleElement(node),
+  );
+}
+
+function hasVisibleAppDialog() {
+  if (typeof document === "undefined") return false;
+  return Array.from(document.querySelectorAll('[role="dialog"][data-state="open"]')).some((node) =>
+    isVisibleElement(node),
+  );
+}
+
+function scheduleRestorePasses() {
+  if (typeof window === "undefined") return;
+
+  const restoreIfSafe = () => {
+    if (hasVisibleFreemiusCheckout() || hasVisibleAppDialog()) return;
+    restoreCheckoutPageState();
+  };
+
+  restoreIfSafe();
+  window.requestAnimationFrame(restoreIfSafe);
+  [60, 180, 400, 900].forEach((delay) => {
+    window.setTimeout(restoreIfSafe, delay);
+  });
+}
+
 export function restoreCheckoutPageState() {
   if (typeof document === "undefined") return;
 
@@ -81,6 +117,11 @@ export function restoreCheckoutPageState() {
   document.body.style.top = "";
   document.body.style.height = "";
   document.body.style.width = "";
+  document.body.style.left = "";
+  document.body.style.right = "";
+  document.body.style.overflowX = "";
+  document.body.style.overflowY = "";
+  document.body.style.overscrollBehavior = "";
   document.body.style.pointerEvents = "";
   document.body.style.touchAction = "";
 
@@ -88,6 +129,11 @@ export function restoreCheckoutPageState() {
   document.documentElement.style.position = "";
   document.documentElement.style.height = "";
   document.documentElement.style.width = "";
+  document.documentElement.style.left = "";
+  document.documentElement.style.right = "";
+  document.documentElement.style.overflowX = "";
+  document.documentElement.style.overflowY = "";
+  document.documentElement.style.overscrollBehavior = "";
   document.documentElement.style.pointerEvents = "";
   document.documentElement.style.touchAction = "";
 
@@ -131,6 +177,29 @@ export function restoreCheckoutPageState() {
     node.remove();
   });
 
+  if (!hasVisibleFreemiusCheckout() && !hasVisibleAppDialog()) {
+    const bodyStyle = window.getComputedStyle(document.body);
+    const htmlStyle = window.getComputedStyle(document.documentElement);
+
+    if (bodyStyle.overflow === "hidden" || bodyStyle.overflowY === "hidden") {
+      document.body.style.overflow = "auto";
+      document.body.style.overflowY = "auto";
+    }
+
+    if (htmlStyle.overflow === "hidden" || htmlStyle.overflowY === "hidden") {
+      document.documentElement.style.overflow = "auto";
+      document.documentElement.style.overflowY = "auto";
+    }
+
+    if (bodyStyle.pointerEvents === "none") {
+      document.body.style.pointerEvents = "auto";
+    }
+
+    if (htmlStyle.pointerEvents === "none") {
+      document.documentElement.style.pointerEvents = "auto";
+    }
+  }
+
   if (shouldRestoreScrollPosition) {
     window.scrollTo({ top: Math.abs(bodyTop) });
   }
@@ -151,16 +220,69 @@ export async function openCheckout({ onSuccess, onCancel }: CheckoutHandlers): P
 
   let didFinish = false;
   let stopWatch: (() => void) | null = null;
+  let checkoutWasVisible = false;
+  let pendingReason: "success" | "cancel" | null = null;
+  const markVisibility = () => {
+    if (hasVisibleFreemiusCheckout()) {
+      checkoutWasVisible = true;
+      return true;
+    }
+    return false;
+  };
+  const settle = (reason: "success" | "cancel") => {
+    pendingReason = reason;
+
+    if (!markVisibility()) {
+      if (checkoutWasVisible) {
+        finish(reason);
+      }
+      return;
+    }
+
+    if (reason === "cancel") {
+      pendingReason = "cancel";
+    }
+  };
+  const startWindowRestoreWatch = () => {
+    if (typeof window === "undefined") return () => undefined;
+
+    const queueRestore = () => {
+      window.setTimeout(() => {
+        if (!hasVisibleFreemiusCheckout()) {
+          scheduleRestorePasses();
+        }
+      }, 0);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        queueRestore();
+      }
+    };
+
+    window.addEventListener("focus", queueRestore);
+    window.addEventListener("pageshow", queueRestore);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", queueRestore);
+      window.removeEventListener("pageshow", queueRestore);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  };
+
+  const stopWindowRestoreWatch = startWindowRestoreWatch();
   const finish = (reason: "success" | "cancel") => {
     if (didFinish) return;
     didFinish = true;
     stopWatch?.();
+    stopWindowRestoreWatch();
     try {
       handler.close();
     } catch {
       // ignore cleanup failures from the hosted SDK
     }
-    restoreCheckoutPageState();
+    scheduleRestorePasses();
     if (reason === "success") {
       onSuccess();
       return;
@@ -173,29 +295,33 @@ export async function openCheckout({ onSuccess, onCancel }: CheckoutHandlers): P
   // or become hidden and restore page scroll regardless.
   const startCloseWatchdog = () => {
     if (typeof window === "undefined") return;
-    const isVisible = () => {
-      const iframes = document.querySelectorAll<HTMLIFrameElement>(
-        'iframe[src*="checkout.freemius.com"]',
-      );
-      for (const f of iframes) {
-        const r = f.getBoundingClientRect();
-        const s = window.getComputedStyle(f);
-        if (s.display !== "none" && s.visibility !== "hidden" && r.width > 0 && r.height > 0) {
-          return true;
-        }
-      }
-      return false;
-    };
     let everVisible = false;
-    const id = window.setInterval(() => {
-      if (isVisible()) {
+    const checkClosed = () => {
+      if (markVisibility()) {
         everVisible = true;
       } else if (everVisible) {
-        finish("cancel");
+        finish(pendingReason ?? "cancel");
       }
+    };
+
+    const id = window.setInterval(() => {
+      checkClosed();
     }, 250);
+
+    const observer = new MutationObserver(() => {
+      checkClosed();
+    });
+
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "inert"],
+    });
+
     stopWatch = () => {
       window.clearInterval(id);
+      observer.disconnect();
       stopWatch = null;
     };
   };
@@ -204,17 +330,17 @@ export async function openCheckout({ onSuccess, onCancel }: CheckoutHandlers): P
     name: "QuiltButler",
     licenses: 1,
     purchaseCompleted: () => {
-      finish("success");
+      settle("success");
     },
     success: () => {
       // Some Freemius flows fire `success` instead of purchaseCompleted.
-      finish("success");
+      settle("success");
     },
     cancel: () => {
-      finish("cancel");
+      settle("cancel");
     },
     canceled: () => {
-      finish("cancel");
+      settle("cancel");
     },
   });
   startCloseWatchdog();
