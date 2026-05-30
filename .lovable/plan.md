@@ -1,44 +1,44 @@
-# Phase 1: Freemius Paywall (Frontend-Only)
+## Goal
 
-Free pattern: Nine Patch. Every other pattern opens an Unlock modal. A successful Freemius purchase — or your secret bypass code `#QBFREE` — stores a license in `localStorage` and unlocks all patterns forever on that device.
+Give you a safe way to hand out free access without exposing anything stealable in the app's JavaScript, while keeping a fast test bypass for sandbox.
 
-No Lovable Cloud. No backend. Survives any future Lovable plan change.
+## Approach
 
-## User flow
+### 1. Free gifting → Freemius coupons (no code changes needed)
 
-1. Visitor taps a paid pattern tile → Unlock modal opens.
-2. Modal shows: one-time price, what they get, "Unlock all patterns" button, and a small "Have a code?" link.
-3. Click Unlock → Freemius hosted checkout opens (popup).
-4. On success, Freemius fires a callback → we save the license locally → modal closes → user proceeds to the size step for the pattern they clicked.
-5. On every future visit, paid patterns are unlocked automatically (no login).
+Freemius has a built-in coupon system. You create a 100% discount code in your Freemius dashboard (Pricing → Coupons → "Add Coupon"). Recipients enter the code during the Freemius checkout window that already opens from the Unlock modal. Total becomes $0, they "complete" the purchase, and the existing `purchaseCompleted` handler in `src/lib/checkout.ts` fires — their device gets a real persisted license, identical to a paying customer.
 
-## Bypass code
+Per-coupon controls in the Freemius dashboard:
+- Single-use vs. multi-use
+- Expiration date
+- Max redemptions
+- Per-user limits
+- Revoke at any time
+- Full redemption log
 
-- Code: `#QBFREE` (hardcoded in `src/lib/license.ts`, one line, easy to change later).
-- Typed into the "Have a code?" field in the Unlock modal → unlocks the device immediately, no payment, no Freemius involvement.
-- For your own testing and anyone you want to give free access to. Don't post it publicly.
+Nothing about the coupon lives in your JS bundle, so it cannot be extracted by inspecting the site.
 
-## Files to create
+### 2. `#QBFREE` becomes sandbox-only session unlock
 
-- `src/lib/freemius-config.ts` — Product ID `30617`, Plan ID `50283`, Pricing ID `66203`, Public Key `pk_f993d14743e7f27a372ff2a194da1`, plus `FREEMIUS_MODE` (`"sandbox" | "live"`). One line to flip when going live.
-- `src/lib/license.ts` — `isUnlocked(patternId)`, `unlock()`, `applyBypassCode(code)`. `localStorage` key `qb_license_v1`. `FREE_PATTERNS = ["nine-patch"]`. Bypass code constant `#QBFREE`.
-- `src/lib/checkout.ts` — Lazy-loads the Freemius checkout script and exposes `openCheckout({ onSuccess })`.
-- `src/components/UnlockModal.tsx` — Dialog: headline, price, 3-bullet value prop, primary "Unlock all patterns" button, secondary "Have a code?" toggle that reveals an input + Apply button.
-- `src/components/TestModeBanner.tsx` — Small yellow banner shown only when `FREEMIUS_MODE === "sandbox"`. Hidden in live mode.
+Changes to `src/lib/license.ts`:
+- Add an in-memory `sessionUnlocked` flag (resets on page reload).
+- `applyBypassCode("#QBFREE")`:
+  - In sandbox mode → sets `sessionUnlocked = true`, does NOT write to `localStorage`. Padlocks reappear on next page load.
+  - In live mode → returns `false` (no-op). Code is worthless to anyone who finds it in the bundle on the live site.
+- `unlock("purchase")` continues to write to `localStorage` in both modes — real Freemius purchases (including coupon-redeemed ones) persist forever.
+- `isUnlocked(id)` returns true if the pattern is free, OR `sessionUnlocked` is true, OR a persisted license exists.
+- One-time migration: on load, if `qb_license_v1` exists with `source === "bypass"`, delete it. Cleans up any leftover unlock from earlier testing so padlocks come back automatically.
 
-## Files to edit
+No UI changes — `PatternPickerPage` already reacts to `isUnlocked()`.
 
-- `src/pages/PatternPickerPage.tsx` — In tile click handler: if `isUnlocked(p.id)` → `choose(p.id)` as today; else open `UnlockModal` with that pattern id. On modal success → `choose(p.id)`.
-- `src/App.tsx` — Render `<TestModeBanner />` above `<Routes>`.
+## What you'll do after this ships
 
-## Going live (one-line change, later)
+1. Log into your Freemius dashboard.
+2. Create a 100% coupon (e.g. `QBGIFT2026`).
+3. Share that code with whoever you want to gift access to. They redeem it inside the Freemius checkout window.
 
-Flip `FREEMIUS_MODE` from `"sandbox"` to `"live"` in `src/lib/freemius-config.ts`. The bypass code keeps working in both modes.
+## Files touched
 
-## Out of scope for Phase 1
+- `src/lib/license.ts` — session flag, sandbox-only bypass, bypass-source migration.
 
-Server-side license verification, license transfer between devices, analytics events.
-
-## What I need from you
-
-Just your approval — I'll use the Freemius values we already have and the code `#QBFREE`.
+That's it. The Unlock modal, checkout flow, and pattern picker UI stay as they are.
