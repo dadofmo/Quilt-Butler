@@ -5,8 +5,13 @@ import PatternPickerPage from "./pages/PatternPickerPage";
 const SizePage = lazy(() => import("./pages/SizePage"));
 const FabricsPage = lazy(() => import("./pages/FabricsPage"));
 const ResultsPage = lazy(() => import("./pages/ResultsPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
 import { ScrollToTop } from "./components/ScrollToTop";
 import { TestModeBanner } from "./components/TestModeBanner";
+import { SiteFooter } from "./components/SiteFooter";
+import { CookieBanner } from "./components/CookieBanner";
+
 
 
 
@@ -39,19 +44,25 @@ function NotFound() {
 
 export default function App() {
   return (
-    <>
+    <div className="flex min-h-screen flex-col">
       <TestModeBanner />
       <ScrollToTop />
-      <Suspense fallback={null}>
-        <Routes>
-          <Route path="/" element={<PatternPickerPage />} />
-          <Route path="/size" element={<SizePage />} />
-          <Route path="/fabrics" element={<FabricsPage />} />
-          <Route path="/results" element={<ResultsPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
-    </>
+      <div className="flex flex-1 flex-col">
+        <Suspense fallback={null}>
+          <Routes>
+            <Route path="/" element={<PatternPickerPage />} />
+            <Route path="/size" element={<SizePage />} />
+            <Route path="/fabrics" element={<FabricsPage />} />
+            <Route path="/results" element={<ResultsPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </div>
+      <SiteFooter />
+      <CookieBanner />
+    </div>
   );
 }
 
