@@ -220,6 +220,29 @@ export async function openCheckout({ onSuccess, onCancel }: CheckoutHandlers): P
 
   let didFinish = false;
   let stopWatch: (() => void) | null = null;
+  let checkoutWasVisible = false;
+  let pendingReason: "success" | "cancel" | null = null;
+  const markVisibility = () => {
+    if (hasVisibleFreemiusCheckout()) {
+      checkoutWasVisible = true;
+      return true;
+    }
+    return false;
+  };
+  const settle = (reason: "success" | "cancel") => {
+    pendingReason = reason;
+
+    if (!markVisibility()) {
+      if (checkoutWasVisible) {
+        finish(reason);
+      }
+      return;
+    }
+
+    if (reason === "cancel") {
+      pendingReason = "cancel";
+    }
+  };
   const startWindowRestoreWatch = () => {
     if (typeof window === "undefined") return () => undefined;
 
@@ -274,10 +297,10 @@ export async function openCheckout({ onSuccess, onCancel }: CheckoutHandlers): P
     if (typeof window === "undefined") return;
     let everVisible = false;
     const checkClosed = () => {
-      if (hasVisibleFreemiusCheckout()) {
+      if (markVisibility()) {
         everVisible = true;
       } else if (everVisible) {
-        finish("cancel");
+        finish(pendingReason ?? "cancel");
       }
     };
 
@@ -307,17 +330,17 @@ export async function openCheckout({ onSuccess, onCancel }: CheckoutHandlers): P
     name: "QuiltButler",
     licenses: 1,
     purchaseCompleted: () => {
-      finish("success");
+      settle("success");
     },
     success: () => {
       // Some Freemius flows fire `success` instead of purchaseCompleted.
-      finish("success");
+      settle("success");
     },
     cancel: () => {
-      finish("cancel");
+      settle("cancel");
     },
     canceled: () => {
-      finish("cancel");
+      settle("cancel");
     },
   });
   startCloseWatchdog();
