@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { openCheckout } from "@/lib/checkout";
+import { openCheckout, restoreCheckoutPageState } from "@/lib/checkout";
 import { unlock, activateLicenseKey } from "@/lib/license";
 import { FREEMIUS_CONFIG } from "@/lib/freemius-config";
 
@@ -23,12 +23,7 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
   // leftover scroll-lock styles (from Freemius or Radix) remain on body.
   useEffect(() => {
     return () => {
-      if (typeof document === "undefined") return;
-      document.body.style.overflow = "";
-      document.body.style.position = "";
-      document.body.style.paddingRight = "";
-      document.body.style.top = "";
-      document.documentElement.style.overflow = "";
+      restoreCheckoutPageState();
     };
   }, []);
 
