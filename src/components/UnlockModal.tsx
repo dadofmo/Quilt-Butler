@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { openCheckout, restoreCheckoutPageState } from "@/lib/checkout";
 import { unlock, activateLicenseKey } from "@/lib/license";
-import { FREEMIUS_CONFIG } from "@/lib/freemius-config";
+import { FREEMIUS_CONFIG, FREEMIUS_LICENSE_RECOVERY_URL } from "@/lib/freemius-config";
 
 type Props = {
   open: boolean;
@@ -90,13 +90,23 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
 
         <div className="mt-2 border-t pt-3">
           {!showKeyInput ? (
-            <button
-              type="button"
-              onClick={() => setShowKeyInput(true)}
-              className="text-sm text-primary underline-offset-2 hover:underline"
-            >
-              Already purchased? Enter your license key
-            </button>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => setShowKeyInput(true)}
+                className="block text-sm text-primary underline-offset-2 hover:underline"
+              >
+                Already purchased? Enter your license key
+              </button>
+              <a
+                href={FREEMIUS_LICENSE_RECOVERY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-sm text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+              >
+                Lost your license key? Recover it
+              </a>
+            </div>
           ) : (
             <div className="space-y-2">
               <label htmlFor="license-key" className="block text-sm font-medium text-foreground">
