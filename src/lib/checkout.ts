@@ -82,17 +82,32 @@ export async function openCheckout({ onSuccess, onCancel }: CheckoutHandlers): P
     mode: FREEMIUS_MODE === "sandbox" ? "sandbox" : "live",
   });
 
+  const restoreScroll = () => {
+    // Freemius's checkout locks body scroll while open and sometimes
+    // forgets to fully restore it when closed via the X. Force-clear
+    // the styles it (and any wrapping modal) may have left behind.
+    if (typeof document === "undefined") return;
+    document.body.style.overflow = "";
+    document.body.style.position = "";
+    document.body.style.paddingRight = "";
+    document.body.style.top = "";
+    document.documentElement.style.overflow = "";
+  };
+
   handler.open({
     name: "QuiltButler",
     licenses: 1,
     purchaseCompleted: () => {
+      restoreScroll();
       onSuccess();
     },
     success: () => {
       // Some Freemius flows fire `success` instead of purchaseCompleted.
+      restoreScroll();
       onSuccess();
     },
     cancel: () => {
+      restoreScroll();
       onCancel?.();
     },
   });
