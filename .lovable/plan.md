@@ -1,28 +1,23 @@
-## Go live
+## Fix: load jQuery before Freemius checkout
 
-Single change in `src/lib/freemius-config.ts`:
+The console error on quiltbutler.com is `Uncaught ReferenceError: jQuery is not defined` from `checkout.min.js`. Freemius's hosted checkout script requires jQuery on `window`, and our app doesn't include it. That's why clicking "Unlock all patterns" does nothing.
 
-```ts
-export const FREEMIUS_MODE: "sandbox" | "live" = "live";
-```
+### Change
 
-### What this flips
-- `openCheckout` passes `mode: "live"` to Freemius → real charges, real licenses, real payouts.
-- `applyBypassCode("#QBFREE")` returns `false` → the sandbox bypass is dead on the live site, even if someone finds the string in the bundle.
-- `TestModeBanner` (if it keys off `FREEMIUS_MODE === "sandbox"`) disappears.
-- Real purchases and 100%-off coupon redemptions still persist via `unlock("purchase")` → `localStorage`, unchanged.
+Update `src/lib/checkout.ts` so `loadScript()` loads jQuery first (if not already present), then loads the Freemius script.
 
-### Pre-flight (your side, not code)
-- Freemius dashboard: payout/banking info complete, product 30617 / plan 50283 / pricing 66203 set to $7.99 live, public key `pk_f993d...` is the production key (it is in most Freemius setups — sandbox and live share the public key, mode is what switches).
-- Any gift coupons you want ready (e.g. `QBGIFT2026`, 100% off) created in the live coupon list — sandbox coupons do not carry over.
+Sequence inside `loadScript()`:
+1. If `window.jQuery` exists → skip jQuery load.
+2. Otherwise inject `<script src="https://code.jquery.com/jquery-3.7.1.min.js">` and await its `load` event.
+3. Then inject the existing Freemius `https://checkout.freemius.com/checkout.min.js` and await its `load` event.
+4. Cache the combined promise so repeat clicks don't re-fetch.
 
-### After deploy — smoke test
-1. Open the live site in a fresh incognito window. Padlocks visible.
-2. Click a locked pattern → Unlock modal → "Have a code?" → enter `#QBFREE` → should fail.
-3. Click "Unlock all patterns" → Freemius checkout should open in **live** mode (no sandbox banner inside the popup).
-4. Either close it, or run one real $7.99 purchase / 100%-off coupon to confirm `purchaseCompleted` still persists the license.
+Everything else (`openCheckout`, the Freemius config, the unlock modal, license storage) stays exactly as-is.
 
 ### Files touched
-- `src/lib/freemius-config.ts` — one line.
 
-That's the whole change.
+- `src/lib/checkout.ts` — only `loadScript()`.
+
+### Verify after publish
+
+Open https://quiltbutler.com in a fresh incognito window → click a locked pattern → click **Unlock all patterns**. The Freemius checkout modal should open with no console errors.

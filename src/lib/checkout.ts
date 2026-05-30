@@ -11,33 +11,54 @@ declare global {
         };
       };
     };
+    jQuery?: unknown;
+    $?: unknown;
   }
 }
 
+const JQUERY_URL = "https://code.jquery.com/jquery-3.7.1.min.js";
 const SCRIPT_URL = "https://checkout.freemius.com/checkout.min.js";
 let loadPromise: Promise<void> | null = null;
 
-function loadScript(): Promise<void> {
-  if (typeof window === "undefined") return Promise.reject(new Error("no window"));
-  if (window.FS?.Checkout) return Promise.resolve();
-  if (loadPromise) return loadPromise;
-
-  loadPromise = new Promise<void>((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(`script[src="${SCRIPT_URL}"]`);
+function injectScript(src: string): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`);
     if (existing) {
+      if (existing.dataset.loaded === "true") {
+        resolve();
+        return;
+      }
       existing.addEventListener("load", () => resolve());
-      existing.addEventListener("error", () => reject(new Error("Freemius script failed")));
+      existing.addEventListener("error", () => reject(new Error(`Failed to load ${src}`)));
       return;
     }
     const s = document.createElement("script");
-    s.src = SCRIPT_URL;
+    s.src = src;
     s.async = true;
-    s.onload = () => resolve();
-    s.onerror = () => {
-      loadPromise = null;
-      reject(new Error("Freemius script failed to load"));
+    s.onload = () => {
+      s.dataset.loaded = "true";
+      resolve();
     };
+    s.onerror = () => reject(new Error(`Failed to load ${src}`));
     document.head.appendChild(s);
+  });
+}
+
+function loadScript(): Promise<void> {
+  if (typeof window === "undefined") return Promise.reject(new Error("no window"));
+  if (window.FS?.Checkout && window.jQuery) return Promise.resolve();
+  if (loadPromise) return loadPromise;
+
+  loadPromise = (async () => {
+    if (!window.jQuery) {
+      await injectScript(JQUERY_URL);
+    }
+    if (!window.FS?.Checkout) {
+      await injectScript(SCRIPT_URL);
+    }
+  })().catch((err) => {
+    loadPromise = null;
+    throw err;
   });
 
   return loadPromise;
