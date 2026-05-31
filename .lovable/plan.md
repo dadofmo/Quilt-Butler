@@ -1,49 +1,32 @@
-## Goal
-Add the approved legal pages, a site-wide footer, a one-time cookie banner, and a Freemius license-recovery link in both the unlock modal and the footer. No refund policy or refund language anywhere.
+## Why Google shows a generic globe
 
-## What gets built
+Google's search result icon (the little circle to the left of your domain) is your site's **favicon** — not your og:image. Facebook uses og:image (which is why your logo shows there), but Google specifically looks for a `<link rel="icon">` in the homepage HTML pointing at a square icon at least 48×48px on the same domain.
 
-1. **Two legal pages**, using the exact wording approved in chat
-   - `/terms` — Terms of Service (8 sections; §2 includes the email-consent paragraph)
-   - `/privacy` — Privacy Policy (includes "Occasional emails from QuiltButler"; no refund references)
-   - Centered prose, semantic headings, "Last updated: May 29, 2026"
-   - Each page sets its own `<title>` and meta description
+Your project currently has:
+- No favicon file in `public/`
+- No `<link rel="icon">` in `index.html`
 
-2. **Site-wide footer** (mounted once in the shared layout)
-   - Links: Terms · Privacy · Support (`mailto:quiltbutler@gmail.com`) · Recover license
-   - "© QuiltButler" line, no personal name, no Refunds link
-   - "Recover license" opens `https://dashboard.freemius.com/license-recovery/30617/quilt-butler/` in a new tab
+So Google falls back to the default globe. Once a favicon is in place and Google re-crawls the site, the logo will replace the globe (typically days to a few weeks — Google controls the timing).
 
-3. **License-recovery link in the Unlock modal**
-   - New small secondary link directly under the existing "Already purchased? Enter your license key" row
-   - Label: *"Lost your license key? Recover it"*
-   - Opens the same Freemius recovery URL in a new tab (`target="_blank"`, `rel="noopener noreferrer"`)
+## Plan
 
-4. **One-time cookie banner**
-   - Bottom-of-screen, single "Got it" dismiss button
-   - Stores acknowledgment in `localStorage`; never shown again on that device
-   - Copy: "We use a few cookies for analytics and to remember your license on this device. See our Privacy Policy."
-   - Disclosure only — does not gate analytics
+1. Generate favicon assets from `src/assets/quilt-butler-logo.webp`:
+   - `public/favicon.ico` (multi-size: 16, 32, 48)
+   - `public/favicon-96.png` (96×96, for higher-DPI)
+   - `public/apple-touch-icon.png` (180×180, for iOS home-screen)
+   The logo will be center-fit on a solid background so it reads clearly at tiny sizes (Google requires the icon be visible at 48×48; thin line art on transparent often fails this).
 
-5. **Routing**
-   - Register `/terms` and `/privacy` in the existing router as public routes
+2. Reference them in `index.html` `<head>`:
+   ```html
+   <link rel="icon" href="/favicon.ico" sizes="any" />
+   <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png" />
+   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+   ```
 
-## Technical details
+3. After deploy, request a recrawl in Google Search Console (URL Inspection → "Request indexing" on `https://quiltbutler.com/`) to speed things up.
 
-- **New files**
-  - `src/pages/TermsPage.tsx`
-  - `src/pages/PrivacyPage.tsx`
-  - `src/components/SiteFooter.tsx`
-  - `src/components/CookieBanner.tsx`
-- **Edited files**
-  - `src/App.tsx` — add the two routes, mount `<SiteFooter />` and `<CookieBanner />` in the shared layout
-  - `src/components/UnlockModal.tsx` — add the "Lost your license key? Recover it" link
-  - `public/sitemap.xml` — add `/terms` and `/privacy`
-- **Recovery URL constant** — hardcoded once (e.g., in `src/lib/freemius-config.ts`) so the modal and footer share it
-- **Styling** — Tailwind + existing semantic tokens only (no hardcoded colors)
-- **Identity** — generic ("QuiltButler" / "a personal project" / `quiltbutler@gmail.com`); no personal name
-- No backend changes, no new dependencies, no changes to checkout/Freemius send flow
+## Notes
 
-## Out of scope
-- No Refund Policy page and no refund language anywhere
-- No email capture or marketing opt-in UI
+- This won't affect the Facebook preview — that still uses `og:image`, which is already working.
+- The favicon must be served from the same domain Google indexes. Since Google currently indexes `quiltbutler.com` (your May 24 Vercel deploy), the new favicon won't show in Google results until you publish the updated build to `quiltbutler.com`. It will show in `quiltbutler.lovable.app` previews immediately.
+- One question before I build: do you want the favicon to be the **logo on a white background**, the **logo on your brand color**, or **logo on transparent**? White usually reads best in Google's light-mode results; transparent can look washed out.
