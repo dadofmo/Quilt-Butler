@@ -36,7 +36,7 @@ export default function PrivacyPage() {
               and pages visited. It does <strong>not</strong> include your name or email.
             </li>
             <li>
-              <strong>License activations</strong> — when you activate your key on a device,
+              <strong>License activations</strong> — when you activate your license key on a device,
               Freemius records that activation so we can enforce the 3-device limit.
             </li>
           </ul>
