@@ -1,32 +1,61 @@
-## Why Google shows a generic globe
+## Assessment
 
-Google's search result icon (the little circle to the left of your domain) is your site's **favicon** — not your og:image. Facebook uses og:image (which is why your logo shows there), but Google specifically looks for a `<link rel="icon">` in the homepage HTML pointing at a square icon at least 48×48px on the same domain.
+Gemini's advice is essentially correct. These three findings (X-Frame-Options, X-Content-Type-Options, CSP) are **low-to-medium severity hardening recommendations**, not active vulnerabilities. They aren't "your site is broken" — they're "best-practice headers are missing." The "no WAF detected" note is a false alarm; Vercel's edge already provides DDoS and L3/4 protection, and Sucuri can't see it from the outside.
 
-Your project currently has:
-- No favicon file in `public/`
-- No `<link rel="icon">` in `index.html`
+The fix is exactly what Gemini described: add a `vercel.json` with a `headers` block. Vercel applies it automatically on the next deploy, no code changes, no risk of breaking React/Vite.
 
-So Google falls back to the default globe. Once a favicon is in place and Google re-crawls the site, the logo will replace the globe (typically days to a few weeks — Google controls the timing).
+**One important caveat about the proposed CSP.** Gemini's suggested policy:
+```
+default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval';
+```
+is so permissive it barely qualifies as a CSP — it allows scripts from any HTTPS origin and permits inline/eval. It will pass the scanner but provides minimal real protection. That said, it is the **safest starter** for an app that loads Freemius checkout, Google Fonts, etc., and it won't break anything. I recommend we use it as-is now, then tighten later if you want.
 
 ## Plan
 
-1. Generate favicon assets from `src/assets/quilt-butler-logo.webp`:
-   - `public/favicon.ico` (multi-size: 16, 32, 48)
-   - `public/favicon-96.png` (96×96, for higher-DPI)
-   - `public/apple-touch-icon.png` (180×180, for iOS home-screen)
-   The logo will be center-fit on a solid background so it reads clearly at tiny sizes (Google requires the icon be visible at 48×48; thin line art on transparent often fails this).
+### 1. Update `vercel.json`
 
-2. Reference them in `index.html` `<head>`:
-   ```html
-   <link rel="icon" href="/favicon.ico" sizes="any" />
-   <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96.png" />
-   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-   ```
+Your project already has a `vercel.json` (for SPA rewrites). I'll add a `headers` block to it — keeping the existing rewrites intact:
 
-3. After deploy, request a recrawl in Google Search Console (URL Inspection → "Request indexing" on `https://quiltbutler.com/`) to speed things up.
+```json
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "github": { "autoAlias": false },
+  "rewrites": [
+    { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self'" }
+      ]
+    }
+  ]
+}
+```
 
-## Notes
+Notes on what I changed vs. Gemini's snippet:
+- Merged into your existing `vercel.json` (don't replace — you'd lose the SPA rewrites and the site would 404).
+- Added `frame-ancestors 'self'` so the CSP also covers clickjacking (modern equivalent of X-Frame-Options).
+- Added `blob:` to default-src — Freemius / some bundlers occasionally need it.
+- Added `Referrer-Policy` (small bonus, no risk).
 
-- This won't affect the Facebook preview — that still uses `og:image`, which is already working.
-- The favicon must be served from the same domain Google indexes. Since Google currently indexes `quiltbutler.com` (your May 24 Vercel deploy), the new favicon won't show in Google results until you publish the updated build to `quiltbutler.com`. It will show in `quiltbutler.lovable.app` previews immediately.
-- One question before I build: do you want the favicon to be the **logo on a white background**, the **logo on your brand color**, or **logo on transparent**? White usually reads best in Google's light-mode results; transparent can look washed out.
+### 2. Publish to `quiltbutler.com`
+
+Headers only take effect after a Vercel deploy. Lovable preview won't show them.
+
+### 3. Verify
+
+After deploy, re-run the Sucuri scan or use https://securityheaders.com to confirm the three findings clear.
+
+### What this does NOT do
+
+- Doesn't add a WAF. You don't need one for a static SPA on Vercel; ignore that warning.
+- Doesn't tighten CSP to a strict allowlist. That's a future polish task if you want a higher security grade.
+
+### Risk
+
+Very low. The CSP is intentionally permissive so it won't block Freemius, Stripe, fonts, analytics, or anything else currently loading. If anything does break after deploy, removing one line from `vercel.json` reverts it.
