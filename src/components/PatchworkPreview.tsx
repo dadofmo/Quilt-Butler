@@ -4,7 +4,32 @@ import {
   FABRIC_COLORS,
   type FabricKey,
 } from "@/lib/planner-store";
-import { fabricBackgroundStyle } from "@/lib/fabric-fill";
+
+/**
+ * Fixed-scale fabric tiling for the HTML patchwork preview. Mirrors the
+ * behavior of `FabricPatternDefs` (used by SVG diagrams): the photo tiles
+ * at a fixed pixel size and repeats — so the motif is the same physical
+ * size in the border, sashing, and every square, just like cutting from
+ * a real bolt of fabric. Never use `background-size: cover` here — it
+ * stretches the photo and produces blown-up/distorted motifs.
+ */
+const FABRIC_TILE_PX = 64;
+function fabricTileStyle(
+  key: FabricKey,
+  photos?: Partial<Record<FabricKey, string>>,
+): React.CSSProperties {
+  const url = photos?.[key];
+  if (url) {
+    return {
+      backgroundColor: FABRIC_COLORS[key],
+      backgroundImage: `url(${url})`,
+      backgroundRepeat: "repeat",
+      backgroundSize: `${FABRIC_TILE_PX}px ${FABRIC_TILE_PX}px`,
+      backgroundPosition: "0 0",
+    };
+  }
+  return { background: FABRIC_COLORS[key] };
+}
 
 interface Props {
   /** Number of distinct fabrics to cycle through (2–12). */
@@ -126,7 +151,7 @@ export function PatchworkPreview({
           ...(showBorder && borderFabric
             ? {
                 background: FABRIC_COLORS[borderFabric],
-                ...fabricBackgroundStyle(borderFabric, photos),
+                ...fabricTileStyle(borderFabric, photos),
               }
             : {}),
         }}
@@ -141,7 +166,7 @@ export function PatchworkPreview({
             ...(showSash && sashingFabric
               ? {
                   background: FABRIC_COLORS[sashingFabric],
-                  ...fabricBackgroundStyle(sashingFabric, photos),
+                  ...fabricTileStyle(sashingFabric, photos),
                 }
               : {}),
           }}
@@ -165,7 +190,7 @@ export function PatchworkPreview({
                     gridColumn: `${colTrack} / span 1`,
                     gridRow: `${rowTrack} / span 1`,
                     background: FABRIC_COLORS[fab],
-                    ...fabricBackgroundStyle(fab, photos),
+                    ...fabricTileStyle(fab, photos),
                   }}
                 />
               );
