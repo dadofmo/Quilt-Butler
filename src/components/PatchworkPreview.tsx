@@ -151,7 +151,7 @@ export function PatchworkPreview({
           ...(showBorder && borderFabric
             ? {
                 background: FABRIC_COLORS[borderFabric],
-                ...fabricBackgroundStyle(borderFabric, photos),
+                ...fabricTileStyle(borderFabric, photos),
               }
             : {}),
         }}
@@ -166,7 +166,7 @@ export function PatchworkPreview({
             ...(showSash && sashingFabric
               ? {
                   background: FABRIC_COLORS[sashingFabric],
-                  ...fabricBackgroundStyle(sashingFabric, photos),
+                  ...fabricTileStyle(sashingFabric, photos),
                 }
               : {}),
           }}
@@ -190,7 +190,7 @@ export function PatchworkPreview({
                     gridColumn: `${colTrack} / span 1`,
                     gridRow: `${rowTrack} / span 1`,
                     background: FABRIC_COLORS[fab],
-                    ...fabricBackgroundStyle(fab, photos),
+                    ...fabricTileStyle(fab, photos),
                   }}
                 />
               );
