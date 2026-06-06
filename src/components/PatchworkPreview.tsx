@@ -171,6 +171,7 @@ export function PatchworkPreview({
   return (
     <div className="flex flex-col items-center gap-3">
       <div
+        ref={containerRef}
         className="shadow-sm"
         style={{
           width: "min(100%, 360px)",
