@@ -1,61 +1,24 @@
-## Assessment
+## Problem
 
-Gemini's advice is essentially correct. These three findings (X-Frame-Options, X-Content-Type-Options, CSP) are **low-to-medium severity hardening recommendations**, not active vulnerabilities. They aren't "your site is broken" — they're "best-practice headers are missing." The "no WAF detected" note is a false alarm; Vercel's edge already provides DDoS and L3/4 protection, and Sucuri can't see it from the outside.
+In the Simple Squares preview, when a fabric photo is assigned to a cell it looks "blown up" — you see only a corner of one motif instead of a repeating fabric.
 
-The fix is exactly what Gemini described: add a `vercel.json` with a `headers` block. Vercel applies it automatically on the next deploy, no code changes, no risk of breaking React/Vite.
+Root cause: `PatchworkPreview` uses a fixed `FABRIC_TILE_PX = 64` for every fabric photo background. The preview container is capped at 360px wide, so when there are many blocks across (e.g. a 10×12 layout), each cell renders at ~30–40 px. A 64px tile is then larger than the cell, so only a fragment of one motif is visible — exactly the "blown up / distorted" look.
 
-**One important caveat about the proposed CSP.** Gemini's suggested policy:
-```
-default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval';
-```
-is so permissive it barely qualifies as a CSP — it allows scripts from any HTTPS origin and permits inline/eval. It will pass the scanner but provides minimal real protection. That said, it is the **safest starter** for an app that loads Freemius checkout, Google Fonts, etc., and it won't break anything. I recommend we use it as-is now, then tighten later if you want.
+The SVG diagrams don't have this problem because `FabricPatternDefs` tiles at ~40% of a block, scaled in SVG user units that resize with the shape. The HTML preview needs the same behavior.
 
-## Plan
+## Fix (PatchworkPreview.tsx only)
 
-### 1. Update `vercel.json`
+1. Add a `ref` + `ResizeObserver` (or a `useLayoutEffect` measuring `clientWidth`) on the outer preview div to track its rendered pixel width.
+2. Derive the rendered pixel size of one block:
+   `blockPx = (containerPx - 2 * borderPx) / (cols + sashCols * sashingWidth/blockSize)`
+   (i.e. mirror the same fr-track math already used for layout).
+3. Set the tile pixel size to roughly 40% of `blockPx` (clamped to a sensible min, e.g. `max(12, round(blockPx * 0.4))`) — matching the SVG convention so the motif looks like it was cut from a continuous bolt.
+4. Pass that dynamic tile size into `fabricTileStyle` (turn the constant into a parameter) and use it for all three call sites: border, sashing, and each cell.
+5. Leave the no-photo (solid color) branch unchanged.
 
-Your project already has a `vercel.json` (for SPA rewrites). I'll add a `headers` block to it — keeping the existing rewrites intact:
+Result: as the preview width or block count changes, the photo always tiles at ~40% of a block, so every cell shows a believable swatch of fabric — same scale as the SVG diagrams elsewhere in the app, and consistent before and after cycling.
 
-```json
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "github": { "autoAlias": false },
-  "rewrites": [
-    { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
-  ],
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self'" }
-      ]
-    }
-  ]
-}
-```
+## Out of scope
 
-Notes on what I changed vs. Gemini's snippet:
-- Merged into your existing `vercel.json` (don't replace — you'd lose the SPA rewrites and the site would 404).
-- Added `frame-ancestors 'self'` so the CSP also covers clickjacking (modern equivalent of X-Frame-Options).
-- Added `blob:` to default-src — Freemius / some bundlers occasionally need it.
-- Added `Referrer-Policy` (small bonus, no risk).
-
-### 2. Publish to `quiltbutler.com`
-
-Headers only take effect after a Vercel deploy. Lovable preview won't show them.
-
-### 3. Verify
-
-After deploy, re-run the Sucuri scan or use https://securityheaders.com to confirm the three findings clear.
-
-### What this does NOT do
-
-- Doesn't add a WAF. You don't need one for a static SPA on Vercel; ignore that warning.
-- Doesn't tighten CSP to a strict allowlist. That's a future polish task if you want a higher security grade.
-
-### Risk
-
-Very low. The CSP is intentionally permissive so it won't block Freemius, Stripe, fonts, analytics, or anything else currently loading. If anything does break after deploy, removing one line from `vercel.json` reverts it.
+- No changes to yardage math, pattern definitions, FabricPatternDefs, or any other component.
+- No change to the cycle/tap behavior itself.

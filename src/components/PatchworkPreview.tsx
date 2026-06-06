@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ALL_FABRIC_KEYS,
   FABRIC_COLORS,
@@ -6,16 +6,18 @@ import {
 } from "@/lib/planner-store";
 
 /**
- * Fixed-scale fabric tiling for the HTML patchwork preview. Mirrors the
- * behavior of `FabricPatternDefs` (used by SVG diagrams): the photo tiles
- * at a fixed pixel size and repeats — so the motif is the same physical
- * size in the border, sashing, and every square, just like cutting from
- * a real bolt of fabric. Never use `background-size: cover` here — it
- * stretches the photo and produces blown-up/distorted motifs.
+ * Fabric tiling for the HTML patchwork preview. Mirrors the behavior of
+ * `FabricPatternDefs` (used by SVG diagrams): the photo tiles at ~40% of
+ * a block and repeats — so the motif is the same physical size in the
+ * border, sashing, and every square, just like cutting from a real bolt
+ * of fabric. Never use `background-size: cover` here — it stretches the
+ * photo and produces blown-up/distorted motifs. The tile size is passed
+ * in dynamically (derived from the measured block pixel size) so the
+ * motif scales with the preview instead of overflowing tiny cells.
  */
-const FABRIC_TILE_PX = 64;
 function fabricTileStyle(
   key: FabricKey,
+  tilePx: number,
   photos?: Partial<Record<FabricKey, string>>,
 ): React.CSSProperties {
   const url = photos?.[key];
@@ -24,7 +26,7 @@ function fabricTileStyle(
       backgroundColor: FABRIC_COLORS[key],
       backgroundImage: `url(${url})`,
       backgroundRepeat: "repeat",
-      backgroundSize: `${FABRIC_TILE_PX}px ${FABRIC_TILE_PX}px`,
+      backgroundSize: `${tilePx}px ${tilePx}px`,
       backgroundPosition: "0 0",
     };
   }
@@ -99,6 +101,23 @@ export function PatchworkPreview({
     [quiltWidth, quiltHeight, blockSize, borderWidth],
   );
 
+  // Measure the rendered preview width so we can size the fabric photo
+  // tile relative to a single block (matches the ~40% rule used by the
+  // SVG diagrams via FabricPatternDefs). Without this the photo tiles
+  // at a fixed pixel size and overflows small cells, looking blown up.
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [containerPx, setContainerPx] = useState(360);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width;
+      if (w && w > 0) setContainerPx(w);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const palette: FabricKey[] = ALL_FABRIC_KEYS.slice(
     0,
     Math.max(2, Math.min(12, fabricCount)),
@@ -128,6 +147,15 @@ export function PatchworkPreview({
   const borderPct = borderWidth > 0 ? (borderWidth / outerW) * 100 : 0;
   const showBorder = borderWidth > 0 && !!borderFabric;
 
+  // Pixel size of one block in the rendered preview. The grid uses fr
+  // tracks proportional to inches, so block-px = innerPx / innerInches *
+  // blockSize. Tile fabric photos at ~40% of a block (matches the SVG
+  // FabricPatternDefs convention) so motifs look like cut fabric.
+  const borderPxRendered = showBorder ? (borderPct / 100) * containerPx : 0;
+  const innerPxRendered = Math.max(1, containerPx - 2 * borderPxRendered);
+  const blockPx = innerW > 0 ? (innerPxRendered / innerW) * blockSize : 32;
+  const tilePx = Math.max(12, Math.round(blockPx * 0.4));
+
   // Build column/row template tracks: alternating block | sashing | block ...
   const colTracks: string[] = [];
   for (let c = 0; c < cols; c++) {
@@ -143,6 +171,7 @@ export function PatchworkPreview({
   return (
     <div className="flex flex-col items-center gap-3">
       <div
+        ref={containerRef}
         className="shadow-sm"
         style={{
           width: "min(100%, 360px)",
@@ -151,7 +180,7 @@ export function PatchworkPreview({
           ...(showBorder && borderFabric
             ? {
                 background: FABRIC_COLORS[borderFabric],
-                ...fabricTileStyle(borderFabric, photos),
+                ...fabricTileStyle(borderFabric, tilePx, photos),
               }
             : {}),
         }}
@@ -166,7 +195,7 @@ export function PatchworkPreview({
             ...(showSash && sashingFabric
               ? {
                   background: FABRIC_COLORS[sashingFabric],
-                  ...fabricTileStyle(sashingFabric, photos),
+                  ...fabricTileStyle(sashingFabric, tilePx, photos),
                 }
               : {}),
           }}
@@ -190,7 +219,7 @@ export function PatchworkPreview({
                     gridColumn: `${colTrack} / span 1`,
                     gridRow: `${rowTrack} / span 1`,
                     background: FABRIC_COLORS[fab],
-                    ...fabricTileStyle(fab, photos),
+                    ...fabricTileStyle(fab, tilePx, photos),
                   }}
                 />
               );
