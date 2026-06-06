@@ -147,6 +147,15 @@ export function PatchworkPreview({
   const borderPct = borderWidth > 0 ? (borderWidth / outerW) * 100 : 0;
   const showBorder = borderWidth > 0 && !!borderFabric;
 
+  // Pixel size of one block in the rendered preview. The grid uses fr
+  // tracks proportional to inches, so block-px = innerPx / innerInches *
+  // blockSize. Tile fabric photos at ~40% of a block (matches the SVG
+  // FabricPatternDefs convention) so motifs look like cut fabric.
+  const borderPxRendered = showBorder ? (borderPct / 100) * containerPx : 0;
+  const innerPxRendered = Math.max(1, containerPx - 2 * borderPxRendered);
+  const blockPx = innerW > 0 ? (innerPxRendered / innerW) * blockSize : 32;
+  const tilePx = Math.max(12, Math.round(blockPx * 0.4));
+
   // Build column/row template tracks: alternating block | sashing | block ...
   const colTracks: string[] = [];
   for (let c = 0; c < cols; c++) {
