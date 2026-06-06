@@ -101,6 +101,23 @@ export function PatchworkPreview({
     [quiltWidth, quiltHeight, blockSize, borderWidth],
   );
 
+  // Measure the rendered preview width so we can size the fabric photo
+  // tile relative to a single block (matches the ~40% rule used by the
+  // SVG diagrams via FabricPatternDefs). Without this the photo tiles
+  // at a fixed pixel size and overflows small cells, looking blown up.
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [containerPx, setContainerPx] = useState(360);
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width;
+      if (w && w > 0) setContainerPx(w);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const palette: FabricKey[] = ALL_FABRIC_KEYS.slice(
     0,
     Math.max(2, Math.min(12, fabricCount)),
