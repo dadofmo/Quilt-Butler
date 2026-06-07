@@ -44,15 +44,51 @@ function signRequest(method: string, resource: string, body: string | null, secr
   return headers;
 }
 
-async function lookupLicense(licenseKey: string, secretKey: string): Promise<FreemiusLicense | null> {
-  // Freemius license keys live on the plugin as `secret_key`.
-  const resource = `/v1/plugins/${PLUGIN_ID}/licenses.json?secret_key=${encodeURIComponent(licenseKey)}&count=1`;
+type LookupResult =
+  | { kind: "found"; license: FreemiusLicense }
+  | { kind: "not_found" }
+  | { kind: "error"; status: number; message: string };
+
+async function freemiusGet(resource: string, secretKey: string) {
   const headers = signRequest("GET", resource, null, secretKey);
   const res = await fetch(`${FREEMIUS_API}${resource}`, { method: "GET", headers });
-  if (!res.ok) return null;
-  const data = (await res.json()) as FreemiusListResponse;
-  if (!data?.licenses?.length) return null;
-  return data.licenses[0];
+  const text = await res.text();
+  let json: any = null;
+  try { json = text ? JSON.parse(text) : null; } catch { /* ignore */ }
+  return { status: res.status, ok: res.ok, json, text };
+}
+
+async function lookupLicense(licenseKey: string, secretKey: string): Promise<LookupResult> {
+  // Strategy 1: direct lookup by license key as the resource id.
+  // Freemius supports GET /v1/plugins/{id}/licenses/{license_key}.json
+  const direct = await freemiusGet(
+    `/v1/plugins/${PLUGIN_ID}/licenses/${encodeURIComponent(licenseKey)}.json`,
+    secretKey,
+  );
+  if (direct.ok && direct.json && !direct.json.error && (direct.json.id || direct.json.secret_key)) {
+    return { kind: "found", license: direct.json as FreemiusLicense };
+  }
+  // 404 from the direct endpoint is a clean "not found" — fall through to search to be safe.
+  // Strategy 2: search the licenses list by the key.
+  const search = await freemiusGet(
+    `/v1/plugins/${PLUGIN_ID}/licenses.json?search=${encodeURIComponent(licenseKey)}&filter=all&count=5`,
+    secretKey,
+  );
+  if (search.ok && search.json?.licenses?.length) {
+    const match =
+      (search.json.licenses as FreemiusLicense[]).find(
+        (l: any) => l.secret_key === licenseKey,
+      ) ?? (search.json.licenses[0] as FreemiusLicense);
+    return { kind: "found", license: match };
+  }
+
+  // If both attempts failed for a non-404 reason, surface the error.
+  const failing = !direct.ok && direct.status !== 404 ? direct : !search.ok ? search : null;
+  if (failing) {
+    const msg = failing.json?.error?.message || failing.text?.slice(0, 200) || `HTTP ${failing.status}`;
+    return { kind: "error", status: failing.status, message: msg };
+  }
+  return { kind: "not_found" };
 }
 
 const CORS_HEADERS = {
@@ -96,14 +132,23 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    const license = await lookupLicense(licenseKey, secretKey);
-    if (!license) {
+    const lookup = await lookupLicense(licenseKey, secretKey);
+    if (lookup.kind === "error") {
+      console.error("[license-activate] Freemius error", lookup.status, lookup.message);
+      res.status(502).json({
+        ok: false,
+        error: "We couldn't reach the license server. Please try again in a moment.",
+      });
+      return;
+    }
+    if (lookup.kind === "not_found") {
       res.status(404).json({
         ok: false,
         error: "We couldn't find that license key. Double-check the key from your purchase email.",
       });
       return;
     }
+    const license = lookup.license;
 
     if (license.is_cancelled || license.is_active === false) {
       res.status(403).json({
