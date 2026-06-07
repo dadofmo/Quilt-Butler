@@ -137,7 +137,7 @@ export default async function handler(req: any, res: any) {
       console.error("[license-activate] Freemius error", lookup.status, lookup.message);
       res.status(502).json({
         ok: false,
-        error: "We couldn't reach the license server. Please try again in a moment.",
+        error: `License server error (${lookup.status}): ${lookup.message}`,
       });
       return;
     }
