@@ -1,24 +1,34 @@
 ## Problem
 
-In the Simple Squares preview, when a fabric photo is assigned to a cell it looks "blown up" — you see only a corner of one motif instead of a repeating fabric.
+Newly purchased license keys are being rejected because the serverless validator is querying Freemius the wrong way.
 
-Root cause: `PatchworkPreview` uses a fixed `FABRIC_TILE_PX = 64` for every fabric photo background. The preview container is capped at 360px wide, so when there are many blocks across (e.g. a 10×12 layout), each cell renders at ~30–40 px. A 64px tile is then larger than the cell, so only a fragment of one motif is visible — exactly the "blown up / distorted" look.
+Current code in `api/license-activate.ts` does this:
 
-The SVG diagrams don't have this problem because `FabricPatternDefs` tiles at ~40% of a block, scaled in SVG user units that resize with the shape. The HTML preview needs the same behavior.
+```ts
+GET /v1/plugins/30617/licenses.json?secret_key=<entered_license_key>&count=1
+```
 
-## Fix (PatchworkPreview.tsx only)
+That treats the customer’s license key as a `secret_key` query param on the list endpoint, which does not reliably look up a customer license by the key they pasted. As a result, Freemius returns no matching licenses, and the app shows:
 
-1. Add a `ref` + `ResizeObserver` (or a `useLayoutEffect` measuring `clientWidth`) on the outer preview div to track its rendered pixel width.
-2. Derive the rendered pixel size of one block:
-   `blockPx = (containerPx - 2 * borderPx) / (cols + sashCols * sashingWidth/blockSize)`
-   (i.e. mirror the same fr-track math already used for layout).
-3. Set the tile pixel size to roughly 40% of `blockPx` (clamped to a sensible min, e.g. `max(12, round(blockPx * 0.4))`) — matching the SVG convention so the motif looks like it was cut from a continuous bolt.
-4. Pass that dynamic tile size into `fabricTileStyle` (turn the constant into a parameter) and use it for all three call sites: border, sashing, and each cell.
-5. Leave the no-photo (solid color) branch unchanged.
+`We couldn't find that license key.`
 
-Result: as the preview width or block count changes, the photo always tiles at ~40% of a block, so every cell shows a believable swatch of fabric — same scale as the SVG diagrams elsewhere in the app, and consistent before and after cycling.
+This matches your symptom exactly: checkout succeeds, email arrives immediately, but a brand-new live key still fails in incognito.
 
-## Out of scope
+## Plan
 
-- No changes to yardage math, pattern definitions, FabricPatternDefs, or any other component.
-- No change to the cycle/tap behavior itself.
+1. Replace the current list-style lookup in `api/license-activate.ts` with the correct Freemius license validation flow for a pasted license key.
+2. Keep the existing owner override and active / cancelled / expired checks, but apply them to the correctly resolved license record.
+3. Improve error handling so Freemius auth errors, not-found responses, and configuration problems return distinct messages instead of all looking like “license not found.”
+4. Verify the client contract stays the same (`/api/license-activate` still returns `{ ok: true }` on success) so no UI changes are required in `src/lib/license.ts` or `UnlockModal.tsx`.
+5. Test the fix against the deployed flow by validating that a newly issued key can unlock in a fresh browser session.
+
+## Technical details
+
+- Root cause is in `api/license-activate.ts`, not in the modal UI and not in the latest preview tiling change.
+- Checkout success already stores local unlock state for the purchasing browser, so the broken part is specifically the manual “enter license key” recovery / second-device flow.
+- Most likely fix: use Freemius’s proper license-key activation / validation endpoint instead of `licenses.json?secret_key=...`.
+- No design or frontend behavior changes are needed unless we choose to surface a better error message for device-limit failures.
+
+## Expected result
+
+A real license key from the purchase email should activate successfully on `quiltbutler.com`, including in incognito or on a new device.
