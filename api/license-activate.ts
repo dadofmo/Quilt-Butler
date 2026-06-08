@@ -82,36 +82,50 @@ async function freemiusGet(resource: string, secretKey: string) {
 }
 
 async function lookupLicense(licenseKey: string, secretKey: string): Promise<LookupResult> {
-  // Strategy 1: direct lookup by license key as the resource id.
-  // Freemius supports GET /v1/plugins/{id}/licenses/{license_key}.json
-  const direct = await freemiusGet(
-    `/v1/plugins/${PLUGIN_ID}/licenses/${encodeURIComponent(licenseKey)}.json`,
-    secretKey,
-  );
-  if (direct.ok && direct.json && !direct.json.error && (direct.json.id || direct.json.secret_key)) {
-    return { kind: "found", license: direct.json as FreemiusLicense };
-  }
-  // 404 from the direct endpoint is a clean "not found" — fall through to search to be safe.
-  // Strategy 2: search the licenses list by the key.
+  // Freemius does not allow looking up a license by its secret_key as a path
+  // segment (returns 400 "Invalid request path"). We have to list licenses
+  // and match by secret_key.
+  //
+  // Strategy 1: search query (works for most installations).
   const search = await freemiusGet(
-    `/v1/plugins/${PLUGIN_ID}/licenses.json?search=${encodeURIComponent(licenseKey)}&filter=all&count=5`,
+    `/v1/plugins/${PLUGIN_ID}/licenses.json?search=${encodeURIComponent(licenseKey)}&filter=all&count=10`,
     secretKey,
   );
-  if (search.ok && search.json?.licenses?.length) {
-    const match =
-      (search.json.licenses as FreemiusLicense[]).find(
-        (l: any) => l.secret_key === licenseKey,
-      ) ?? (search.json.licenses[0] as FreemiusLicense);
-    return { kind: "found", license: match };
+  if (search.ok && Array.isArray(search.json?.licenses)) {
+    const match = (search.json.licenses as any[]).find(
+      (l) => l.secret_key === licenseKey,
+    );
+    if (match) return { kind: "found", license: match as FreemiusLicense };
   }
 
-  // If both attempts failed for a non-404 reason, surface the error.
-  const failing = !direct.ok && direct.status !== 404 ? direct : !search.ok ? search : null;
-  if (failing) {
-    const msg = failing.json?.error?.message || failing.text?.slice(0, 200) || `HTTP ${failing.status}`;
-    return { kind: "error", status: failing.status, message: msg };
+  // Strategy 2: paginate through the most recent licenses and match by
+  // secret_key. Covers cases where the `search` param is ignored by the API.
+  if (search.ok) {
+    let offset = 0;
+    const pageSize = 50;
+    const maxPages = 20; // up to 1000 most recent licenses
+    for (let page = 0; page < maxPages; page++) {
+      const list = await freemiusGet(
+        `/v1/plugins/${PLUGIN_ID}/licenses.json?count=${pageSize}&offset=${offset}&filter=all`,
+        secretKey,
+      );
+      if (!list.ok || !Array.isArray(list.json?.licenses)) break;
+      const licenses = list.json.licenses as any[];
+      if (licenses.length === 0) break;
+      const match = licenses.find((l) => l.secret_key === licenseKey);
+      if (match) return { kind: "found", license: match as FreemiusLicense };
+      if (licenses.length < pageSize) break;
+      offset += pageSize;
+    }
+    return { kind: "not_found" };
   }
-  return { kind: "not_found" };
+
+  // The license-list call itself failed — surface the underlying error.
+  const msg =
+    search.json?.error?.message ||
+    search.text?.slice(0, 200) ||
+    `HTTP ${search.status}`;
+  return { kind: "error", status: search.status, message: msg };
 }
 
 const CORS_HEADERS = {
