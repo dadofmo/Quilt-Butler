@@ -1,34 +1,54 @@
-## Problem
+## What’s actually failing
+The new error is **not** “bad customer license key” anymore. It is a **server-to-Freemius authentication failure**:
 
-Newly purchased license keys are being rejected because the serverless validator is querying Freemius the wrong way.
+- Your app is reaching `/api/license-activate`
+- That function is calling Freemius
+- Freemius is replying **401: Invalid Authorization header**
 
-Current code in `api/license-activate.ts` does this:
+So the pasted key is not the main blocker right now — the backend request itself is being rejected before license lookup completes.
 
-```ts
-GET /v1/plugins/30617/licenses.json?secret_key=<entered_license_key>&count=1
-```
-
-That treats the customer’s license key as a `secret_key` query param on the list endpoint, which does not reliably look up a customer license by the key they pasted. As a result, Freemius returns no matching licenses, and the app shows:
-
-`We couldn't find that license key.`
-
-This matches your symptom exactly: checkout succeeds, email arrives immediately, but a brand-new live key still fails in incognito.
+## Files to isolate
+- `api/license-activate.ts` — builds the Freemius auth header and hits the license endpoint
+- `src/lib/license.ts` — client call path, mainly to keep the UI contract unchanged
+- `src/lib/freemius-config.ts` — confirms the product id/public key being used
 
 ## Plan
+1. **Replace the current auth approach with the supported Freemius auth flow**
+   - Stop relying on the current manually signed `Authorization: FS ...` request shape if it does not match the current API requirements.
+   - Align the request with Freemius’ documented product-scope API authentication and endpoint namespace.
 
-1. Replace the current list-style lookup in `api/license-activate.ts` with the correct Freemius license validation flow for a pasted license key.
-2. Keep the existing owner override and active / cancelled / expired checks, but apply them to the correctly resolved license record.
-3. Improve error handling so Freemius auth errors, not-found responses, and configuration problems return distinct messages instead of all looking like “license not found.”
-4. Verify the client contract stays the same (`/api/license-activate` still returns `{ ok: true }` on success) so no UI changes are required in `src/lib/license.ts` or `UnlockModal.tsx`.
-5. Test the fix against the deployed flow by validating that a newly issued key can unlock in a fresh browser session.
+2. **Update the license lookup endpoint to the correct API namespace**
+   - Move off the legacy plugin-style path if needed.
+   - Use the documented product/license endpoint that matches the required auth method.
 
-## Technical details
+3. **Harden env-var validation and diagnostics**
+   - Distinguish between:
+     - wrong server credential/config
+     - wrong product scope
+     - real “license not found”
+   - Return a clear config error instead of a misleading customer-facing key error.
 
-- Root cause is in `api/license-activate.ts`, not in the modal UI and not in the latest preview tiling change.
-- Checkout success already stores local unlock state for the purchasing browser, so the broken part is specifically the manual “enter license key” recovery / second-device flow.
-- Most likely fix: use Freemius’s proper license-key activation / validation endpoint instead of `licenses.json?secret_key=...`.
-- No design or frontend behavior changes are needed unless we choose to surface a better error message for device-limit failures.
+4. **Keep the frontend contract unchanged**
+   - Preserve the existing modal and `activateLicenseKey()` success/error handling.
+   - Only change backend logic unless the error copy needs a tiny wording adjustment.
+
+5. **Verify the real unlock flow after the code change**
+   - Check that a fresh browser session can paste a valid emailed key and unlock successfully.
+   - Confirm the error changes from auth failure to either success or a true key-specific validation response.
+
+## Technical notes
+Most likely causes from the code + docs review:
+- The current server code is sending a legacy-style signed header that Freemius now rejects for this endpoint.
+- Or `FREEMIUS_SECRET_KEY` in Vercel is not the credential type this endpoint expects.
+- Freemius’ current docs show **Bearer token auth for `/products/{product_id}/...` operations**, which may mean this function needs a different credential and path than the current `/v1/plugins/...` signed request.
 
 ## Expected result
+After implementation, entering a real purchase key should no longer fail with **401 Invalid Authorization header**.
 
-A real license key from the purchase email should activate successfully on `quiltbutler.com`, including in incognito or on a new device.
+<presentation-actions>
+  <presentation-open-history>View History</presentation-open-history>
+</presentation-actions>
+
+<presentation-actions>
+<presentation-link url="https://docs.lovable.dev/tips-tricks/troubleshooting">Troubleshooting docs</presentation-link>
+</presentation-actions>
