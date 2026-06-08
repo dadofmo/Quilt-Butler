@@ -79,6 +79,35 @@ export function unlock(source: LicenseRecord["source"] = "purchase", licenseKey?
   }
 }
 
+const DEVICE_UID_KEY = "qb_device_uid_v1";
+
+function getOrCreateDeviceUid(): string {
+  try {
+    const existing = localStorage.getItem(DEVICE_UID_KEY);
+    if (existing && existing.length >= 16) return existing;
+    const uid =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID().replace(/-/g, "")
+        : Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+    localStorage.setItem(DEVICE_UID_KEY, uid);
+    return uid;
+  } catch {
+    return Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
+  }
+}
+
+function getDeviceTitle(): string {
+  try {
+    const ua = navigator.userAgent || "";
+    if (/iPhone/i.test(ua)) return "Quilt Butler — iPhone";
+    if (/iPad/i.test(ua)) return "Quilt Butler — iPad";
+    if (/Android/i.test(ua)) return "Quilt Butler — Android";
+    if (/Mac OS/i.test(ua)) return "Quilt Butler — Mac";
+    if (/Windows/i.test(ua)) return "Quilt Butler — Windows";
+  } catch { /* ignore */ }
+  return "Quilt Butler (Web)";
+}
+
 /**
  * Activate a license key against the server. On success, persists the
  * unlock so it survives reloads on this device.
@@ -94,7 +123,11 @@ export async function activateLicenseKey(
     const res = await fetch("/api/license-activate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ licenseKey }),
+      body: JSON.stringify({
+        licenseKey,
+        uid: getOrCreateDeviceUid(),
+        title: getDeviceTitle(),
+      }),
     });
     const data = (await res.json().catch(() => ({}))) as {
       ok?: boolean;
