@@ -27,12 +27,35 @@ type FreemiusListResponse = {
   error?: { message?: string; code?: string };
 };
 
+// RFC 2822 date in the exact format the Freemius API expects.
+// Node's Date.toUTCString() returns "...GMT"; Freemius wants "...+0000".
+function rfc2822Date(d: Date): string {
+  const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    `${days[d.getUTCDay()]}, ${pad(d.getUTCDate())} ${months[d.getUTCMonth()]} ${d.getUTCFullYear()} ` +
+    `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())} +0000`
+  );
+}
+
+// Matches the official Freemius SDKs: base64-url-encode the *hex* HMAC digest
+// (NOT the raw binary). Strip '=' padding, replace '+' -> '-' and '/' -> '_'.
+function base64UrlEncodeHex(hex: string): string {
+  return Buffer.from(hex)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
 function signRequest(method: string, resource: string, body: string | null, secretKey: string) {
-  const date = new Date().toUTCString();
+  const date = rfc2822Date(new Date());
   const contentMd5 = body ? crypto.createHash("md5").update(body).digest("hex") : "";
   const contentType = body ? "application/json" : "";
   const stringToSign = `${method}\n${contentMd5}\n${contentType}\n${date}\n${resource}`;
-  const signature = crypto.createHmac("sha256", secretKey).update(stringToSign).digest("base64");
+  const hexDigest = crypto.createHmac("sha256", secretKey).update(stringToSign).digest("hex");
+  const signature = base64UrlEncodeHex(hexDigest);
   const headers: Record<string, string> = {
     Date: date,
     Authorization: `FS ${PLUGIN_ID}:${PLUGIN_PUBLIC_KEY}:${signature}`,
