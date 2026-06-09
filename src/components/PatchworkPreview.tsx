@@ -30,7 +30,16 @@ function fabricTileStyle(
       backgroundPosition: "0 0",
     };
   }
-  return { background: FABRIC_COLORS[key] };
+  // Explicitly clear image-related properties so React style diffing
+  // never leaves a stale `background-size: auto` from a previous photo
+  // render on this element (which would show one giant zoomed tile).
+  return {
+    backgroundColor: FABRIC_COLORS[key],
+    backgroundImage: "none",
+    backgroundRepeat: "repeat",
+    backgroundSize: "auto",
+    backgroundPosition: "0 0",
+  };
 }
 
 interface Props {
