@@ -30,7 +30,16 @@ function fabricTileStyle(
       backgroundPosition: "0 0",
     };
   }
-  return { background: FABRIC_COLORS[key] };
+  // Explicitly clear image-related properties so React style diffing
+  // never leaves a stale `background-size: auto` from a previous photo
+  // render on this element (which would show one giant zoomed tile).
+  return {
+    backgroundColor: FABRIC_COLORS[key],
+    backgroundImage: "none",
+    backgroundRepeat: "repeat",
+    backgroundSize: "auto",
+    backgroundPosition: "0 0",
+  };
 }
 
 interface Props {
@@ -178,10 +187,7 @@ export function PatchworkPreview({
           aspectRatio: `${outerW} / ${outerH}`,
           padding: showBorder ? `${borderPct}%` : 0,
           ...(showBorder && borderFabric
-            ? {
-                background: FABRIC_COLORS[borderFabric],
-                ...fabricTileStyle(borderFabric, tilePx, photos),
-              }
+            ? fabricTileStyle(borderFabric, tilePx, photos)
             : {}),
         }}
         role="group"
@@ -193,10 +199,7 @@ export function PatchworkPreview({
             gridTemplateColumns: colTracks.join(" "),
             gridTemplateRows: rowTracks.join(" "),
             ...(showSash && sashingFabric
-              ? {
-                  background: FABRIC_COLORS[sashingFabric],
-                  ...fabricTileStyle(sashingFabric, tilePx, photos),
-                }
+              ? fabricTileStyle(sashingFabric, tilePx, photos)
               : {}),
           }}
           role="grid"
@@ -218,7 +221,6 @@ export function PatchworkPreview({
                   style={{
                     gridColumn: `${colTrack} / span 1`,
                     gridRow: `${rowTrack} / span 1`,
-                    background: FABRIC_COLORS[fab],
                     ...fabricTileStyle(fab, tilePx, photos),
                   }}
                 />

@@ -1,72 +1,33 @@
-## Diagnosis
-The new error is still a **server-to-Freemius auth failure**, not a bad customer key.
+# Fix plan: Simple Squares preview zooms in on fabric photos after toggling
 
-Your app is currently doing this:
-- `api/license-activate.ts` signs a legacy `Authorization: FS ...` header
-- then calls `/v1/plugins/30617/licenses.json?...`
-- Freemius responds `401 Invalid Authorization header`
+## Problem
+In the Simple Squares quilt visualizer, tapping squares to cycle fabrics can make a photo-backed fabric render as a zoomed-in / flat-looking patch (the camo turning grayish is one example). This must not happen for any fabric.
 
-The more important finding is that the current Freemius SaaS/license docs use a different flow for this use case:
-- **Activate key:** `POST /v1/products/{product_id}/licenses/activate.json`
-- request body includes `license_key`, `uid`, and `title`
-- this flow is documented as the license-key integration path
-- the product API docs are centered on **product-scoped endpoints** and newer auth patterns, while the old plugin-signed lookup path is what is failing here
+## Root cause
+`PatchworkPreview` builds each cell's style by spreading `fabricTileStyle(...)` AFTER a `background: FABRIC_COLORS[fab]` shorthand:
 
-## Files to change
-- `api/license-activate.ts`
-- `src/lib/license.ts`
-- `src/components/UnlockModal.tsx` (only if tiny UX copy/state changes are needed)
+```
+style={{
+  background: FABRIC_COLORS[fab],   // shorthand resets background-size, position, repeat
+  ...fabricTileStyle(fab, tilePx, photos), // then sets image/size/repeat
+}}
+```
 
-## Plan
-1. **Replace license lookup with direct activation**
-   - Stop searching `/v1/plugins/.../licenses.json` by secret key.
-   - Change the backend to call Freemius’ documented license activation endpoint:
-     `POST /v1/products/30617/licenses/activate.json`
-   - Send the license key in the JSON body with a generated device/install identifier and a simple device title.
+For solid swatches the shorthand stays. For photo swatches, React's style diffing during re-render (after a cycle) can momentarily reapply `background` and clobber `background-size`/`repeat`, so the image defaults to `auto` and shows one giant zoomed tile. The same shorthand-then-override pattern is used for the border and sashing layers.
 
-2. **Use the correct auth model for the new endpoint**
-   - Implement the activation call exactly as documented for the product endpoint.
-   - Remove the failing legacy signed-header dependency from the activation path.
-   - Keep auth/config handling explicit so a true credential/config problem is reported separately from a bad key.
+A second contributor: `tilePx` is derived from a measured `containerPx` that only updates via ResizeObserver, so on first paint of a newly-assigned cell the tile can fall back to a stale or oversized value.
 
-3. **Persist the activation details needed for future validation**
-   - Store the returned activation data needed for later checks (for example install/license metadata) alongside the local unlock state.
-   - Keep the current “unlock this browser/device after valid activation” behavior intact.
+## Fix
+1. In `src/components/PatchworkPreview.tsx`, change `fabricTileStyle` to always return a fully-specified style object (color + image when present + explicit `backgroundRepeat`, `backgroundSize`, `backgroundPosition`) and NEVER combine it with a separate `background:` shorthand at the call site.
+2. Update all three call sites (cells, border layer, sashing layer) to use only `...fabricTileStyle(...)` — drop the preceding `background: FABRIC_COLORS[...]` line so the shorthand can't reset image properties.
+3. Guarantee tiling for solid colors too by setting `backgroundColor` (not `background`) inside the helper, so React diffing is stable across re-renders.
+4. Guard `tilePx` so it always has a sensible minimum even before the ResizeObserver fires, and recompute it from the actual block-grid math already in the component (no behavior change for sizing — just no stale-zoom on first paint).
 
-4. **Tighten error handling**
-   - Distinguish between:
-     - invalid/unknown license key
-     - inactive/cancelled/expired license
-     - device activation limit reached
-     - Freemius config/server error
-   - Return clearer messages instead of surfacing raw auth noise to the user.
+## Out of scope
+- No changes to yardage math, pattern defaults, or `FabricPatternDefs` (SVG diagrams already render correctly).
+- No visual redesign — same tile scale, same tap-to-cycle behavior.
 
-5. **Keep the UI contract nearly unchanged**
-   - Preserve the existing modal and activate flow.
-   - Only make small UX tweaks if needed, such as a better error string for activation-limit or invalid-key cases.
-
-6. **Validate the real recovery path**
-   - Confirm that a fresh browser session can paste a newly purchased key and unlock successfully.
-   - If Freemius rejects the key after the API change, the message should become a real license-specific response instead of `401 Invalid Authorization header`.
-
-## Technical details
-- Current failing path: legacy signed request to `/v1/plugins/{id}/licenses.json`
-- Replacement path: product license activation endpoint under `/v1/products/{product_id}/licenses/activate.json`
-- Request body should include:
-  - `license_key`
-  - `uid` (stable per device/browser install)
-  - `title` (human-readable device label)
-- After activation, future checks can use the install/license details returned by Freemius instead of scanning license lists.
-
-## Expected result
-Pasting a real emailed key should stop failing with the authorization-header error and should either:
-- unlock successfully, or
-- show a true license-specific reason from Freemius.
-
-<presentation-actions>
-  <presentation-open-history>View History</presentation-open-history>
-</presentation-actions>
-
-<presentation-actions>
-<presentation-link url="https://docs.lovable.dev/tips-tricks/troubleshooting">Troubleshooting docs</presentation-link>
-</presentation-actions>
+## Verification
+- Open Simple Squares, upload photos for A, B, and C, then tap squares repeatedly to cycle through every fabric multiple times. Each fabric must render at the same scale every cycle, with the motif visibly repeating — no giant zoomed patches.
+- Repeat on a narrow mobile viewport (matches the screenshot).
+- Confirm border and sashing photo rendering is unchanged for non-cycled states.
