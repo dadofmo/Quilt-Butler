@@ -187,10 +187,7 @@ export function PatchworkPreview({
           aspectRatio: `${outerW} / ${outerH}`,
           padding: showBorder ? `${borderPct}%` : 0,
           ...(showBorder && borderFabric
-            ? {
-                background: FABRIC_COLORS[borderFabric],
-                ...fabricTileStyle(borderFabric, tilePx, photos),
-              }
+            ? fabricTileStyle(borderFabric, tilePx, photos)
             : {}),
         }}
         role="group"
