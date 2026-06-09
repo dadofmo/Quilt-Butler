@@ -199,10 +199,7 @@ export function PatchworkPreview({
             gridTemplateColumns: colTracks.join(" "),
             gridTemplateRows: rowTracks.join(" "),
             ...(showSash && sashingFabric
-              ? {
-                  background: FABRIC_COLORS[sashingFabric],
-                  ...fabricTileStyle(sashingFabric, tilePx, photos),
-                }
+              ? fabricTileStyle(sashingFabric, tilePx, photos)
               : {}),
           }}
           role="grid"
