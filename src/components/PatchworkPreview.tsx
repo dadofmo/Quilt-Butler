@@ -221,7 +221,6 @@ export function PatchworkPreview({
                   style={{
                     gridColumn: `${colTrack} / span 1`,
                     gridRow: `${rowTrack} / span 1`,
-                    background: FABRIC_COLORS[fab],
                     ...fabricTileStyle(fab, tilePx, photos),
                   }}
                 />
