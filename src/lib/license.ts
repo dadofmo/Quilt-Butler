@@ -13,7 +13,6 @@
 import { FREEMIUS_MODE } from "./freemius-config";
 
 const STORAGE_KEY = "qb_license_v1";
-const BYPASS_CODE = "#QBFREE";
 
 export const FREE_PATTERNS: readonly string[] = ["nine-patch"];
 
@@ -22,6 +21,8 @@ type LicenseRecord = {
   source: "purchase" | "bypass" | "key" | "owner";
   /** License key, if unlock came from key entry. */
   licenseKey?: string;
+  /** Buyer's email from Freemius, if available. */
+  email?: string;
   at: string; // ISO timestamp
 };
 
@@ -65,11 +66,12 @@ export function hasFullLicense(): boolean {
   return readLicense() !== null;
 }
 
-export function unlock(source: LicenseRecord["source"] = "purchase", licenseKey?: string): void {
+export function unlock(source: LicenseRecord["source"] = "purchase", licenseKey?: string, email?: string): void {
   const record: LicenseRecord = {
     unlocked: true,
     source,
     licenseKey,
+    email,
     at: new Date().toISOString(),
   };
   try {
@@ -133,6 +135,7 @@ export async function activateLicenseKey(
       ok?: boolean;
       error?: string;
       source?: "owner" | "freemius";
+      email?: string;
     };
     if (!res.ok || !data.ok) {
       return {
@@ -140,7 +143,7 @@ export async function activateLicenseKey(
         error: data.error || "We couldn't activate that key. Please try again.",
       };
     }
-    unlock(data.source === "owner" ? "owner" : "key", licenseKey);
+    unlock(data.source === "owner" ? "owner" : "key", licenseKey, data.email);
     return { ok: true };
   } catch {
     return {
@@ -151,13 +154,13 @@ export async function activateLicenseKey(
 }
 
 /**
- * Sandbox-only test bypass. In live mode this always returns false so the
- * code is worthless to anyone who finds it in the JS bundle.
+ * Sandbox-only test bypass. In production builds this is a no-op and is
+ * fully tree-shaken so the bypass string never ships in the JS bundle.
  */
 export function applyBypassCode(code: string): boolean {
-  if (FREEMIUS_MODE !== "sandbox") return false;
+  if (!import.meta.env.DEV) return false;
   const normalized = code.trim().toUpperCase();
-  if (normalized === BYPASS_CODE.toUpperCase()) {
+  if (normalized === "#QBFREE") {
     sessionUnlocked = true;
     return true;
   }

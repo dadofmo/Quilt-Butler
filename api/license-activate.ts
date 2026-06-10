@@ -18,6 +18,7 @@ type FreemiusActivateResponse = {
   install_id?: string;
   install_api_token?: string;
   license_plan_name?: string;
+  user?: { email?: string };
   license?: {
     id?: string;
     is_active?: boolean;
@@ -50,7 +51,7 @@ function friendlyError(status: number, code: string | undefined, message: string
     return "This license has expired.";
   }
   if (c.includes("quota") || m.includes("activation") && m.includes("limit") || m.includes("quota")) {
-    return "This license has reached its device activation limit. Deactivate it on another device and try again.";
+    return "This license has reached its device activation limit. You can deactivate a device from your Freemius account or email us for help.";
   }
   if (status === 404) {
     return "We couldn't find that license key. Double-check the key from your purchase email.";
@@ -140,6 +141,7 @@ export default async function handler(req: any, res: any) {
       install_id: json?.install_id,
       install_api_token: json?.install_api_token,
       plan_name: json?.license_plan_name,
+      email: json?.user?.email,
     });
   } catch (err) {
     console.error("[license-activate] unexpected error", err);
