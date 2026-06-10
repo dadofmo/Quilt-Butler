@@ -22,6 +22,8 @@ type LicenseRecord = {
   source: "purchase" | "bypass" | "key" | "owner";
   /** License key, if unlock came from key entry. */
   licenseKey?: string;
+  /** Buyer's email from Freemius, if available. */
+  email?: string;
   at: string; // ISO timestamp
 };
 
