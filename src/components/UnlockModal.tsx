@@ -267,8 +267,8 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
                     <Button
                       type="button"
                       variant="ghost"
-                      onClick={() => { setShowKeyInput(false); setKeyError(null); }}
-                      disabled={keyLoading}
+                      onClick={() => { setShowKeyInput(false); setKeyError(null); setDevices(null); }}
+                      disabled={keyLoading || swappingId !== null}
                     >
                       Cancel
                     </Button>
