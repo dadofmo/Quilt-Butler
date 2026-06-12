@@ -118,9 +118,11 @@ export default async function handler(req: any, res: any) {
       const errCode = json?.error?.code;
       console.error("[license-activate] Freemius activate error", fmRes.status, text?.slice(0, 400));
       const status = fmRes.status >= 400 ? fmRes.status : 400;
+      const friendly = friendlyError(status, errCode, errMsg);
       res.status(status).json({
         ok: false,
-        error: friendlyError(status, errCode, errMsg),
+        error: friendly.message,
+        reason: friendly.reason,
       });
       return;
     }
