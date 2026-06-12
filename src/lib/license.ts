@@ -110,13 +110,19 @@ function getDeviceTitle(): string {
   return "Quilt Butler (Web)";
 }
 
+export type ActivationFailure = {
+  ok: false;
+  error: string;
+  reason?: "limit_reached" | "invalid" | "cancelled" | "expired";
+};
+
 /**
  * Activate a license key against the server. On success, persists the
  * unlock so it survives reloads on this device.
  */
 export async function activateLicenseKey(
   rawKey: string,
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<{ ok: true } | ActivationFailure> {
   const licenseKey = rawKey.trim();
   if (!licenseKey) {
     return { ok: false, error: "Please enter your license key." };
@@ -134,6 +140,7 @@ export async function activateLicenseKey(
     const data = (await res.json().catch(() => ({}))) as {
       ok?: boolean;
       error?: string;
+      reason?: ActivationFailure["reason"];
       source?: "owner" | "freemius";
       email?: string;
     };
@@ -141,6 +148,7 @@ export async function activateLicenseKey(
       return {
         ok: false,
         error: data.error || "We couldn't activate that key. Please try again.",
+        reason: data.reason,
       };
     }
     unlock(data.source === "owner" ? "owner" : "key", licenseKey, data.email);
@@ -150,6 +158,77 @@ export async function activateLicenseKey(
       ok: false,
       error: "Network error. Check your connection and try again.",
     };
+  }
+}
+
+export type LicenseDevice = {
+  install_id: string;
+  title: string;
+  last_seen: string | null;
+};
+
+/** Fetch the list of devices currently activated against a license key. */
+export async function listLicenseDevices(
+  rawKey: string,
+): Promise<{ ok: true; devices: LicenseDevice[] } | { ok: false; error: string }> {
+  const licenseKey = rawKey.trim();
+  if (!licenseKey) return { ok: false, error: "Please enter your license key." };
+  try {
+    const res = await fetch("/api/license-devices", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ licenseKey }),
+    });
+    const data = (await res.json().catch(() => ({}))) as {
+      ok?: boolean;
+      error?: string;
+      devices?: LicenseDevice[];
+    };
+    if (!res.ok || !data.ok) {
+      return { ok: false, error: data.error || "We couldn't load your devices." };
+    }
+    return { ok: true, devices: data.devices || [] };
+  } catch {
+    return { ok: false, error: "Network error. Check your connection and try again." };
+  }
+}
+
+/**
+ * Free up one device on a license, then activate the current device.
+ * On success, persists the unlock just like activateLicenseKey.
+ */
+export async function swapLicenseDevice(
+  rawKey: string,
+  installId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const licenseKey = rawKey.trim();
+  if (!licenseKey || !installId) {
+    return { ok: false, error: "Please pick a device to free up." };
+  }
+  try {
+    const res = await fetch("/api/license-deactivate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        licenseKey,
+        installId,
+        uid: getOrCreateDeviceUid(),
+        title: getDeviceTitle(),
+      }),
+    });
+    const data = (await res.json().catch(() => ({}))) as {
+      ok?: boolean;
+      error?: string;
+      source?: "owner" | "freemius";
+      email?: string;
+    };
+    if (!res.ok || !data.ok) {
+      return { ok: false, error: data.error || "We couldn't free up that device." };
+    }
+    unlock("key", licenseKey, data.email);
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Network error. Check your connection and try again." };
   }
 }
 
