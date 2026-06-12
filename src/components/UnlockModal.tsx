@@ -3,7 +3,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { openCheckout, restoreCheckoutPageState } from "@/lib/checkout";
-import { unlock, activateLicenseKey } from "@/lib/license";
+import {
+  unlock,
+  activateLicenseKey,
+  listLicenseDevices,
+  swapLicenseDevice,
+  type LicenseDevice,
+} from "@/lib/license";
 import { FREEMIUS_CONFIG, FREEMIUS_LICENSE_RECOVERY_URL } from "@/lib/freemius-config";
 
 type Props = {
