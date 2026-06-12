@@ -259,7 +259,7 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
                   <div className="flex gap-2">
                     <Button
                       onClick={handleActivateKey}
-                      disabled={keyLoading || !keyValue.trim()}
+                      disabled={keyLoading || !keyValue.trim() || swappingId !== null || (devices?.length ?? 0) > 0}
                       className="flex-1"
                     >
                       {keyLoading ? "Activating…" : "Activate"}
