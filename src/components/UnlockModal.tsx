@@ -203,28 +203,58 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
                     spellCheck={false}
                     disabled={keyLoading}
                   />
-                  {keyError && (
+                  {devices && devices.length > 0 && (
+                    <div className="space-y-2 rounded-md border border-border bg-muted/40 p-3">
+                      <p className="text-sm font-medium text-foreground">
+                        Your license is already used on {devices.length} device{devices.length === 1 ? "" : "s"}.
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Pick one to sign out so you can use this device instead.
+                      </p>
+                      <ul className="space-y-2 pt-1">
+                        {devices.map((d) => {
+                          const seen = formatLastSeen(d.last_seen);
+                          const isSwapping = swappingId === d.install_id;
+                          return (
+                            <li
+                              key={d.install_id}
+                              className="flex items-center justify-between gap-2 rounded border border-border bg-background p-2"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm text-foreground">{d.title}</p>
+                                {seen && <p className="text-xs text-muted-foreground">{seen}</p>}
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleSwapDevice(d.install_id)}
+                                disabled={swappingId !== null}
+                              >
+                                {isSwapping ? "Swapping…" : "Use this device instead"}
+                              </Button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
+                  {keyError && !devices && (
                     <div className="space-y-1">
                       <p role="alert" className="text-sm text-destructive">{keyError}</p>
                       <p className="text-xs text-muted-foreground">
-                        Need help?{" "}
-                        <a
-                          href="mailto:quiltbutler@gmail.com?subject=QuiltButler%20license%20help"
-                          className="underline underline-offset-2 hover:text-foreground"
-                        >
-                          Email support
-                        </a>
-                        {" "}or{" "}
                         <a
                           href={FREEMIUS_LICENSE_RECOVERY_URL}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="underline underline-offset-2 hover:text-foreground"
                         >
-                          manage your devices
-                        </a>.
+                          Recover your license key
+                        </a>
                       </p>
                     </div>
+                  )}
+                  {keyError && devices && (
+                    <p role="alert" className="text-sm text-destructive">{keyError}</p>
                   )}
                   <div className="flex gap-2">
                     <Button
