@@ -37,26 +37,31 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-function friendlyError(status: number, code: string | undefined, message: string | undefined): string {
+type FriendlyError = { message: string; reason?: "limit_reached" | "invalid" | "cancelled" | "expired" };
+
+function friendlyError(status: number, code: string | undefined, message: string | undefined): FriendlyError {
   const c = (code || "").toLowerCase();
   const m = (message || "").toLowerCase();
 
+  if (c.includes("quota") || (m.includes("activation") && m.includes("limit")) || m.includes("quota") || m.includes("no available activation")) {
+    return {
+      reason: "limit_reached",
+      message: "This license is already used on 3 devices. Pick one below to free up.",
+    };
+  }
   if (c.includes("invalid_license") || m.includes("invalid license") || m.includes("license key")) {
-    return "We couldn't find that license key. Double-check the key from your purchase email.";
+    return { reason: "invalid", message: "We couldn't find that license key. Double-check the key from your purchase email." };
   }
   if (c.includes("cancelled") || m.includes("cancel")) {
-    return "This license has been cancelled.";
+    return { reason: "cancelled", message: "This license has been cancelled." };
   }
   if (c.includes("expired") || m.includes("expired")) {
-    return "This license has expired.";
-  }
-  if (c.includes("quota") || m.includes("activation") && m.includes("limit") || m.includes("quota")) {
-    return "This license has reached its device activation limit. You can deactivate a device from your Freemius account or email us for help.";
+    return { reason: "expired", message: "This license has expired." };
   }
   if (status === 404) {
-    return "We couldn't find that license key. Double-check the key from your purchase email.";
+    return { reason: "invalid", message: "We couldn't find that license key. Double-check the key from your purchase email." };
   }
-  return message || `License server error (${status}).`;
+  return { message: message || `License server error (${status}).` };
 }
 
 export default async function handler(req: any, res: any) {
@@ -113,9 +118,11 @@ export default async function handler(req: any, res: any) {
       const errCode = json?.error?.code;
       console.error("[license-activate] Freemius activate error", fmRes.status, text?.slice(0, 400));
       const status = fmRes.status >= 400 ? fmRes.status : 400;
+      const friendly = friendlyError(status, errCode, errMsg);
       res.status(status).json({
         ok: false,
-        error: friendlyError(status, errCode, errMsg),
+        error: friendly.message,
+        reason: friendly.reason,
       });
       return;
     }

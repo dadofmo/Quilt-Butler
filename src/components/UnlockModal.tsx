@@ -3,7 +3,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { openCheckout, restoreCheckoutPageState } from "@/lib/checkout";
-import { unlock, activateLicenseKey } from "@/lib/license";
+import {
+  unlock,
+  activateLicenseKey,
+  listLicenseDevices,
+  swapLicenseDevice,
+  type LicenseDevice,
+} from "@/lib/license";
 import { FREEMIUS_CONFIG, FREEMIUS_LICENSE_RECOVERY_URL } from "@/lib/freemius-config";
 
 type Props = {
@@ -19,6 +25,8 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
   const [keyError, setKeyError] = useState<string | null>(null);
   const [keyLoading, setKeyLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [devices, setDevices] = useState<LicenseDevice[] | null>(null);
+  const [swappingId, setSwappingId] = useState<string | null>(null);
 
   // Safety net: if this modal unmounts for any reason, make sure no
   // leftover scroll-lock styles (from Freemius or Radix) remain on body.
@@ -32,6 +40,7 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
   useEffect(() => {
     if (open) {
       setShowSuccess(false);
+      setDevices(null);
     }
   }, [open]);
 
@@ -56,23 +65,64 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
     }
   };
 
+  const finishSuccess = () => {
+    setShowSuccess(true);
+    setTimeout(() => {
+      setKeyValue("");
+      setShowKeyInput(false);
+      setShowSuccess(false);
+      setDevices(null);
+      onUnlocked();
+      onOpenChange(false);
+    }, 2500);
+  };
+
   const handleActivateKey = async () => {
     setKeyError(null);
     setKeyLoading(true);
     const result = await activateLicenseKey(keyValue);
-    setKeyLoading(false);
     if (result.ok) {
-      setShowSuccess(true);
-      setTimeout(() => {
-        setKeyValue("");
-        setShowKeyInput(false);
-        setShowSuccess(false);
-        onUnlocked();
-        onOpenChange(false);
-      }, 2500);
+      setKeyLoading(false);
+      finishSuccess();
+      return;
+    }
+    // Limit reached → fetch device list and show picker instead of dead-end error.
+    if (result.reason === "limit_reached") {
+      const list = await listLicenseDevices(keyValue);
+      setKeyLoading(false);
+      if (list.ok) {
+        setDevices(list.devices);
+        setKeyError(result.error);
+      } else {
+        setKeyError(list.error);
+      }
+      return;
+    }
+    setKeyLoading(false);
+    setKeyError(result.error);
+  };
+
+  const handleSwapDevice = async (installId: string) => {
+    setKeyError(null);
+    setSwappingId(installId);
+    const result = await swapLicenseDevice(keyValue, installId);
+    setSwappingId(null);
+    if (result.ok) {
+      finishSuccess();
     } else {
       setKeyError(result.error);
     }
+  };
+
+  const formatLastSeen = (iso: string | null): string => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "";
+    const days = Math.floor((Date.now() - d.getTime()) / (1000 * 60 * 60 * 24));
+    if (days <= 0) return "last used today";
+    if (days === 1) return "last used yesterday";
+    if (days < 30) return `last used ${days} days ago`;
+    return `last used ${d.toLocaleDateString(undefined, { month: "short", day: "numeric" })}`;
   };
 
   return (
@@ -153,33 +203,63 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
                     spellCheck={false}
                     disabled={keyLoading}
                   />
-                  {keyError && (
+                  {devices && devices.length > 0 && (
+                    <div className="space-y-2 rounded-md border border-border bg-muted/40 p-3">
+                      <p className="text-sm font-medium text-foreground">
+                        Your license is already used on {devices.length} device{devices.length === 1 ? "" : "s"}.
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Pick one to sign out so you can use this device instead.
+                      </p>
+                      <ul className="space-y-2 pt-1">
+                        {devices.map((d) => {
+                          const seen = formatLastSeen(d.last_seen);
+                          const isSwapping = swappingId === d.install_id;
+                          return (
+                            <li
+                              key={d.install_id}
+                              className="flex items-center justify-between gap-2 rounded border border-border bg-background p-2"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm text-foreground">{d.title}</p>
+                                {seen && <p className="text-xs text-muted-foreground">{seen}</p>}
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleSwapDevice(d.install_id)}
+                                disabled={swappingId !== null}
+                              >
+                                {isSwapping ? "Swapping…" : "Use this device instead"}
+                              </Button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
+                  {keyError && !devices && (
                     <div className="space-y-1">
                       <p role="alert" className="text-sm text-destructive">{keyError}</p>
                       <p className="text-xs text-muted-foreground">
-                        Need help?{" "}
-                        <a
-                          href="mailto:quiltbutler@gmail.com?subject=QuiltButler%20license%20help"
-                          className="underline underline-offset-2 hover:text-foreground"
-                        >
-                          Email support
-                        </a>
-                        {" "}or{" "}
                         <a
                           href={FREEMIUS_LICENSE_RECOVERY_URL}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="underline underline-offset-2 hover:text-foreground"
                         >
-                          manage your devices
-                        </a>.
+                          Recover your license key
+                        </a>
                       </p>
                     </div>
+                  )}
+                  {keyError && devices && (
+                    <p role="alert" className="text-sm text-destructive">{keyError}</p>
                   )}
                   <div className="flex gap-2">
                     <Button
                       onClick={handleActivateKey}
-                      disabled={keyLoading || !keyValue.trim()}
+                      disabled={keyLoading || !keyValue.trim() || swappingId !== null || (devices?.length ?? 0) > 0}
                       className="flex-1"
                     >
                       {keyLoading ? "Activating…" : "Activate"}
@@ -187,8 +267,8 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
                     <Button
                       type="button"
                       variant="ghost"
-                      onClick={() => { setShowKeyInput(false); setKeyError(null); }}
-                      disabled={keyLoading}
+                      onClick={() => { setShowKeyInput(false); setKeyError(null); setDevices(null); }}
+                      disabled={keyLoading || swappingId !== null}
                     >
                       Cancel
                     </Button>
