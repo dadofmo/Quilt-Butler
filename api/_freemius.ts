@@ -74,7 +74,7 @@ export async function freemiusFetch(opts: FreemiusRequestOptions): Promise<{
   const headers: Record<string, string> = {
     Accept: "application/json",
     Date: date,
-    Authorization: `FSP ${PRODUCT_ID}:${PUBLIC_KEY}:${signature}`,
+    Authorization: `FS ${PRODUCT_ID}:${PUBLIC_KEY}:${signature}`,
   };
   if (bodyStr) {
     headers["Content-Type"] = "application/json";
