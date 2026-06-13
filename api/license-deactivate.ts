@@ -40,6 +40,7 @@ export default async function handler(req: any, res: any) {
       res.status(del.status).json({
         ok: false,
         error: "We couldn't free up that device. Please try a different one.",
+        debug: { status: del.status, body: del.text?.slice(0, 400) },
       });
       return;
     }
