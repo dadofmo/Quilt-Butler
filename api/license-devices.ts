@@ -42,6 +42,7 @@ export default async function handler(req: any, res: any) {
       res.status(status).json({
         ok: false,
         error: "We couldn't load your devices. Please try again.",
+        debug: { status, body: text?.slice(0, 400) },
       });
       return;
     }
