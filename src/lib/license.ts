@@ -183,13 +183,17 @@ export async function listLicenseDevices(
       ok?: boolean;
       error?: string;
       devices?: LicenseDevice[];
+      debug?: { status?: number; body?: string };
     };
     if (!res.ok || !data.ok) {
-      return { ok: false, error: data.error || "We couldn't load your devices." };
+      const dbg = data.debug
+        ? ` [debug: ${data.debug.status ?? res.status} — ${(data.debug.body ?? "").slice(0, 240)}]`
+        : ` [debug: http ${res.status}]`;
+      return { ok: false, error: (data.error || "We couldn't load your devices.") + dbg };
     }
     return { ok: true, devices: data.devices || [] };
-  } catch {
-    return { ok: false, error: "Network error. Check your connection and try again." };
+  } catch (err) {
+    return { ok: false, error: `Network error. ${(err as Error)?.message || ""}` };
   }
 }
 
@@ -221,14 +225,18 @@ export async function swapLicenseDevice(
       error?: string;
       source?: "owner" | "freemius";
       email?: string;
+      debug?: { status?: number; body?: string };
     };
     if (!res.ok || !data.ok) {
-      return { ok: false, error: data.error || "We couldn't free up that device." };
+      const dbg = data.debug
+        ? ` [debug: ${data.debug.status ?? res.status} — ${(data.debug.body ?? "").slice(0, 240)}]`
+        : ` [debug: http ${res.status}]`;
+      return { ok: false, error: (data.error || "We couldn't free up that device.") + dbg };
     }
     unlock("key", licenseKey, data.email);
     return { ok: true };
-  } catch {
-    return { ok: false, error: "Network error. Check your connection and try again." };
+  } catch (err) {
+    return { ok: false, error: `Network error. ${(err as Error)?.message || ""}` };
   }
 }
 
