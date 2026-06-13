@@ -1,51 +1,37 @@
-# Self-Service Device Management
+# Fix "We couldn't load your devices"
 
-## What the user (your customer) will see
+## What's happening
+- Activating your key returned `limit_reached` (expected — you're at 3 devices).
+- The app then called `/api/license-devices` to show the device picker, and Freemius rejected our signed request.
+- The user sees a generic "We couldn't load your devices." with no detail.
 
-When someone enters their license key and it's already used on 3 devices, instead of a scary "activation limit reached" error, they'll see:
+## Root cause (most likely)
+In `api/_freemius.ts` the Authorization header is built as:
 
-> **Your license is already used on 3 devices.**
-> Pick one to sign out so you can use this device instead.
->
-> - 🖥️ Quilt Butler — Mac (last used yesterday) [Use this device instead]
-> - 📱 Quilt Butler — iPhone (last used Nov 2) [Use this device instead]
-> - 💻 Quilt Butler — Windows (last used Oct 28) [Use this device instead]
+```
+Authorization: FSP <product_id>:<public_key>:<signature>
+```
 
-They click one → that device gets signed out → their current device activates automatically. No Freemius account. No support email needed.
+Freemius's documented signed-request scheme is `FS`, not `FSP`. The API scope (product/developer/plugin/etc.) is inferred from the request URL, not from the header prefix. With the wrong prefix, every signed call returns 401, which is exactly what we're seeing — activation works (it's an unsigned public endpoint), device list fails (it's signed).
 
-## How it works behind the scenes
+## Fix
+1. **`api/_freemius.ts`** — change the auth scheme from `FSP` to `FS`:
+   ```
+   Authorization: FS <product_id>:<public_key>:<signature>
+   ```
+   No other changes to the signing math (HMAC-SHA256, url-safe base64, the `METHOD\nMD5\nCT\nDATE\nPATH` string-to-sign all stay the same).
 
-Two new pieces:
+2. **`api/license-devices.ts`** — surface the underlying error (status + Freemius message) into the JSON response when running in a non-production environment, so if it still fails we can see the real reason in the browser instead of the generic "couldn't load your devices". Production-facing copy stays the friendly version.
 
-**1. New serverless endpoint: `api/license-devices.ts`**
-- Takes the license key
-- Asks Freemius "what devices is this key on?" (using your secret key)
-- Returns a clean list: device name, last-used date, and an internal id for each
+3. **`api/license-deactivate.ts`** — same treatment for the delete-install call, since it uses the same signed helper.
 
-**2. New serverless endpoint: `api/license-deactivate.ts`**
-- Takes the license key + the device id to deactivate
-- Tells Freemius to release that device
-- Then immediately activates the customer's current device (reuses existing activate logic)
+## Verify after deploy
+1. Reload the unlock modal, paste your key, click Activate.
+2. You should now see your 3 devices listed (with names + "last used" dates) instead of the red error.
+3. Click "Use this device instead" on the oldest one — it should free that slot and activate this browser, then show "License activated!".
 
-**3. Updated UnlockModal**
-- When activate returns the "limit reached" error, instead of just showing a message, fetch the device list and show the picker above
-- Clicking a device calls deactivate-then-reactivate, then unlocks the app
+## If it still fails
+If after the prefix fix the device list still errors, the next likely cause is `FREEMIUS_SECRET_KEY` missing from Vercel env vars. The improved error surface in step 2 will tell us which it is (401 = still an auth problem, 500 with "not configured" = missing env var).
 
-## Technical details
-
-- Endpoints use Freemius product-scope API at `/v1/products/30617/...` with `Authorization: FSA <product_id>:<secret_key>` signing (required for server-side calls — different from the public activate endpoint we already have).
-- `FREEMIUS_SECRET_KEY` (just saved) is read from `process.env` server-side only; never sent to the browser.
-- Device names already include platform (iPhone/Mac/Windows/etc.) thanks to `getDeviceTitle()` in `src/lib/license.ts`, so the picker will be recognizable.
-- Friendly error mapping in `friendlyError()` updated so the limit error triggers the picker flow instead of a dead-end message.
-- No changes to yardage, patterns, or any quilt logic.
-
-## Files I'll touch
-
-- **New:** `api/license-devices.ts`
-- **New:** `api/license-deactivate.ts`
-- **Edit:** `src/lib/license.ts` — add `listLicenseDevices()` and `deactivateAndActivate()` helpers
-- **Edit:** `src/components/UnlockModal.tsx` — add the device-picker UI that appears when limit is reached
-
-## After deploy
-
-You'll deploy to Vercel as usual. Then to test: enter your license key on a 4th browser/incognito session — you should see the picker instead of an error.
+## Out of scope
+No changes to yardage, patterns, pricing, or the activation flow itself.
