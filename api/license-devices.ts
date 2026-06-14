@@ -5,7 +5,7 @@
 // Always returns JSON so the client's [debug: …] surface can show the
 // real Freemius status + body instead of an opaque "http 500".
 
-export const config = { runtime: "nodejs20.x" };
+export const config = { runtime: "nodejs" };
 
 const PRODUCT_ID = "30617";
 const FREEMIUS_API = "https://api.freemius.com";

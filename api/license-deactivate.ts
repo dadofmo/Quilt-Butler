@@ -2,7 +2,7 @@
 // caller's current device. Uses unsigned, license-key-authenticated
 // endpoints (same pattern as license-activate.ts).
 
-export const config = { runtime: "nodejs20.x" };
+export const config = { runtime: "nodejs" };
 
 const PRODUCT_ID = "30617";
 const FREEMIUS_API = "https://api.freemius.com";
