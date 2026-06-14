@@ -1,20 +1,12 @@
-// Lists devices (installs) currently activated against a Freemius license
-// key. Uses the unsigned, license-key-authenticated endpoint to mirror
-// the activation path that already works (see license-activate.ts).
-//
-// Always returns JSON so the client's [debug: …] surface can show the
-// real Freemius status + body instead of an opaque "http 500".
+// Lists devices (installs) currently activated against a Freemius license.
+// Freemius install-list endpoints require the INTERNAL license id (not the
+// customer-facing license key) in the URL path, and they require the signed
+// product-scope Authorization header. We resolve the id via findLicenseIdByKey
+// and then call the product-scoped installs endpoint through freemiusFetch.
 
 export const config = { runtime: "nodejs" };
 
-const PRODUCT_ID = "30617";
-const FREEMIUS_API = "https://api.freemius.com";
-
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
+import { freemiusFetch, findLicenseIdByKey, CORS_HEADERS } from "./_freemius";
 
 type DeviceSummary = {
   install_id: string;
@@ -22,7 +14,12 @@ type DeviceSummary = {
   last_seen: string | null;
 };
 
-function jsonError(res: any, status: number, error: string, debug?: { status?: number; body?: string }) {
+function jsonError(
+  res: any,
+  status: number,
+  error: string,
+  debug?: { status?: number; body?: string },
+) {
   res.status(status).json({ ok: false, error, ...(debug ? { debug } : {}) });
 }
 
@@ -44,24 +41,35 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    // Unsigned, license-key-authenticated endpoint. The license key in the
-    // URL path acts as the credential, identical to /licenses/activate.json.
-    const url = `${FREEMIUS_API}/v1/products/${PRODUCT_ID}/licenses/${encodeURIComponent(licenseKey)}/installs.json`;
-    const fmRes = await fetch(url, {
-      method: "GET",
-      headers: { Accept: "application/json" },
-    });
-    const text = await fmRes.text();
-    let json: any = null;
-    try { json = text ? JSON.parse(text) : null; } catch { /* ignore */ }
+    if (!process.env.FREEMIUS_SECRET_KEY?.trim()) {
+      jsonError(res, 500, "License server is not configured.", {
+        status: 500,
+        body: "FREEMIUS_SECRET_KEY missing",
+      });
+      return;
+    }
 
-    if (!fmRes.ok || json?.error) {
-      console.error("[license-devices] freemius error", fmRes.status, text?.slice(0, 400));
+    const licenseId = await findLicenseIdByKey(licenseKey);
+    if (!licenseId) {
+      jsonError(res, 404, "We couldn't find that license key.", {
+        status: 404,
+        body: "license lookup returned no match",
+      });
+      return;
+    }
+
+    const { status, json, text } = await freemiusFetch({
+      method: "GET",
+      path: `/licenses/${encodeURIComponent(licenseId)}/installs.json`,
+    });
+
+    if (status >= 400 || json?.error) {
+      console.error("[license-devices] freemius error", status, text?.slice(0, 400));
       jsonError(
         res,
-        fmRes.status >= 400 ? fmRes.status : 502,
+        status >= 400 ? status : 502,
         "We couldn't load your devices. Please try again.",
-        { status: fmRes.status, body: text?.slice(0, 400) },
+        { status, body: text?.slice(0, 400) },
       );
       return;
     }
@@ -85,7 +93,7 @@ export default async function handler(req: any, res: any) {
         debug: { status: 500, body: `${msg} | ${stack}` },
       });
     } catch {
-      // Last resort if res is hosed.
+      // Last resort.
     }
   }
 }
