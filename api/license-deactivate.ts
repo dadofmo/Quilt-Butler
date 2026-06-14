@@ -1,19 +1,17 @@
 // Deactivates one device on a Freemius license, then activates the
-// caller's current device. Uses unsigned, license-key-authenticated
-// endpoints (same pattern as license-activate.ts).
+// caller's current device. The DELETE call needs the INTERNAL license id
+// resolved from the customer-facing license key via findLicenseIdByKey.
 
 export const config = { runtime: "nodejs" };
 
-const PRODUCT_ID = "30617";
-const FREEMIUS_API = "https://api.freemius.com";
+import { freemiusFetch, findLicenseIdByKey, CORS_HEADERS, FREEMIUS_API, PRODUCT_ID } from "./_freemius";
 
-const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
-
-function jsonError(res: any, status: number, error: string, debug?: { status?: number; body?: string }) {
+function jsonError(
+  res: any,
+  status: number,
+  error: string,
+  debug?: { status?: number; body?: string },
+) {
   res.status(status).json({ ok: false, error, ...(debug ? { debug } : {}) });
 }
 
@@ -39,29 +37,42 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    // Step 1 — deactivate the chosen install via the unsigned, license-
-    // key-authenticated DELETE endpoint.
-    const delUrl = `${FREEMIUS_API}/v1/products/${PRODUCT_ID}/licenses/${encodeURIComponent(licenseKey)}/installs/${encodeURIComponent(installId)}.json`;
-    const delRes = await fetch(delUrl, {
-      method: "DELETE",
-      headers: { Accept: "application/json" },
-    });
-    const delText = await delRes.text();
-    let delJson: any = null;
-    try { delJson = delText ? JSON.parse(delText) : null; } catch { /* ignore */ }
+    if (!process.env.FREEMIUS_SECRET_KEY?.trim()) {
+      jsonError(res, 500, "License server is not configured.", {
+        status: 500,
+        body: "FREEMIUS_SECRET_KEY missing",
+      });
+      return;
+    }
 
-    if (!delRes.ok || delJson?.error) {
-      console.error("[license-deactivate] delete install error", delRes.status, delText?.slice(0, 400));
+    const licenseId = await findLicenseIdByKey(licenseKey);
+    if (!licenseId) {
+      jsonError(res, 404, "We couldn't find that license key.", {
+        status: 404,
+        body: "license lookup returned no match",
+      });
+      return;
+    }
+
+    // Step 1 — deactivate the chosen install (signed, product-scoped DELETE).
+    const del = await freemiusFetch({
+      method: "DELETE",
+      path: `/licenses/${encodeURIComponent(licenseId)}/installs/${encodeURIComponent(installId)}.json`,
+    });
+
+    if (del.status >= 400 || del.json?.error) {
+      console.error("[license-deactivate] delete install error", del.status, del.text?.slice(0, 400));
       jsonError(
         res,
-        delRes.status >= 400 ? delRes.status : 502,
+        del.status >= 400 ? del.status : 502,
         "We couldn't free up that device. Please try a different one.",
-        { status: delRes.status, body: delText?.slice(0, 400) },
+        { status: del.status, body: del.text?.slice(0, 400) },
       );
       return;
     }
 
-    // Step 2 — re-activate this device.
+    // Step 2 — re-activate this device using the unsigned, key-authenticated
+    // activate endpoint (same path as /api/license-activate).
     const actRes = await fetch(
       `${FREEMIUS_API}/v1/products/${PRODUCT_ID}/licenses/activate.json`,
       {
