@@ -41,10 +41,10 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    if (!process.env.FREEMIUS_SECRET_KEY?.trim()) {
+    if (!process.env.FREEMIUS_API_TOKEN?.trim()) {
       jsonError(res, 500, "License server is not configured.", {
         status: 500,
-        body: "FREEMIUS_SECRET_KEY missing",
+        body: "FREEMIUS_API_TOKEN missing",
       });
       return;
     }
