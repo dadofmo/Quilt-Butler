@@ -1,31 +1,42 @@
-# Plan
+## Goal
+Restore the license-key fallback flow so that when a key is already active on 3 devices, the app can load the existing devices instead of failing with `We couldn't load your devices. [debug: http 500]`.
 
-## What I’ll fix
-- Restore the license-device flow so entering a valid key can list existing activations instead of failing with `400 Invalid request path`.
-- Keep the current activation UX unchanged; only fix the broken API path logic behind the modal.
+## What I found
+- The error happens on the fallback path after activation returns `limit_reached`.
+- That path is: `UnlockModal.tsx` → `src/lib/license.ts` → `/api/license-devices` → `api/_freemius.ts`.
+- The activation endpoint uses the public Freemius `licenses/activate.json` route and does not rely on server-side signed auth.
+- The device-list and device-swap endpoints do rely on `api/_freemius.ts`, which currently uses the older secret-key signing flow.
+- Freemius docs now document **Bearer token auth for product-scope endpoints**, which includes the product-scoped license endpoints this fallback uses.
 
-## Implementation
-1. Rework `api/license-devices.ts` to stop treating the customer-facing license key as a valid path segment for Freemius install-list endpoints.
-2. Use the existing shared Freemius helper flow in `api/_freemius.ts` to resolve the real internal license id from the entered key, then fetch installs with the correct product-scoped license id path.
-3. Update `api/license-deactivate.ts` to use the same resolved internal license id when deleting an install, so device removal and re-activation stay consistent.
-4. Preserve the improved JSON error/debug responses so any future Freemius rejection is surfaced clearly in the UI instead of as an opaque failure.
-5. Validate the final API responses by checking the relevant endpoint behavior after the code changes.
+## Plan
+1. **Replace the product-scope Freemius auth helper**
+   - Update `api/_freemius.ts` so product-scope requests use Bearer auth when a product API token is configured.
+   - Keep response parsing and debug surfacing intact.
+
+2. **Make license lookup + installs list use the corrected auth path**
+   - Keep resolving the internal license id from the entered license key.
+   - Ensure `/api/license-devices` uses the corrected helper for both the lookup and installs fetch.
+
+3. **Make device swap use the same corrected auth path**
+   - Ensure `/api/license-deactivate` uses the same auth mechanism for install deletion before re-activating the current device.
+
+4. **Harden server errors so the UI shows the real backend cause**
+   - Preserve the current friendly messages.
+   - Ensure 500 responses include the real server debug body so future failures are diagnosable from the UI.
+
+5. **Validate the full fallback flow**
+   - Check the “3 devices already used” path.
+   - Confirm devices load, one can be removed, and the current device activates successfully.
 
 ## Technical details
-- Current broken path:
-  ```text
-  /v1/products/30617/licenses/{licenseKey}/installs.json
-  ```
-  Freemius rejects this because installs endpoints expect the internal numeric/string license id, not the raw license key.
-- Activation can still use:
-  ```text
-  /v1/products/30617/licenses/activate.json
-  ```
-  with `license_key` in the POST body.
-- Device listing/deletion should instead follow:
-  ```text
-  lookup key -> internal license id
-  /v1/products/30617/licenses/{licenseId}/installs.json
-  /v1/products/30617/licenses/{licenseId}/installs/{installId}.json
-  ```
-- If Freemius still rejects the signed auth scheme in `_freemius.ts`, I’ll keep the same user-visible error surface and adjust the auth format in the next pass based on the returned debug body.
+- Files involved:
+  - `api/_freemius.ts`
+  - `api/license-devices.ts`
+  - `api/license-deactivate.ts`
+- Likely root cause:
+  - The fallback endpoints are still using a Freemius auth approach that is either rejected for these product-scope calls or depends on a server secret/config that is missing in the deployed environment.
+- Expected config after the fix:
+  - A product-scoped Freemius API bearer token available in deployment env vars for the Vercel functions.
+
+## Result
+After this change, entering a valid key that has hit its device limit should show the existing devices instead of a 500, and the customer should be able to free one and continue.
