@@ -1,46 +1,50 @@
-## Goal
-Make license-key activation work reliably on the live site, including the “3 devices already used” fallback, so you can launch without another trial-and-error loop.
+Do I know what the issue is? Yes.
 
-## What I found
-- Your new Freemius API token is present in this project, so this no longer looks like “missing secret” on our side.
-- Freemius docs do confirm:
-  - `POST /products/{product_id}/licenses/activate.json` uses the license key and does **not** need Authorization.
-  - Bearer token auth **is** valid for product-scoped endpoints.
-- The failure is isolated to the fallback flow after activation says the license is already fully used.
-- The most likely issue is that the fallback routes are using the wrong Freemius resource path for listing/removing installs, or the serverless function is throwing before it can send its normal debug JSON.
+The screenshot proves the API handler is running and the Freemius token is being accepted far enough to reach Freemius. The failure is the endpoint path:
 
-## Plan
-1. **Correct the fallback Freemius calls**
-   - Replace the current device-list and device-removal requests with the documented product-scope endpoints/flow for installs and license deactivation.
-   - Keep activation on the existing documented `licenses/activate.json` endpoint.
+```text
+Current broken path:
+/products/{plugin_id}/licenses/{license_id}/installs.json
 
-2. **Make the API failure-proof and transparent**
-   - Harden `api/_freemius.ts`, `api/license-devices.ts`, and `api/license-deactivate.ts` so they always return structured JSON errors instead of a bare `http 500`.
-   - Include the upstream Freemius status/message in a safe debug payload so we can see exactly what production returns if anything is still off.
+Freemius response:
+code: not_implemented
+message: Invalid request path
+```
 
-3. **Verify the exact customer path**
-   - Test the live flow end-to-end:
-     - enter valid key
-     - hit “license utilized” case
-     - load current devices
-     - free one device
-     - activate current device successfully
+That route does not exist in the Freemius product API.
 
-4. **Tighten the UX only where needed**
-   - Keep the modal behavior the same, but ensure the user sees a precise next step if Freemius rejects a device swap for a product-specific reason.
+Plan:
 
-## Technical details
-Files involved:
-- `api/_freemius.ts`
-- `api/license-devices.ts`
-- `api/license-deactivate.ts`
-- `api/license-activate.ts`
-- `src/lib/license.ts`
+1. Fix `api/license-devices.ts`
+   - Keep the working Bearer token auth using `FREEMIUS_API_TOKEN`.
+   - Resolve the license from `/licenses.json?search=...&enriched=true`.
+   - Use the license’s `user_id` to call the documented endpoint:
+     ```text
+     GET /products/{product_id}/users/{user_id}/installs.json
+     ```
+   - Filter returned installs to the selected `license_id`, using the documented install field `license_id`.
+   - Return the same `{ ok: true, devices }` shape the UI already expects.
 
-Freemius doc points already verified:
-- Product-scope Bearer auth is supported.
-- Activation is unauthenticated beyond the submitted license key.
-- The current bug is therefore likely in the fallback install list/deactivate route selection, not in the checkout modal or your Vercel env setup.
+2. Fix `api/license-deactivate.ts`
+   - Resolve the license id the same way.
+   - Replace the current install delete call with the documented Freemius deactivation endpoint:
+     ```text
+     DELETE /products/{product_id}/installs/{install_id}/licenses/{license_id}.json?license_key={licenseKey}
+     ```
+   - Then keep the existing reactivation step for the current browser/device.
 
-## Expected outcome
-After this change, entering a valid key on a full license should show the existing devices and let the customer free one and continue, instead of failing with `We couldn't load your devices. [debug: http 500]`.
+3. Improve errors only enough to diagnose launch blockers
+   - Keep the debug `where` tags.
+   - Make Freemius path errors show the exact endpoint step (`lookup`, `user-installs`, `deactivate`, `reactivate`) without exposing the API token.
+
+4. Verify the affected flow
+   - Check that the code no longer calls `/licenses/{license_id}/installs.json`.
+   - Check that deactivation no longer deletes an entire install and instead removes only the license from that install.
+
+<presentation-actions>
+  <presentation-open-history>View History</presentation-open-history>
+</presentation-actions>
+
+<presentation-actions>
+<presentation-link url="https://docs.lovable.dev/tips-tricks/troubleshooting">Troubleshooting docs</presentation-link>
+</presentation-actions>
