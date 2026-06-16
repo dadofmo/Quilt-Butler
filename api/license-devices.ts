@@ -1,12 +1,15 @@
 // Lists devices (installs) currently activated against a Freemius license.
-// Freemius install-list endpoints require the INTERNAL license id (not the
-// customer-facing license key) in the URL path, and they require the signed
-// product-scope Authorization header. We resolve the id via findLicenseIdByKey
-// and then call the product-scoped installs endpoint through freemiusFetch.
+// Uses product-scope Bearer token auth (FREEMIUS_API_TOKEN). We resolve
+// the numeric license id from the customer-facing key, then list installs.
 
-export const config = { runtime: "nodejs" };
+const PRODUCT_ID = "30617";
+const FREEMIUS_API = "https://api.freemius.com";
 
-import { freemiusFetch, findLicenseIdByKey, CORS_HEADERS } from "./_freemius";
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
 
 type DeviceSummary = {
   install_id: string;
@@ -18,82 +21,108 @@ function jsonError(
   res: any,
   status: number,
   error: string,
-  debug?: { status?: number; body?: string },
+  debug?: { status?: number; body?: string; where?: string },
 ) {
   res.status(status).json({ ok: false, error, ...(debug ? { debug } : {}) });
 }
 
-console.log("[license-devices] boot");
+async function freemiusGet(token: string, path: string) {
+  const url = `${FREEMIUS_API}/v1/products/${PRODUCT_ID}${path}`;
+  const r = await fetch(url, {
+    method: "GET",
+    headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+  });
+  const text = await r.text();
+  let json: any = null;
+  try { json = text ? JSON.parse(text) : null; } catch { /* ignore */ }
+  return { status: r.status, text, json, url };
+}
 
 export default async function handler(req: any, res: any) {
   try {
     for (const [k, v] of Object.entries(CORS_HEADERS)) res.setHeader(k, v);
     if (req.method === "OPTIONS") { res.status(204).end(); return; }
-    if (req.method !== "POST") {
-      jsonError(res, 405, "Method not allowed");
-      return;
-    }
+    if (req.method !== "POST") { jsonError(res, 405, "Method not allowed"); return; }
 
     const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body ?? {});
     const licenseKey = String(body.licenseKey ?? "").trim();
-    if (!licenseKey) {
-      jsonError(res, 400, "License key is required.");
-      return;
-    }
+    if (!licenseKey) { jsonError(res, 400, "License key is required."); return; }
 
-    if (!process.env.FREEMIUS_API_TOKEN?.trim()) {
+    const token = process.env.FREEMIUS_API_TOKEN?.trim();
+    if (!token) {
       jsonError(res, 500, "License server is not configured.", {
-        status: 500,
-        body: "FREEMIUS_API_TOKEN missing",
+        status: 500, body: "FREEMIUS_API_TOKEN missing", where: "env",
       });
       return;
     }
 
-    const licenseId = await findLicenseIdByKey(licenseKey);
-    if (!licenseId) {
+    // 1) Resolve license id from key. Freemius product-scope license list
+    // supports a `search` query that matches against the license secret_key
+    // (the sk_... value customers paste). We also fall back to scanning the
+    // first page if search returns nothing.
+    const lookup = await freemiusGet(
+      token,
+      `/licenses.json?search=${encodeURIComponent(licenseKey)}&count=10`,
+    );
+
+    if (lookup.status >= 400) {
+      jsonError(res, lookup.status, "We couldn't load your devices. Please try again.", {
+        status: lookup.status,
+        body: `[licenses.json] ${lookup.text?.slice(0, 300)}`,
+        where: "lookup",
+      });
+      return;
+    }
+
+    const licenses: any[] = Array.isArray(lookup.json?.licenses) ? lookup.json.licenses : [];
+    const match =
+      licenses.find((l) => l?.secret_key === licenseKey) ??
+      licenses.find((l) => l?.license_key === licenseKey) ??
+      (licenses.length === 1 ? licenses[0] : null);
+
+    if (!match?.id) {
       jsonError(res, 404, "We couldn't find that license key.", {
-        status: 404,
-        body: "license lookup returned no match",
+        status: 200,
+        body: `licenses returned=${licenses.length}; first_keys=${licenses.slice(0,3).map((l:any)=>l?.secret_key?.slice(0,6)).join(",")}`,
+        where: "lookup-match",
       });
       return;
     }
 
-    const { status, json, text } = await freemiusFetch({
-      method: "GET",
-      path: `/licenses/${encodeURIComponent(licenseId)}/installs.json`,
-    });
+    const licenseId = String(match.id);
 
-    if (status >= 400 || json?.error) {
-      console.error("[license-devices] freemius error", status, text?.slice(0, 400));
-      jsonError(
-        res,
-        status >= 400 ? status : 502,
-        "We couldn't load your devices. Please try again.",
-        { status, body: text?.slice(0, 400) },
-      );
+    // 2) List installs for that license.
+    const installs = await freemiusGet(
+      token,
+      `/licenses/${encodeURIComponent(licenseId)}/installs.json`,
+    );
+
+    if (installs.status >= 400) {
+      jsonError(res, installs.status, "We couldn't load your devices. Please try again.", {
+        status: installs.status,
+        body: `[installs.json] ${installs.text?.slice(0, 300)}`,
+        where: "installs",
+      });
       return;
     }
 
-    const installs: any[] = Array.isArray(json?.installs) ? json.installs : [];
-    const devices: DeviceSummary[] = installs.map((i) => ({
+    const list: any[] = Array.isArray(installs.json?.installs) ? installs.json.installs : [];
+    const devices: DeviceSummary[] = list.map((i) => ({
       install_id: String(i.id),
       title: String(i.title || i.url || "Unknown device"),
-      last_seen: i.updated || i.created || null,
+      last_seen: i.last_seen_at || i.updated || i.created || null,
     }));
 
     res.status(200).json({ ok: true, devices });
   } catch (err: any) {
-    console.error("[license-devices] unexpected error", err);
+    const msg = err?.message || String(err);
+    const stack = (err?.stack || "").slice(0, 300);
     try {
-      const msg = err?.message || String(err);
-      const stack = (err?.stack || "").slice(0, 300);
       res.status(500).json({
         ok: false,
-        error: "Something went wrong loading your devices. Please try again.",
-        debug: { status: 500, body: `${msg} | ${stack}` },
+        error: "Something went wrong loading your devices.",
+        debug: { status: 500, body: `${msg} | ${stack}`, where: "catch" },
       });
-    } catch {
-      // Last resort.
-    }
+    } catch { /* last resort */ }
   }
 }
