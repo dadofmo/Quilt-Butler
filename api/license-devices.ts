@@ -1,6 +1,11 @@
 // Lists devices (installs) currently activated against a Freemius license.
-// Uses product-scope Bearer token auth (FREEMIUS_API_TOKEN). We resolve
-// the numeric license id from the customer-facing key, then list installs.
+// Uses product-scope Bearer token auth (FREEMIUS_API_TOKEN).
+//
+// Freemius does not expose `/licenses/{id}/installs.json`. Instead we:
+//   1) Look up the license by key via `/licenses.json?search=...&enriched=true`
+//      to get its numeric `id` and `user_id`.
+//   2) List that user's installs via `/users/{user_id}/installs.json`.
+//   3) Filter to installs whose `license_id` matches.
 
 const PRODUCT_ID = "30617";
 const FREEMIUS_API = "https://api.freemius.com";
@@ -35,7 +40,7 @@ async function freemiusGet(token: string, path: string) {
   const text = await r.text();
   let json: any = null;
   try { json = text ? JSON.parse(text) : null; } catch { /* ignore */ }
-  return { status: r.status, text, json, url };
+  return { status: r.status, text, json };
 }
 
 export default async function handler(req: any, res: any) {
@@ -56,15 +61,11 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    // 1) Resolve license id from key. Freemius product-scope license list
-    // supports a `search` query that matches against the license secret_key
-    // (the sk_... value customers paste). We also fall back to scanning the
-    // first page if search returns nothing.
+    // 1) Resolve license -> id, user_id. `enriched=true` includes user info.
     const lookup = await freemiusGet(
       token,
-      `/licenses.json?search=${encodeURIComponent(licenseKey)}&count=10`,
+      `/licenses.json?search=${encodeURIComponent(licenseKey)}&enriched=true&count=10`,
     );
-
     if (lookup.status >= 400) {
       jsonError(res, lookup.status, "We couldn't load your devices. Please try again.", {
         status: lookup.status,
@@ -83,31 +84,40 @@ export default async function handler(req: any, res: any) {
     if (!match?.id) {
       jsonError(res, 404, "We couldn't find that license key.", {
         status: 200,
-        body: `licenses returned=${licenses.length}; first_keys=${licenses.slice(0,3).map((l:any)=>l?.secret_key?.slice(0,6)).join(",")}`,
+        body: `licenses returned=${licenses.length}`,
         where: "lookup-match",
       });
       return;
     }
 
     const licenseId = String(match.id);
+    const userId = String(match.user_id ?? match.user?.id ?? "");
+    if (!userId) {
+      jsonError(res, 500, "We couldn't load your devices. Please try again.", {
+        status: 500,
+        body: `license missing user_id; keys=${Object.keys(match).join(",")}`,
+        where: "lookup-user",
+      });
+      return;
+    }
 
-    // 2) List installs for that license.
+    // 2) List the owning user's installs and filter to this license.
     const installs = await freemiusGet(
       token,
-      `/licenses/${encodeURIComponent(licenseId)}/installs.json`,
+      `/users/${encodeURIComponent(userId)}/installs.json?count=50`,
     );
-
     if (installs.status >= 400) {
       jsonError(res, installs.status, "We couldn't load your devices. Please try again.", {
         status: installs.status,
-        body: `[installs.json] ${installs.text?.slice(0, 300)}`,
-        where: "installs",
+        body: `[users/${userId}/installs.json] ${installs.text?.slice(0, 300)}`,
+        where: "user-installs",
       });
       return;
     }
 
     const list: any[] = Array.isArray(installs.json?.installs) ? installs.json.installs : [];
-    const devices: DeviceSummary[] = list.map((i) => ({
+    const forLicense = list.filter((i) => String(i?.license_id ?? "") === licenseId);
+    const devices: DeviceSummary[] = forLicense.map((i) => ({
       install_id: String(i.id),
       title: String(i.title || i.url || "Unknown device"),
       last_seen: i.last_seen_at || i.updated || i.created || null,

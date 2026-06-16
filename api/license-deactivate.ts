@@ -1,7 +1,9 @@
-// Deactivates one device on a Freemius license, then activates the
-// caller's current device. Uses Bearer token auth (FREEMIUS_API_TOKEN)
-// for the delete step, and the unauthenticated key-based activate
-// endpoint for the re-activate step.
+// Deactivates one device on a Freemius license, then activates the caller's
+// current device. Uses Bearer token auth (FREEMIUS_API_TOKEN) for delete,
+// and the unauthenticated key-based activate endpoint for re-activation.
+//
+// Deactivation endpoint (documented):
+//   DELETE /v1/products/{product_id}/installs/{install_id}/licenses/{license_id}.json?license_key=...
 
 const PRODUCT_ID = "30617";
 const FREEMIUS_API = "https://api.freemius.com";
@@ -71,7 +73,7 @@ export default async function handler(req: any, res: any) {
     // 1) Resolve license id from key.
     const lookup = await freemiusGet(
       token,
-      `/licenses.json?search=${encodeURIComponent(licenseKey)}&count=10`,
+      `/licenses.json?search=${encodeURIComponent(licenseKey)}&enriched=true&count=10`,
     );
     if (lookup.status >= 400) {
       jsonError(res, lookup.status, "We couldn't free up that device.", {
@@ -92,17 +94,17 @@ export default async function handler(req: any, res: any) {
     }
     const licenseId = String(match.id);
 
-    // 2) Delete the chosen install.
+    // 2) Deactivate the license from that install using the documented path.
     const del = await freemiusDelete(
       token,
-      `/installs/${encodeURIComponent(installId)}.json`,
+      `/installs/${encodeURIComponent(installId)}/licenses/${encodeURIComponent(licenseId)}.json?license_key=${encodeURIComponent(licenseKey)}`,
     );
     if (del.status >= 400 || del.json?.error) {
       jsonError(
         res,
         del.status >= 400 ? del.status : 502,
         "We couldn't free up that device. Please try a different one.",
-        { status: del.status, body: `[delete install] ${del.text?.slice(0, 300)}`, where: "delete" },
+        { status: del.status, body: `[deactivate] ${del.text?.slice(0, 300)}`, where: "deactivate" },
       );
       return;
     }
