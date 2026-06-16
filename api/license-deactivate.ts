@@ -1,30 +1,53 @@
 // Deactivates one device on a Freemius license, then activates the
-// caller's current device. The DELETE call needs the INTERNAL license id
-// resolved from the customer-facing license key via findLicenseIdByKey.
+// caller's current device. Uses Bearer token auth (FREEMIUS_API_TOKEN)
+// for the delete step, and the unauthenticated key-based activate
+// endpoint for the re-activate step.
 
-export const config = { runtime: "nodejs" };
+const PRODUCT_ID = "30617";
+const FREEMIUS_API = "https://api.freemius.com";
 
-import { freemiusFetch, findLicenseIdByKey, CORS_HEADERS, FREEMIUS_API, PRODUCT_ID } from "./_freemius";
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
 
 function jsonError(
   res: any,
   status: number,
   error: string,
-  debug?: { status?: number; body?: string },
+  debug?: { status?: number; body?: string; where?: string },
 ) {
   res.status(status).json({ ok: false, error, ...(debug ? { debug } : {}) });
 }
 
-console.log("[license-deactivate] boot");
+async function freemiusGet(token: string, path: string) {
+  const r = await fetch(`${FREEMIUS_API}/v1/products/${PRODUCT_ID}${path}`, {
+    method: "GET",
+    headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+  });
+  const text = await r.text();
+  let json: any = null;
+  try { json = text ? JSON.parse(text) : null; } catch { /* ignore */ }
+  return { status: r.status, text, json };
+}
+
+async function freemiusDelete(token: string, path: string) {
+  const r = await fetch(`${FREEMIUS_API}/v1/products/${PRODUCT_ID}${path}`, {
+    method: "DELETE",
+    headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+  });
+  const text = await r.text();
+  let json: any = null;
+  try { json = text ? JSON.parse(text) : null; } catch { /* ignore */ }
+  return { status: r.status, text, json };
+}
 
 export default async function handler(req: any, res: any) {
   try {
     for (const [k, v] of Object.entries(CORS_HEADERS)) res.setHeader(k, v);
     if (req.method === "OPTIONS") { res.status(204).end(); return; }
-    if (req.method !== "POST") {
-      jsonError(res, 405, "Method not allowed");
-      return;
-    }
+    if (req.method !== "POST") { jsonError(res, 405, "Method not allowed"); return; }
 
     const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body ?? {});
     const licenseKey = String(body.licenseKey ?? "").trim();
@@ -37,42 +60,54 @@ export default async function handler(req: any, res: any) {
       return;
     }
 
-    if (!process.env.FREEMIUS_API_TOKEN?.trim()) {
+    const token = process.env.FREEMIUS_API_TOKEN?.trim();
+    if (!token) {
       jsonError(res, 500, "License server is not configured.", {
-        status: 500,
-        body: "FREEMIUS_API_TOKEN missing",
+        status: 500, body: "FREEMIUS_API_TOKEN missing", where: "env",
       });
       return;
     }
 
-    const licenseId = await findLicenseIdByKey(licenseKey);
-    if (!licenseId) {
+    // 1) Resolve license id from key.
+    const lookup = await freemiusGet(
+      token,
+      `/licenses.json?search=${encodeURIComponent(licenseKey)}&count=10`,
+    );
+    if (lookup.status >= 400) {
+      jsonError(res, lookup.status, "We couldn't free up that device.", {
+        status: lookup.status, body: `[licenses.json] ${lookup.text?.slice(0, 300)}`, where: "lookup",
+      });
+      return;
+    }
+    const licenses: any[] = Array.isArray(lookup.json?.licenses) ? lookup.json.licenses : [];
+    const match =
+      licenses.find((l) => l?.secret_key === licenseKey) ??
+      licenses.find((l) => l?.license_key === licenseKey) ??
+      (licenses.length === 1 ? licenses[0] : null);
+    if (!match?.id) {
       jsonError(res, 404, "We couldn't find that license key.", {
-        status: 404,
-        body: "license lookup returned no match",
+        status: 200, body: `licenses returned=${licenses.length}`, where: "lookup-match",
       });
       return;
     }
+    const licenseId = String(match.id);
 
-    // Step 1 — deactivate the chosen install (signed, product-scoped DELETE).
-    const del = await freemiusFetch({
-      method: "DELETE",
-      path: `/licenses/${encodeURIComponent(licenseId)}/installs/${encodeURIComponent(installId)}.json`,
-    });
-
+    // 2) Delete the chosen install.
+    const del = await freemiusDelete(
+      token,
+      `/installs/${encodeURIComponent(installId)}.json`,
+    );
     if (del.status >= 400 || del.json?.error) {
-      console.error("[license-deactivate] delete install error", del.status, del.text?.slice(0, 400));
       jsonError(
         res,
         del.status >= 400 ? del.status : 502,
         "We couldn't free up that device. Please try a different one.",
-        { status: del.status, body: del.text?.slice(0, 400) },
+        { status: del.status, body: `[delete install] ${del.text?.slice(0, 300)}`, where: "delete" },
       );
       return;
     }
 
-    // Step 2 — re-activate this device using the unsigned, key-authenticated
-    // activate endpoint (same path as /api/license-activate).
+    // 3) Re-activate using the unsigned key-authenticated activate endpoint.
     const actRes = await fetch(
       `${FREEMIUS_API}/v1/products/${PRODUCT_ID}/licenses/activate.json`,
       {
@@ -86,12 +121,11 @@ export default async function handler(req: any, res: any) {
     try { actJson = actText ? JSON.parse(actText) : null; } catch { /* ignore */ }
 
     if (!actRes.ok || actJson?.error) {
-      console.error("[license-deactivate] reactivate error", actRes.status, actText?.slice(0, 400));
       jsonError(
         res,
         actRes.status >= 400 ? actRes.status : 400,
         actJson?.error?.message || "We freed up that device, but couldn't activate this one. Please try entering your key again.",
-        { status: actRes.status, body: actText?.slice(0, 400) },
+        { status: actRes.status, body: `[activate] ${actText?.slice(0, 300)}`, where: "reactivate" },
       );
       return;
     }
@@ -104,17 +138,14 @@ export default async function handler(req: any, res: any) {
       email: actJson?.user?.email,
     });
   } catch (err: any) {
-    console.error("[license-deactivate] unexpected error", err);
+    const msg = err?.message || String(err);
+    const stack = (err?.stack || "").slice(0, 300);
     try {
-      const msg = err?.message || String(err);
-      const stack = (err?.stack || "").slice(0, 300);
       res.status(500).json({
         ok: false,
-        error: "Something went wrong. Please try again.",
-        debug: { status: 500, body: `${msg} | ${stack}` },
+        error: "Something went wrong.",
+        debug: { status: 500, body: `${msg} | ${stack}`, where: "catch" },
       });
-    } catch {
-      // Last resort.
-    }
+    } catch { /* last resort */ }
   }
 }
