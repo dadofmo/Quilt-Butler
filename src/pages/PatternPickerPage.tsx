@@ -6,7 +6,7 @@ import { PatternThumb } from "@/components/PatternThumb";
 import { PATTERNS, getPattern } from "@/lib/patterns";
 import { setPlanner } from "@/lib/planner-store";
 import { UnlockModal } from "@/components/UnlockModal";
-import { isUnlocked, hasFullLicense } from "@/lib/license";
+import { isUnlocked } from "@/lib/license";
 import { Lock } from "lucide-react";
 
 import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
@@ -152,19 +152,6 @@ function PatternPickerInner() {
           if (id) choose(id);
         }}
       />
-      {/* TEMP DEBUG — remove after owner finishes testing payment flow. */}
-      {hasFullLicense() && (
-        <button
-          type="button"
-          onClick={() => {
-            localStorage.removeItem("qb_license_v1");
-            window.location.reload();
-          }}
-          className="fixed bottom-3 right-3 z-50 rounded-md border border-border bg-background/90 px-3 py-1.5 text-xs text-muted-foreground shadow-sm hover:text-foreground"
-        >
-          Re-lock (testing)
-        </button>
-      )}
     </StepShell>
 
   );
