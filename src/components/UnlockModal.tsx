@@ -92,7 +92,7 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
       setKeyLoading(false);
       if (list.ok) {
         setDevices(list.devices);
-        setKeyError(result.error);
+        setKeyError(null);
       } else {
         setKeyError(list.error);
       }
@@ -127,7 +127,7 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">Unlock all quilt patterns</DialogTitle>
           <DialogDescription>
@@ -206,10 +206,10 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
                   {devices && devices.length > 0 && (
                     <div className="space-y-2 rounded-md border border-border bg-muted/40 p-3">
                       <p className="text-sm font-medium text-foreground">
-                        Your license is already used on {devices.length} device{devices.length === 1 ? "" : "s"}.
+                        Your license is active on {devices.length} device{devices.length === 1 ? "" : "s"}.
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Pick one to sign out so you can use this device instead.
+                        Sign one out to free up a spot for this device.
                       </p>
                       <ul className="space-y-2 pt-1">
                         {devices.map((d) => {
@@ -230,7 +230,7 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
                                 onClick={() => handleSwapDevice(d.install_id)}
                                 disabled={swappingId !== null}
                               >
-                                {isSwapping ? "Swapping…" : "Use this device instead"}
+                                {isSwapping ? "Signing out…" : "Sign out"}
                               </Button>
                             </li>
                           );
@@ -238,6 +238,7 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
                       </ul>
                     </div>
                   )}
+
                   {keyError && !devices && (
                     <div className="space-y-1">
                       <p role="alert" className="text-sm text-destructive">{keyError}</p>
