@@ -92,7 +92,7 @@ export function UnlockModal({ open, onOpenChange, onUnlocked }: Props) {
       setKeyLoading(false);
       if (list.ok) {
         setDevices(list.devices);
-        setKeyError(result.error);
+        setKeyError(null);
       } else {
         setKeyError(list.error);
       }
