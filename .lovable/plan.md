@@ -1,7 +1,15 @@
-Remove the temporary "Re-lock (testing)" debug button from `src/pages/PatternPickerPage.tsx`:
+The uploaded logo is 512×388 (not square) and contains text that is unreadable at favicon sizes — this is why Google falls back to the generic globe icon. To fix this we will:
 
-- Delete the floating button block (lines 155–167), including its `hasFullLicense()` guard and the `localStorage.removeItem("qb_license_v1")` reload handler.
-- Drop `hasFullLicense` from the `@/lib/license` import on line 9 (keep `isUnlocked`), since nothing else on this page uses it.
-- Leave `hasFullLicense` exported from `src/lib/license.ts` untouched — it's not referenced elsewhere right now, but keeping the export costs nothing and avoids touching shared code.
+1. **Square the logo** — Pad the 512×388 image to 512×512 so it meets favicon aspect-ratio requirements without cropping the brand mark.
+2. **Generate multi-resolution favicon files** using the square image:
+   - `favicon.ico` — multi-size ICO containing 16×16, 32×32, 48×48. Google specifically looks for 48×48 inside the ICO.
+   - `favicon-16x16.png`
+   - `favicon-32x32.png`
+   - `favicon-96x96.png` (replaces existing)
+   - `favicon-192x192.png`
+   - `favicon-512x512.png`
+   - `apple-touch-icon.png` — 180×180 (replaces existing)
+3. **Update `index.html`** — Replace the existing favicon `<link>` tags with a complete set that explicitly advertises the 48×48 size Google expects.
+4. **Add `site.webmanifest`** — A PWA manifest with the 192×192 and 512×512 icons. Google also reads the manifest `icons` array when deciding which image to display.
 
-No other files change. After the edit, the bottom-right "Re-lock (testing)" pill will no longer appear for unlocked users.
+After deployment it will still take **a few days to a few weeks** for Google to recrawl and update the search-results icon; this is normal and unavoidable on their side.
