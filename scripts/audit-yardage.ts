@@ -963,6 +963,118 @@ console.log("\n=== Churn Dash: 50×65, 12\" block, no border, 2\" sashing ===");
 
 
 // =========================================================================
+// FRIENDSHIP STAR — 3×3 block, 1 center + 4 corners + 4 HSTs (star points)
+// =========================================================================
+console.log("\n=== Friendship Star: 50×65, 12\" block, no border, no sashing, distinct A/B/C ===");
+{
+  const s = {
+    ...base(),
+    pattern: "friendship-star" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { center: "A", points: "B", bg: "C" } as Record<string, FabricKey>,
+  };
+  // 4×5 = 20 blocks. u = 12/3 = 4. centerCut=4.5, hstCut=4.875, cornerCut=4.5.
+  // A (center): 20 centers @4.5. Per strip floor(42.5/4.5)=9. Strips=ceil(20/9)=3. Inches=3*4.5=13.5.
+  // B (points): 80 HST squares @4.875. Per strip floor(42.5/4.875)=8. Strips=ceil(80/8)=10. Inches=10*4.875=48.75.
+  // C (bg): 80 corners @4.5 + 80 HSTs @4.875. corner strips=ceil(80/9)=9 → 9*4.5=40.5; hst strips=ceil(80/8)=10 → 10*4.875=48.75. Total inches=89.25.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("FS A center count", a.pieces[0].count, 20);
+  check("FS A cut size", a.pieces[0].w, 4.5);
+  check("FS A strips", a.strips[0].count, 3);
+  check("FS A inches", a.totalInches, 13.5);
+  check("FS B points count", b.pieces[0].count, 80);
+  check("FS B cut size", b.pieces[0].w, 4.875);
+  check("FS B strips", b.strips[0].count, 10);
+  check("FS B inches", b.totalInches, 48.75);
+  check("FS C bucket count", c.pieces.length, 2);
+  check("FS C corner count", c.pieces[0].count, 80);
+  check("FS C corner cut", c.pieces[0].w, 4.5);
+  check("FS C HST count", c.pieces[1].count, 80);
+  check("FS C HST cut", c.pieces[1].w, 4.875);
+  check("FS C total inches", c.totalInches, 89.25);
+  check("FS C yards", c.yards, ceilQuarter(89.25/36));
+  check("FS no D (no border, no sashing)", r.fabrics.find(f => f.fabric === "D") ? 1 : 0, 0);
+}
+
+console.log("\n=== Friendship Star: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "friendship-star" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 2,
+    assignments: { center: "A", points: "B", bg: "C", sashing: "D" } as Record<string, FabricKey>,
+  };
+  // Sashing D: vSash=(4-1)*5=15, hSash=(5-1)*4=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const d = r.fabrics.find(f => f.fabric === "D")!;
+  check("FS(sash) D strip count", d.pieces[0].count, 31);
+  check("FS(sash) D strip width", d.pieces[0].h, 2.5);
+  check("FS(sash) D strip length", d.pieces[0].w, 12.5);
+}
+
+console.log("\n=== Friendship Star: two-fabric look (center === points = B) — verify pooling ===");
+{
+  const s = {
+    ...base(),
+    pattern: "friendship-star" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { center: "B", points: "B", bg: "C" } as Record<string, FabricKey>,
+  };
+  // B pools: 20 centers @4.5 + 80 HSTs @4.875.
+  //   center strips = ceil(20/9)=3 → 3*4.5 = 13.5"
+  //   hst strips    = ceil(80/8)=10 → 10*4.875 = 48.75"
+  //   total = 62.25"  → yards = ceilQuarter((62.25)/36)
+  const r = calculateYardage(s);
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("FS pool: B bucket count", b.pieces.length, 2);
+  check("FS pool: B center count", b.pieces[0].count, 20);
+  check("FS pool: B HST count", b.pieces[1].count, 80);
+  check("FS pool: B total inches", b.totalInches, 62.25);
+  check("FS pool: B yards (rounded once after pooling)", b.yards, ceilQuarter(62.25/36));
+  check("FS pool: A absent", r.fabrics.find(f => f.fabric === "A") ? 1 : 0, 0);
+}
+
+console.log("\n=== Friendship Star: small 9\" block edge case (u=3) ===");
+{
+  const s = {
+    ...base(),
+    pattern: "friendship-star" as const,
+    quiltWidth: 27, quiltHeight: 27,
+    blockSize: 9,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { center: "A", points: "B", bg: "C" } as Record<string, FabricKey>,
+  };
+  // 3×3 = 9 blocks. u=3. centerCut=3.5, hstCut=3.875.
+  // A: 9 centers @3.5. Per strip floor(42.5/3.5)=12. Strips=ceil(9/12)=1. Inches=3.5.
+  // B: 36 HSTs @3.875. Per strip floor(42.5/3.875)=10. Strips=ceil(36/10)=4. Inches=4*3.875=15.5.
+  // C: 36 corners @3.5 + 36 HSTs @3.875. corner strips=ceil(36/12)=3 → 10.5; hst strips=ceil(36/10)=4 → 15.5; total=26.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("FS9 A strips", a.strips[0].count, 1);
+  check("FS9 A inches", a.totalInches, 3.5);
+  check("FS9 B strips", b.strips[0].count, 4);
+  check("FS9 B inches", b.totalInches, 15.5);
+  check("FS9 C total inches", c.totalInches, 26);
+}
+
+
+
+
+
+
+// =========================================================================
 // SUMMARY
 // =========================================================================
 console.log("\n=========================================");
