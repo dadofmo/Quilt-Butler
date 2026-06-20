@@ -13,6 +13,16 @@ const C = {
   d: "var(--fabric-d)",
 };
 
+// Demo colors for the Friendship Star tile illustration (per spec):
+// pink center, yellow background/corners, blue star points — shows
+// users this block supports a separate accent center.
+const FRIENDSHIP_STAR_DEMO = {
+  center: "#ec4899", // pink
+  bg: "#fde68a",     // yellow
+  points: "#3b82f6", // blue
+};
+
+
 const PATTERN_ALT: Record<PatternId, string> = {
   "nine-patch":
     "Nine Patch quilt block diagram showing 3x3 checkerboard grid layout",
