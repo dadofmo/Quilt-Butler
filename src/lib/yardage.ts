@@ -1204,7 +1204,72 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sawtooth Star Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} Sawtooth Star blocks following the 4×4 grid steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the stars without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
       );
     }
+  } else if (s.pattern === "friendship-star") {
+    // Friendship Star: 3×3 grid of equal units (u = blockSize / 3).
+    //   - 1 center square per block: cut (u + 0.5)" (center fabric)
+    //   - 4 background corner squares per block: cut (u + 0.5)"
+    //   - 4 HST units per block (the 4 star points). Standard HST math:
+    //     cut starting squares at (u + 0.875)" — 4 star + 4 bg per block,
+    //     pair RST and yield 8 HSTs (exactly enough; we only need 4 per
+    //     block but each pair yields 2 HSTs so 4 pairs per block = 8 HSTs;
+    //     we use the "extra" by trimming both halves so the math stays
+    //     simple and the per-piece counts match the spec: 4 star + 4 bg
+    //     starting squares per block).
+    const u = s.blockSize / 3;
+    const centerCut = u + SEAM;
+    const cornerCut = u + SEAM;
+    const hstCut = u + HST_EXTRA;
+
+    const centerFab = (s.assignments["center"] ?? "A") as FabricKey;
+    const pointsFab = (s.assignments["points"] ?? "B") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "C") as FabricKey;
+
+    const centerCount = blockCount;
+    const cornerCount = 4 * blockCount;
+    const hstPointsCount = 4 * blockCount;
+    const hstBgCount = 4 * blockCount;
+
+    addSquares(reqs[centerFab], "Center squares", centerCount, centerCut, s.fabricWidth);
+    addSquares(reqs[pointsFab], "HST starting squares (star points)", hstPointsCount, hstCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Background corner squares", cornerCount, cornerCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "HST starting squares (background)", hstBgCount, hstCut, s.fabricWidth);
+
+    notes.push(
+      `Each block uses a 3×3 grid where each small unit = ${u.toFixed(2)}" finished.`,
+    );
+    notes.push(
+      `Each block uses: 1 center square at ${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}", 4 star point HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}", 4 corner squares at ${cornerCut.toFixed(2)}" × ${cornerCut.toFixed(2)}", and 4 background HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}".`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${centerCount} center squares of Fabric ${centerFab}, ${hstPointsCount} HST starting squares of Fabric ${pointsFab} (star points), ${cornerCount} corner squares and ${hstBgCount} HST starting squares of Fabric ${bgFab} (background).`,
+    );
+    notes.push(
+      `HST construction: pair one star points starting square with one background starting square right sides together. Draw a diagonal line corner to corner on the lighter square. Sew a scant 1/4" on each side of the line. Cut apart on the line to yield 2 HST units. Press open and trim each unit to ${(u + SEAM).toFixed(3)}" square (finished ${u.toFixed(2)}"). Each block needs 4 HST units — 2 pairs yield exactly 4.`,
+    );
+    notes.push(
+      `Friendship Star Assembly Tip: Make your 4 HST units first by pairing star points and background squares — draw the diagonal on the lighter fabric, sew 1/4" on each side of the line, cut apart, press open, and trim to ${(u + SEAM).toFixed(3)}" square. Lay out your 3×3 grid before sewing — corner squares, HST units with star points facing inward toward the center, and your center square in the middle. Sew into three rows then join. Try a bold accent fabric for just the center square to make your star pop even more.`,
+    );
+
+    // Optional sashing between blocks (Friendship Star).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+      notes.push(
+        `Friendship Star Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} Friendship Star blocks following the 3×3 grid steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the stars without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
   }
+
 
   // Border
   if (s.borderWidth > 0) {
