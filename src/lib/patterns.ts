@@ -408,6 +408,40 @@ export const PATTERNS: PatternDef[] = [
       borderSection,
     ],
   },
+  {
+    id: "friendship-star",
+    name: "Friendship Star",
+    hasMath: true,
+    intro:
+      "The Friendship Star is a classic 3×3 block — one center square, four corner background squares, and four Half Square Triangle units forming the star points. You can use the same fabric for the center and points for a traditional two-color look, or pick a different accent fabric for the center to make it pop. Each \"Fabric\" (A / B / C) is one bolt you will buy — use the same letter for parts you want to look the same.",
+    sections: [
+      {
+        id: "center",
+        label: "Center square",
+        defaultFabric: "A",
+        hint: "The square in the middle of the block. Match it to your star points for a classic look, or use a fun accent fabric.",
+      },
+      {
+        id: "points",
+        label: "Star points",
+        defaultFabric: "B",
+        hint: "The triangle in each of the four HST units that forms the star shape.",
+      },
+      {
+        id: "bg",
+        label: "Background",
+        defaultFabric: "C",
+        hint: "The four corner squares and the background triangle in each HST unit.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "D",
+        hint: "Optional strips of fabric that separate each Friendship Star block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      borderSection,
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
