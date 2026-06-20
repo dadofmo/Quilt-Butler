@@ -422,7 +422,9 @@ function SizeStepInner() {
                                         ? "Sashing separates each Churn Dash block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
                                         : isSawtoothStar
                                           ? "Sashing separates each Sawtooth Star block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
-                                          : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
+                                          : isFriendshipStar
+                                            ? "Sashing separates each Friendship Star block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
+                                            : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">
