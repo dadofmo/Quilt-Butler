@@ -17,7 +17,8 @@ export type PatternId =
   | "churn-dash"
   | "bear-paw"
   | "irish-chain"
-  | "sawtooth-star";
+  | "sawtooth-star"
+  | "friendship-star";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
