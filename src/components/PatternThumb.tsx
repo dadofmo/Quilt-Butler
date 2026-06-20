@@ -13,6 +13,16 @@ const C = {
   d: "var(--fabric-d)",
 };
 
+// Demo colors for the Friendship Star tile illustration (per spec):
+// pink center, yellow background/corners, blue star points — shows
+// users this block supports a separate accent center.
+const FRIENDSHIP_STAR_DEMO = {
+  center: "#ec4899", // pink
+  bg: "#fde68a",     // yellow
+  points: "#3b82f6", // blue
+};
+
+
 const PATTERN_ALT: Record<PatternId, string> = {
   "nine-patch":
     "Nine Patch quilt block diagram showing 3x3 checkerboard grid layout",
@@ -43,6 +53,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Irish Chain quilt block diagram showing a 9-patch chain block with five contrasting corner and center squares forming diagonal chains across alternating background blocks",
   "sawtooth-star":
     "Sawtooth Star quilt block diagram showing a 4x4 grid with a large 2x2 center square, four background corner squares, and eight half square triangle units forming an eight pointed star",
+  "friendship-star":
+    "Friendship Star quilt block diagram showing a 3x3 grid with a center square, four background corner squares, and four half square triangle units forming a rotational star",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -327,6 +339,41 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
           {hsts.map(([c, r, sc]) => (
             <g key={`${c}-${r}`}>
               <polygon points={tri(c, r, sc)} fill={star} />
+              <polygon points={tri(c, r, opp[sc])} fill={bg} />
+            </g>
+          ))}
+        </svg>
+      );
+    }
+    case "friendship-star": {
+      // 3×3 grid. Center = center fabric, 4 corners = bg, 4 edge cells = HST
+      // with rotational orientation matching the classic Friendship Star.
+      const u = 90 / 3;
+      const center = FRIENDSHIP_STAR_DEMO.center;
+      const bg = FRIENDSHIP_STAR_DEMO.bg;
+      const points = FRIENDSHIP_STAR_DEMO.points;
+      // Each HST cell: [col, row, starCorner] — corner where the points
+      // triangle's right angle sits (rotational windmill orientation).
+      const hsts: Array<[number, number, "TL" | "TR" | "BL" | "BR"]> = [
+        [1, 0, "BR"], // top edge
+        [2, 1, "BL"], // right edge
+        [1, 2, "TL"], // bottom edge
+        [0, 1, "TR"], // left edge
+      ];
+      const opp = { TL: "BR", BR: "TL", TR: "BL", BL: "TR" } as const;
+      const tri = (col: number, row: number, c: "TL" | "TR" | "BL" | "BR") => {
+        const x = col * u, y = row * u;
+        const TL = `${x},${y}`, TR = `${x + u},${y}`, BL = `${x},${y + u}`, BR = `${x + u},${y + u}`;
+        const map = { TL: `${TL} ${TR} ${BL}`, TR: `${TL} ${TR} ${BR}`, BL: `${TL} ${BL} ${BR}`, BR: `${TR} ${BL} ${BR}` };
+        return map[c];
+      };
+      return (
+        <svg {...common}>
+          <rect width={90} height={90} fill={bg} />
+          <rect x={u} y={u} width={u} height={u} fill={center} />
+          {hsts.map(([c, r, sc]) => (
+            <g key={`${c}-${r}`}>
+              <polygon points={tri(c, r, sc)} fill={points} />
               <polygon points={tri(c, r, opp[sc])} fill={bg} />
             </g>
           ))}

@@ -61,7 +61,8 @@ function SizeStepInner() {
   const isPlusBlock = planner.pattern === "plus-block";
   const isChurnDash = planner.pattern === "churn-dash";
   const isSawtoothStar = planner.pattern === "sawtooth-star";
-  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar;
+  const isFriendshipStar = planner.pattern === "friendship-star";
+  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar;
   const [sashingText, setSashingText] = useState(
     // Preserve 0 explicitly (Nine Patch may legitimately use no sashing).
     typeof planner.sashingWidth === "number" && !isNaN(planner.sashingWidth)
@@ -421,7 +422,9 @@ function SizeStepInner() {
                                         ? "Sashing separates each Churn Dash block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
                                         : isSawtoothStar
                                           ? "Sashing separates each Sawtooth Star block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
-                                          : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
+                                          : isFriendshipStar
+                                            ? "Sashing separates each Friendship Star block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
+                                            : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">

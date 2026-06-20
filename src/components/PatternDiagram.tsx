@@ -520,5 +520,45 @@ function renderInner(
         </>
       );
     }
+    case "friendship-star": {
+      const center = get("center", "A");
+      const points = get("points", "B");
+      const bg = get("bg", "C");
+      const u = 200 / 3;
+      const hsts: Array<[number, number, "TL" | "TR" | "BL" | "BR"]> = [
+        [1, 0, "BR"],
+        [2, 1, "BL"],
+        [1, 2, "TL"],
+        [0, 1, "TR"],
+      ];
+      const opp = { TL: "BR", BR: "TL", TR: "BL", BL: "TR" } as const;
+      const tri = (col: number, row: number, c: "TL" | "TR" | "BL" | "BR") => {
+        const x = col * u, y = row * u;
+        const TL = `${x},${y}`, TR = `${x + u},${y}`, BL = `${x},${y + u}`, BR = `${x + u},${y + u}`;
+        const map = { TL: `${TL} ${TR} ${BL}`, TR: `${TL} ${TR} ${BR}`, BL: `${TL} ${BL} ${BR}`, BR: `${TR} ${BL} ${BR}` };
+        return map[c];
+      };
+      return (
+        <>
+          <rect width={200} height={200} fill={bg} />
+          <rect x={u} y={u} width={u} height={u} fill={center} />
+          {hsts.map(([c, r, sc]) => (
+            <g key={`${c}-${r}`}>
+              <polygon points={tri(c, r, sc)} fill={points} />
+              <polygon points={tri(c, r, opp[sc])} fill={bg} />
+            </g>
+          ))}
+          {/* Subtle 3×3 grid lines so beginners can see the construction */}
+          <g stroke="white" strokeWidth={1} opacity={0.5}>
+            {[1, 2].map((k) => (
+              <g key={k}>
+                <line x1={k * u} y1={0} x2={k * u} y2={200} />
+                <line x1={0} y1={k * u} x2={200} y2={k * u} />
+              </g>
+            ))}
+          </g>
+        </>
+      );
+    }
   }
 }
