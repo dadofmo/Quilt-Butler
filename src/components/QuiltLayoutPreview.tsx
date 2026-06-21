@@ -273,11 +273,15 @@ function MiniBlock({
   assignments,
   photos,
   irishPlain,
+  swap,
 }: {
   pattern: PatternId;
   assignments: SectionAssignments;
   photos?: Partial<Record<FabricKey, string>>;
   irishPlain?: boolean;
+  /** Snowball Block: when true, swap which fabric is the main square vs. the
+   *  corner accent (used on alternating grid cells to create the checkerboard). */
+  swap?: boolean;
 }) {
   // Fallback resolves through the pattern definition (single source of truth
   // in src/lib/patterns.ts) before the literal — so a section's defaultFabric
