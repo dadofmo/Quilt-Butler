@@ -106,6 +106,13 @@ function SizeStepInner() {
     !isSashed ||
     (sashingText.trim() !== "" && !isNaN(sashingNum) && sashingNum >= 0);
   const sashing = isSashed && sashingValid ? sashingNum : 0;
+  const cornerAccentNum = Number(cornerAccentText);
+  const cornerAccentValid =
+    !isSnowball ||
+    (cornerAccentText.trim() !== "" &&
+      !isNaN(cornerAccentNum) &&
+      cornerAccentNum > 0 &&
+      (!blockSizeValid || cornerAccentNum < blockSizeNum));
 
   const fit = useMemo(() => {
     if (!blockSizeValid) return null;
