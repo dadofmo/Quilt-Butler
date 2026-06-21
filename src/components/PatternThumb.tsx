@@ -55,6 +55,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Sawtooth Star quilt block diagram showing a 4x4 grid with a large 2x2 center square, four background corner squares, and eight half square triangle units forming an eight pointed star",
   "friendship-star":
     "Friendship Star quilt block diagram showing a 3x3 grid with a center square, four background corner squares, and four half square triangle units forming a rotational star",
+  "snowball-block":
+    "Snowball Block quilt diagram showing two adjacent blocks with corner accent triangles where the two fabrics swap roles to create an alternating checkerboard pattern",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
