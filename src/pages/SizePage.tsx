@@ -461,7 +461,9 @@ function SizeStepInner() {
                                           ? "Sashing separates each Sawtooth Star block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
                                           : isFriendshipStar
                                             ? "Sashing separates each Friendship Star block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
-                                            : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
+                                            : isSnowball
+                                              ? "Sashing separates each Snowball Block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
+                                              : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">
@@ -672,7 +674,7 @@ function SizeStepInner() {
 
         <button
           onClick={next}
-          disabled={!blockSizeValid || !fabricWidthValid || !borderValid}
+          disabled={!blockSizeValid || !fabricWidthValid || !borderValid || (isSashed && !sashingValid) || (isSnowball && !cornerAccentValid)}
           className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed w-full rounded-xl px-6 py-4 text-lg font-semibold shadow-sm transition-colors"
         >
           Assign fabrics →

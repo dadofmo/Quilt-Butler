@@ -58,7 +58,8 @@ function FabricsStepInner() {
   const isChurnDashPattern = pattern.id === "churn-dash";
   const isSawtoothStarPattern = pattern.id === "sawtooth-star";
   const isFriendshipStarPattern = pattern.id === "friendship-star";
-  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern || isSimpleSquaresPattern || isRailFencePattern || isLogCabinPattern || isOhioStarPattern || isFlyingGeesePattern || isD9PPattern || isSquaresOnPointPattern || isPinwheelPattern || isPlusBlockPattern || isChurnDashPattern || isSawtoothStarPattern || isFriendshipStarPattern) && (planner.sashingWidth || 0) > 0;
+  const isSnowballPattern = pattern.id === "snowball-block";
+  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern || isSimpleSquaresPattern || isRailFencePattern || isLogCabinPattern || isOhioStarPattern || isFlyingGeesePattern || isD9PPattern || isSquaresOnPointPattern || isPinwheelPattern || isPlusBlockPattern || isChurnDashPattern || isSawtoothStarPattern || isFriendshipStarPattern || isSnowballPattern) && (planner.sashingWidth || 0) > 0;
   const hasCornerstonesSection = isBearPawPattern && hasSashing;
   const sections = pattern.sections.filter((s) => {
     if (s.id === "border") return hasBorder;
@@ -226,7 +227,8 @@ function FabricsStepInner() {
             const isChurnDash = pattern.id === "churn-dash";
             const isSawtoothStar = pattern.id === "sawtooth-star";
             const isFriendshipStar = pattern.id === "friendship-star";
-            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar;
+            const isSnowball = pattern.id === "snowball-block";
+            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball;
             const sashing = isSashed ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
