@@ -159,9 +159,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isChurnDash = s.pattern === "churn-dash";
   const isSawtoothStar = s.pattern === "sawtooth-star";
   const isFriendshipStar = s.pattern === "friendship-star";
+  const isSnowball = s.pattern === "snowball-block";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -1268,6 +1269,71 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Friendship Star Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} Friendship Star blocks following the 3×3 grid steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the stars without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
       );
     }
+  } else if (s.pattern === "snowball-block") {
+    // Snowball Block: each block is one large square with 4 small corner
+    // accent squares stitched-and-flipped onto the corners. Two fabrics
+    // alternate roles every other block in a checkerboard to create the
+    // diamond pattern at the seams.
+    const corner = Math.max(0, s.cornerAccentSize || 0);
+    const mainCut = s.blockSize + SEAM;
+    const cornerCut = corner + SEAM;
+    const fabA = (s.assignments["mainA"] ?? "A") as FabricKey;
+    const fabB = (s.assignments["mainB"] ?? "B") as FabricKey;
+
+    // Walk the real grid so odd totals split exactly (not a flat 50/50).
+    let evenBlocks = 0;
+    let oddBlocks = 0;
+    for (let r = 0; r < blocksDown; r++) {
+      for (let c = 0; c < blocksAcross; c++) {
+        if ((r + c) % 2 === 0) evenBlocks++;
+        else oddBlocks++;
+      }
+    }
+
+    // Fabric A:  evenBlocks main squares + oddBlocks × 4 corner squares.
+    // Fabric B:  oddBlocks  main squares + evenBlocks × 4 corner squares.
+    const aMain = evenBlocks;
+    const aCorner = oddBlocks * 4;
+    const bMain = oddBlocks;
+    const bCorner = evenBlocks * 4;
+
+    if (aMain > 0) addSquares(reqs[fabA], "Fabric A main squares", aMain, mainCut, s.fabricWidth);
+    if (corner > 0 && aCorner > 0) addSquares(reqs[fabA], "Fabric A corner accent squares", aCorner, cornerCut, s.fabricWidth);
+    if (bMain > 0) addSquares(reqs[fabB], "Fabric B main squares", bMain, mainCut, s.fabricWidth);
+    if (corner > 0 && bCorner > 0) addSquares(reqs[fabB], "Fabric B corner accent squares", bCorner, cornerCut, s.fabricWidth);
+
+    notes.push(
+      `Cut sizes include 1/4" seam allowance.`,
+    );
+    notes.push(
+      `Each block uses 1 main square at ${mainCut.toFixed(2)}" × ${mainCut.toFixed(2)}" and 4 corner accent squares at ${cornerCut.toFixed(2)}" × ${cornerCut.toFixed(2)}" — fabrics swap which role they play every other block.`,
+    );
+    notes.push(
+      `Corner construction: place one corner accent square right sides together on a corner of the main square. Sew diagonally corner to corner. Trim 1/4" beyond the stitch line. Press open to reveal the clipped corner. Repeat on all four corners.`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${aMain} main squares and ${aCorner} corner squares of Fabric ${fabA}; ${bMain} main squares and ${bCorner} corner squares of Fabric ${fabB}.`,
+    );
+
+    // Optional sashing between blocks (Snowball Block).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
+
+    notes.push(
+      `Snowball Block Assembly Tip: Sew all four corner accent squares onto each main square before joining blocks together — work in batches, since you'll have two block types (A-main and B-main) alternating. Lay out your full quilt grid before sewing rows so you can confirm the alternating pattern looks right — it should create a checkerboard of diamonds at the seams between blocks.`,
+    );
   }
 
 
@@ -1327,7 +1393,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "bear-paw" ||
     s.pattern === "irish-chain" ||
     s.pattern === "sawtooth-star" ||
-    s.pattern === "friendship-star";
+    s.pattern === "friendship-star" ||
+    s.pattern === "snowball-block";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
