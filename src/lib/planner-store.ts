@@ -18,7 +18,8 @@ export type PatternId =
   | "bear-paw"
   | "irish-chain"
   | "sawtooth-star"
-  | "friendship-star";
+  | "friendship-star"
+  | "snowball-block";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
@@ -42,6 +43,9 @@ export interface PlannerState {
   /** Sashing width between blocks (inches). Currently only used by Bear Paw,
    *  where it is permanent (default 2") and cannot be 0. */
   sashingWidth: number;
+  /** Corner accent square finished size for Snowball Block (inches).
+   *  0 = not set yet. Other patterns ignore this field. */
+  cornerAccentSize: number;
   assignments: SectionAssignments;
   safetyBuffer: boolean;
   fabricNames: Partial<Record<FabricKey, string>>;
@@ -69,6 +73,7 @@ const initial: PlannerState = {
   blockSize: 0,
   borderWidth: 0,
   sashingWidth: 2,
+  cornerAccentSize: 0,
   assignments: {},
   safetyBuffer: true,
   fabricNames: {},

@@ -1070,6 +1070,101 @@ console.log("\n=== Friendship Star: small 9\" block edge case (u=3) ===");
 }
 
 
+// =========================================================================
+// SNOWBALL BLOCK — permanent A/B checkerboard role-swap
+// =========================================================================
+console.log("\n=== Snowball Block: 50×65, 12\" block, 4\" corner, no border, no sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "snowball-block" as const,
+    blockSize: 12, cornerAccentSize: 4,
+    borderWidth: 0, sashingWidth: 0,
+    assignments: { mainA: "A", mainB: "B" } as Record<string, FabricKey>,
+  };
+  // 4×5 = 20 blocks. even=10, odd=10. mainCut=12.5, cornerCut=4.5.
+  // A: 10 mains @12.5 — per strip floor(42.5/12.5)=3 → 4 strips × 12.5 = 50.
+  //    40 corners @4.5 — per strip floor(42.5/4.5)=9 → ceil(40/9)=5 × 4.5 = 22.5.
+  //    Total A = 72.5.
+  // B mirrors A → 72.5.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("SB A bucket count", a.pieces.length, 2);
+  check("SB A main count", a.pieces[0].count, 10);
+  check("SB A corner count", a.pieces[1].count, 40);
+  check("SB A inches", a.totalInches, 72.5);
+  check("SB B mirrors A inches", b.totalInches, 72.5);
+  check("SB no sashing C", r.fabrics.find(f => f.fabric === "C") ? 1 : 0, 0);
+}
+
+console.log("\n=== Snowball Block: 50×65, 12\" block, 4\" corner, 2\" sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "snowball-block" as const,
+    blockSize: 12, cornerAccentSize: 4,
+    sashingWidth: 2,
+    assignments: { mainA: "A", mainB: "B", sashing: "C" } as Record<string, FabricKey>,
+  };
+  // Sashing C: vSash=(4-1)*5=15, hSash=(5-1)*4=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("SB(sash) C strip count", c.pieces[0].count, 31);
+  check("SB(sash) C strip width", c.pieces[0].h, 2.5);
+  check("SB(sash) C strip length", c.pieces[0].w, 12.5);
+}
+
+console.log("\n=== Snowball Block: 36×60, 12\" block, 4\" corner — ODD total blocks (3×5=15) ===");
+{
+  const s = {
+    ...base(),
+    pattern: "snowball-block" as const,
+    quiltWidth: 36, quiltHeight: 60,
+    blockSize: 12, cornerAccentSize: 4,
+    borderWidth: 0, sashingWidth: 0,
+    assignments: { mainA: "A", mainB: "B" } as Record<string, FabricKey>,
+  };
+  // 3×5 = 15 blocks. Walk grid: even=8, odd=7.
+  // A: 8 main + 28 corners. B: 7 main + 32 corners.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("SB odd: A main count", a.pieces[0].count, 8);
+  check("SB odd: A corner count", a.pieces[1].count, 28);
+  check("SB odd: B main count", b.pieces[0].count, 7);
+  check("SB odd: B corner count", b.pieces[1].count, 32);
+  // Total mains = 8+7=15 ✓ ; total corners = 28+32 = 60 = 15*4 ✓
+}
+
+console.log("\n=== Snowball Block: small 8\" block, 3\" corner, 24×24 (3×3=9) ===");
+{
+  const s = {
+    ...base(),
+    pattern: "snowball-block" as const,
+    quiltWidth: 24, quiltHeight: 24,
+    blockSize: 8, cornerAccentSize: 3,
+    borderWidth: 0, sashingWidth: 0,
+    assignments: { mainA: "A", mainB: "B" } as Record<string, FabricKey>,
+  };
+  // 3×3 = 9. even=5 (corners + center), odd=4.
+  // mainCut=8.5, cornerCut=3.5.
+  // A: 5 mains @8.5 — per strip floor(42.5/8.5)=5 → ceil(5/5)=1 strip × 8.5 = 8.5.
+  //    16 corners @3.5 — per strip floor(42.5/3.5)=12 → ceil(16/12)=2 × 3.5 = 7.0.
+  //    Total A = 15.5.
+  // B: 4 mains @8.5 → 1 strip × 8.5 = 8.5. 20 corners @3.5 → ceil(20/12)=2 × 3.5 = 7.0. Total B = 15.5.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("SB small: A main count", a.pieces[0].count, 5);
+  check("SB small: A corner count", a.pieces[1].count, 16);
+  check("SB small: A inches", a.totalInches, 15.5);
+  check("SB small: B main count", b.pieces[0].count, 4);
+  check("SB small: B corner count", b.pieces[1].count, 20);
+  check("SB small: B inches", b.totalInches, 15.5);
+}
+
+
 
 
 

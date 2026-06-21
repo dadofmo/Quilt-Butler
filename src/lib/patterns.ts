@@ -442,6 +442,34 @@ export const PATTERNS: PatternDef[] = [
       borderSection,
     ],
   },
+  {
+    id: "snowball-block",
+    name: "Snowball Block",
+    hasMath: true,
+    intro:
+      "This pattern uses two fabrics that trade places block to block. In one block, Fabric A fills the large center octagon and Fabric B forms the small corner triangles. In the next block, the roles flip — Fabric B becomes the large center and Fabric A becomes the corners. This automatic checkerboard alternation is what creates the diamond pattern where blocks meet — no extra decisions needed, it happens automatically across your whole quilt.",
+    sections: [
+      {
+        id: "mainA",
+        label: "Fabric A",
+        defaultFabric: "A",
+        hint: "Used as the large center square in half your blocks, and as the corner accent in the other half.",
+      },
+      {
+        id: "mainB",
+        label: "Fabric B",
+        defaultFabric: "B",
+        hint: "The second fabric — automatically swaps roles with Fabric A every other block.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips of fabric that separate each Snowball Block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      borderSection,
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

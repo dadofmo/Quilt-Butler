@@ -55,6 +55,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Sawtooth Star quilt block diagram showing a 4x4 grid with a large 2x2 center square, four background corner squares, and eight half square triangle units forming an eight pointed star",
   "friendship-star":
     "Friendship Star quilt block diagram showing a 3x3 grid with a center square, four background corner squares, and four half square triangle units forming a rotational star",
+  "snowball-block":
+    "Snowball Block quilt diagram showing two adjacent blocks with corner accent triangles where the two fabrics swap roles to create an alternating checkerboard pattern",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -377,6 +379,39 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
               <polygon points={tri(c, r, opp[sc])} fill={bg} />
             </g>
           ))}
+        </svg>
+      );
+    }
+    case "snowball-block": {
+      // 1×2 mini-grid showing two adjacent blocks with A/B swapped, so the
+      // checkerboard role-swap is visible in the tile. Each block is a
+      // 45×90 octagon-style square with clipped corners.
+      const block = (ox: number, main: string, accent: string, key: string) => {
+        const c = 13; // corner fraction (≈ 1/3 of a 45-wide block) for the tile preview
+        // Octagon outline (clockwise from top-left): 8 points produced by clipping each corner
+        const pts = [
+          `${ox + c},0`,
+          `${ox + 45 - c},0`,
+          `${ox + 45},${c}`,
+          `${ox + 45},${90 - c}`,
+          `${ox + 45 - c},90`,
+          `${ox + c},90`,
+          `${ox},${90 - c}`,
+          `${ox},${c}`,
+        ].join(" ");
+        // Corner triangles in the accent color (so the corner "square stitched
+        // and flipped" reads as the accent).
+        return (
+          <g key={key}>
+            <rect x={ox} y={0} width={45} height={90} fill={accent} />
+            <polygon points={pts} fill={main} />
+          </g>
+        );
+      };
+      return (
+        <svg {...common}>
+          {block(0, C.a, C.b, "left")}
+          {block(45, C.b, C.a, "right")}
         </svg>
       );
     }

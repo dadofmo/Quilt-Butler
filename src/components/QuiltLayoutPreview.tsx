@@ -71,7 +71,7 @@ export function QuiltLayoutPreview({
     <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
       <div className="flex flex-col items-center gap-2">
         <div className="text-foreground text-xs font-semibold uppercase tracking-wide">
-          1 block
+          {pattern === "snowball-block" ? "How blocks alternate" : "1 block"}
         </div>
         {pattern === "rail-fence" ? (
           <div className="flex items-stretch gap-2">
@@ -176,6 +176,9 @@ export function QuiltLayoutPreview({
                 // Irish Chain alternates a chain block with a plain background
                 // block in a checkerboard — corner cell (0,0) is a chain block.
                 const irishPlain = pattern === "irish-chain" && (i + j) % 2 === 1;
+                // Snowball Block: fabrics A and B swap roles on every other
+                // cell — this is what creates the diamond pattern at the seams.
+                const snowballSwap = pattern === "snowball-block" && (i + j) % 2 === 1;
                 return (
                   <svg
                     key={`${i}-${j}`}
@@ -200,6 +203,7 @@ export function QuiltLayoutPreview({
                         assignments={assignments}
                         photos={photos}
                         irishPlain={irishPlain}
+                        swap={snowballSwap}
                       />
                     )}
                   </svg>
@@ -273,11 +277,15 @@ function MiniBlock({
   assignments,
   photos,
   irishPlain,
+  swap,
 }: {
   pattern: PatternId;
   assignments: SectionAssignments;
   photos?: Partial<Record<FabricKey, string>>;
   irishPlain?: boolean;
+  /** Snowball Block: when true, swap which fabric is the main square vs. the
+   *  corner accent (used on alternating grid cells to create the checkerboard). */
+  swap?: boolean;
 }) {
   // Fallback resolves through the pattern definition (single source of truth
   // in src/lib/patterns.ts) before the literal — so a section's defaultFabric
@@ -643,6 +651,33 @@ function MiniBlock({
               <polygon points={tri(c, r, opp[sc])} fill={bg} />
             </g>
           ))}
+        </>
+      );
+    }
+    case "snowball-block": {
+      // Single snowball block: octagon main square with 4 corner accent
+      // triangles. `swap` (set on alternating grid cells) flips which fabric
+      // is the main vs. accent — that's what creates the diamond pattern at
+      // the seams. The visual corner fraction is fixed for the preview.
+      const a = get("mainA", "A");
+      const b = get("mainB", "B");
+      const main = swap ? b : a;
+      const accent = swap ? a : b;
+      const c = 60; // visual corner accent (~30% of the 200-wide block)
+      const pts = [
+        `${c},0`,
+        `${200 - c},0`,
+        `${200},${c}`,
+        `${200},${200 - c}`,
+        `${200 - c},${200}`,
+        `${c},${200}`,
+        `${0},${200 - c}`,
+        `${0},${c}`,
+      ].join(" ");
+      return (
+        <>
+          <rect width={200} height={200} fill={accent} />
+          <polygon points={pts} fill={main} />
         </>
       );
     }

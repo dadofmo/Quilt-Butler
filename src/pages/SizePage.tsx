@@ -62,12 +62,16 @@ function SizeStepInner() {
   const isChurnDash = planner.pattern === "churn-dash";
   const isSawtoothStar = planner.pattern === "sawtooth-star";
   const isFriendshipStar = planner.pattern === "friendship-star";
-  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar;
+  const isSnowball = planner.pattern === "snowball-block";
+  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball;
   const [sashingText, setSashingText] = useState(
     // Preserve 0 explicitly (Nine Patch may legitimately use no sashing).
     typeof planner.sashingWidth === "number" && !isNaN(planner.sashingWidth)
       ? String(planner.sashingWidth)
       : "2",
+  );
+  const [cornerAccentText, setCornerAccentText] = useState(
+    planner.cornerAccentSize ? String(planner.cornerAccentSize) : "",
   );
 
   if (!planner.pattern) {
@@ -102,6 +106,13 @@ function SizeStepInner() {
     !isSashed ||
     (sashingText.trim() !== "" && !isNaN(sashingNum) && sashingNum >= 0);
   const sashing = isSashed && sashingValid ? sashingNum : 0;
+  const cornerAccentNum = Number(cornerAccentText);
+  const cornerAccentValid =
+    !isSnowball ||
+    (cornerAccentText.trim() !== "" &&
+      !isNaN(cornerAccentNum) &&
+      cornerAccentNum > 0 &&
+      (!blockSizeValid || cornerAccentNum < blockSizeNum));
 
   const fit = useMemo(() => {
     if (!blockSizeValid) return null;
@@ -292,6 +303,7 @@ function SizeStepInner() {
   const next = () => {
     if (!blockSizeValid || !fabricWidthValid || !borderValid) return;
     if (isSashed && !sashingValid) return;
+    if (isSnowball && !cornerAccentValid) return;
     setPlanner({
       sizePreset: preset,
       quiltWidth: Number(w) || 0,
@@ -300,6 +312,7 @@ function SizeStepInner() {
       blockSize: blockSizeNum,
       borderWidth: border,
       sashingWidth: isSashed ? sashingNum : planner.sashingWidth,
+      cornerAccentSize: isSnowball ? cornerAccentNum : planner.cornerAccentSize,
     });
     navigate("/fabrics");
   };
@@ -363,6 +376,30 @@ function SizeStepInner() {
           )}
         </Field>
 
+        {isSnowball && (
+          <Field label="Corner accent size (in inches)">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={cornerAccentText}
+              onChange={(e) => setCornerAccentText(e.target.value)}
+              placeholder="e.g. 3"
+              aria-invalid={!cornerAccentValid}
+              className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+            />
+            <p className="text-muted-foreground mt-2 text-xs leading-snug">
+              How big the corner triangles are — smaller creates a more rounded
+              look, larger creates a sharper diamond look. A common choice is
+              about 1/3 of your block size.
+            </p>
+            {cornerAccentText.trim() !== "" && !cornerAccentValid && (
+              <p className="text-destructive mt-2 text-sm font-medium">
+                Please enter a positive number smaller than your block size.
+              </p>
+            )}
+          </Field>
+        )}
+
         <Field label="Border width (in inches)">
           <input
             type="text"
@@ -424,7 +461,9 @@ function SizeStepInner() {
                                           ? "Sashing separates each Sawtooth Star block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
                                           : isFriendshipStar
                                             ? "Sashing separates each Friendship Star block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
-                                            : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
+                                            : isSnowball
+                                              ? "Sashing separates each Snowball Block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
+                                              : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">
@@ -635,7 +674,7 @@ function SizeStepInner() {
 
         <button
           onClick={next}
-          disabled={!blockSizeValid || !fabricWidthValid || !borderValid}
+          disabled={!blockSizeValid || !fabricWidthValid || !borderValid || (isSashed && !sashingValid) || (isSnowball && !cornerAccentValid)}
           className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed w-full rounded-xl px-6 py-4 text-lg font-semibold shadow-sm transition-colors"
         >
           Assign fabrics →

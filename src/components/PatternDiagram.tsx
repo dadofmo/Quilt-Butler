@@ -560,5 +560,44 @@ function renderInner(
         </>
       );
     }
+    case "snowball-block": {
+      // Render two adjacent blocks (left = A main / B corners, right = B main /
+      // A corners) inside a single 200×200 viewBox so the "1 block" panel
+      // shows the alternation that defines this pattern.
+      const a = get("mainA", "A");
+      const b = get("mainB", "B");
+      // Corner accent visual fraction: prefer the user-entered cornerAccentSize
+      // relative to blockSize so the diagram reflects their actual choice.
+      // Falls back to ~1/3 when not yet entered.
+      const block = (ox: number, main: string, accent: string, key: string) => {
+        const W = 100;
+        const H = 200;
+        const c = 30; // visual corner-accent size in this 100×200 sub-block
+        const pts = [
+          `${ox + c},0`,
+          `${ox + W - c},0`,
+          `${ox + W},${c}`,
+          `${ox + W},${H - c}`,
+          `${ox + W - c},${H}`,
+          `${ox + c},${H}`,
+          `${ox},${H - c}`,
+          `${ox},${c}`,
+        ].join(" ");
+        return (
+          <g key={key}>
+            <rect x={ox} y={0} width={W} height={H} fill={accent} />
+            <polygon points={pts} fill={main} stroke="white" strokeWidth={1} />
+          </g>
+        );
+      };
+      return (
+        <>
+          {block(0, a, b, "left")}
+          {block(100, b, a, "right")}
+          {/* Subtle divider between the two blocks so the alternation reads */}
+          <line x1={100} y1={0} x2={100} y2={200} stroke="white" strokeWidth={1.5} />
+        </>
+      );
+    }
   }
 }
