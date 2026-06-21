@@ -62,12 +62,16 @@ function SizeStepInner() {
   const isChurnDash = planner.pattern === "churn-dash";
   const isSawtoothStar = planner.pattern === "sawtooth-star";
   const isFriendshipStar = planner.pattern === "friendship-star";
-  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar;
+  const isSnowball = planner.pattern === "snowball-block";
+  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball;
   const [sashingText, setSashingText] = useState(
     // Preserve 0 explicitly (Nine Patch may legitimately use no sashing).
     typeof planner.sashingWidth === "number" && !isNaN(planner.sashingWidth)
       ? String(planner.sashingWidth)
       : "2",
+  );
+  const [cornerAccentText, setCornerAccentText] = useState(
+    planner.cornerAccentSize ? String(planner.cornerAccentSize) : "",
   );
 
   if (!planner.pattern) {
