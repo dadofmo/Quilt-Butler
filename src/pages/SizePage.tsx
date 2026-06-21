@@ -303,6 +303,7 @@ function SizeStepInner() {
   const next = () => {
     if (!blockSizeValid || !fabricWidthValid || !borderValid) return;
     if (isSashed && !sashingValid) return;
+    if (isSnowball && !cornerAccentValid) return;
     setPlanner({
       sizePreset: preset,
       quiltWidth: Number(w) || 0,
@@ -311,6 +312,7 @@ function SizeStepInner() {
       blockSize: blockSizeNum,
       borderWidth: border,
       sashingWidth: isSashed ? sashingNum : planner.sashingWidth,
+      cornerAccentSize: isSnowball ? cornerAccentNum : planner.cornerAccentSize,
     });
     navigate("/fabrics");
   };
@@ -373,6 +375,30 @@ function SizeStepInner() {
             </p>
           )}
         </Field>
+
+        {isSnowball && (
+          <Field label="Corner accent size (in inches)">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={cornerAccentText}
+              onChange={(e) => setCornerAccentText(e.target.value)}
+              placeholder="e.g. 3"
+              aria-invalid={!cornerAccentValid}
+              className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+            />
+            <p className="text-muted-foreground mt-2 text-xs leading-snug">
+              How big the corner triangles are — smaller creates a more rounded
+              look, larger creates a sharper diamond look. A common choice is
+              about 1/3 of your block size.
+            </p>
+            {cornerAccentText.trim() !== "" && !cornerAccentValid && (
+              <p className="text-destructive mt-2 text-sm font-medium">
+                Please enter a positive number smaller than your block size.
+              </p>
+            )}
+          </Field>
+        )}
 
         <Field label="Border width (in inches)">
           <input
