@@ -1,45 +1,65 @@
-# Add Pattern: Friendship Star
+## Add "Snowball Block" pattern
 
-A new 3×3 star block built from 1 center square + 4 background corner squares + 4 HST star points arranged with the classic Friendship Star **rotational** orientation (each HST's star triangle points in a swirling pattern around the center, as in your reference image). Sashing is included to match every other pattern except Irish Chain. Paywalled like the rest (only Nine Patch and HST stay free).
+A new fully-functional pattern with a permanent checkerboard A/B fabric swap and a new per-pattern "corner accent size" input. License/paywall logic untouched — Snowball lands behind the paywall automatically like every pattern except Nine Patch and HST.
 
-## Zero-risk for existing users
+### Files to edit (all additive, no breaking changes)
 
-- No edits to `src/lib/license.ts`, `src/components/UnlockModal.tsx`, or any `api/license-*` file.
-- No localStorage key changes (`qb_license_v1`, `qb_device_uid_v1` untouched).
-- No existing pattern's calculator, diagram, thumbnail, or store field is modified — Friendship Star is added as a brand-new `case` in each switch statement.
-- `PatternId` only gains a new value; nothing renamed/removed → no breaking store change.
+1. **`src/lib/planner-store.ts`**
+   - Add `"snowball-block"` to the `PatternId` union.
+   - Add a new optional field `cornerAccentSize: number` (default `0` = "not set yet"), persisted in localStorage alongside the rest of planner state. Existing users' stored state spreads cleanly via `{ ...initial, ...parsed }` — no migration needed.
 
-## Files to edit (all additive)
+2. **`src/lib/patterns.ts`**
+   - New `PatternDef` entry with sections: `mainA` (A) and `mainB` (B) — both labeled per spec — plus `sashing` (C) and `border`. `intro` uses the spec's green-box copy.
+   - Effective border default falls through `getEffectiveBorderDefault` (no change to that helper).
 
-1. **`src/lib/planner-store.ts`** — add `"friendship-star"` to the `PatternId` union.
-2. **`src/lib/patterns.ts`** — add Friendship Star entry to `PATTERNS` with sections: `center` (A), `points` (B), `bg` (C), `sashing` (D), border (auto). `hasMath: true`. Intro text uses the green-box copy from the spec.
-3. **`src/lib/yardage.ts`**
-   - Add `case "friendship-star"` branch modeled on Sawtooth Star (line 1146).
-   - Math: `u = blockSize / 3`; `centerCut = u + 0.5`, `hstCut = u + 0.875`, `cornerCut = u + 0.5`. Per block: 1 center, 4 star-point HST starting squares, 4 bg corner squares, 4 bg HST starting squares.
-   - Route every cut through `addSquares` / `addRails` — **never push to `req.pieces` directly** (per CHANGE-SAFETY.md).
-   - Pooling for shared letters is automatic: each `addSquares` call appends to the requirement object for whatever letter is assigned, so when two sections share a letter their piece counts pool into one yardage calculation. No special-case code needed.
-   - Add the exact spec `notes.push(...)` lines: cutting/sewing bullets, sub-cut instructions per fabric (center / star points / background), HST construction step, and the sage-green Assembly Tip.
-   - Add sashing block copied from Sawtooth Star: if `sashWidth > 0`, compute vSash/hSash, `addRails`, push sashing note + 2-stage assembly tip.
-   - Add `"friendship-star"` to the `showBasics` list at line 1263.
-   - Border is handled automatically by the shared block at line 1208 via `getEffectiveBorderDefault`.
-4. **`src/components/PatternDiagram.tsx`** — add `case "friendship-star"`: 3×3 grid. Center cell uses `center` fabric, 4 corners use `bg`, 4 edge cells render HSTs with rotational orientation matching your reference (top HST dark triangle on right half, right HST dark on bottom, bottom HST dark on left, left HST dark on top). Reuse existing HST cell rendering used by Sawtooth Star.
-5. **`src/components/QuiltLayoutPreview.tsx`** — add `case "friendship-star"` tiling the block across the grid (same construction as the diagram, scaled).
-6. **`src/components/PatternThumb.tsx`** — add `case "friendship-star"` producing the tile illustration. Demo colors: pink center, yellow corners/background, blue star points — matching the spec. Also add the thumb-list entry near line 44.
-7. **`src/components/FabricRollIcon.tsx`** — add `"friendship-star": 4`.
-8. **`scripts/audit-yardage.ts`** — add cases:
-   - All distinct fabrics (A center, B points, C bg, D border), block 12", no sashing — verify exact piece counts: blocks × 1 centers, blocks × 4 point HSTs, blocks × 4 corners, blocks × 4 bg HSTs; verify cut sizes match formulas.
-   - With sashing 2" — verify sashing strip counts.
-   - **Two-fabric look (center === points, both = "B"):** verify pooled piece counts produce a single yardage equal to what cutting the combined piece list would actually require (round-up happens once, after pooling).
-   - Small block edge case (block 9", u=3").
-   - Cross-check: shopping-list total yardage equals `Σ(strips × cut size)` from the cutting diagram for each letter.
+3. **`src/pages/SizePage.tsx`**
+   - Add `isSnowball` flag; include it in `isSashed`.
+   - When `isSnowball`, render a new "Corner accent size (in inches)" text input directly below Block size, with the exact helper text from the spec. Validate `> 0` AND `< blockSize`. Block "Next" if invalid.
+   - On `next()`, persist `cornerAccentSize`.
 
-## Behavior verification (after build)
+4. **`src/lib/yardage.ts`**
+   - New `case "snowball-block"` branch. Math:
+     - `mainCut = blockSize + SEAM` (0.5)
+     - `cornerCut = cornerAccentSize + SEAM`
+     - `evenBlocks` / `oddBlocks` computed by iterating the actual grid (`(r+c) % 2`), not a flat 50/50, so odd totals split correctly.
+     - Fabric A pieces: `evenBlocks` main squares (`mainCut`) + `oddBlocks * 4` corner squares (`cornerCut`).
+     - Fabric B pieces: `oddBlocks` main squares + `evenBlocks * 4` corner squares.
+   - Route every cut through `addSquares` (never push to `req.pieces` directly), keeping the main-square and corner-square cuts as separate `addSquares` calls per fabric so the cutting diagram naturally renders them as distinct strip groups.
+   - Add the spec's exact `notes.push(...)` lines (cutting/sewing bullets, per-fabric counts, sage-green Assembly Tip).
+   - Sashing block: reuse the existing Sawtooth Star / Friendship Star sashing snippet verbatim.
+   - Add `"snowball-block"` to the `showBasics` list and any other inclusive pattern flags already used for sashed block patterns.
 
-- `bun audit:math` passes.
-- Manually walk one Friendship Star quilt end-to-end in the preview: tile shows on picker, fabrics page renders all 4 cards + border, results page shows correct piece counts, cutting diagrams render for each assigned letter, shopping list totals match the diagrams.
-- Spot-check Sawtooth Star and Nine Patch still render identically (regression check on shared code paths).
-- License flow: not touched. No smoke test required by CHANGE-SAFETY.md.
+5. **`src/components/PatternThumb.tsx`**
+   - Add a tile illustration: 1×2 mini grid showing two adjacent snowball blocks with A/B swapped (octagon shape via clipped corners). Add the new id to the thumb-list mapping.
 
-## One small spec note
+6. **`src/components/PatternDiagram.tsx`**
+   - Add a `case "snowball-block"` that renders the "How blocks alternate" 1×2 panel (left = A main / B corners, right = B main / A corners), with the spec's caption sentence underneath.
 
-Your reference image shows the classic **rotational** Friendship Star (HSTs swirl around the center) rather than all four star triangles pointing dead-center. Claude's text said "pointing inward toward center" — these read similarly but the rotational version is the traditional Friendship Star and matches your image. I'll build the rotational version. The math is identical either way (still 4 HSTs per block, same cut sizes, same yardage); only the diagram/thumb orientation changes.
+7. **`src/components/QuiltLayoutPreview.tsx`**
+   - Add a `case "snowball-block"` that tiles the full grid with the alternating colorway (octagon main + 4 corner triangles, swapped on `(r+c) % 2 === 1`). Used both by the Step 2 live preview and the Step 3/4 full-quilt preview, so the checkerboard appears everywhere automatically.
+
+8. **`src/components/FabricRollIcon.tsx`**
+   - Add `"snowball-block": 3` (uses up to 3 bolts: A, B, border; sashing fabric defaults to C so still 3).
+
+9. **`src/pages/FabricsPage.tsx`** and **`src/pages/ResultsPage.tsx`**
+   - Add `isSnowball` flag where other pattern-specific labels/copy switch. FabricsPage header/subheading + the green explanation box use the spec text. ResultsPage uses the spec's header/subheading and the sage-green Assembly Tip already emitted by `yardage.ts`.
+
+10. **`scripts/audit-yardage.ts`**
+    - Add 4 cases: (a) no sashing throw, (b) 2" sashing throw, (c) odd total blocks (e.g. 5×7 grid) to verify even/odd split math, (d) small block (8") with 3" corner accent. Run `bun audit:math` after the edits.
+
+### What is NOT touched (license safety)
+
+- `src/lib/license.ts`, `src/components/UnlockModal.tsx`, `api/license-*.ts`, Freemius config — zero changes. New pattern inherits the existing paywall rule "everything except `nine-patch` and `hst` requires a license" with no edits to that rule.
+- localStorage key `quiltbutler-planner-state` unchanged. New field is additive and tolerated by old clients (they'd just ignore it).
+- No existing pattern's calculator, diagram, sections, or defaults are modified.
+
+### Verification
+
+- `bun audit:math` must pass for all existing patterns plus the 4 new Snowball cases.
+- Manually walk a Snowball quilt end-to-end (Step 1 → Step 4) and confirm: checkerboard preview, corner-accent input validation, fabric totals match the hand-computed `even/odd × pieces` formula, sashing toggles cleanly at 0" and 2".
+- Spot-check Sawtooth Star, Friendship Star, Nine Patch, and HST still render and price identically.
+- Confirm license flow: pattern card shows lock until key is entered; entering a valid key unlocks Snowball alongside the other paid patterns.
+
+### Open question
+
+The spec says Card 3 (Border) offers swatches "A, B, and C". The existing FabricsPage border picker auto-derives the available swatches from active fabrics + the next free letter (via `getEffectiveBorderDefault`). I'll keep that existing helper so Snowball's border picker shows A, B, and C exactly (since only A and B are active block fabrics, C is the next free letter). Confirm this matches your intent — otherwise I'll hardcode the three options for Snowball only.
