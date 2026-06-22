@@ -561,41 +561,29 @@ function renderInner(
       );
     }
     case "snowball-block": {
-      // Render two adjacent blocks (left = A main / B corners, right = B main /
-      // A corners) inside a single 200×200 viewBox so the "1 block" panel
-      // shows the alternation that defines this pattern.
+      // Single square Snowball block: solid accent background + octagon main
+      // square on top. The alternation across the quilt is shown in the
+      // adjacent "Your full quilt" panel via the swap flag in
+      // QuiltLayoutPreview — not by distorting this single-block diagram.
+      // Geometry matches MiniBlock's snowball case so the "1 block" preview
+      // and each full-quilt tile read identically.
       const a = get("mainA", "A");
       const b = get("mainB", "B");
-      // Corner accent visual fraction: prefer the user-entered cornerAccentSize
-      // relative to blockSize so the diagram reflects their actual choice.
-      // Falls back to ~1/3 when not yet entered.
-      const block = (ox: number, main: string, accent: string, key: string) => {
-        const W = 100;
-        const H = 200;
-        const c = 30; // visual corner-accent size in this 100×200 sub-block
-        const pts = [
-          `${ox + c},0`,
-          `${ox + W - c},0`,
-          `${ox + W},${c}`,
-          `${ox + W},${H - c}`,
-          `${ox + W - c},${H}`,
-          `${ox + c},${H}`,
-          `${ox},${H - c}`,
-          `${ox},${c}`,
-        ].join(" ");
-        return (
-          <g key={key}>
-            <rect x={ox} y={0} width={W} height={H} fill={accent} />
-            <polygon points={pts} fill={main} stroke="white" strokeWidth={1} />
-          </g>
-        );
-      };
+      const c = 60; // ~30% corner accent — visual only
+      const pts = [
+        `${c},0`,
+        `${200 - c},0`,
+        `${200},${c}`,
+        `${200},${200 - c}`,
+        `${200 - c},${200}`,
+        `${c},${200}`,
+        `${0},${200 - c}`,
+        `${0},${c}`,
+      ].join(" ");
       return (
         <>
-          {block(0, a, b, "left")}
-          {block(100, b, a, "right")}
-          {/* Subtle divider between the two blocks so the alternation reads */}
-          <line x1={100} y1={0} x2={100} y2={200} stroke="white" strokeWidth={1.5} />
+          <rect width={200} height={200} fill={b} />
+          <polygon points={pts} fill={a} stroke="white" strokeWidth={1} />
         </>
       );
     }
