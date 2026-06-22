@@ -71,7 +71,7 @@ export function QuiltLayoutPreview({
     <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
       <div className="flex flex-col items-center gap-2">
         <div className="text-foreground text-xs font-semibold uppercase tracking-wide">
-          {pattern === "snowball-block" ? "How blocks alternate" : "1 block"}
+          1 block
         </div>
         {pattern === "rail-fence" ? (
           <div className="flex items-stretch gap-2">
