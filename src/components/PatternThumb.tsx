@@ -343,9 +343,9 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       // 3×3 grid. Center = center fabric, 4 corners = bg, 4 edge cells = HST
       // with rotational orientation matching the classic Friendship Star.
       const u = 90 / 3;
-      const center = FRIENDSHIP_STAR_DEMO.center;
-      const bg = FRIENDSHIP_STAR_DEMO.bg;
-      const points = FRIENDSHIP_STAR_DEMO.points;
+      const center = C.d; // pink — matches on-brand fabric token palette
+      const bg = C.b;     // yellow
+      const points = C.a; // blue
       // Each HST cell: [col, row, starCorner] — corner where the points
       // triangle's right angle sits (rotational windmill orientation).
       const hsts: Array<[number, number, "TL" | "TR" | "BL" | "BR"]> = [
