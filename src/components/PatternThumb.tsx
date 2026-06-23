@@ -49,6 +49,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Friendship Star quilt block diagram showing a 3x3 grid with a center square, four background corner squares, and four half square triangle units forming a rotational star",
   "snowball-block":
     "Snowball Block quilt diagram showing two adjacent blocks with corner accent triangles where the two fabrics swap roles to create an alternating checkerboard pattern",
+  "four-patch":
+    "Four Patch quilt block diagram showing a simple 2x2 grid of four equal squares in four distinct fabric colors",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -411,6 +413,19 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
               return block(cIdx, r, main, accent, `${r}-${cIdx}`);
             }),
           )}
+        </svg>
+      );
+    }
+    case "four-patch": {
+      // Simple 2×2 grid using four distinct demo colors to clearly show
+      // this block supports a unique fabric in every position.
+      // TL=blue (A), TR=yellow (B), BL=pink (D), BR=green (C) per spec.
+      return (
+        <svg {...common}>
+          <rect x={0} y={0} width={45} height={45} fill={C.a} />
+          <rect x={45} y={0} width={45} height={45} fill={C.b} />
+          <rect x={0} y={45} width={45} height={45} fill={C.d} />
+          <rect x={45} y={45} width={45} height={45} fill={C.c} />
         </svg>
       );
     }

@@ -470,6 +470,46 @@ export const PATTERNS: PatternDef[] = [
       borderSection,
     ],
   },
+  {
+    id: "four-patch",
+    name: "Four Patch",
+    hasMath: true,
+    intro:
+      "The Four Patch is the simplest block in quilting — just four equal squares arranged in a 2×2 grid. Use two fabrics for a classic checkerboard look, or four completely different fabrics for a scrappy confetti effect — it's entirely up to you.",
+    sections: [
+      {
+        id: "topLeft",
+        label: "Top-left square",
+        defaultFabric: "A",
+        hint: "The square in the top-left position of every block.",
+      },
+      {
+        id: "topRight",
+        label: "Top-right square",
+        defaultFabric: "B",
+        hint: "The square in the top-right position of every block.",
+      },
+      {
+        id: "bottomLeft",
+        label: "Bottom-left square",
+        defaultFabric: "D",
+        hint: "The square in the bottom-left position of every block.",
+      },
+      {
+        id: "bottomRight",
+        label: "Bottom-right square",
+        defaultFabric: "C",
+        hint: "The square in the bottom-right position of every block.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "E",
+        hint: "Optional strips of fabric that separate each Four Patch block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      borderSection,
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

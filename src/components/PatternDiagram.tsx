@@ -587,5 +587,26 @@ function renderInner(
         </>
       );
     }
+    case "four-patch": {
+      // 2×2 grid of equal squares. Defaults match the tile illustration
+      // (TL=A blue, TR=B yellow, BL=D pink, BR=C green) but each cell
+      // updates live from the user's per-position fabric choices.
+      const tl = get("topLeft", "A");
+      const tr = get("topRight", "B");
+      const bl = get("bottomLeft", "D");
+      const br = get("bottomRight", "C");
+      return (
+        <>
+          <rect x={0} y={0} width={100} height={100} fill={tl} />
+          <rect x={100} y={0} width={100} height={100} fill={tr} />
+          <rect x={0} y={100} width={100} height={100} fill={bl} />
+          <rect x={100} y={100} width={100} height={100} fill={br} />
+          <g stroke="white" strokeWidth={1.5} opacity={0.6}>
+            <line x1={100} y1={0} x2={100} y2={200} />
+            <line x1={0} y1={100} x2={200} y2={100} />
+          </g>
+        </>
+      );
+    }
   }
 }

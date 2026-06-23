@@ -681,5 +681,19 @@ function MiniBlock({
         </>
       );
     }
+    case "four-patch": {
+      const tl = get("topLeft", "A");
+      const tr = get("topRight", "B");
+      const bl = get("bottomLeft", "D");
+      const br = get("bottomRight", "C");
+      return (
+        <>
+          <rect x={0} y={0} width={100} height={100} fill={tl} />
+          <rect x={100} y={0} width={100} height={100} fill={tr} />
+          <rect x={0} y={100} width={100} height={100} fill={bl} />
+          <rect x={100} y={100} width={100} height={100} fill={br} />
+        </>
+      );
+    }
   }
 }
