@@ -19,7 +19,8 @@ export type PatternId =
   | "irish-chain"
   | "sawtooth-star"
   | "friendship-star"
-  | "snowball-block";
+  | "snowball-block"
+  | "four-patch";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
