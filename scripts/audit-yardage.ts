@@ -1165,8 +1165,72 @@ console.log("\n=== Snowball Block: small 8\" block, 3\" corner, 24×24 (3×3=9) 
 }
 
 
+// =========================================================================
+// FOUR PATCH
+// =========================================================================
+console.log("\n=== Four Patch: 50×65, 12\" block, no border, no sashing, 4 distinct fabrics ===");
+{
+  const s = {
+    ...base(),
+    pattern: "four-patch" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { topLeft: "A", topRight: "B", bottomLeft: "D", bottomRight: "C" } as Record<string, FabricKey>,
+  };
+  // 4×5 = 20 blocks. u=6, cut=6.5. Per strip floor(42.5/6.5)=6. Strips=ceil(20/6)=4.
+  // Inches per fabric = 4*6.5 = 26.
+  const r = calculateYardage(s);
+  for (const fab of ["A","B","C","D"] as FabricKey[]) {
+    const f = r.fabrics.find(x => x.fabric === fab)!;
+    check(`4P ${fab} count`, f.pieces[0].count, 20);
+    check(`4P ${fab} cut`, f.pieces[0].w, 6.5);
+    check(`4P ${fab} strips`, f.strips[0].count, 4);
+    check(`4P ${fab} inches`, f.totalInches, 26);
+  }
+}
 
+console.log("\n=== Four Patch: shared fabric — A in two positions pools to 2× count ===");
+{
+  const s = {
+    ...base(),
+    pattern: "four-patch" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { topLeft: "A", topRight: "B", bottomLeft: "B", bottomRight: "A" } as Record<string, FabricKey>,
+  };
+  // 4×5 = 20 blocks. A holds TL + BR = 2 positions → 40 squares. B holds TR + BL → 40.
+  // cut 6.5. per strip 6. Strips=ceil(40/6)=7. Inches=7*6.5=45.5.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("4P shared A count", a.pieces[0].count, 40);
+  check("4P shared A strips", a.strips[0].count, 7);
+  check("4P shared A inches", a.totalInches, 45.5);
+  check("4P shared B count", b.pieces[0].count, 40);
+  check("4P shared B inches", b.totalInches, 45.5);
+  check("4P shared no C", r.fabrics.find(f => f.fabric === "C") ? 1 : 0, 0);
+  check("4P shared no D", r.fabrics.find(f => f.fabric === "D") ? 1 : 0, 0);
+}
 
+console.log("\n=== Four Patch: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "four-patch" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 2,
+    assignments: { topLeft: "A", topRight: "B", bottomLeft: "D", bottomRight: "C", sashing: "E" } as Record<string, FabricKey>,
+  };
+  // vSash=(4-1)*5=15, hSash=(5-1)*4=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const e = r.fabrics.find(f => f.fabric === "E")!;
+  check("4P(sash) E strip count", e.pieces[0].count, 31);
+  check("4P(sash) E strip width", e.pieces[0].h, 2.5);
+  check("4P(sash) E strip length", e.pieces[0].w, 12.5);
+}
 
 
 // =========================================================================
