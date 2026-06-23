@@ -160,9 +160,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isSawtoothStar = s.pattern === "sawtooth-star";
   const isFriendshipStar = s.pattern === "friendship-star";
   const isSnowball = s.pattern === "snowball-block";
+  const isFourPatch = s.pattern === "four-patch";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -1334,6 +1335,73 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Snowball Block Assembly Tip: Sew all four corner accent squares onto each main square before joining blocks together — work in batches, since you'll have two block types (A-main and B-main) alternating. Lay out your full quilt grid before sewing rows so you can confirm the alternating pattern looks right — it should create a checkerboard of diamonds at the seams between blocks.`,
     );
+  } else if (s.pattern === "four-patch") {
+    // Four Patch: the simplest block in quilting — 2×2 grid of equal squares.
+    // Each position can take its own fabric. We pool the per-position
+    // assignments by fabric letter so two positions sharing a fabric share
+    // one labeled pile of squares.
+    const u = s.blockSize / 2;
+    const cut = u + SEAM;
+    const POSITIONS = ["topLeft", "topRight", "bottomLeft", "bottomRight"] as const;
+    const POSITION_LABELS: Record<typeof POSITIONS[number], string> = {
+      topLeft: "top-left",
+      topRight: "top-right",
+      bottomLeft: "bottom-left",
+      bottomRight: "bottom-right",
+    };
+    const FALLBACK: Record<typeof POSITIONS[number], FabricKey> = {
+      topLeft: "A",
+      topRight: "B",
+      bottomLeft: "D",
+      bottomRight: "C",
+    };
+    const fabricPositions: Partial<Record<FabricKey, string[]>> = {};
+    for (const pos of POSITIONS) {
+      const fab = (s.assignments[pos] ?? FALLBACK[pos]) as FabricKey;
+      (fabricPositions[fab] ??= []).push(POSITION_LABELS[pos]);
+    }
+    for (const fab of ALL_FABRIC_KEYS) {
+      const posList = fabricPositions[fab];
+      if (!posList || posList.length === 0) continue;
+      const count = posList.length * blockCount;
+      const labelJoin = posList.length === 1
+        ? `${posList[0]} squares`
+        : `${posList.join(" & ")} squares`;
+      addSquares(reqs[fab], labelJoin, count, cut, s.fabricWidth);
+    }
+
+    notes.push(
+      `Each block uses 4 equal squares at ${cut.toFixed(2)}" × ${cut.toFixed(2)}" — one per position.`,
+    );
+    const breakdownParts: string[] = [];
+    for (const fab of ALL_FABRIC_KEYS) {
+      const posList = fabricPositions[fab];
+      if (!posList || posList.length === 0) continue;
+      const count = posList.length * blockCount;
+      breakdownParts.push(`${count} squares of Fabric ${fab} for ${posList.join(" & ")}`);
+    }
+    notes.push(
+      `Across all ${blockCount} blocks: ${breakdownParts.join(", ")}.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
+
+    notes.push(
+      `Four Patch Assembly Tip: This is one of the simplest blocks in all of quilting — perfect for a very first project. Sew your top-left and top-right squares together to make the top row. Sew your bottom-left and bottom-right squares together to make the bottom row. Press the seam on each row in opposite directions, then join the two rows — the seams will nest together perfectly at the center for a flat block.`,
+    );
   }
 
 
@@ -1394,7 +1462,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "irish-chain" ||
     s.pattern === "sawtooth-star" ||
     s.pattern === "friendship-star" ||
-    s.pattern === "snowball-block";
+    s.pattern === "snowball-block" ||
+    s.pattern === "four-patch";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
