@@ -140,7 +140,7 @@ function PatternPickerInner() {
       </div>
       <section className="mx-auto mt-16 max-w-2xl px-4 py-10 text-center sm:mt-20 sm:py-12">
         <p className="text-xs leading-relaxed text-muted-foreground/70 sm:text-sm">
-          QuiltButler is a free online quilt planning tool built for quilters of every skill level. Choose from multiple quilt patterns — from beginner-friendly Nine Patch and Half Square Triangles to more complex designs — with new patterns added regularly. Enter your quilt size and fabric choices to instantly receive exact yardage requirements, visual cutting diagrams, and a printable shopping list. Use the Quilt Visualizer to see how your fabric choices will look before you buy a single yard. Estimate your total project cost with the built-in cost calculator, and get helpful quilting tips along the way. No login required — just open QuiltButler and get your complete quilt plan. Happy Quilting!
+          QuiltButler is an online quilt planning tool built for quilters of every skill level. Start free with the beginner-friendly Nine Patch, then unlock the full pattern library — Half Square Triangles, Snowball, Friendship Star, Bear Paw and more — with a single one-time purchase. Enter your quilt size and fabric choices to instantly receive exact yardage requirements, visual cutting diagrams, and a printable shopping list. Use the Quilt Visualizer to see how your fabric choices will look before you buy a single yard, estimate your total project cost with the built-in cost calculator, and get helpful quilting tips along the way. No login required — just open QuiltButler and get your complete quilt plan. Happy Quilting!
         </p>
       </section>
       <UnlockModal

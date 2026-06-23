@@ -1,25 +1,12 @@
-## Fix the Snowball Block tile illustration
+## Problem
+The SEO/footer paragraph at the bottom of the Pattern Picker page still reads as if every pattern is free. It says *"Choose from multiple quilt patterns — from beginner-friendly Nine Patch and Half Square Triangles to more complex designs"* but now only **Nine Patch** is free; all others are locked behind the paywall.
 
-The tile on the pattern picker currently renders two tall-skinny 45×90 rectangles side by side, so each block is a stretched octagon instead of a square. That's what you're seeing in the screenshot — it doesn't read like the red/white checkerboard reference you pasted.
+## Change
+Rewrite the `<section>` paragraph in `src/pages/PatternPickerPage.tsx` (the big SEO blurb at the bottom) to accurately reflect the freemium model:
+- Lead with Nine Patch as the free pattern to try
+- Mention that additional patterns unlock with a one-time purchase
+- Keep the rest of the value props (exact yardage, cutting diagrams, visualizer, cost calculator, no login)
+- Keep it under ~80 words so it still fits the compact footer style
 
-### Change
-
-**`src/components/PatternThumb.tsx`** — `case "snowball-block"` (lines 385–417)
-
-Replace the 1×2 tall-block layout with a **2×2 grid of square blocks** (each 45×45 inside the 90×90 thumb viewBox), with A/B swapped on every other cell using `(r+c) % 2`. This:
-
-- Shows true square blocks (matches the reference image's geometry).
-- Demonstrates the checkerboard alternation on both axes — exactly the red/white reversal you want users to see at a glance on the picker tile.
-- Uses the same octagon math already in `MiniBlock`/`PatternDiagram`, just scaled to 45px.
-
-Corner fraction: `c = 13` of 45 (~29%) — keeps the existing visual weight.
-
-### Not changing
-
-- No math, yardage, license, or paywall code touched.
-- `PatternDiagram` (single-block panel) and `QuiltLayoutPreview` (full-quilt preview) already render correctly from the prior fix — leaving them alone.
-
-### Verify
-
-- Open the pattern picker: Snowball Block tile should show a 2×2 grid where diagonal cells share the same colorway and adjacent cells are reversed — matching the reference image's checkerboard.
-- `bun audit:math` unaffected (no math edits).
+## No other files touched
+Only the single paragraph in `PatternPickerPage.tsx` changes. No license, pattern, or paywall code is affected.
