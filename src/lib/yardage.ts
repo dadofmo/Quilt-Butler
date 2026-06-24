@@ -161,9 +161,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isFriendshipStar = s.pattern === "friendship-star";
   const isSnowball = s.pattern === "snowball-block";
   const isFourPatch = s.pattern === "four-patch";
+  const isStreak = s.pattern === "streak-of-lightning";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -1402,6 +1403,68 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Four Patch Assembly Tip: This is one of the simplest blocks in all of quilting — perfect for a very first project. Sew your top-left and top-right squares together to make the top row. Sew your bottom-left and bottom-right squares together to make the bottom row. Press the seam on each row in opposite directions, then join the two rows — the seams will nest together perfectly at the center for a flat block.`,
     );
+  } else if (s.pattern === "streak-of-lightning") {
+    // Streak of Lightning: 2×2 grid of HSTs, all facing the SAME direction.
+    // One pair of starting squares (1 stripe + 1 background) sewn on the
+    // diagonal yields 2 HST units that already share the same direction.
+    // Each block needs 4 same-direction HSTs → 2 pairs → 2 stripe starting
+    // squares + 2 background starting squares per block.
+    const u = s.blockSize / 2;
+    const cut = u + HST_EXTRA;
+    const stripeFab = (s.assignments["stripe"] ?? "A") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
+    // Pool by fabric letter so two roles sharing a fabric share one labeled pile.
+    const counts: Partial<Record<FabricKey, { stripe: number; bg: number }>> = {};
+    const perBlockStripe = 2;
+    const perBlockBg = 2;
+    counts[stripeFab] = { stripe: (counts[stripeFab]?.stripe ?? 0) + blockCount * perBlockStripe, bg: counts[stripeFab]?.bg ?? 0 };
+    counts[bgFab] = { stripe: counts[bgFab]?.stripe ?? 0, bg: (counts[bgFab]?.bg ?? 0) + blockCount * perBlockBg };
+    for (const fab of ALL_FABRIC_KEYS) {
+      const c = counts[fab];
+      if (!c) continue;
+      const total = c.stripe + c.bg;
+      if (total <= 0) continue;
+      const roles: string[] = [];
+      if (c.stripe > 0) roles.push("stripe");
+      if (c.bg > 0) roles.push("background");
+      const label = `${roles.join(" & ")} starting squares`;
+      addSquares(reqs[fab], label.charAt(0).toUpperCase() + label.slice(1), total, cut, s.fabricWidth);
+    }
+
+    notes.push(
+      `Each block = 4 Half Square Triangle units, all facing the same direction. Across all ${blockCount} blocks: ${blockCount * 4} HST units total.`,
+    );
+    notes.push(
+      `Each block uses 2 stripe starting squares and 2 background starting squares, each at ${cut.toFixed(2)}" × ${cut.toFixed(2)}" (finished ${u.toFixed(2)}" + 7/8" extra for the diagonal seam).`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${blockCount * perBlockStripe} starting squares of Fabric ${stripeFab} (stripe) and ${blockCount * perBlockBg} starting squares of Fabric ${bgFab} (background)${stripeFab === bgFab ? ` — pooled into ${blockCount * (perBlockStripe + perBlockBg)} squares of Fabric ${stripeFab} total` : ""}.`,
+    );
+    notes.push(
+      `HST construction: pair one Fabric ${stripeFab} starting square with one Fabric ${bgFab} starting square right sides together (RST). Draw a diagonal line corner to corner on the lighter square. Sew a scant 1/4" on each side of the line. Cut apart on the line — this yields 2 HST units, and because both came from the same diagonal cut they already face the same direction. Press open and trim each unit to ${(u + SEAM).toFixed(2)}" square.`,
+    );
+    notes.push(
+      `Important: when laying out your block, make sure all four HST units face the SAME direction — orient them so the stripe fabric runs consistently from one corner to the opposite corner across the whole block.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge. Heads up: sashing will interrupt the continuous zigzag effect at every seam — skip sashing for an uninterrupted lightning streak.`,
+      );
+    }
+
+    notes.push(
+      `Streak of Lightning Assembly Tip: Keep your HST units oriented consistently as you sew — every diagonal in every block should run the same direction. Before joining blocks into rows, lay out your full quilt top on the floor or a design wall and double check the zigzag lines connect cleanly from block to block. For the most striking continuous effect, skip sashing between blocks so the diagonals flow uninterrupted across the whole quilt.`,
+    );
   }
 
 
@@ -1463,7 +1526,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "sawtooth-star" ||
     s.pattern === "friendship-star" ||
     s.pattern === "snowball-block" ||
-    s.pattern === "four-patch";
+    s.pattern === "four-patch" ||
+    s.pattern === "streak-of-lightning";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
