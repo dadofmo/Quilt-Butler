@@ -51,6 +51,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Snowball Block quilt diagram showing two adjacent blocks with corner accent triangles where the two fabrics swap roles to create an alternating checkerboard pattern",
   "four-patch":
     "Four Patch quilt block diagram showing a simple 2x2 grid of four equal squares in four distinct fabric colors",
+  "streak-of-lightning":
+    "Streak of Lightning quilt block diagram showing a 2x2 grid of four half square triangle units all oriented the same diagonal direction so the stripe runs continuously across the block",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -429,5 +431,26 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "streak-of-lightning": {
+      // 2×2 grid of HSTs, ALL same direction — stripe (A) bottom-left triangle,
+      // background (B) top-right triangle, in every cell. Lined up across the
+      // quilt this reads as one continuous diagonal streak.
+      const cell = (gx: number, gy: number) => {
+        const x = gx * 45;
+        const y = gy * 45;
+        return (
+          <g key={`${gx}-${gy}`}>
+            <polygon points={`${x},${y} ${x},${y + 45} ${x + 45},${y + 45}`} fill={C.a} />
+            <polygon points={`${x},${y} ${x + 45},${y} ${x + 45},${y + 45}`} fill={C.b} />
+          </g>
+        );
+      };
+      return (
+        <svg {...common}>
+          {[0, 1].flatMap((gy) => [0, 1].map((gx) => cell(gx, gy)))}
+        </svg>
+      );
+    }
   }
 }
+

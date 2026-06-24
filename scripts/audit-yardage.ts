@@ -1234,6 +1234,69 @@ console.log("\n=== Four Patch: 50×65, 12\" block, no border, 2\" sashing ===");
 
 
 // =========================================================================
+// STREAK OF LIGHTNING
+// =========================================================================
+console.log("\n=== Streak of Lightning: 50×65, 12\" block, no border, no sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "streak-of-lightning" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { stripe: "A", bg: "B" } as Record<string, FabricKey>,
+  };
+  // 4×5 = 20 blocks. u=6, cut=6.875. perStrip floor(42.5/6.875)=6.
+  // Each fabric: 20*2 = 40 squares. strips=ceil(40/6)=7. inches=7*6.875=48.125.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("SoL A count", a.pieces[0].count, 40);
+  check("SoL A cut", a.pieces[0].w, 6.875);
+  check("SoL A strips", a.strips[0].count, 7);
+  check("SoL A inches", a.totalInches, 48.125);
+  check("SoL B count", b.pieces[0].count, 40);
+  check("SoL B inches", b.totalInches, 48.125);
+}
+
+console.log("\n=== Streak of Lightning: shared fabric — stripe and bg both A pools to 80 ===");
+{
+  const s = {
+    ...base(),
+    pattern: "streak-of-lightning" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { stripe: "A", bg: "A" } as Record<string, FabricKey>,
+  };
+  // 20 blocks * 4 = 80 squares of A, cut 6.875, perStrip 6 → strips ceil(80/6)=14.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("SoL shared A count", a.pieces[0].count, 80);
+  check("SoL shared A strips", a.strips[0].count, 14);
+  check("SoL shared no B", r.fabrics.find(f => f.fabric === "B") ? 1 : 0, 0);
+}
+
+console.log("\n=== Streak of Lightning: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "streak-of-lightning" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 2,
+    assignments: { stripe: "A", bg: "B", sashing: "D" } as Record<string, FabricKey>,
+  };
+  // vSash=(4-1)*5=15, hSash=(5-1)*4=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const d = r.fabrics.find(f => f.fabric === "D")!;
+  check("SoL(sash) D strip count", d.pieces[0].count, 31);
+  check("SoL(sash) D strip width", d.pieces[0].h, 2.5);
+  check("SoL(sash) D strip length", d.pieces[0].w, 12.5);
+}
+
+
+// =========================================================================
 // SUMMARY
 // =========================================================================
 console.log("\n=========================================");

@@ -695,5 +695,28 @@ function MiniBlock({
         </>
       );
     }
+    case "streak-of-lightning": {
+      // Same-direction HST tile — when laid edge-to-edge the diagonals from
+      // adjacent blocks line up into one continuous zigzag across the quilt.
+      const stripe = get("stripe", "A");
+      const bg = get("bg", "B");
+      return (
+        <>
+          {[0, 1].flatMap((gy) =>
+            [0, 1].map((gx) => {
+              const x = gx * 100;
+              const y = gy * 100;
+              return (
+                <g key={`${gx}-${gy}`}>
+                  <polygon points={`${x},${y} ${x},${y + 100} ${x + 100},${y + 100}`} fill={stripe} />
+                  <polygon points={`${x},${y} ${x + 100},${y} ${x + 100},${y + 100}`} fill={bg} />
+                </g>
+              );
+            }),
+          )}
+        </>
+      );
+    }
   }
 }
+

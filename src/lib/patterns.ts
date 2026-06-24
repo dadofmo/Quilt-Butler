@@ -510,6 +510,34 @@ export const PATTERNS: PatternDef[] = [
       borderSection,
     ],
   },
+  {
+    id: "streak-of-lightning",
+    name: "Streak of Lightning",
+    hasMath: true,
+    intro:
+      "Each block is four Half Square Triangle units, all facing the same direction. On their own each block shows a simple diagonal stripe — but lined up across a full quilt, the diagonals connect block to block into one continuous zigzag streak. Tip for best results: this pattern looks most striking with no sashing between blocks, so the diagonal lines connect cleanly. Sashing is still available if you prefer a more separated look — just know the continuous zigzag effect will be interrupted at each seam.",
+    sections: [
+      {
+        id: "stripe",
+        label: "Stripe fabric",
+        defaultFabric: "A",
+        hint: "The fabric forming the diagonal line running through each block.",
+      },
+      {
+        id: "bg",
+        label: "Background",
+        defaultFabric: "B",
+        hint: "The fabric behind the diagonal stripe.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "D",
+        hint: "Optional strips of fabric that separate each Streak of Lightning block — set sashing to 0\" on the previous step to keep the zigzag continuous.",
+      },
+      borderSection,
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

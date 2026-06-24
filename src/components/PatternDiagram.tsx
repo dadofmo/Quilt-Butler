@@ -608,5 +608,34 @@ function renderInner(
         </>
       );
     }
+    case "streak-of-lightning": {
+      // 2×2 grid where every HST runs the SAME diagonal direction. Stripe
+      // fabric fills the bottom-left half of each cell, background fills
+      // the top-right half. Tiled across the quilt this connects into one
+      // continuous zigzag.
+      const stripe = get("stripe", "A");
+      const bg = get("bg", "B");
+      return (
+        <>
+          {[0, 1].flatMap((gy) =>
+            [0, 1].map((gx) => {
+              const x = gx * 100;
+              const y = gy * 100;
+              return (
+                <g key={`${gx}-${gy}`}>
+                  <polygon points={`${x},${y} ${x},${y + 100} ${x + 100},${y + 100}`} fill={stripe} />
+                  <polygon points={`${x},${y} ${x + 100},${y} ${x + 100},${y + 100}`} fill={bg} />
+                </g>
+              );
+            }),
+          )}
+          <g stroke="white" strokeWidth={1} opacity={0.4}>
+            <line x1={100} y1={0} x2={100} y2={200} />
+            <line x1={0} y1={100} x2={200} y2={100} />
+          </g>
+        </>
+      );
+    }
   }
 }
+
