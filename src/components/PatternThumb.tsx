@@ -430,6 +430,26 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
           <rect x={45} y={45} width={45} height={45} fill={C.c} />
         </svg>
       );
+    case "streak-of-lightning": {
+      // 2×2 grid of HSTs, ALL same direction — stripe (A) bottom-left triangle,
+      // background (B) top-right triangle, in every cell. Lined up across the
+      // quilt this reads as one continuous diagonal streak.
+      const cell = (gx: number, gy: number) => {
+        const x = gx * 45;
+        const y = gy * 45;
+        return (
+          <g key={`${gx}-${gy}`}>
+            <polygon points={`${x},${y} ${x},${y + 45} ${x + 45},${y + 45}`} fill={C.a} />
+            <polygon points={`${x},${y} ${x + 45},${y} ${x + 45},${y + 45}`} fill={C.b} />
+          </g>
+        );
+      };
+      return (
+        <svg {...common}>
+          {[0, 1].flatMap((gy) => [0, 1].map((gx) => cell(gx, gy)))}
+        </svg>
+      );
     }
   }
 }
+
