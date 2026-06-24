@@ -51,6 +51,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Snowball Block quilt diagram showing two adjacent blocks with corner accent triangles where the two fabrics swap roles to create an alternating checkerboard pattern",
   "four-patch":
     "Four Patch quilt block diagram showing a simple 2x2 grid of four equal squares in four distinct fabric colors",
+  "streak-of-lightning":
+    "Streak of Lightning quilt block diagram showing a 2x2 grid of four half square triangle units all oriented the same diagonal direction so the stripe runs continuously across the block",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {

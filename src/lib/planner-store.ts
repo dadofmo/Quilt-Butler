@@ -20,7 +20,8 @@ export type PatternId =
   | "sawtooth-star"
   | "friendship-star"
   | "snowball-block"
-  | "four-patch";
+  | "four-patch"
+  | "streak-of-lightning";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
