@@ -64,7 +64,8 @@ function SizeStepInner() {
   const isFriendshipStar = planner.pattern === "friendship-star";
   const isSnowball = planner.pattern === "snowball-block";
   const isFourPatch = planner.pattern === "four-patch";
-  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch;
+  const isStreak = planner.pattern === "streak-of-lightning";
+  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak;
   const [sashingText, setSashingText] = useState(
     // Preserve 0 explicitly (Nine Patch may legitimately use no sashing).
     typeof planner.sashingWidth === "number" && !isNaN(planner.sashingWidth)
@@ -466,7 +467,9 @@ function SizeStepInner() {
                                                 ? "Sashing separates each Snowball Block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
                                                 : isFourPatch
                                                   ? "Sashing separates each Four Patch block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
-                                                  : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
+                                                  : isStreak
+                                                    ? "Sashing separates each Streak of Lightning block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 to keep the continuous zigzag effect (recommended)."
+                                                    : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">
