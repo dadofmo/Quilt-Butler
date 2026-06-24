@@ -430,6 +430,7 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
           <rect x={45} y={45} width={45} height={45} fill={C.c} />
         </svg>
       );
+    }
     case "streak-of-lightning": {
       // 2×2 grid of HSTs, ALL same direction — stripe (A) bottom-left triangle,
       // background (B) top-right triangle, in every cell. Lined up across the
