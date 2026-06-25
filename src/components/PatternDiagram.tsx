@@ -609,10 +609,11 @@ function renderInner(
       );
     }
     case "streak-of-lightning": {
-      // 2×2 grid where every HST runs the SAME diagonal direction. Stripe
-      // fabric fills the bottom-left half of each cell, background fills
-      // the top-right half. Tiled across the quilt this connects into one
-      // continuous zigzag.
+      // 2×2 grid where every HST uses the SAME diagonal orientation
+      // (BL→TR hypotenuse). Stripe fills the upper-left half of each cell,
+      // background fills the lower-right half. No cell is rotated or mirrored
+      // relative to its neighbors — the streak comes from this consistent
+      // diagonal repeating cleanly across cell and block boundaries.
       const stripe = get("stripe", "A");
       const bg = get("bg", "B");
       return (
@@ -623,8 +624,8 @@ function renderInner(
               const y = gy * 100;
               return (
                 <g key={`${gx}-${gy}`}>
-                  <polygon points={`${x},${y} ${x},${y + 100} ${x + 100},${y + 100}`} fill={stripe} />
-                  <polygon points={`${x},${y} ${x + 100},${y} ${x + 100},${y + 100}`} fill={bg} />
+                  <polygon points={`${x},${y} ${x + 100},${y} ${x},${y + 100}`} fill={stripe} />
+                  <polygon points={`${x + 100},${y} ${x + 100},${y + 100} ${x},${y + 100}`} fill={bg} />
                 </g>
               );
             }),

@@ -432,16 +432,18 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       );
     }
     case "streak-of-lightning": {
-      // 2×2 grid of HSTs, ALL same direction — stripe (A) bottom-left triangle,
-      // background (B) top-right triangle, in every cell. Lined up across the
-      // quilt this reads as one continuous diagonal streak.
+      // 2×2 grid of HSTs, ALL the SAME diagonal orientation (BL→TR hypotenuse).
+      // Stripe (A) fills the upper-left half of every cell, background (B)
+      // fills the lower-right half. Every block in the quilt is identical —
+      // the "lightning streak" comes from this consistent diagonal repeating
+      // edge-to-edge, not from rotating or mirroring any HST.
       const cell = (gx: number, gy: number) => {
         const x = gx * 45;
         const y = gy * 45;
         return (
           <g key={`${gx}-${gy}`}>
-            <polygon points={`${x},${y} ${x},${y + 45} ${x + 45},${y + 45}`} fill={C.a} />
-            <polygon points={`${x},${y} ${x + 45},${y} ${x + 45},${y + 45}`} fill={C.b} />
+            <polygon points={`${x},${y} ${x + 45},${y} ${x},${y + 45}`} fill={C.a} />
+            <polygon points={`${x + 45},${y} ${x + 45},${y + 45} ${x},${y + 45}`} fill={C.b} />
           </g>
         );
       };
