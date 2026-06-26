@@ -270,6 +270,7 @@ function ResultsStepInner() {
             <ShoppingList
               fabrics={result.fabrics}
               materials={result.materials}
+              precut={precut}
               fabricNames={planner.fabricNames}
               fabricPhotos={planner.fabricPhotos}
               itemPrices={planner.itemPrices}
@@ -287,6 +288,7 @@ function ResultsStepInner() {
             />
           </Section>
           </div>
+
 
           <div className="no-print space-y-2">
             <button
