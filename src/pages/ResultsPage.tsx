@@ -1111,3 +1111,142 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
     </div>
   );
 }
+
+/**
+ * Jelly-roll plan card: shows a strip-by-strip cutting diagram for each block
+ * fabric. One row per 2.5" jelly-roll strip with dashed sub-cut marks at each
+ * 6.5" rail boundary. Mirrors the visual language of CuttingDiagram but for
+ * pre-cut strips instead of WOF cuts off a bolt.
+ */
+function JellyRollPlanCard({
+  plan,
+  photos,
+}: {
+  plan: PrecutPlan;
+  photos: Partial<Record<FabricKey, string>>;
+}) {
+  return (
+    <div className="space-y-4">
+      <div
+        className={`rounded-xl border-2 p-4 text-sm leading-relaxed ${
+          plan.feasible
+            ? "border-primary/40 bg-accent/50"
+            : "border-destructive/60 bg-destructive/5"
+        }`}
+      >
+        <div className="text-foreground font-semibold">
+          {plan.feasible ? "Your jelly roll has enough strips" : "Heads up — not enough strips"}
+        </div>
+        <p className="text-foreground mt-1">{plan.feasibilityMessage}</p>
+      </div>
+
+      <ul className="text-muted-foreground list-disc space-y-1 pl-5 text-sm">
+        {plan.notes.map((n, i) => (
+          <li key={i}>{n}</li>
+        ))}
+      </ul>
+
+      <div className="space-y-4">
+        {plan.fabrics.map((line) => (
+          <JellyRollFabricDiagram key={line.fabric} line={line} photo={photos[line.fabric]} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function JellyRollFabricDiagram({
+  line,
+  photo,
+}: {
+  line: PrecutPlan["fabrics"][number];
+  photo?: string;
+}) {
+  const SCALE = 9; // 1 inch = 9px
+  const PAD_TOP = 24;
+  const PAD_LEFT = 80;
+  const PAD_RIGHT = 16;
+  const PAD_BOTTOM = 16;
+  const stripLenIn = JELLY_ROLL_USABLE_LENGTH;
+  const stripW = stripLenIn * SCALE;
+  const stripH = line.cutHeightIn * SCALE;
+  const rowGap = 8;
+  const totalH = line.stripsNeeded * (stripH + rowGap) - rowGap;
+  const svgW = PAD_LEFT + stripW + PAD_RIGHT;
+  const svgH = PAD_TOP + totalH + PAD_BOTTOM;
+  const fabricColor = FABRIC_COLORS[line.fabric];
+  const stripFill = `color-mix(in oklab, ${fabricColor} 30%, white)`;
+
+  return (
+    <div className="bg-card rounded-xl border-2 border-border p-4">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span
+            className="border-border inline-block h-10 w-10 rounded border"
+            style={photo ? { backgroundImage: `url(${photo})`, backgroundSize: "cover", backgroundPosition: "center" } : { background: fabricColor }}
+          />
+          <span className="text-foreground font-semibold">
+            Fabric {line.fabric} — {line.roles.join(" & ")}
+          </span>
+        </div>
+        <span className="text-muted-foreground text-sm">
+          {line.stripsNeeded} jelly-roll strip{line.stripsNeeded === 1 ? "" : "s"} ({line.piecesNeeded} rails total)
+        </span>
+      </div>
+
+      <ol className="text-foreground mb-3 list-decimal space-y-1 pl-5 text-sm">
+        <li>
+          Pull <strong>{line.stripsNeeded}</strong> jelly-roll strip{line.stripsNeeded === 1 ? "" : "s"} of Fabric {line.fabric} from the roll. Each strip is <strong>2.5&quot; × ~42&quot;</strong> already cut for you — no strip cutting needed.
+        </li>
+        <li>
+          Sub-cut each strip at the dashed lines below into <strong>{line.piecesPerStrip} rails of {line.cutLengthIn.toFixed(2)}&quot; long</strong> (finished {(line.cutLengthIn - 0.5).toFixed(0)}&quot; × {(line.cutHeightIn - 0.5).toFixed(0)}&quot;).
+        </li>
+        <li>
+          Total rails of Fabric {line.fabric}: <strong>{line.piecesNeeded}</strong> — used for the {line.roles.join(" & ").toLowerCase()} of every block.
+        </li>
+      </ol>
+
+      <div className="overflow-x-auto">
+        <svg width={svgW} height={svgH} className="block" role="img" aria-label={`Jelly roll sub-cut diagram for Fabric ${line.fabric}`}>
+          {Array.from({ length: line.stripsNeeded }).map((_, i) => {
+            const remaining = line.piecesNeeded - i * line.piecesPerStrip;
+            const cutsOnThisStrip = Math.min(line.piecesPerStrip, remaining);
+            const ry = PAD_TOP + i * (stripH + rowGap);
+            const usedIn = cutsOnThisStrip * line.cutLengthIn;
+            const usedW = usedIn * SCALE;
+            const leftoverIn = Math.max(0, stripLenIn - usedIn);
+            const leftoverW = leftoverIn * SCALE;
+            return (
+              <g key={i}>
+                {/* Strip body */}
+                <rect x={PAD_LEFT} y={ry} width={usedW} height={stripH} fill={stripFill} stroke={fabricColor} strokeWidth={1} rx={2} />
+                {leftoverW > 1 && (
+                  <rect x={PAD_LEFT + usedW} y={ry} width={leftoverW} height={stripH} fill="var(--muted)" stroke={fabricColor} strokeWidth={1} strokeDasharray="2 2" opacity={0.6} rx={2} />
+                )}
+                {/* Sub-cut dashed lines */}
+                {Array.from({ length: cutsOnThisStrip - 1 }).map((_, k) => {
+                  const x = PAD_LEFT + (k + 1) * line.cutLengthIn * SCALE;
+                  return <line key={k} x1={x} y1={ry + 2} x2={x} y2={ry + stripH - 2} stroke={fabricColor} strokeWidth={1} strokeDasharray="3 3" opacity={0.85} />;
+                })}
+                {/* Strip number badge */}
+                <text x={PAD_LEFT - 8} y={ry + stripH / 2 + 4} textAnchor="end" className="fill-foreground text-[11px] font-semibold">
+                  Strip {i + 1}
+                </text>
+                {/* Per-strip count label */}
+                <text x={PAD_LEFT + usedW / 2} y={ry + stripH / 2 + 4} textAnchor="middle" className="fill-foreground text-[10px] font-medium">
+                  sub-cut {cutsOnThisStrip} @ {line.cutLengthIn.toFixed(2)}&quot;
+                </text>
+                {leftoverW > 28 && (
+                  <text x={PAD_LEFT + usedW + leftoverW / 2} y={ry + stripH / 2 + 4} textAnchor="middle" className="fill-muted-foreground text-[9px] italic">
+                    leftover {leftoverIn.toFixed(1)}&quot;
+                  </text>
+                )}
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
