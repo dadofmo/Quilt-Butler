@@ -184,7 +184,15 @@ function ResultsStepInner() {
 
             {precut && (
               <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
-                Your block fabrics come from your jelly roll and are listed in the <strong>Jelly roll plan</strong> below. The yardage above covers only your border, sashing, backing, batting, and binding.
+                {result.fabrics.length > 0 ? (
+                  <>
+                    Your block fabrics come from your jelly roll and are listed in the <strong>Jelly roll plan</strong> below. The yardage above covers only your border and sashing fabric(s). Backing, batting, and binding are listed under <strong>Other materials you&apos;ll need</strong>.
+                  </>
+                ) : (
+                  <>
+                    Your block fabrics come from your jelly roll and are listed in the <strong>Jelly roll plan</strong> below. There are no yardage fabrics to buy for this quilt top; backing, batting, and binding are listed under <strong>Other materials you&apos;ll need</strong>.
+                  </>
+                )}
               </p>
             )}
 
