@@ -39,6 +39,8 @@ function ResultsStepInner() {
   }
 
   const result = calculateYardage(planner);
+  const precut = computePrecutPlan(planner);
+
 
   // Compute the ACTUAL finished size from the same math the calculator uses,
   // so the header (and the size-mismatch note) always match what the quilter
