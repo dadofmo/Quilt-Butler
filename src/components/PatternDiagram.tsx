@@ -609,11 +609,10 @@ function renderInner(
       );
     }
     case "streak-of-lightning": {
-      // 2×2 grid where every HST uses the SAME diagonal orientation
-      // (BL→TR hypotenuse). Stripe fills the upper-left half of each cell,
-      // background fills the lower-right half. No cell is rotated or mirrored
-      // relative to its neighbors — the streak comes from this consistent
-      // diagonal repeating cleanly across cell and block boundaries.
+      // 2×2 grid where every HST keeps the same BL→TR diagonal orientation,
+      // but the bottom row swaps the top-row color placement. That horizontal
+      // color reversal creates the visible kink/lightning zigzag while leaving
+      // cutting math and fabric assignments unchanged.
       const stripe = get("stripe", "A");
       const bg = get("bg", "B");
       return (
@@ -622,10 +621,11 @@ function renderInner(
             [0, 1].map((gx) => {
               const x = gx * 100;
               const y = gy * 100;
+              const topRow = gy === 0;
               return (
                 <g key={`${gx}-${gy}`}>
-                  <polygon points={`${x},${y} ${x + 100},${y} ${x},${y + 100}`} fill={stripe} />
-                  <polygon points={`${x + 100},${y} ${x + 100},${y + 100} ${x},${y + 100}`} fill={bg} />
+                  <polygon points={`${x},${y} ${x + 100},${y} ${x},${y + 100}`} fill={topRow ? stripe : bg} />
+                  <polygon points={`${x + 100},${y} ${x + 100},${y + 100} ${x},${y + 100}`} fill={topRow ? bg : stripe} />
                 </g>
               );
             }),
