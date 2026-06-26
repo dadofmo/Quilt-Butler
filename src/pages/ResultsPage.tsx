@@ -897,32 +897,43 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   stroke={fabricColor}
                   strokeWidth={1}
                 />
-                {/* Leftover / waste portion (within usable width) */}
-                {leftoverW > 1 && (
-                  <>
-                    <rect
-                      x={cuttableX + usedW}
-                      y={ry}
-                      width={leftoverW}
-                      height={rh}
-                      fill="var(--muted)"
-                      stroke={fabricColor}
-                      strokeWidth={1}
-                      strokeDasharray="2 2"
-                      opacity={0.7}
-                    />
-                    {leftoverW > 28 && (
-                      <text
-                        x={cuttableX + usedW + leftoverW / 2}
-                        y={ry + rh / 2 + 3}
-                        textAnchor="middle"
-                        className="fill-muted-foreground text-[9px] italic"
-                      >
-                        leftover {leftoverIn.toFixed(1)}"
-                      </text>
-                    )}
-                  </>
-                )}
+                {/* Leftover / waste portion (within usable width). The
+                    "leftover X" caption is suppressed when the strip is a
+                    partial strip whose sub-cut label needs to overflow into
+                    this region to remain legible (see label block below). */}
+                {leftoverW > 1 && (() => {
+                  // Re-derive whether the label will overflow into leftover.
+                  const tag = r.groupLabel ? `${r.groupLabel} — ` : "";
+                  const shortLabel = r.isBorder
+                    ? `Border (full width)`
+                    : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
+                  const labelOverflows = shortLabel.length * 5 > usedW - 30;
+                  return (
+                    <>
+                      <rect
+                        x={cuttableX + usedW}
+                        y={ry}
+                        width={leftoverW}
+                        height={rh}
+                        fill="var(--muted)"
+                        stroke={fabricColor}
+                        strokeWidth={1}
+                        strokeDasharray="2 2"
+                        opacity={0.7}
+                      />
+                      {leftoverW > 28 && !labelOverflows && (
+                        <text
+                          x={cuttableX + usedW + leftoverW / 2}
+                          y={ry + rh / 2 + 3}
+                          textAnchor="middle"
+                          className="fill-muted-foreground text-[9px] italic"
+                        >
+                          leftover {leftoverIn.toFixed(1)}"
+                        </text>
+                      )}
+                    </>
+                  );
+                })()}
                 {/* Right selvage zone (not cuttable) */}
                 {selvageInPx > 0.5 && (
                   <rect
@@ -985,12 +996,21 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   {r.stripIndex}
                 </text>
 
-                {/* In-strip label — describes the sub-cut action. Height is
-                    already shown in the left gutter, so this label focuses on
-                    "what to cut from this strip" and degrades gracefully on
-                    narrow strips without ever losing critical info. */}
+                {/* In-strip label — describes the sub-cut action. The cut
+                    instruction MUST always be visible for every strip,
+                    including final partial strips where the colored region
+                    alone is too narrow to hold the text. Strategy:
+                    1. Pick the longest of three label variants that fits in
+                       the usable strip width (cuttable + leftover).
+                    2. If even the shortest variant doesn't fit at 10px,
+                       shrink the font down to 7px so it still fits in one
+                       line.
+                    3. Allow the text to overflow into the leftover region
+                       when needed (the "leftover X" caption is suppressed
+                       in that case to avoid collision). */}
                 {(() => {
-                  const labelAvailW = usedW - 30; // px available to the right of the badge
+                  const inStripW = usedW - 30; // px to the right of the badge in the colored region
+                  const fullAvailW = usedW + leftoverW - 30; // can borrow leftover space
                   const tag = r.groupLabel ? `${r.groupLabel} — ` : "";
                   const fullLabel = r.isBorder
                     ? `Border strip — ${fabricWidth}" wide (full fabric width), no sub-cuts`
@@ -1001,27 +1021,38 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   const shortLabel = r.isBorder
                     ? `Border (full width)`
                     : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
-                  // Roughly 5px per char at 10px font; pick the longest version that fits.
-                  const label =
-                    labelAvailW > fullLabel.length * 5
-                      ? fullLabel
-                      : labelAvailW > midLabel.length * 5
-                        ? midLabel
-                        : labelAvailW > shortLabel.length * 5
-                          ? shortLabel
-                          : "";
-                  if (!label) return null;
+                  const CHAR_W = 5; // ~5px per char at 10px font
+                  // Prefer in-strip fit at 10px; otherwise allow overflow.
+                  let label = shortLabel;
+                  let fontSize = 10;
+                  if (fullLabel.length * CHAR_W < inStripW) label = fullLabel;
+                  else if (midLabel.length * CHAR_W < inStripW) label = midLabel;
+                  else if (shortLabel.length * CHAR_W < inStripW) label = shortLabel;
+                  else if (fullLabel.length * CHAR_W < fullAvailW) label = fullLabel;
+                  else if (midLabel.length * CHAR_W < fullAvailW) label = midLabel;
+                  else if (shortLabel.length * CHAR_W < fullAvailW) label = shortLabel;
+                  else {
+                    // Even the short label overflows the full row — shrink
+                    // the font so it still renders on one line.
+                    label = shortLabel;
+                    fontSize = Math.max(
+                      7,
+                      Math.floor((fullAvailW / shortLabel.length) * 1.9),
+                    );
+                  }
                   return (
                     <text
                       x={cuttableX + 28}
                       y={ry + rh / 2 + 3}
                       textAnchor="start"
-                      className="fill-foreground text-[10px] font-medium"
+                      fontSize={fontSize}
+                      className="fill-foreground font-medium"
                     >
                       {label}
                     </text>
                   );
                 })()}
+
               </g>
             );
           })}
