@@ -406,9 +406,9 @@ function SizeStepInner() {
           )}
         </Field>
 
-        {/* Fabric source: yardage vs jelly roll. Only Rail Fence supports
-            jelly-roll right now; other patterns see a disabled "coming soon"
-            chip so the option is discoverable but doesn't break their flow. */}
+        {/* Fabric source: yardage vs jelly roll. Only shown for patterns that
+            support jelly roll (currently Rail Fence only). */}
+        {jellyRollEligible && (
         <Field label="What fabric are you using?">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button
@@ -425,27 +425,22 @@ function SizeStepInner() {
             </button>
             <button
               type="button"
-              disabled={!jellyRollEligible}
-              onClick={() => jellyRollEligible && setFabricSource("jelly-roll")}
+              onClick={() => setFabricSource("jelly-roll")}
               className={`rounded-xl border-2 px-4 py-3 text-left transition-colors ${
-                !jellyRollEligible
-                  ? "border-input bg-muted/30 opacity-60 cursor-not-allowed"
-                  : fabricSource === "jelly-roll"
-                    ? "border-primary bg-primary/5"
-                    : "border-input bg-card hover:bg-muted/40"
+                fabricSource === "jelly-roll"
+                  ? "border-primary bg-primary/5"
+                  : "border-input bg-card hover:bg-muted/40"
               }`}
             >
-              <div className="text-foreground text-base font-semibold">
-                Jelly roll {!jellyRollEligible && <span className="text-muted-foreground text-xs font-normal">— coming soon</span>}
-              </div>
+              <div className="text-foreground text-base font-semibold">Jelly roll</div>
               <div className="text-muted-foreground text-xs mt-0.5">
-                {jellyRollEligible
-                  ? "Pre-cut 2.5\" strips, already bundled — fastest way to start a Rail Fence quilt."
-                  : "Currently only supported on Rail Fence. More patterns coming."}
+                Pre-cut 2.5" strips, already bundled — fastest way to start a Rail Fence quilt.
               </div>
             </button>
           </div>
         </Field>
+        )}
+
 
         {!isJellyRoll && (
           <Field label="Fabric width (your bolt, in inches)">
