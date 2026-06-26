@@ -162,9 +162,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isSnowball = s.pattern === "snowball-block";
   const isFourPatch = s.pattern === "four-patch";
   const isStreak = s.pattern === "streak-of-lightning";
+  const isBowTie = s.pattern === "bow-tie";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -1527,7 +1528,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "friendship-star" ||
     s.pattern === "snowball-block" ||
     s.pattern === "four-patch" ||
-    s.pattern === "streak-of-lightning";
+    s.pattern === "streak-of-lightning" ||
+    s.pattern === "bow-tie";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
