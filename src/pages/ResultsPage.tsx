@@ -72,14 +72,16 @@ function ResultsStepInner() {
   const innerH = planner.quiltHeight - 2 * planner.borderWidth;
   // Optional sashing sits BETWEEN blocks, so it adds size without changing the
   // block grid selected by the block size + border inputs.
+  const sashAdd = useSashedMath ? sashing : 0;
   const blocksAcross = Math.max(
     1,
-    Math.floor(innerW / planner.blockSize),
+    Math.floor((innerW + sashAdd) / (planner.blockSize + sashAdd)),
   );
   const blocksDown = Math.max(
     1,
-    Math.floor(innerH / planner.blockSize),
+    Math.floor((innerH + sashAdd) / (planner.blockSize + sashAdd)),
   );
+
   const actualW =
     blocksAcross * planner.blockSize +
     (useSashedMath ? Math.max(0, blocksAcross - 1) * sashing : 0) +
@@ -179,6 +181,13 @@ function ResultsStepInner() {
                 </tbody>
               </table>
             </div>
+
+            {precut && (
+              <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+                Your block fabrics come from your jelly roll and are listed in the <strong>Jelly roll plan</strong> below. The yardage above covers only your border, sashing, backing, batting, and binding.
+              </p>
+            )}
+
 
             {/* Safety buffer toggle — sits next to the numbers it actually
                 affects so users can flip it and watch yardage update. */}
