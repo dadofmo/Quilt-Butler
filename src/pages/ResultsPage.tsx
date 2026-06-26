@@ -182,6 +182,13 @@ function ResultsStepInner() {
               </table>
             </div>
 
+            {precut && (
+              <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
+                Your block fabrics come from your jelly roll and are listed in the <strong>Jelly roll plan</strong> below. The yardage above covers only your border, sashing, backing, batting, and binding.
+              </p>
+            )}
+
+
             {/* Safety buffer toggle — sits next to the numbers it actually
                 affects so users can flip it and watch yardage update. */}
             <div className="no-print bg-card mt-3 flex items-center justify-between gap-4 rounded-xl border-2 border-border p-4">
