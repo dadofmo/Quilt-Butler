@@ -52,7 +52,7 @@ const PATTERN_ALT: Record<PatternId, string> = {
   "four-patch":
     "Four Patch quilt block diagram showing a simple 2x2 grid of four equal squares in four distinct fabric colors",
   "streak-of-lightning":
-    "Streak of Lightning quilt block diagram showing a 2x2 grid of four half square triangle units all oriented the same diagonal direction so the stripe runs continuously across the block",
+    "Streak of Lightning quilt block diagram showing a 2x2 grid of half square triangle units forming a peak and valley chevron",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -432,33 +432,27 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       );
     }
     case "streak-of-lightning": {
-      // 2×2 grid of HSTs. Top row: TR→BL diagonal, stripe in upper-left
-      // triangle. Bottom row mirrors vertically — opposite diagonal (TL→BR),
-      // stripe in upper-right triangle. The flipped diagonal at the horizontal
-      // seam is what produces the zigzag kink.
-      const cell = (gx: number, gy: number) => {
-        const x = gx * 45;
-        const y = gy * 45;
-        const topRow = gy === 0;
-        return (
-          <g key={`${gx}-${gy}`}>
-            {topRow ? (
-              <>
-                <polygon points={`${x},${y} ${x + 45},${y} ${x},${y + 45}`} fill={C.a} />
-                <polygon points={`${x + 45},${y} ${x + 45},${y + 45} ${x},${y + 45}`} fill={C.b} />
-              </>
-            ) : (
-              <>
-                <polygon points={`${x},${y} ${x + 45},${y} ${x + 45},${y + 45}`} fill={C.a} />
-                <polygon points={`${x},${y} ${x},${y + 45} ${x + 45},${y + 45}`} fill={C.b} />
-              </>
-            )}
-          </g>
-        );
-      };
+      // Exact chevron geometry: background triangles form the two upper
+      // outside corners and two lower center triangles; stripe triangles form
+      // the peak at top-center and valley opening at bottom-center.
       return (
         <svg {...common}>
-          {[0, 1].flatMap((gy) => [0, 1].map((gx) => cell(gx, gy)))}
+          {/* Top-left quadrant */}
+          <polygon points="0,0 45,0 0,45" fill={C.b} />
+          <polygon points="45,0 45,45 0,45" fill={C.a} />
+          {/* Top-right quadrant */}
+          <polygon points="45,0 90,0 90,45" fill={C.b} />
+          <polygon points="45,0 90,45 45,45" fill={C.a} />
+          {/* Bottom-left quadrant */}
+          <polygon points="0,45 45,45 0,90" fill={C.a} />
+          <polygon points="45,45 45,90 0,90" fill={C.b} />
+          {/* Bottom-right quadrant */}
+          <polygon points="45,45 90,45 90,90" fill={C.a} />
+          <polygon points="45,45 45,90 90,90" fill={C.b} />
+          <g stroke="white" strokeWidth={1.5} opacity={0.9}>
+            <line x1={45} y1={0} x2={45} y2={90} />
+            <line x1={0} y1={45} x2={90} y2={45} />
+          </g>
         </svg>
       );
     }

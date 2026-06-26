@@ -609,38 +609,27 @@ function renderInner(
       );
     }
     case "streak-of-lightning": {
-      // 2×2 grid of HSTs. Top row uses TR→BL diagonal with stripe in the
-      // upper-left triangle. Bottom row mirrors vertically — opposite diagonal
-      // (TL→BR), stripe in the upper-right triangle. The flipped diagonal at
-      // the seam produces the zigzag/lightning kink. Yardage math is
-      // unchanged.
+      // Exact requested Streak of Lightning block geometry, scaled from the
+      // user's 300×300 coordinate spec to this 200×200 SVG: top quadrants
+      // point toward each other to form a peak; bottom quadrants point toward
+      // each other to form a valley. Yardage math is unchanged.
       const stripe = get("stripe", "A");
       const bg = get("bg", "B");
       return (
         <>
-          {[0, 1].flatMap((gy) =>
-            [0, 1].map((gx) => {
-              const x = gx * 100;
-              const y = gy * 100;
-              const topRow = gy === 0;
-              return (
-                <g key={`${gx}-${gy}`}>
-                  {topRow ? (
-                    <>
-                      <polygon points={`${x},${y} ${x + 100},${y} ${x},${y + 100}`} fill={stripe} />
-                      <polygon points={`${x + 100},${y} ${x + 100},${y + 100} ${x},${y + 100}`} fill={bg} />
-                    </>
-                  ) : (
-                    <>
-                      <polygon points={`${x},${y} ${x + 100},${y} ${x + 100},${y + 100}`} fill={stripe} />
-                      <polygon points={`${x},${y} ${x},${y + 100} ${x + 100},${y + 100}`} fill={bg} />
-                    </>
-                  )}
-                </g>
-              );
-            }),
-          )}
-          <g stroke="white" strokeWidth={1} opacity={0.4}>
+          {/* Top-left quadrant */}
+          <polygon points="0,0 100,0 0,100" fill={bg} />
+          <polygon points="100,0 100,100 0,100" fill={stripe} />
+          {/* Top-right quadrant */}
+          <polygon points="100,0 200,0 200,100" fill={bg} />
+          <polygon points="100,0 200,100 100,100" fill={stripe} />
+          {/* Bottom-left quadrant */}
+          <polygon points="0,100 100,100 0,200" fill={stripe} />
+          <polygon points="100,100 100,200 0,200" fill={bg} />
+          {/* Bottom-right quadrant */}
+          <polygon points="100,100 200,100 200,200" fill={stripe} />
+          <polygon points="100,100 100,200 200,200" fill={bg} />
+          <g stroke="white" strokeWidth={2} opacity={0.9}>
             <line x1={100} y1={0} x2={100} y2={200} />
             <line x1={0} y1={100} x2={200} y2={100} />
           </g>

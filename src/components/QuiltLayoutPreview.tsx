@@ -696,36 +696,25 @@ function MiniBlock({
       );
     }
     case "streak-of-lightning": {
-      // Top row: TR→BL diagonal, stripe in upper-left triangle.
-      // Bottom row: opposite TL→BR diagonal, stripe in upper-right triangle.
-      // Repeating this block edge-to-edge forms the lightning zigzag without
-      // changing yardage or fabric assignments.
+      // Same exact peak/valley chevron geometry as PatternDiagram. Each block
+      // repeats without rotation or mirroring; yardage and fabric assignments
+      // stay unchanged.
       const stripe = get("stripe", "A");
       const bg = get("bg", "B");
       return (
         <>
-          {[0, 1].flatMap((gy) =>
-            [0, 1].map((gx) => {
-              const x = gx * 100;
-              const y = gy * 100;
-              const topRow = gy === 0;
-              return (
-                <g key={`${gx}-${gy}`}>
-                  {topRow ? (
-                    <>
-                      <polygon points={`${x},${y} ${x + 100},${y} ${x},${y + 100}`} fill={stripe} />
-                      <polygon points={`${x + 100},${y} ${x + 100},${y + 100} ${x},${y + 100}`} fill={bg} />
-                    </>
-                  ) : (
-                    <>
-                      <polygon points={`${x},${y} ${x + 100},${y} ${x + 100},${y + 100}`} fill={stripe} />
-                      <polygon points={`${x},${y} ${x},${y + 100} ${x + 100},${y + 100}`} fill={bg} />
-                    </>
-                  )}
-                </g>
-              );
-            }),
-          )}
+          {/* Top-left quadrant */}
+          <polygon points="0,0 100,0 0,100" fill={bg} />
+          <polygon points="100,0 100,100 0,100" fill={stripe} />
+          {/* Top-right quadrant */}
+          <polygon points="100,0 200,0 200,100" fill={bg} />
+          <polygon points="100,0 200,100 100,100" fill={stripe} />
+          {/* Bottom-left quadrant */}
+          <polygon points="0,100 100,100 0,200" fill={stripe} />
+          <polygon points="100,100 100,200 0,200" fill={bg} />
+          {/* Bottom-right quadrant */}
+          <polygon points="100,100 200,100 200,200" fill={stripe} />
+          <polygon points="100,100 100,200 200,200" fill={bg} />
         </>
       );
     }
