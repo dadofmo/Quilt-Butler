@@ -2,8 +2,9 @@ import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { SIZE_PRESETS, setPlanner, usePlanner } from "@/lib/planner-store";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
+
 
 export default function SizeStep() {
   return (
@@ -76,6 +77,25 @@ function SizeStepInner() {
   const [cornerAccentText, setCornerAccentText] = useState(
     planner.cornerAccentSize ? String(planner.cornerAccentSize) : "",
   );
+  // Jelly-roll precut mode — currently only Rail Fence supports it. In jelly-
+  // roll mode the block-fabric input ("Fabric width" bolt) is replaced with
+  // a strip-count input, and block size is locked to 6" (3 strips × 2" fin.).
+  const jellyRollEligible = isRailFence;
+  const [fabricSource, setFabricSource] = useState<"yardage" | "jelly-roll">(
+    jellyRollEligible ? planner.fabricSource : "yardage",
+  );
+  const [stripCountText, setStripCountText] = useState(
+    planner.jellyRollStripCount ? String(planner.jellyRollStripCount) : "40",
+  );
+  const isJellyRoll = jellyRollEligible && fabricSource === "jelly-roll";
+
+  // In jelly-roll mode, lock block size to 6" so the live preview and the
+  // downstream fit/grid math stay consistent with what the user will sew.
+  useEffect(() => {
+    if (isJellyRoll && blockSizeText !== "6") setBlockSizeText("6");
+  }, [isJellyRoll, blockSizeText]);
+
+
 
   if (!planner.pattern) {
     return (
@@ -303,22 +323,37 @@ function SizeStepInner() {
   const fabricWidthValid =
     fabricWidthText.trim() !== "" && !isNaN(fabricWidthNum) && fabricWidthNum > 0;
 
+  const stripCountNum = Number(stripCountText);
+  const stripCountValid =
+    !isJellyRoll ||
+    (stripCountText.trim() !== "" && !isNaN(stripCountNum) && stripCountNum > 0);
+
   const next = () => {
-    if (!blockSizeValid || !fabricWidthValid || !borderValid) return;
+    // In jelly-roll mode the bolt-width field is hidden; we still need a
+    // fabric width for border/sashing/backing/binding math, so default to 44".
+    const effectiveFabricWidth = isJellyRoll
+      ? (fabricWidthValid ? fabricWidthNum : 44)
+      : fabricWidthNum;
+    if (!blockSizeValid || !borderValid) return;
+    if (!isJellyRoll && !fabricWidthValid) return;
+    if (isJellyRoll && !stripCountValid) return;
     if (isSashed && !sashingValid) return;
     if (isSnowball && !cornerAccentValid) return;
     setPlanner({
       sizePreset: preset,
       quiltWidth: Number(w) || 0,
       quiltHeight: Number(h) || 0,
-      fabricWidth: fabricWidthNum,
-      blockSize: blockSizeNum,
+      fabricWidth: effectiveFabricWidth,
+      blockSize: isJellyRoll ? 6 : blockSizeNum,
       borderWidth: border,
       sashingWidth: isSashed ? sashingNum : planner.sashingWidth,
       cornerAccentSize: isSnowball ? cornerAccentNum : planner.cornerAccentSize,
+      fabricSource: isJellyRoll ? "jelly-roll" : "yardage",
+      jellyRollStripCount: isJellyRoll ? stripCountNum : planner.jellyRollStripCount,
     });
     navigate("/fabrics");
   };
+
 
   return (
     <StepShell step={2} title="Quilt size & basics" subtitle="A few quick details so we can do the math." backTo="/">
@@ -337,47 +372,124 @@ function SizeStepInner() {
           )}
         </Field>
 
-        <Field label="Fabric width (your bolt, in inches)">
-          <input
-            type="text"
-            inputMode="decimal"
-            value={fabricWidthText}
-            onChange={(e) => setFabricWidthText(e.target.value)}
-            placeholder="e.g. 44"
-            aria-invalid={!fabricWidthValid}
-            className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
-          />
-          <p className="text-muted-foreground mt-2 text-xs leading-snug">
-            Enter your bolt&apos;s width <strong>in inches</strong> — measure selvage to
-            selvage. Common quilting widths: <strong>42&quot; or 44&quot;</strong>. For
-            backing fabric on large quilts: <strong>108&quot;</strong>. All cutting math will use this value.
-          </p>
-          {fabricWidthText.trim() !== "" && !fabricWidthValid && (
-            <p className="text-destructive mt-2 text-sm font-medium">
-              Please enter a positive number of inches (e.g. 44, 54, 60).
-            </p>
-          )}
+        {/* Fabric source: yardage vs jelly roll. Only Rail Fence supports
+            jelly-roll right now; other patterns see a disabled "coming soon"
+            chip so the option is discoverable but doesn't break their flow. */}
+        <Field label="What fabric are you using?">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => setFabricSource("yardage")}
+              className={`rounded-xl border-2 px-4 py-3 text-left transition-colors ${
+                fabricSource === "yardage"
+                  ? "border-primary bg-primary/5"
+                  : "border-input bg-card hover:bg-muted/40"
+              }`}
+            >
+              <div className="text-foreground text-base font-semibold">Yardage from a bolt</div>
+              <div className="text-muted-foreground text-xs mt-0.5">Cut from a flat bolt of fabric (the classic way).</div>
+            </button>
+            <button
+              type="button"
+              disabled={!jellyRollEligible}
+              onClick={() => jellyRollEligible && setFabricSource("jelly-roll")}
+              className={`rounded-xl border-2 px-4 py-3 text-left transition-colors ${
+                !jellyRollEligible
+                  ? "border-input bg-muted/30 opacity-60 cursor-not-allowed"
+                  : fabricSource === "jelly-roll"
+                    ? "border-primary bg-primary/5"
+                    : "border-input bg-card hover:bg-muted/40"
+              }`}
+            >
+              <div className="text-foreground text-base font-semibold">
+                Jelly roll {!jellyRollEligible && <span className="text-muted-foreground text-xs font-normal">— coming soon</span>}
+              </div>
+              <div className="text-muted-foreground text-xs mt-0.5">
+                {jellyRollEligible
+                  ? "Pre-cut 2.5\" strips, already bundled — fastest way to start a Rail Fence quilt."
+                  : "Currently only supported on Rail Fence. More patterns coming."}
+              </div>
+            </button>
+          </div>
         </Field>
 
-        <Field label="Block size (finished, in inches)">
-          <input
-            type="text"
-            inputMode="decimal"
-            value={blockSizeText}
-            onChange={(e) => setBlockSizeText(e.target.value)}
-            placeholder="e.g. 4.5"
-            aria-invalid={!blockSizeValid}
-            className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
-          />
-          <p className="text-muted-foreground mt-2 text-xs leading-snug">
-            Enter any size — common sizes include 4&quot;, 6&quot;, 8&quot;, 10&quot;, 12&quot; but any size works.
-          </p>
-          {blockSizeText.trim() !== "" && !blockSizeValid && (
-            <p className="text-destructive mt-2 text-sm font-medium">
-              Please enter a positive number (e.g. 3.75, 4, 6, 8.5).
+        {!isJellyRoll && (
+          <Field label="Fabric width (your bolt, in inches)">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={fabricWidthText}
+              onChange={(e) => setFabricWidthText(e.target.value)}
+              placeholder="e.g. 44"
+              aria-invalid={!fabricWidthValid}
+              className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+            />
+            <p className="text-muted-foreground mt-2 text-xs leading-snug">
+              Enter your bolt&apos;s width <strong>in inches</strong> — measure selvage to
+              selvage. Common quilting widths: <strong>42&quot; or 44&quot;</strong>. For
+              backing fabric on large quilts: <strong>108&quot;</strong>. All cutting math will use this value.
             </p>
-          )}
-        </Field>
+            {fabricWidthText.trim() !== "" && !fabricWidthValid && (
+              <p className="text-destructive mt-2 text-sm font-medium">
+                Please enter a positive number of inches (e.g. 44, 54, 60).
+              </p>
+            )}
+          </Field>
+        )}
+
+        {isJellyRoll && (
+          <Field label="How many strips are in your jelly roll?">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={stripCountText}
+              onChange={(e) => setStripCountText(e.target.value)}
+              placeholder="e.g. 40"
+              aria-invalid={!stripCountValid}
+              className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+            />
+            <p className="text-muted-foreground mt-2 text-xs leading-snug">
+              Most jelly rolls have <strong>40 strips</strong> (each 2.5&quot; × ~42&quot;). Check the label on yours — some designers package 20 or 42. Backing, batting, binding, sashing, and any border are still bought as regular yardage.
+            </p>
+            {!stripCountValid && (
+              <p className="text-destructive mt-2 text-sm font-medium">
+                Please enter a positive number of strips.
+              </p>
+            )}
+          </Field>
+        )}
+
+        {!isJellyRoll && (
+          <Field label="Block size (finished, in inches)">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={blockSizeText}
+              onChange={(e) => setBlockSizeText(e.target.value)}
+              placeholder="e.g. 4.5"
+              aria-invalid={!blockSizeValid}
+              className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+            />
+            <p className="text-muted-foreground mt-2 text-xs leading-snug">
+              Enter any size — common sizes include 4&quot;, 6&quot;, 8&quot;, 10&quot;, 12&quot; but any size works.
+            </p>
+            {blockSizeText.trim() !== "" && !blockSizeValid && (
+              <p className="text-destructive mt-2 text-sm font-medium">
+                Please enter a positive number (e.g. 3.75, 4, 6, 8.5).
+              </p>
+            )}
+          </Field>
+        )}
+
+        {isJellyRoll && (
+          <div className="bg-accent/50 border-primary/30 rounded-xl border-2 p-4 text-sm leading-relaxed">
+            <div className="text-foreground font-semibold">Block size: 6&quot; (locked)</div>
+            <p className="text-muted-foreground mt-1 text-xs">
+              In jelly-roll mode the block size is fixed at 6&quot; finished — each block stacks 3 of your 2.5&quot; strips (finishing 2&quot; each). This is what makes a jelly roll a perfect Rail Fence match.
+            </p>
+          </div>
+        )}
+
 
         {isSnowball && (
           <Field label="Corner accent size (in inches)">

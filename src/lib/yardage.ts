@@ -394,17 +394,23 @@ export function calculateYardage(s: PlannerState): CalcResult {
     for (const f of [r1, r2, r3] as FabricKey[]) {
       railFabrics[f] = (railFabrics[f] ?? 0) + blockCount;
     }
-    for (const fab of ALL_FABRIC_KEYS) {
-      const railsNeeded = railFabrics[fab];
-      if (!railsNeeded) continue;
-      addRails(
-        reqs[fab],
-        `${railsNeeded} rails (Fabric ${fab})`,
-        railsNeeded,
-        railCutLength,
-        railCutHeight,
-        s.fabricWidth,
-      );
+    // Skip rail yardage entirely when the user is sourcing block fabric from
+    // a jelly roll — the precut planner handles rails. Sashing/border math
+    // below still runs because those come from yardage bolts.
+    const fromJellyRoll = s.fabricSource === "jelly-roll";
+    if (!fromJellyRoll) {
+      for (const fab of ALL_FABRIC_KEYS) {
+        const railsNeeded = railFabrics[fab];
+        if (!railsNeeded) continue;
+        addRails(
+          reqs[fab],
+          `${railsNeeded} rails (Fabric ${fab})`,
+          railsNeeded,
+          railCutLength,
+          railCutHeight,
+          s.fabricWidth,
+        );
+      }
     }
     const railsPerStrip = Math.max(
       1,
@@ -1765,4 +1771,140 @@ function addRails(
   });
   req.totalInches += stripCount * cutHeight;
 }
+
+// ============================================================================
+// PRECUT (jelly roll) PLANNER — pilot for Rail Fence only.
+//
+// This is a SEPARATE code path from calculateYardage(). It runs alongside the
+// yardage calculator: yardage handles border/sashing/backing/batting/binding,
+// while this function tells the user how many jelly-roll strips they need
+// for the rail blocks themselves.
+//
+// Jelly roll strip = 2.5" × ~42" usable (industry standard). Each strip yields
+// floor(42 / railCutLength) rails. Rail Fence at 6" finished blocks gives
+// railCutLength = 6.5", railsPerStrip = floor(42/6.5) = 6.
+// ============================================================================
+
+/** Usable length of a single jelly-roll strip after trimming the bound short
+ *  edge. Industry standard is 44" raw width; we conservatively assume 42"
+ *  usable to match real-world precuts. */
+export const JELLY_ROLL_USABLE_LENGTH = 42;
+/** Standard jelly-roll strip width. */
+export const JELLY_ROLL_STRIP_WIDTH = 2.5;
+
+export interface PrecutFabricLine {
+  fabric: FabricKey;
+  /** Block-fabric roles this letter is used for (e.g. ["Top rail", "Middle rail"]). */
+  roles: string[];
+  /** Number of finished pieces (rails) needed across the whole quilt. */
+  piecesNeeded: number;
+  /** How many of THIS fabric's jelly-roll strips are needed. */
+  stripsNeeded: number;
+  /** How many finished pieces fit per strip. */
+  piecesPerStrip: number;
+  /** Cut length of each piece, inches. */
+  cutLengthIn: number;
+  /** Cut height of each piece, inches (matches strip width for jelly rolls). */
+  cutHeightIn: number;
+}
+
+export interface PrecutPlan {
+  /** Pattern the plan was built for. */
+  pattern: "rail-fence";
+  /** Block-fabric requirements grouped by fabric letter. */
+  fabrics: PrecutFabricLine[];
+  /** Total jelly-roll strips consumed across all block fabrics. */
+  totalStripsNeeded: number;
+  /** How many strips the user said are in their jelly roll. */
+  stripsAvailable: number;
+  /** True if totalStripsNeeded <= stripsAvailable. */
+  feasible: boolean;
+  /** Human-readable feasibility / next-step note. */
+  feasibilityMessage: string;
+  /** Cutting/sewing notes for the precut path. */
+  notes: string[];
+}
+
+/**
+ * Returns null when the planner isn't in precut mode (or pattern isn't
+ * supported yet). Callers should fall through to the yardage flow.
+ */
+export function computePrecutPlan(s: PlannerState): PrecutPlan | null {
+  if (s.fabricSource !== "jelly-roll") return null;
+  if (s.pattern !== "rail-fence") return null;
+
+  // Rail Fence at jelly-roll: block size is locked to 6" finished (3 strips
+  // × 2" finished). If for any reason the stored block size differs, we
+  // honor 6" here so the math stays self-consistent.
+  const blockSize = 6;
+  const railCutLength = blockSize + SEAM; // 6.5"
+  const railCutHeight = JELLY_ROLL_STRIP_WIDTH; // 2.5" — already includes seam
+  const railsPerStrip = Math.max(
+    1,
+    Math.floor(JELLY_ROLL_USABLE_LENGTH / railCutLength),
+  );
+
+  const innerW = s.quiltWidth - 2 * s.borderWidth;
+  const innerH = s.quiltHeight - 2 * s.borderWidth;
+  const blocksAcross = Math.max(1, Math.floor(innerW / blockSize));
+  const blocksDown = Math.max(1, Math.floor(innerH / blockSize));
+  const blockCount = blocksAcross * blocksDown;
+
+  const r1 = (s.assignments["rail1"] ?? "A") as FabricKey;
+  const r2 = (s.assignments["rail2"] ?? "B") as FabricKey;
+  const r3 = (s.assignments["rail3"] ?? "C") as FabricKey;
+  const roleByRail: Record<string, string> = {
+    rail1: "Top rail",
+    rail2: "Middle rail",
+    rail3: "Bottom rail",
+  };
+  const rolesByFabric: Partial<Record<FabricKey, string[]>> = {};
+  const piecesByFabric: Partial<Record<FabricKey, number>> = {};
+  for (const [slot, fab] of [["rail1", r1], ["rail2", r2], ["rail3", r3]] as const) {
+    rolesByFabric[fab] = [...(rolesByFabric[fab] ?? []), roleByRail[slot]];
+    piecesByFabric[fab] = (piecesByFabric[fab] ?? 0) + blockCount;
+  }
+
+  const fabrics: PrecutFabricLine[] = ALL_FABRIC_KEYS
+    .filter((f) => (piecesByFabric[f] ?? 0) > 0)
+    .map((f) => {
+      const piecesNeeded = piecesByFabric[f]!;
+      const stripsNeeded = Math.ceil(piecesNeeded / railsPerStrip);
+      return {
+        fabric: f,
+        roles: rolesByFabric[f]!,
+        piecesNeeded,
+        stripsNeeded,
+        piecesPerStrip: railsPerStrip,
+        cutLengthIn: railCutLength,
+        cutHeightIn: railCutHeight,
+      };
+    });
+
+  const totalStripsNeeded = fabrics.reduce((sum, l) => sum + l.stripsNeeded, 0);
+  const stripsAvailable = Math.max(1, s.jellyRollStripCount || 40);
+  const feasible = totalStripsNeeded <= stripsAvailable;
+  const feasibilityMessage = feasible
+    ? `One jelly roll is plenty — you'll use ${totalStripsNeeded} of its ${stripsAvailable} strips for the blocks (${stripsAvailable - totalStripsNeeded} strips left over).`
+    : `One jelly roll isn't enough — you need ${totalStripsNeeded} strips but only have ${stripsAvailable}. Either buy a second jelly roll, or reduce the quilt size on Step 2 until the strip count fits.`;
+
+  const notes: string[] = [
+    `Quilt grid: ${blocksAcross} × ${blocksDown} = ${blockCount} Rail Fence blocks at 6" finished (block size is locked at 6" in jelly-roll mode because each block stacks 3 of your 2.5" strips into a 6" square).`,
+    `Each block uses 3 rails — one of Fabric ${r1} on top, one of Fabric ${r2} in the middle, one of Fabric ${r3} on the bottom.`,
+    `From each 2.5" × ~42" jelly-roll strip you'll sub-cut ${railsPerStrip} rails at ${railCutLength.toFixed(2)}" long (finished 6" × 2"). Leftover at the end of each strip: ${(JELLY_ROLL_USABLE_LENGTH - railsPerStrip * railCutLength).toFixed(2)}".`,
+    `Across all ${blockCount} blocks you need ${blockCount} rails of each role. After grouping by fabric letter, that totals ${totalStripsNeeded} jelly-roll strips for the blocks.`,
+    `Sewing: place the top rail and middle rail right sides together along one long edge, sew with a 1/4" seam, unfold and press toward the middle. Repeat for the bottom rail. Rotate every other block 90° when laying out the quilt for the classic woven look.`,
+  ];
+
+  return {
+    pattern: "rail-fence",
+    fabrics,
+    totalStripsNeeded,
+    stripsAvailable,
+    feasible,
+    feasibilityMessage,
+    notes,
+  };
+}
+
 

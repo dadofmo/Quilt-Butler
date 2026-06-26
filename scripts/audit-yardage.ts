@@ -2,7 +2,7 @@
  * Holistic correctness audit for yardage math.
  * Tests calculator output against independent hand-calcs.
  */
-import { calculateYardage, calculateMaterials } from "/dev-server/src/lib/yardage";
+import { calculateYardage, calculateMaterials, computePrecutPlan } from "/dev-server/src/lib/yardage";
 import type { PlannerState, FabricKey } from "/dev-server/src/lib/planner-store";
 
 function base(): PlannerState {
@@ -10,12 +10,15 @@ function base(): PlannerState {
     pattern: null,
     quiltWidth: 50, quiltHeight: 65, sizePreset: "throw",
     fabricWidth: 44, blockSize: 12, borderWidth: 0, sashingWidth: 0,
+    cornerAccentSize: 0,
     assignments: {}, safetyBuffer: false,
     fabricNames: {}, fabricPhotos: {},
     patchworkFabricCount: 4, patchworkGrid: {},
     pricePerYard: "", itemPrices: {},
+    fabricSource: "yardage", jellyRollStripCount: 40,
   };
 }
+
 
 function ceilQuarter(yards: number) { return Math.ceil(yards * 4) / 4; }
 
@@ -1365,6 +1368,65 @@ console.log("\n=== Bow Tie: 50×65, 12\" block, no border, 2\" sashing ===");
   check("BT(sash) C strip count", c.pieces[0].count, 31);
   check("BT(sash) C strip width", c.pieces[0].h, 2.5);
   check("BT(sash) C strip length", c.pieces[0].w, 12.5);
+}
+
+// =========================================================================
+// RAIL FENCE — JELLY ROLL PRECUT MODE
+// railsPerStrip = floor(42 / 6.5) = 6.
+// Block size locked to 6". Rails grouped by fabric (3 rail slots).
+// =========================================================================
+console.log("\n=== Rail Fence jelly roll: small (36×48) ===");
+{
+  // 36/6=6 across, 48/6=8 down → 48 blocks. 3 rail fabrics each need 48 rails.
+  // Strips per fabric = ceil(48/6) = 8. Total strips = 24. Fits in 40-strip roll.
+  const s = { ...base(), pattern: "rail-fence" as const, quiltWidth: 36, quiltHeight: 48, blockSize: 6, fabricSource: "jelly-roll" as const, jellyRollStripCount: 40 };
+  const p = computePrecutPlan(s)!;
+  check("JR small: 3 fabrics", p.fabrics.length, 3);
+  check("JR small: A pieces", p.fabrics[0].piecesNeeded, 48);
+  check("JR small: A strips", p.fabrics[0].stripsNeeded, 8);
+  check("JR small: total strips", p.totalStripsNeeded, 24);
+  check("JR small: feasible", p.feasible ? 1 : 0, 1);
+  // Yardage calc should NOT include rails (jelly-roll mode skips them).
+  const y = calculateYardage(s);
+  check("JR small: no rail yardage", y.fabrics.length, 0);
+}
+
+console.log("\n=== Rail Fence jelly roll: throw (50×65, 2 fabrics overlap) ===");
+{
+  // 50/6=8 across, 65/6=10 down → 80 blocks. With rail2=A, rail3=B, rail1=A,
+  // Fabric A gets 2×80=160 rails (ceil(160/6)=27 strips), B gets 80 (ceil(80/6)=14).
+  // total = 41. Just over the 40-strip roll → infeasible.
+  const s = {
+    ...base(),
+    pattern: "rail-fence" as const,
+    quiltWidth: 50, quiltHeight: 65, blockSize: 6,
+    fabricSource: "jelly-roll" as const, jellyRollStripCount: 40,
+    assignments: { rail1: "A" as FabricKey, rail2: "A" as FabricKey, rail3: "B" as FabricKey },
+  };
+  const p = computePrecutPlan(s)!;
+  check("JR throw: 2 fabrics", p.fabrics.length, 2);
+  const a = p.fabrics.find(x => x.fabric === "A")!;
+  const b = p.fabrics.find(x => x.fabric === "B")!;
+  check("JR throw: A pieces", a.piecesNeeded, 160);
+  check("JR throw: A strips", a.stripsNeeded, 27);
+  check("JR throw: B pieces", b.piecesNeeded, 80);
+  check("JR throw: B strips", b.stripsNeeded, 14);
+  check("JR throw: total strips", p.totalStripsNeeded, 41);
+  check("JR throw: infeasible vs 40", p.feasible ? 1 : 0, 0);
+}
+
+console.log("\n=== Rail Fence jelly roll: yardage mode unchanged ===");
+{
+  // Sanity: in yardage mode (default), rail yardage still flows through
+  // calculateYardage exactly as before — no precut plan returned.
+  const s = { ...base(), pattern: "rail-fence" as const, quiltWidth: 36, quiltHeight: 48, blockSize: 6 };
+  const p = computePrecutPlan(s);
+  check("JR yardage-mode: no precut plan", p === null ? 1 : 0, 1);
+  const y = calculateYardage(s);
+  // 48 rails × 3 fabrics. railCutLength=6.5, railCutHeight=2.5.
+  // perStrip = floor(42.5/6.5)=6. strips per fab = ceil(48/6)=8. Inches=8*2.5=20.
+  check("JR yardage-mode: 3 fabrics produced", y.fabrics.length, 3);
+  check("JR yardage-mode: A inches", y.fabrics[0].totalInches, 20);
 }
 
 
