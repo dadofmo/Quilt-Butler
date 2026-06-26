@@ -347,7 +347,7 @@ function SizeStepInner() {
       irishAsymmetric,
       irishSuggestions: irishSuggestions.slice(0, 4),
     };
-  }, [blockSizeValid, blockSizeNum, w, h, border, sashing, isSashed, sashingValid, planner.pattern]);
+  }, [blockSizeValid, blockSizeNum, w, h, border, sashing, isSashed, sashingValid, planner.pattern, isJellyRoll]);
 
   const applyBorder = (b: number) => {
     setBorderText(String(b));
