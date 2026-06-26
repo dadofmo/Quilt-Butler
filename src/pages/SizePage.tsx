@@ -149,8 +149,9 @@ function SizeStepInner() {
     // optional sashing BETWEEN blocks. That means changing sashing from 0 → 2
     // keeps the same block count and makes the quilt larger, which matches the
     // quilting workflow and the field label.
-    const blocksAcross = Math.max(1, Math.floor(innerW / blockSizeNum));
-    const blocksDown = Math.max(1, Math.floor(innerH / blockSizeNum));
+    const denom = blockSizeNum + sashing;
+    const blocksAcross = Math.max(1, Math.floor((innerW + sashing) / denom));
+    const blocksDown = Math.max(1, Math.floor((innerH + sashing) / denom));
     const sashCols = Math.max(0, blocksAcross - 1);
     const sashRows = Math.max(0, blocksDown - 1);
     const usedW = blocksAcross * blockSizeNum + sashCols * sashing;
