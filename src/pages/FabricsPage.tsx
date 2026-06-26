@@ -61,7 +61,8 @@ function FabricsStepInner() {
   const isSnowballPattern = pattern.id === "snowball-block";
   const isFourPatchPattern = pattern.id === "four-patch";
   const isStreakPattern = pattern.id === "streak-of-lightning";
-  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern || isSimpleSquaresPattern || isRailFencePattern || isLogCabinPattern || isOhioStarPattern || isFlyingGeesePattern || isD9PPattern || isSquaresOnPointPattern || isPinwheelPattern || isPlusBlockPattern || isChurnDashPattern || isSawtoothStarPattern || isFriendshipStarPattern || isSnowballPattern || isFourPatchPattern || isStreakPattern) && (planner.sashingWidth || 0) > 0;
+  const isBowTiePattern = pattern.id === "bow-tie";
+  const hasSashing = (isBearPawPattern || isNinePatchPattern || isHstPattern || isSimpleSquaresPattern || isRailFencePattern || isLogCabinPattern || isOhioStarPattern || isFlyingGeesePattern || isD9PPattern || isSquaresOnPointPattern || isPinwheelPattern || isPlusBlockPattern || isChurnDashPattern || isSawtoothStarPattern || isFriendshipStarPattern || isSnowballPattern || isFourPatchPattern || isStreakPattern || isBowTiePattern) && (planner.sashingWidth || 0) > 0;
   const hasCornerstonesSection = isBearPawPattern && hasSashing;
   const sections = pattern.sections.filter((s) => {
     if (s.id === "border") return hasBorder;
@@ -232,7 +233,8 @@ function FabricsStepInner() {
             const isSnowball = pattern.id === "snowball-block";
             const isFourPatch = pattern.id === "four-patch";
             const isStreak = pattern.id === "streak-of-lightning";
-            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak;
+            const isBowTie = pattern.id === "bow-tie";
+            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie;
             const sashing = isSashed ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;

@@ -65,7 +65,8 @@ function SizeStepInner() {
   const isSnowball = planner.pattern === "snowball-block";
   const isFourPatch = planner.pattern === "four-patch";
   const isStreak = planner.pattern === "streak-of-lightning";
-  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak;
+  const isBowTie = planner.pattern === "bow-tie";
+  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie;
   const [sashingText, setSashingText] = useState(
     // Preserve 0 explicitly (Nine Patch may legitimately use no sashing).
     typeof planner.sashingWidth === "number" && !isNaN(planner.sashingWidth)

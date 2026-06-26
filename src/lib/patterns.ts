@@ -538,6 +538,40 @@ export const PATTERNS: PatternDef[] = [
       borderSection,
     ],
   },
+  {
+    id: "bow-tie",
+    name: "Bow Tie",
+    hasMath: true,
+    intro:
+      "Each block is a 2×2 grid of four plain squares with a small on-point square (the 'knot') centered where they meet. Fabric A fills the two diagonal corners (top-left + bottom-right), Fabric B fills the other diagonal (top-right + bottom-left), and Fabric C is the knot — three distinct fabrics. The main squares are full, uncut squares; the knot is appliquéd on top of the center seam intersection so the only angled shape in the whole block is the rotated center square.",
+    sections: [
+      {
+        id: "mainA",
+        label: "Fabric A — diagonal squares (top-left + bottom-right)",
+        defaultFabric: "A",
+        hint: "Two of these per block — the squares in the top-left and bottom-right corners.",
+      },
+      {
+        id: "mainB",
+        label: "Fabric B — diagonal squares (top-right + bottom-left)",
+        defaultFabric: "B",
+        hint: "Two of these per block — the squares in the top-right and bottom-left corners. Pick something that contrasts with Fabric A.",
+      },
+      {
+        id: "knot",
+        label: "Fabric C — knot (center diamond)",
+        defaultFabric: "D",
+        hint: "The small on-point square in the middle of every block. One per block — pick a distinct accent color so the knot pops.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips of fabric that separate each Bow Tie block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      borderSection,
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

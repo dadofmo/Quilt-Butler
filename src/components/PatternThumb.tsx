@@ -53,6 +53,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Four Patch quilt block diagram showing a simple 2x2 grid of four equal squares in four distinct fabric colors",
   "streak-of-lightning":
     "Streak of Lightning quilt block diagram showing a 2x2 grid of half square triangle units forming a peak and valley chevron",
+  "bow-tie":
+    "Bow Tie quilt block diagram showing a 2x2 grid of plain squares with a small on-point center square forming the knot at the seam intersection",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -456,6 +458,22 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "bow-tie": {
+      // 2×2 grid of plain squares with a small on-point knot at the seam
+      // intersection. A on the TL/BR diagonal (blue), B on the TR/BL diagonal
+      // (yellow), knot in pink for visual distinction.
+      return (
+        <svg {...common}>
+          <rect x={0} y={0} width={45} height={45} fill={C.a} />
+          <rect x={45} y={0} width={45} height={45} fill={C.b} />
+          <rect x={0} y={45} width={45} height={45} fill={C.b} />
+          <rect x={45} y={45} width={45} height={45} fill={C.a} />
+          {/* Knot: diamond diagonal = 22.5 (~25% of block / 50% of patch) */}
+          <polygon points="45,33.75 56.25,45 45,56.25 33.75,45" fill={C.d} />
+        </svg>
+      );
+    }
   }
 }
+
 
