@@ -1312,7 +1312,8 @@ console.log("\n=== Bow Tie: 50×65, 12\" block, no border, no sashing, 3 distinc
   // 4×5 = 20 blocks. u=6, mainCut=6.5. per strip floor(42.5/6.5)=6.
   // A: 2*20=40 mains. strips=ceil(40/6)=7. inches=7*6.5=45.5.
   // B: same as A → 45.5.
-  // Knot: cut=12/4+0.5=3.5. per strip floor(42.5/3.5)=12. 20 knots → strips=ceil(20/12)=2. inches=2*3.5=7.
+  // Knot: diag=12/2=6, side=6/√2≈4.2426, +0.5=4.7426 → ceil to 1/8 = 4.75.
+  // perStrip=floor(42.5/4.75)=8. 20 knots → strips=ceil(20/8)=3. inches=3*4.75=14.25.
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
   const b = r.fabrics.find(f => f.fabric === "B")!;
@@ -1324,9 +1325,9 @@ console.log("\n=== Bow Tie: 50×65, 12\" block, no border, no sashing, 3 distinc
   check("BT B main count", b.pieces[0].count, 40);
   check("BT B inches", b.totalInches, 45.5);
   check("BT D knot count", d.pieces[0].count, 20);
-  check("BT D knot cut", d.pieces[0].w, 3.5);
-  check("BT D strips", d.strips[0].count, 2);
-  check("BT D inches", d.totalInches, 7);
+  check("BT D knot cut", d.pieces[0].w, 4.75);
+  check("BT D strips", d.strips[0].count, 3);
+  check("BT D inches", d.totalInches, 14.25);
 }
 
 console.log("\n=== Bow Tie: shared fabric — mainA and mainB both A pools to 80 mains ===");

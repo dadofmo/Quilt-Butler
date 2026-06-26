@@ -656,8 +656,9 @@ function renderInner(
             <line x1={100} y1={0} x2={100} y2={200} />
             <line x1={0} y1={100} x2={200} y2={100} />
           </g>
-          {/* On-point knot: corners at (100,75), (125,100), (100,125), (75,100) */}
-          <polygon points="100,75 125,100 100,125 75,100" fill={knot} stroke="white" strokeWidth={1} />
+          {/* On-point knot: diagonal = 50% of block. Corners at midpoints of
+              the inner patch edges → (100,50), (150,100), (100,150), (50,100). */}
+          <polygon points="100,50 150,100 100,150 50,100" fill={knot} stroke="white" strokeWidth={1} />
         </>
       );
     }
