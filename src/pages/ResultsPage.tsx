@@ -526,6 +526,28 @@ function ShoppingList({
         Enter a price per yard / package / spool to get a running total at the bottom.
       </p>
       <ul className="divide-y divide-border">
+        {precut && (
+          <ShoppingLineRow
+            id="jelly-roll"
+            label={`Jelly roll (${precut.stripsAvailable} strips, 2.5" × ~42")`}
+            whatItIs={`provides all block fabric — covers Fabric ${precut.fabrics.map((f) => f.fabric).join(", Fabric ")}`}
+            detail={
+              <>
+                Uses <strong className="text-foreground">{precut.totalStripsNeeded}</strong> of the roll&apos;s {precut.stripsAvailable} strips for the blocks ({Math.max(0, precut.stripsAvailable - precut.totalStripsNeeded)} left over for scraps or matching binding).
+                {!precut.feasible && (
+                  <>
+                    {" "}<strong className="text-destructive">You may need a second jelly roll.</strong>
+                  </>
+                )}
+              </>
+            }
+            qty={precut.feasible ? 1 : Math.ceil(precut.totalStripsNeeded / precut.stripsAvailable)}
+            unit={precut.feasible ? "roll" : "rolls"}
+            price={itemPrices["jelly-roll"] ?? ""}
+            onPrice={(v) => onPrice("jelly-roll", v)}
+          />
+        )}
+
         {fabrics.map((f) => {
           const name = fabricNames[f.fabric] ?? "";
           const id = `fabric-${f.fabric}`;
