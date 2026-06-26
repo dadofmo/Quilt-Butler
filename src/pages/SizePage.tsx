@@ -89,6 +89,13 @@ function SizeStepInner() {
   );
   const isJellyRoll = jellyRollEligible && fabricSource === "jelly-roll";
 
+  // In jelly-roll mode, lock block size to 6" so the live preview and the
+  // downstream fit/grid math stay consistent with what the user will sew.
+  useEffect(() => {
+    if (isJellyRoll && blockSizeText !== "6") setBlockSizeText("6");
+  }, [isJellyRoll, blockSizeText]);
+
+
 
   if (!planner.pattern) {
     return (
