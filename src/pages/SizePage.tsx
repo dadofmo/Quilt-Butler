@@ -209,12 +209,12 @@ function SizeStepInner() {
     }
 
     type ComboSuggestion = {
-      block: number; border: number; across: number; down: number; total: number; score: number;
+      block: number; border: number; sashing: number; across: number; down: number; total: number; score: number;
     };
     const MIN_BLOCK = 4;
     const MAX_COMBO_OPTIONS = 10;
     const comboSuggestions: ComboSuggestion[] = [];
-    if (!perfect) {
+    if (!perfect && !isJellyRoll) {
       for (let b2 = 0; b2 <= 40; b2++) {
         const bd = b2 / 4;
         if (quiltW - 2 * bd <= 0 || quiltH - 2 * bd <= 0) continue;
@@ -225,16 +225,50 @@ function SizeStepInner() {
             const total = Math.round(aw) * Math.round(ah);
             if (total > MAX_BLOCKS) continue;
             const score = Math.abs(s - blockSizeNum) * 1.5 + Math.abs(bd - border) * 1.0;
-            comboSuggestions.push({ block: s, border: bd, across: Math.round(aw), down: Math.round(ah), total, score });
+            comboSuggestions.push({ block: s, border: bd, sashing, across: Math.round(aw), down: Math.round(ah), total, score });
           }
         }
       }
       comboSuggestions.sort((a, b) => a.score - b.score);
     }
 
-    const diversifiedCombos: ComboSuggestion[] = comboSuggestions
-      .slice(0, MAX_COMBO_OPTIONS)
-      .sort((a, b) => a.block - b.block);
+    // Jelly-roll mode: block is locked to 6". Vary border AND sashing to find
+    // combinations that hit the desired finished size exactly.
+    if (!perfect && isJellyRoll) {
+      const lockedBlock = 6;
+      const seen = new Set<string>();
+      for (let b2 = 0; b2 <= 32; b2++) {
+        const bd = b2 / 4;
+        if (quiltW - 2 * bd <= 0 || quiltH - 2 * bd <= 0) continue;
+        for (let sh2 = 0; sh2 <= 16; sh2++) {
+          const sh = sh2 / 4;
+          const iw = quiltW - 2 * bd + sh;
+          const ih = quiltH - 2 * bd + sh;
+          const eb = lockedBlock + sh;
+          const aw = iw / eb;
+          const ah = ih / eb;
+          if (!isInt(aw) || !isInt(ah)) continue;
+          const acrossR = Math.round(aw);
+          const downR = Math.round(ah);
+          if (acrossR < 1 || downR < 1) continue;
+          const total = acrossR * downR;
+          if (total > MAX_BLOCKS) continue;
+          const key = `${bd}-${sh}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          const score = Math.abs(bd - border) * 1.0 + Math.abs(sh - sashing) * 0.5;
+          comboSuggestions.push({ block: lockedBlock, border: bd, sashing: sh, across: acrossR, down: downR, total, score });
+        }
+      }
+      comboSuggestions.sort((a, b) => a.score - b.score);
+    }
+
+    const diversifiedCombos: ComboSuggestion[] = isJellyRoll
+      ? comboSuggestions.slice(0, MAX_COMBO_OPTIONS).sort((a, b) => a.border - b.border || a.sashing - b.sashing)
+      : comboSuggestions
+          .slice(0, MAX_COMBO_OPTIONS)
+          .sort((a, b) => a.block - b.block);
+
 
     // ----- Irish Chain symmetry suggestions -----
     // Irish Chain alternates chain/plain blocks in a checkerboard. For chain
@@ -313,7 +347,7 @@ function SizeStepInner() {
       irishAsymmetric,
       irishSuggestions: irishSuggestions.slice(0, 4),
     };
-  }, [blockSizeValid, blockSizeNum, w, h, border, sashing, isSashed, sashingValid, planner.pattern]);
+  }, [blockSizeValid, blockSizeNum, w, h, border, sashing, isSashed, sashingValid, planner.pattern, isJellyRoll]);
 
   const applyBorder = (b: number) => {
     setBorderText(String(b));
@@ -652,7 +686,12 @@ function SizeStepInner() {
                   }
                   return (
                     <p className="text-foreground text-sm leading-relaxed">
-                      With a <strong>{blockSizeNum}&quot;</strong> block, <strong>{border}&quot;</strong> border
+                      With {isJellyRoll ? (
+                        <>a <strong>6&quot;</strong> jelly-roll block, </>
+                      ) : (
+                        <>a <strong>{blockSizeNum}&quot;</strong> block, </>
+                      )}
+                      <strong>{border}&quot;</strong> border
                       {sashing > 0 && <> and <strong>{sashing}&quot;</strong> sashing</>}, your finished quilt will be{" "}
                       <strong>{actualW}&quot; × {actualH}&quot;</strong>{" "}
                       ({fit.blocksAcross} × {fit.blocksDown} ={" "}
@@ -660,6 +699,7 @@ function SizeStepInner() {
                       {matchesDesired ? "." : ""}
                     </p>
                   );
+
                 })()}
                 {matchesDesired ? (
                   <p className="text-foreground mt-2 text-sm leading-relaxed">
@@ -682,7 +722,9 @@ function SizeStepInner() {
                     {comboOptions.length > 0 ? (
                       <>
                         <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                          These block size + border{sashing > 0 ? " + sashing" : ""} combinations give an exact{" "}
+                          {isJellyRoll
+                            ? <>These border + sashing combinations (with the locked 6&quot; jelly-roll block) give an exact{" "}</>
+                            : <>These block size + border{sashing > 0 ? " + sashing" : ""} combinations give an exact{" "}</>}
                           <strong className="text-foreground">
                             {fit.quiltW}&quot; × {fit.quiltH}&quot;
                           </strong>{" "}
@@ -690,7 +732,7 @@ function SizeStepInner() {
                         </p>
                         <ul className="mt-2 list-none space-y-1.5 pl-0 text-sm leading-relaxed">
                           {comboOptions.map((c, i) => (
-                            <li key={`${c.block}-${c.border}`} className="text-muted-foreground">
+                            <li key={`${c.block}-${c.border}-${c.sashing}`} className="text-muted-foreground">
                               <span className="text-foreground font-semibold">
                                 Option {i + 1}:{" "}
                               </span>
@@ -699,10 +741,15 @@ function SizeStepInner() {
                                 onClick={() => {
                                   setBlockSizeText(String(c.block));
                                   applyBorder(c.border);
+                                  if (isJellyRoll || sashing > 0 || c.sashing > 0) {
+                                    setSashingText(String(c.sashing));
+                                  }
                                 }}
                                 className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
                               >
-                                {c.block}&quot; block with a {c.border}&quot; border{sashing > 0 ? ` and ${sashing}" sashing` : ""}
+                                {isJellyRoll
+                                  ? <>{c.border}&quot; border and {c.sashing}&quot; sashing</>
+                                  : <>{c.block}&quot; block with a {c.border}&quot; border{sashing > 0 ? ` and ${sashing}" sashing` : ""}</>}
                               </button>
                               <span className="text-muted-foreground">
                                 {" "}({c.across} × {c.down} = {c.total} blocks)
@@ -710,6 +757,7 @@ function SizeStepInner() {
                             </li>
                           ))}
                         </ul>
+
                       </>
                     ) : (
                       <p className="text-muted-foreground mt-2 text-sm italic leading-relaxed">
