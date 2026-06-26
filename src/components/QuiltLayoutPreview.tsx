@@ -696,10 +696,9 @@ function MiniBlock({
       );
     }
     case "streak-of-lightning": {
-      // Every HST in every block is identical: stripe in the upper-left
-      // half, background in the lower-right half (BL→TR hypotenuse). Blocks
-      // are not rotated or mirrored as they repeat — the streak effect is
-      // created entirely by this consistent diagonal tiling edge-to-edge.
+      // All HSTs keep the same BL→TR diagonal, but the bottom row swaps the
+      // top-row color placement. Repeating this fixed block edge-to-edge forms
+      // the lightning kink without changing yardage or fabric assignments.
       const stripe = get("stripe", "A");
       const bg = get("bg", "B");
       return (
@@ -708,10 +707,11 @@ function MiniBlock({
             [0, 1].map((gx) => {
               const x = gx * 100;
               const y = gy * 100;
+              const topRow = gy === 0;
               return (
                 <g key={`${gx}-${gy}`}>
-                  <polygon points={`${x},${y} ${x + 100},${y} ${x},${y + 100}`} fill={stripe} />
-                  <polygon points={`${x + 100},${y} ${x + 100},${y + 100} ${x},${y + 100}`} fill={bg} />
+                  <polygon points={`${x},${y} ${x + 100},${y} ${x},${y + 100}`} fill={topRow ? stripe : bg} />
+                  <polygon points={`${x + 100},${y} ${x + 100},${y + 100} ${x},${y + 100}`} fill={topRow ? bg : stripe} />
                 </g>
               );
             }),
