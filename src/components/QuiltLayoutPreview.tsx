@@ -718,6 +718,24 @@ function MiniBlock({
         </>
       );
     }
+    case "bow-tie": {
+      // Same geometry as PatternDiagram, no rotation/mirroring between tiles
+      // so the knot diamonds and A/B diagonals read consistently across the
+      // whole quilt.
+      const a = get("mainA", "A");
+      const b = get("mainB", "B");
+      const knot = get("knot", "D");
+      return (
+        <>
+          <rect x={0} y={0} width={100} height={100} fill={a} />
+          <rect x={100} y={0} width={100} height={100} fill={b} />
+          <rect x={0} y={100} width={100} height={100} fill={b} />
+          <rect x={100} y={100} width={100} height={100} fill={a} />
+          <polygon points="100,75 125,100 100,125 75,100" fill={knot} />
+        </>
+      );
+    }
   }
 }
+
 

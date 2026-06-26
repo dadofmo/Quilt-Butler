@@ -636,6 +636,32 @@ function renderInner(
         </>
       );
     }
+    case "bow-tie": {
+      // 2×2 grid of plain squares + small on-point knot at the center seam
+      // intersection. Fabric A fills TL+BR diagonal, Fabric B fills TR+BL,
+      // Fabric C (knot) is appliquéd on top of the center. Diamond diagonal
+      // = 25% of the block (= 50% of one patch) — matches the yardage math
+      // which cuts the knot at (blockSize/4 + seam) per side.
+      const a = get("mainA", "A");
+      const b = get("mainB", "B");
+      const knot = get("knot", "D");
+      return (
+        <>
+          <rect x={0} y={0} width={100} height={100} fill={a} />
+          <rect x={100} y={0} width={100} height={100} fill={b} />
+          <rect x={0} y={100} width={100} height={100} fill={b} />
+          <rect x={100} y={100} width={100} height={100} fill={a} />
+          {/* Subtle 2×2 grid lines so beginners can see the patch seams */}
+          <g stroke="white" strokeWidth={1.5} opacity={0.6}>
+            <line x1={100} y1={0} x2={100} y2={200} />
+            <line x1={0} y1={100} x2={200} y2={100} />
+          </g>
+          {/* On-point knot: corners at (100,75), (125,100), (100,125), (75,100) */}
+          <polygon points="100,75 125,100 100,125 75,100" fill={knot} stroke="white" strokeWidth={1} />
+        </>
+      );
+    }
   }
 }
+
 
