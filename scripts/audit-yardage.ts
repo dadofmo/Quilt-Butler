@@ -1297,6 +1297,77 @@ console.log("\n=== Streak of Lightning: 50×65, 12\" block, no border, 2\" sashi
 
 
 // =========================================================================
+// BOW TIE
+// =========================================================================
+console.log("\n=== Bow Tie: 50×65, 12\" block, no border, no sashing, 3 distinct fabrics ===");
+{
+  const s = {
+    ...base(),
+    pattern: "bow-tie" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { mainA: "A", mainB: "B", knot: "D" } as Record<string, FabricKey>,
+  };
+  // 4×5 = 20 blocks. u=6, mainCut=6.5. per strip floor(42.5/6.5)=6.
+  // A: 2*20=40 mains. strips=ceil(40/6)=7. inches=7*6.5=45.5.
+  // B: same as A → 45.5.
+  // Knot: cut=12/4+0.5=3.5. per strip floor(42.5/3.5)=12. 20 knots → strips=ceil(20/12)=2. inches=2*3.5=7.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const d = r.fabrics.find(f => f.fabric === "D")!;
+  check("BT A main count", a.pieces[0].count, 40);
+  check("BT A cut", a.pieces[0].w, 6.5);
+  check("BT A strips", a.strips[0].count, 7);
+  check("BT A inches", a.totalInches, 45.5);
+  check("BT B main count", b.pieces[0].count, 40);
+  check("BT B inches", b.totalInches, 45.5);
+  check("BT D knot count", d.pieces[0].count, 20);
+  check("BT D knot cut", d.pieces[0].w, 3.5);
+  check("BT D strips", d.strips[0].count, 2);
+  check("BT D inches", d.totalInches, 7);
+}
+
+console.log("\n=== Bow Tie: shared fabric — mainA and mainB both A pools to 80 mains ===");
+{
+  const s = {
+    ...base(),
+    pattern: "bow-tie" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { mainA: "A", mainB: "A", knot: "D" } as Record<string, FabricKey>,
+  };
+  // 80 mains of A at 6.5". perStrip 6 → strips ceil(80/6)=14. inches=14*6.5=91.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("BT shared A count", a.pieces[0].count, 80);
+  check("BT shared A strips", a.strips[0].count, 14);
+  check("BT shared A inches", a.totalInches, 91);
+  check("BT shared no B", r.fabrics.find(f => f.fabric === "B") ? 1 : 0, 0);
+}
+
+console.log("\n=== Bow Tie: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "bow-tie" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 2,
+    assignments: { mainA: "A", mainB: "B", knot: "D", sashing: "C" } as Record<string, FabricKey>,
+  };
+  // vSash=15, hSash=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("BT(sash) C strip count", c.pieces[0].count, 31);
+  check("BT(sash) C strip width", c.pieces[0].h, 2.5);
+  check("BT(sash) C strip length", c.pieces[0].w, 12.5);
+}
+
+
+// =========================================================================
 // SUMMARY
 // =========================================================================
 console.log("\n=========================================");

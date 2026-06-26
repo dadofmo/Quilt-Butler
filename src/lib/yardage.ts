@@ -1466,6 +1466,78 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Streak of Lightning Assembly Tip: Keep your HST units oriented consistently as you sew — every diagonal in every block should run the same direction. Before joining blocks into rows, lay out your full quilt top on the floor or a design wall and double check the zigzag lines connect cleanly from block to block. For the most striking continuous effect, skip sashing between blocks so the diagonals flow uninterrupted across the whole quilt.`,
     );
+  } else if (s.pattern === "bow-tie") {
+    // Bow Tie: 2×2 grid of plain main squares + 1 small on-point center
+    // "knot" square per block. Fabric A fills the TL+BR diagonal (2 mains),
+    // Fabric B fills the TR+BL diagonal (2 mains), Fabric C (knot) is one
+    // small square per block appliquéd on-point over the center seam
+    // intersection. Pool by fabric letter so sharing a fabric collapses
+    // into a single labeled pile of squares.
+    const u = s.blockSize / 2;
+    const mainCut = u + SEAM;
+    // Knot diagonal (finished, on-point) = blockSize / 4 → produces clean
+    // numbers at common block sizes (12"→3", 10"→2.5", 16"→4"). Cut as a
+    // square with side = diagonal + seam allowance, then placed on-point.
+    const knotDiag = s.blockSize / 4;
+    const knotCut = knotDiag + SEAM;
+    const fabA = (s.assignments["mainA"] ?? "A") as FabricKey;
+    const fabB = (s.assignments["mainB"] ?? "B") as FabricKey;
+    const fabK = (s.assignments["knot"] ?? "D") as FabricKey;
+
+    // Pool main squares by fabric letter (handles A=B or A=knot sharing).
+    const mainCounts: Partial<Record<FabricKey, { roles: string[]; count: number }>> = {};
+    const addMain = (fab: FabricKey, role: string, perBlock: number) => {
+      const entry = (mainCounts[fab] ??= { roles: [], count: 0 });
+      entry.roles.push(role);
+      entry.count += perBlock * blockCount;
+    };
+    addMain(fabA, "TL+BR diagonal", 2);
+    addMain(fabB, "TR+BL diagonal", 2);
+    for (const fab of ALL_FABRIC_KEYS) {
+      const entry = mainCounts[fab];
+      if (!entry || entry.count <= 0) continue;
+      const label = `Main squares (${entry.roles.join(" & ")})`;
+      addSquares(reqs[fab], label, entry.count, mainCut, s.fabricWidth);
+    }
+    // Knot squares — separate bucket because of the different cut size,
+    // even if the user picks the same fabric letter as a main.
+    addSquares(reqs[fabK], "Knot squares (center, sewn on-point)", blockCount, knotCut, s.fabricWidth);
+
+    notes.push(
+      `Each block uses 4 main squares at ${mainCut.toFixed(2)}" × ${mainCut.toFixed(2)}" — two of Fabric ${fabA} on the top-left + bottom-right diagonal, two of Fabric ${fabB} on the top-right + bottom-left diagonal — plus 1 knot square at ${knotCut.toFixed(2)}" × ${knotCut.toFixed(2)}" (Fabric ${fabK}) sewn on-point over the center seam intersection.`,
+    );
+    const breakdown: string[] = [];
+    for (const fab of ALL_FABRIC_KEYS) {
+      const entry = mainCounts[fab];
+      if (!entry || entry.count <= 0) continue;
+      breakdown.push(`${entry.count} main squares of Fabric ${fab}`);
+    }
+    breakdown.push(`${blockCount} knot squares of Fabric ${fabK}`);
+    notes.push(
+      `Across all ${blockCount} blocks: ${breakdown.join(", ")}.`,
+    );
+    notes.push(
+      `Cutting the knot: cut each Fabric ${fabK} square at ${knotCut.toFixed(2)}" × ${knotCut.toFixed(2)}". When you place it on the block you'll rotate it 45° so it sits as an on-point diamond — its finished diagonal will be about ${knotDiag.toFixed(2)}" across, with the four corners touching the center seam intersection.`,
+    );
+    notes.push(
+      `Assembly: STAGE 1 — sew each block as a 4-patch. Join the TL Fabric ${fabA} square to the TR Fabric ${fabB} square to make the top row; join the BL Fabric ${fabB} square to the BR Fabric ${fabA} square to make the bottom row; press seams in opposite directions and join the two rows. STAGE 2 — center one Fabric ${fabK} knot square on-point over the seam intersection (one corner pointing up, one down, one left, one right). Either turn the raw edges under 1/4" and hand- or machine-appliqué it down, or use fusible web for raw-edge appliqué. The four main squares stay full and uncut — the knot is purely on top.`,
+    );
+
+    // Optional sashing between blocks (Bow Tie).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
