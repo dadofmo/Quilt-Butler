@@ -696,9 +696,10 @@ function MiniBlock({
       );
     }
     case "streak-of-lightning": {
-      // All HSTs keep the same BL→TR diagonal, but the bottom row swaps the
-      // top-row color placement. Repeating this fixed block edge-to-edge forms
-      // the lightning kink without changing yardage or fabric assignments.
+      // Top row: TR→BL diagonal, stripe in upper-left triangle.
+      // Bottom row: opposite TL→BR diagonal, stripe in upper-right triangle.
+      // Repeating this block edge-to-edge forms the lightning zigzag without
+      // changing yardage or fabric assignments.
       const stripe = get("stripe", "A");
       const bg = get("bg", "B");
       return (
@@ -710,8 +711,17 @@ function MiniBlock({
               const topRow = gy === 0;
               return (
                 <g key={`${gx}-${gy}`}>
-                  <polygon points={`${x},${y} ${x + 100},${y} ${x},${y + 100}`} fill={topRow ? stripe : bg} />
-                  <polygon points={`${x + 100},${y} ${x + 100},${y + 100} ${x},${y + 100}`} fill={topRow ? bg : stripe} />
+                  {topRow ? (
+                    <>
+                      <polygon points={`${x},${y} ${x + 100},${y} ${x},${y + 100}`} fill={stripe} />
+                      <polygon points={`${x + 100},${y} ${x + 100},${y + 100} ${x},${y + 100}`} fill={bg} />
+                    </>
+                  ) : (
+                    <>
+                      <polygon points={`${x},${y} ${x + 100},${y} ${x + 100},${y + 100}`} fill={stripe} />
+                      <polygon points={`${x},${y} ${x},${y + 100} ${x + 100},${y + 100}`} fill={bg} />
+                    </>
+                  )}
                 </g>
               );
             }),
