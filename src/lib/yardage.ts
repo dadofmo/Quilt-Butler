@@ -1475,11 +1475,14 @@ export function calculateYardage(s: PlannerState): CalcResult {
     // into a single labeled pile of squares.
     const u = s.blockSize / 2;
     const mainCut = u + SEAM;
-    // Knot diagonal (finished, on-point) = blockSize / 4 → produces clean
-    // numbers at common block sizes (12"→3", 10"→2.5", 16"→4"). Cut as a
-    // square with side = diagonal + seam allowance, then placed on-point.
-    const knotDiag = s.blockSize / 4;
-    const knotCut = knotDiag + SEAM;
+    // Knot finished diagonal = blockSize / 2 so the on-point diamond's four
+    // corners land at the midpoint of each inner patch edge — exactly at the
+    // center seam intersection (this is the geometry the reference shows).
+    // Cut size = diagonal / √2 (the square's side) + seam allowance, then
+    // rounded UP to the nearest 1/8" so rotary-cutting marks are usable.
+    const knotDiag = s.blockSize / 2;
+    const knotSide = knotDiag / Math.SQRT2;
+    const knotCut = Math.ceil((knotSide + SEAM) * 8) / 8;
     const fabA = (s.assignments["mainA"] ?? "A") as FabricKey;
     const fabB = (s.assignments["mainB"] ?? "B") as FabricKey;
     const fabK = (s.assignments["knot"] ?? "D") as FabricKey;

@@ -731,7 +731,7 @@ function MiniBlock({
           <rect x={100} y={0} width={100} height={100} fill={b} />
           <rect x={0} y={100} width={100} height={100} fill={b} />
           <rect x={100} y={100} width={100} height={100} fill={a} />
-          <polygon points="100,75 125,100 100,125 75,100" fill={knot} />
+          <polygon points="100,50 150,100 100,150 50,100" fill={knot} />
         </>
       );
     }
