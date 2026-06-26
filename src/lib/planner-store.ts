@@ -62,6 +62,13 @@ export interface PlannerState {
   pricePerYard: string;
   /** Per-line-item prices on the shopping list, keyed by line id (e.g. "fabric-A", "backing", "batting", "binding", "piecing-thread", "quilting-thread"). Stored as strings to preserve user input. */
   itemPrices: Record<string, string>;
+  /** Where the block fabric comes from. "yardage" = traditional bolt (default,
+   *  used by every existing flow). "jelly-roll" = pre-cut 2.5" strips
+   *  (currently only supported on Rail Fence — block fabric comes from the
+   *  jelly roll; border/sashing/backing/batting/binding still use yardage). */
+  fabricSource: "yardage" | "jelly-roll";
+  /** How many 2.5" strips are in the user's jelly roll (industry standard 40). */
+  jellyRollStripCount: number;
 }
 
 const initial: PlannerState = {
