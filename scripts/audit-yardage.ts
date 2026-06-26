@@ -2,7 +2,7 @@
  * Holistic correctness audit for yardage math.
  * Tests calculator output against independent hand-calcs.
  */
-import { calculateYardage, calculateMaterials } from "/dev-server/src/lib/yardage";
+import { calculateYardage, calculateMaterials, computePrecutPlan } from "/dev-server/src/lib/yardage";
 import type { PlannerState, FabricKey } from "/dev-server/src/lib/planner-store";
 
 function base(): PlannerState {
@@ -10,12 +10,15 @@ function base(): PlannerState {
     pattern: null,
     quiltWidth: 50, quiltHeight: 65, sizePreset: "throw",
     fabricWidth: 44, blockSize: 12, borderWidth: 0, sashingWidth: 0,
+    cornerAccentSize: 0,
     assignments: {}, safetyBuffer: false,
     fabricNames: {}, fabricPhotos: {},
     patchworkFabricCount: 4, patchworkGrid: {},
     pricePerYard: "", itemPrices: {},
+    fabricSource: "yardage", jellyRollStripCount: 40,
   };
 }
+
 
 function ceilQuarter(yards: number) { return Math.ceil(yards * 4) / 4; }
 
