@@ -394,17 +394,23 @@ export function calculateYardage(s: PlannerState): CalcResult {
     for (const f of [r1, r2, r3] as FabricKey[]) {
       railFabrics[f] = (railFabrics[f] ?? 0) + blockCount;
     }
-    for (const fab of ALL_FABRIC_KEYS) {
-      const railsNeeded = railFabrics[fab];
-      if (!railsNeeded) continue;
-      addRails(
-        reqs[fab],
-        `${railsNeeded} rails (Fabric ${fab})`,
-        railsNeeded,
-        railCutLength,
-        railCutHeight,
-        s.fabricWidth,
-      );
+    // Skip rail yardage entirely when the user is sourcing block fabric from
+    // a jelly roll — the precut planner handles rails. Sashing/border math
+    // below still runs because those come from yardage bolts.
+    const fromJellyRoll = s.fabricSource === "jelly-roll";
+    if (!fromJellyRoll) {
+      for (const fab of ALL_FABRIC_KEYS) {
+        const railsNeeded = railFabrics[fab];
+        if (!railsNeeded) continue;
+        addRails(
+          reqs[fab],
+          `${railsNeeded} rails (Fabric ${fab})`,
+          railsNeeded,
+          railCutLength,
+          railCutHeight,
+          s.fabricWidth,
+        );
+      }
     }
     const railsPerStrip = Math.max(
       1,
