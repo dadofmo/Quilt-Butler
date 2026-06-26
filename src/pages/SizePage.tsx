@@ -722,7 +722,9 @@ function SizeStepInner() {
                     {comboOptions.length > 0 ? (
                       <>
                         <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-                          These block size + border{sashing > 0 ? " + sashing" : ""} combinations give an exact{" "}
+                          {isJellyRoll
+                            ? <>These border + sashing combinations (with the locked 6&quot; jelly-roll block) give an exact{" "}</>
+                            : <>These block size + border{sashing > 0 ? " + sashing" : ""} combinations give an exact{" "}</>}
                           <strong className="text-foreground">
                             {fit.quiltW}&quot; × {fit.quiltH}&quot;
                           </strong>{" "}
@@ -730,7 +732,7 @@ function SizeStepInner() {
                         </p>
                         <ul className="mt-2 list-none space-y-1.5 pl-0 text-sm leading-relaxed">
                           {comboOptions.map((c, i) => (
-                            <li key={`${c.block}-${c.border}`} className="text-muted-foreground">
+                            <li key={`${c.block}-${c.border}-${c.sashing}`} className="text-muted-foreground">
                               <span className="text-foreground font-semibold">
                                 Option {i + 1}:{" "}
                               </span>
@@ -739,10 +741,15 @@ function SizeStepInner() {
                                 onClick={() => {
                                   setBlockSizeText(String(c.block));
                                   applyBorder(c.border);
+                                  if (isJellyRoll || sashing > 0 || c.sashing > 0) {
+                                    setSashingText(String(c.sashing));
+                                  }
                                 }}
                                 className="text-primary font-semibold underline underline-offset-2 hover:opacity-80"
                               >
-                                {c.block}&quot; block with a {c.border}&quot; border{sashing > 0 ? ` and ${sashing}" sashing` : ""}
+                                {isJellyRoll
+                                  ? <>{c.border}&quot; border and {c.sashing}&quot; sashing</>
+                                  : <>{c.block}&quot; block with a {c.border}&quot; border{sashing > 0 ? ` and ${sashing}" sashing` : ""}</>}
                               </button>
                               <span className="text-muted-foreground">
                                 {" "}({c.across} × {c.down} = {c.total} blocks)
@@ -750,6 +757,7 @@ function SizeStepInner() {
                             </li>
                           ))}
                         </ul>
+
                       </>
                     ) : (
                       <p className="text-muted-foreground mt-2 text-sm italic leading-relaxed">
