@@ -686,7 +686,12 @@ function SizeStepInner() {
                   }
                   return (
                     <p className="text-foreground text-sm leading-relaxed">
-                      With a <strong>{blockSizeNum}&quot;</strong> block, <strong>{border}&quot;</strong> border
+                      With {isJellyRoll ? (
+                        <>a <strong>6&quot;</strong> jelly-roll block, </>
+                      ) : (
+                        <>a <strong>{blockSizeNum}&quot;</strong> block, </>
+                      )}
+                      <strong>{border}&quot;</strong> border
                       {sashing > 0 && <> and <strong>{sashing}&quot;</strong> sashing</>}, your finished quilt will be{" "}
                       <strong>{actualW}&quot; × {actualH}&quot;</strong>{" "}
                       ({fit.blocksAcross} × {fit.blocksDown} ={" "}
@@ -694,6 +699,7 @@ function SizeStepInner() {
                       {matchesDesired ? "." : ""}
                     </p>
                   );
+
                 })()}
                 {matchesDesired ? (
                   <p className="text-foreground mt-2 text-sm leading-relaxed">
