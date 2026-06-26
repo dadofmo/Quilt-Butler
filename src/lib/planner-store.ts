@@ -92,6 +92,8 @@ const initial: PlannerState = {
   patchworkGrid: {},
   pricePerYard: "",
   itemPrices: {},
+  fabricSource: "yardage",
+  jellyRollStripCount: 40,
 };
 
 function loadPlannerState(): PlannerState {
