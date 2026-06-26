@@ -76,6 +76,18 @@ function SizeStepInner() {
   const [cornerAccentText, setCornerAccentText] = useState(
     planner.cornerAccentSize ? String(planner.cornerAccentSize) : "",
   );
+  // Jelly-roll precut mode — currently only Rail Fence supports it. In jelly-
+  // roll mode the block-fabric input ("Fabric width" bolt) is replaced with
+  // a strip-count input, and block size is locked to 6" (3 strips × 2" fin.).
+  const jellyRollEligible = isRailFence;
+  const [fabricSource, setFabricSource] = useState<"yardage" | "jelly-roll">(
+    jellyRollEligible ? planner.fabricSource : "yardage",
+  );
+  const [stripCountText, setStripCountText] = useState(
+    planner.jellyRollStripCount ? String(planner.jellyRollStripCount) : "40",
+  );
+  const isJellyRoll = jellyRollEligible && fabricSource === "jelly-roll";
+
 
   if (!planner.pattern) {
     return (
