@@ -468,8 +468,11 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
           <rect x={45} y={0} width={45} height={45} fill={C.b} />
           <rect x={0} y={45} width={45} height={45} fill={C.b} />
           <rect x={45} y={45} width={45} height={45} fill={C.a} />
-          {/* Knot: diamond diagonal = 22.5 (~25% of block / 50% of patch) */}
-          <polygon points="45,33.75 56.25,45 45,56.25 33.75,45" fill={C.d} />
+          {/* Knot: diamond diagonal = 45 (50% of block / 100% of patch),
+              corners touching the midpoint of each inner patch edge — matches
+              the larger preview/diagram rendering. */}
+          <polygon points="45,22.5 67.5,45 45,67.5 22.5,45" fill={C.d} />
+
         </svg>
       );
     }
