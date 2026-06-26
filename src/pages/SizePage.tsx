@@ -209,12 +209,12 @@ function SizeStepInner() {
     }
 
     type ComboSuggestion = {
-      block: number; border: number; across: number; down: number; total: number; score: number;
+      block: number; border: number; sashing: number; across: number; down: number; total: number; score: number;
     };
     const MIN_BLOCK = 4;
     const MAX_COMBO_OPTIONS = 10;
     const comboSuggestions: ComboSuggestion[] = [];
-    if (!perfect) {
+    if (!perfect && !isJellyRoll) {
       for (let b2 = 0; b2 <= 40; b2++) {
         const bd = b2 / 4;
         if (quiltW - 2 * bd <= 0 || quiltH - 2 * bd <= 0) continue;
@@ -225,16 +225,50 @@ function SizeStepInner() {
             const total = Math.round(aw) * Math.round(ah);
             if (total > MAX_BLOCKS) continue;
             const score = Math.abs(s - blockSizeNum) * 1.5 + Math.abs(bd - border) * 1.0;
-            comboSuggestions.push({ block: s, border: bd, across: Math.round(aw), down: Math.round(ah), total, score });
+            comboSuggestions.push({ block: s, border: bd, sashing, across: Math.round(aw), down: Math.round(ah), total, score });
           }
         }
       }
       comboSuggestions.sort((a, b) => a.score - b.score);
     }
 
-    const diversifiedCombos: ComboSuggestion[] = comboSuggestions
-      .slice(0, MAX_COMBO_OPTIONS)
-      .sort((a, b) => a.block - b.block);
+    // Jelly-roll mode: block is locked to 6". Vary border AND sashing to find
+    // combinations that hit the desired finished size exactly.
+    if (!perfect && isJellyRoll) {
+      const lockedBlock = 6;
+      const seen = new Set<string>();
+      for (let b2 = 0; b2 <= 32; b2++) {
+        const bd = b2 / 4;
+        if (quiltW - 2 * bd <= 0 || quiltH - 2 * bd <= 0) continue;
+        for (let sh2 = 0; sh2 <= 16; sh2++) {
+          const sh = sh2 / 4;
+          const iw = quiltW - 2 * bd + sh;
+          const ih = quiltH - 2 * bd + sh;
+          const eb = lockedBlock + sh;
+          const aw = iw / eb;
+          const ah = ih / eb;
+          if (!isInt(aw) || !isInt(ah)) continue;
+          const acrossR = Math.round(aw);
+          const downR = Math.round(ah);
+          if (acrossR < 1 || downR < 1) continue;
+          const total = acrossR * downR;
+          if (total > MAX_BLOCKS) continue;
+          const key = `${bd}-${sh}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          const score = Math.abs(bd - border) * 1.0 + Math.abs(sh - sashing) * 0.5;
+          comboSuggestions.push({ block: lockedBlock, border: bd, sashing: sh, across: acrossR, down: downR, total, score });
+        }
+      }
+      comboSuggestions.sort((a, b) => a.score - b.score);
+    }
+
+    const diversifiedCombos: ComboSuggestion[] = isJellyRoll
+      ? comboSuggestions.slice(0, MAX_COMBO_OPTIONS).sort((a, b) => a.border - b.border || a.sashing - b.sashing)
+      : comboSuggestions
+          .slice(0, MAX_COMBO_OPTIONS)
+          .sort((a, b) => a.block - b.block);
+
 
     // ----- Irish Chain symmetry suggestions -----
     // Irish Chain alternates chain/plain blocks in a checkerboard. For chain
