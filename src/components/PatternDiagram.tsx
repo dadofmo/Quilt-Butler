@@ -609,10 +609,11 @@ function renderInner(
       );
     }
     case "streak-of-lightning": {
-      // 2×2 grid where every HST keeps the same BL→TR diagonal orientation,
-      // but the bottom row swaps the top-row color placement. That horizontal
-      // color reversal creates the visible kink/lightning zigzag while leaving
-      // cutting math and fabric assignments unchanged.
+      // 2×2 grid of HSTs. Top row uses TR→BL diagonal with stripe in the
+      // upper-left triangle. Bottom row mirrors vertically — opposite diagonal
+      // (TL→BR), stripe in the upper-right triangle. The flipped diagonal at
+      // the seam produces the zigzag/lightning kink. Yardage math is
+      // unchanged.
       const stripe = get("stripe", "A");
       const bg = get("bg", "B");
       return (
@@ -624,8 +625,17 @@ function renderInner(
               const topRow = gy === 0;
               return (
                 <g key={`${gx}-${gy}`}>
-                  <polygon points={`${x},${y} ${x + 100},${y} ${x},${y + 100}`} fill={topRow ? stripe : bg} />
-                  <polygon points={`${x + 100},${y} ${x + 100},${y + 100} ${x},${y + 100}`} fill={topRow ? bg : stripe} />
+                  {topRow ? (
+                    <>
+                      <polygon points={`${x},${y} ${x + 100},${y} ${x},${y + 100}`} fill={stripe} />
+                      <polygon points={`${x + 100},${y} ${x + 100},${y + 100} ${x},${y + 100}`} fill={bg} />
+                    </>
+                  ) : (
+                    <>
+                      <polygon points={`${x},${y} ${x + 100},${y} ${x + 100},${y + 100}`} fill={stripe} />
+                      <polygon points={`${x},${y} ${x},${y + 100} ${x + 100},${y + 100}`} fill={bg} />
+                    </>
+                  )}
                 </g>
               );
             }),
