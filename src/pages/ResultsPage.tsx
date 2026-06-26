@@ -235,6 +235,12 @@ function ResultsStepInner() {
             )}
           </Section>
 
+          {precut && (
+            <Section title="Jelly roll plan">
+              <JellyRollPlanCard plan={precut} photos={planner.fabricPhotos} />
+            </Section>
+          )}
+
           <Section title="Cutting diagrams">
             <div className="space-y-4">
               {/* In print: keep Fabric A on page 1 with the summary, then
@@ -244,8 +250,14 @@ function ResultsStepInner() {
                   <CuttingDiagram req={f} fabricWidth={planner.fabricWidth} pattern={planner.pattern} photo={planner.fabricPhotos[f.fabric]} />
                 </div>
               ))}
+              {precut && result.fabrics.length === 0 && (
+                <p className="text-muted-foreground text-sm italic">
+                  All block fabric comes from your jelly roll — see the Jelly roll plan above for strip-by-strip cuts. There are no yardage cutting diagrams for the block fabrics.
+                </p>
+              )}
             </div>
           </Section>
+
 
           {result.materials && (
             <Section title="Other materials you'll need">
