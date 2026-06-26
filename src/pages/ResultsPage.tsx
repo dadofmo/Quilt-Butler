@@ -458,6 +458,7 @@ function ShoppingLineRow({
 function ShoppingList({
   fabrics,
   materials,
+  precut,
   fabricNames,
   fabricPhotos,
   itemPrices,
@@ -467,6 +468,7 @@ function ShoppingList({
 }: {
   fabrics: FabricRequirement[];
   materials?: MaterialsRequirement;
+  precut?: PrecutPlan | null;
   fabricNames: Partial<Record<FabricKey, string>>;
   fabricPhotos: Partial<Record<FabricKey, string>>;
   itemPrices: Record<string, string>;
@@ -482,6 +484,11 @@ function ShoppingList({
     unit: string;
   };
   const lines: Line[] = [];
+  // One jelly-roll line per block fabric (when in precut mode).
+  if (precut) {
+    // One jelly roll covers all fabrics — single shopping line.
+    lines.push({ id: "jelly-roll", qty: 1, unit: "roll" });
+  }
   for (const f of fabrics) lines.push({ id: `fabric-${f.fabric}`, qty: f.yards, unit: "yd" });
   if (materials) {
     lines.push({ id: "backing", qty: materials.backing.yards, unit: "yd" });
@@ -495,6 +502,7 @@ function ShoppingList({
     lines.push({ id: "piecing-thread", qty: 1, unit: "spool" });
     lines.push({ id: "quilting-thread", qty: 1, unit: "spool" });
   }
+
 
   const grandTotal = lines.reduce((sum, line) => {
     const raw = itemPrices[line.id];
