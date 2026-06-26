@@ -432,17 +432,27 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       );
     }
     case "streak-of-lightning": {
-      // 2×2 grid of HSTs with a consistent BL→TR diagonal. The top row uses
-      // one color placement; the bottom row swaps those colors, creating the
-      // horizontal kink that makes the lightning zigzag when blocks repeat.
+      // 2×2 grid of HSTs. Top row: TR→BL diagonal, stripe in upper-left
+      // triangle. Bottom row mirrors vertically — opposite diagonal (TL→BR),
+      // stripe in upper-right triangle. The flipped diagonal at the horizontal
+      // seam is what produces the zigzag kink.
       const cell = (gx: number, gy: number) => {
         const x = gx * 45;
         const y = gy * 45;
         const topRow = gy === 0;
         return (
           <g key={`${gx}-${gy}`}>
-            <polygon points={`${x},${y} ${x + 45},${y} ${x},${y + 45}`} fill={topRow ? C.a : C.b} />
-            <polygon points={`${x + 45},${y} ${x + 45},${y + 45} ${x},${y + 45}`} fill={topRow ? C.b : C.a} />
+            {topRow ? (
+              <>
+                <polygon points={`${x},${y} ${x + 45},${y} ${x},${y + 45}`} fill={C.a} />
+                <polygon points={`${x + 45},${y} ${x + 45},${y + 45} ${x},${y + 45}`} fill={C.b} />
+              </>
+            ) : (
+              <>
+                <polygon points={`${x},${y} ${x + 45},${y} ${x + 45},${y + 45}`} fill={C.a} />
+                <polygon points={`${x},${y} ${x},${y + 45} ${x + 45},${y + 45}`} fill={C.b} />
+              </>
+            )}
           </g>
         );
       };
