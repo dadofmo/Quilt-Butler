@@ -315,22 +315,37 @@ function SizeStepInner() {
   const fabricWidthValid =
     fabricWidthText.trim() !== "" && !isNaN(fabricWidthNum) && fabricWidthNum > 0;
 
+  const stripCountNum = Number(stripCountText);
+  const stripCountValid =
+    !isJellyRoll ||
+    (stripCountText.trim() !== "" && !isNaN(stripCountNum) && stripCountNum > 0);
+
   const next = () => {
-    if (!blockSizeValid || !fabricWidthValid || !borderValid) return;
+    // In jelly-roll mode the bolt-width field is hidden; we still need a
+    // fabric width for border/sashing/backing/binding math, so default to 44".
+    const effectiveFabricWidth = isJellyRoll
+      ? (fabricWidthValid ? fabricWidthNum : 44)
+      : fabricWidthNum;
+    if (!blockSizeValid || !borderValid) return;
+    if (!isJellyRoll && !fabricWidthValid) return;
+    if (isJellyRoll && !stripCountValid) return;
     if (isSashed && !sashingValid) return;
     if (isSnowball && !cornerAccentValid) return;
     setPlanner({
       sizePreset: preset,
       quiltWidth: Number(w) || 0,
       quiltHeight: Number(h) || 0,
-      fabricWidth: fabricWidthNum,
-      blockSize: blockSizeNum,
+      fabricWidth: effectiveFabricWidth,
+      blockSize: isJellyRoll ? 6 : blockSizeNum,
       borderWidth: border,
       sashingWidth: isSashed ? sashingNum : planner.sashingWidth,
       cornerAccentSize: isSnowball ? cornerAccentNum : planner.cornerAccentSize,
+      fabricSource: isJellyRoll ? "jelly-roll" : "yardage",
+      jellyRollStripCount: isJellyRoll ? stripCountNum : planner.jellyRollStripCount,
     });
     navigate("/fabrics");
   };
+
 
   return (
     <StepShell step={2} title="Quilt size & basics" subtitle="A few quick details so we can do the math." backTo="/">
