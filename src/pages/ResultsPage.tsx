@@ -72,14 +72,16 @@ function ResultsStepInner() {
   const innerH = planner.quiltHeight - 2 * planner.borderWidth;
   // Optional sashing sits BETWEEN blocks, so it adds size without changing the
   // block grid selected by the block size + border inputs.
+  const sashAdd = useSashedMath ? sashing : 0;
   const blocksAcross = Math.max(
     1,
-    Math.floor(innerW / planner.blockSize),
+    Math.floor((innerW + sashAdd) / (planner.blockSize + sashAdd)),
   );
   const blocksDown = Math.max(
     1,
-    Math.floor(innerH / planner.blockSize),
+    Math.floor((innerH + sashAdd) / (planner.blockSize + sashAdd)),
   );
+
   const actualW =
     blocksAcross * planner.blockSize +
     (useSashedMath ? Math.max(0, blocksAcross - 1) * sashing : 0) +
