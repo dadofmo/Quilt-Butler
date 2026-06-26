@@ -1,44 +1,32 @@
-## Two bugs on the Results page in jelly-roll mode
+## Problem
+The jelly-roll note under **Fabric summary** currently says:
 
-### Bug 1 — Wrong finished size (57.5" × 72.5" instead of 50" × 65")
+> "Your block fabrics come from your jelly roll and are listed in the Jelly roll plan below. The yardage above covers only your border, sashing, backing, batting, and binding."
 
-`src/pages/ResultsPage.tsx` (lines 75–82) still computes the block grid with the old formula that ignores sashing:
+That is confusing because:
+- The **Fabric summary** table usually only shows border and sashing fabrics (often 2 fabrics).
+- Backing, batting, and binding are not shown in the table above the note; they already appear in the separate **Other materials you'll need** section further down the page.
 
-```ts
-const blocksAcross = Math.floor(innerW / planner.blockSize);
-const blocksDown   = Math.floor(innerH / planner.blockSize);
-```
+## Plan
+Update the note in `src/pages/ResultsPage.tsx` so it is factually accurate and matches the actual page layout.
 
-This is exactly the SizePage bug we fixed last round — it was never applied here. With a 50×65 desired quilt, 3.25" border, 6" block, 1.5" sashing → `innerW = 43.5`, `floor(43.5/6) = 7`, so it reports 7×9 blocks → 57.5" × 72.5". The suggester (and SizePage) correctly computes 6×8 = 50" × 65".
+### New wording
+When the user still has yardage fabrics to buy (e.g. border and/or sashing):
 
-**Fix:** in ResultsPage, use the sashing-aware formula:
+> Your block fabrics come from your jelly roll and are listed in the **Jelly Roll Plan** below. The yardage above covers only your border and sashing fabric(s). Backing, batting, and binding are listed under **Other materials you'll need**.
 
-```ts
-const denomW = planner.blockSize + (useSashedMath ? sashing : 0);
-const denomH = denomW;
-const blocksAcross = Math.max(1, Math.floor((innerW + (useSashedMath ? sashing : 0)) / denomW));
-const blocksDown   = Math.max(1, Math.floor((innerH + (useSashedMath ? sashing : 0)) / denomH));
-```
+If there are no yardage fabrics at all (no border and no sashing):
 
-After this, the "Heads up" mismatch banner will correctly disappear and the subtitle will read `50" × 65" finished`.
+> Your block fabrics come from your jelly roll and are listed in the **Jelly Roll Plan** below. There are no yardage fabrics to buy for this quilt top; backing, batting, and binding are listed under **Other materials you'll need**.
 
-### Bug 2 — Fabric summary only shows 2 fabrics
-
-The summary correctly omits block fabrics in jelly-roll mode (they come from the precut, not yardage), but with `result.fabrics.length > 0` (border D + sashing E) the existing explanatory note at line 253 never shows, so the user can't tell why their block fabric is missing.
-
-**Fix:** in jelly-roll mode, add a short note directly under the Fabric summary table — e.g.
-
-> Your block fabrics come from your jelly roll and are listed in the **Jelly roll plan** below. The yardage above covers only your border, sashing, backing, batting, and binding.
-
-This is just an info line in `ResultsPage.tsx` shown when `precut` is truthy.
+### Implementation details
+- Replace the static `{precut && ...}` note with a small conditional block that picks the message based on `result.fabrics.length > 0`.
+- Keep the same paragraph styling (`text-muted-foreground mt-3 text-sm leading-relaxed`).
+- No math changes; this is a copy-only fix.
 
 ### Verification
+- Run `bun audit:math` after the edit (project rule after any change near yardage/results).
+- Spot-check the preview on a Rail Fence jelly-roll plan with a border and sashing to confirm the note reads correctly and no longer mentions backing/batting/binding in the Fabric summary.
 
-- Reload `/results` in Rail Fence + jelly-roll mode with 50×65 / 3.25" border / 1.5" sashing → header reads `50" × 65"`, no mismatch banner.
-- Fabric summary still shows D + E, with a new note pointing to the Jelly roll plan for block fabrics.
-- `bun audit:math` still passes (no yardage math changes).
-- Quick sanity check that yardage mode (non-jelly-roll) is unchanged — same formula, just sashing-aware.
-
-### Scope
-
-Only `src/pages/ResultsPage.tsx` is touched. No changes to `yardage.ts`, patterns, or the license/checkout flow.
+## Files to change
+- `src/pages/ResultsPage.tsx`
