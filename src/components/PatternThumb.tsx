@@ -1,7 +1,5 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import jellyRollBadge from "@/assets/jelly-roll-badge.png.asset.json";
-import fatQuarterBadge from "@/assets/fat-quarter-badge.png.asset.json";
 
 
 interface Props {
@@ -79,16 +77,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
               <rect key={`${x}-${y}`} x={x + 1} y={y + 1} width={20.5} height={20.5} fill={C.a} />
             )),
           )}
-          {/* Fat Quarter Friendly badge */}
-          <image
-            href={fatQuarterBadge.url}
-            x={52}
-            y={52}
-            width={38}
-            height={38}
-            preserveAspectRatio="xMidYMid meet"
-          />
         </svg>
+
       );
     case "nine-patch":
       return (
@@ -127,16 +117,9 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
               <rect x={x} y={60} width={30} height={30} fill={C.d} />
             </g>
           ))}
-          {/* Jelly Roll Friendly badge */}
-          <image
-            href={jellyRollBadge.url}
-            x={52}
-            y={52}
-            width={38}
-            height={38}
-            preserveAspectRatio="xMidYMid meet"
-          />
+          {/* Jelly Roll Friendly badge moved to overlay in PatternPickerPage */}
         </svg>
+
       );
     case "log-cabin": {
       const u = 90 / 8;

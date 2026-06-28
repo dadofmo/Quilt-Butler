@@ -10,6 +10,12 @@ import { isUnlocked } from "@/lib/license";
 import { Lock } from "lucide-react";
 
 import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
+import jellyRollBadge from "@/assets/jelly-roll-badge.png.asset.json";
+import fatQuarterBadge from "@/assets/fat-quarter-badge.png.asset.json";
+
+const THUMB_PX = 110;
+const BADGE_PX = 70; // 50% bigger than the prior ~46px badge
+
 
 
 export default function PatternPicker() {
@@ -105,12 +111,26 @@ function PatternPickerInner() {
               >
                 <div
                   className={
-                    "flex aspect-square w-full items-center justify-center rounded-lg bg-muted/50 p-3 " +
+                    "relative flex aspect-square w-full items-center justify-center rounded-lg bg-muted/50 p-3 " +
                     (ready ? "" : "opacity-40 grayscale")
                   }
                 >
-                  <PatternThumb pattern={p.id} size={110} />
+                  <PatternThumb pattern={p.id} size={THUMB_PX} />
+                  {(p.id === "rail-fence" || p.id === "simple-squares") && (
+                    <img
+                      src={p.id === "rail-fence" ? jellyRollBadge.url : fatQuarterBadge.url}
+                      alt={p.id === "rail-fence" ? "Jelly Roll Friendly" : "Fat Quarter Friendly"}
+                      className="pointer-events-none absolute -translate-x-1/2 translate-y-1/2"
+                      style={{
+                        width: BADGE_PX,
+                        height: BADGE_PX,
+                        left: `calc((100% - ${THUMB_PX}px) / 4)`,
+                        bottom: `calc((100% - ${THUMB_PX}px) / 4)`,
+                      }}
+                    />
+                  )}
                 </div>
+
                 <span
                   className={
                     "text-sm font-semibold leading-tight sm:text-base " +
