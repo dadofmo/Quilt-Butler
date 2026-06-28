@@ -335,19 +335,19 @@ export const PATTERNS: PatternDef[] = [
         id: "bg",
         label: "Background",
         defaultFabric: "C",
-        hint: "The corner squares, sashing strips between paws, and the background triangle in each HST unit. Usually a light neutral fabric.",
+        hint: "The corner squares and the background triangle in each HST unit. Also forms the cross-strips inside each block that separate the four paws (the strips you see inside the 1 BLOCK preview). Usually a light neutral fabric.",
       },
       {
         id: "center-accent",
         label: "Center accent square",
         defaultFabric: "D",
-        hint: "The small square where the four sashing strips meet in the center of the block — often a fun accent color that ties the whole block together.",
+        hint: "The small square where the four in-block strips meet in the center of the block — often a fun accent color that ties the whole block together.",
       },
       {
         id: "sashing",
         label: "Sashing between blocks",
         defaultFabric: "C",
-        hint: "The strips of fabric that separate each Bear Paw block — usually your background fabric or a coordinating neutral.",
+        hint: "The strips of fabric that separate one finished Bear Paw block from the next — only visible in the full quilt view, not inside a single block. Usually your background fabric or a coordinating neutral.",
       },
       {
         id: "cornerstone",
