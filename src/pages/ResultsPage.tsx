@@ -5,7 +5,7 @@ import { PrintBlockLegend } from "@/components/PrintBlockLegend";
 import { FABRIC_COLORS, FABRIC_LABELS, setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { getPattern, getEffectiveBorderDefault } from "@/lib/patterns";
-import { calculateYardage, computePrecutPlan, describePieceShape, piecesPerStrip, usableFabricWidth, JELLY_ROLL_USABLE_LENGTH, type FabricRequirement, type MaterialsRequirement, type PrecutPlan } from "@/lib/yardage";
+import { calculateYardage, computePrecutPlan, computeFatQuarterPlan, describePieceShape, piecesPerStrip, usableFabricWidth, JELLY_ROLL_USABLE_LENGTH, type FabricRequirement, type MaterialsRequirement, type PrecutPlan, type FatQuarterPlan } from "@/lib/yardage";
 import { Printer } from "lucide-react";
 
 export default function ResultsStep() {
@@ -40,6 +40,8 @@ function ResultsStepInner() {
 
   const result = calculateYardage(planner);
   const precut = computePrecutPlan(planner);
+  const fqPlan = computeFatQuarterPlan(planner);
+
 
 
   // Compute the ACTUAL finished size from the same math the calculator uses,
@@ -258,6 +260,13 @@ function ResultsStepInner() {
             </Section>
           )}
 
+          {fqPlan && (
+            <Section title="Fat quarter plan">
+              <FatQuarterPlanCard plan={fqPlan} photos={planner.fabricPhotos} />
+            </Section>
+          )}
+
+
           <Section title="Cutting diagrams">
             <div className="space-y-4">
               {/* In print: keep Fabric A on page 1 with the summary, then
@@ -267,11 +276,12 @@ function ResultsStepInner() {
                   <CuttingDiagram req={f} fabricWidth={planner.fabricWidth} pattern={planner.pattern} photo={planner.fabricPhotos[f.fabric]} />
                 </div>
               ))}
-              {precut && result.fabrics.length === 0 && (
+              {(precut || fqPlan) && result.fabrics.length === 0 && (
                 <p className="text-muted-foreground text-sm italic">
-                  All block fabric comes from your jelly roll — see the Jelly roll plan above for strip-by-strip cuts. There are no yardage cutting diagrams for the block fabrics.
+                  All block fabric comes from your {precut ? "jelly roll" : "fat quarters"} — see the {precut ? "Jelly roll" : "Fat quarter"} plan above for cutting details. There are no yardage cutting diagrams for the block fabrics.
                 </p>
               )}
+
             </div>
           </Section>
 
@@ -1266,4 +1276,137 @@ function JellyRollFabricDiagram({
     </div>
   );
 }
+
+/**
+ * Fat quarter plan card: shows per-fabric FQ needs and a small grid diagram
+ * of how to sub-cut each fat quarter into squares.
+ */
+function FatQuarterPlanCard({
+  plan,
+  photos,
+}: {
+  plan: FatQuarterPlan;
+  photos: Partial<Record<FabricKey, string>>;
+}) {
+  return (
+    <div className="space-y-4">
+      <div
+        className={`rounded-xl border-2 p-4 text-sm leading-relaxed ${
+          plan.feasible
+            ? "border-primary/40 bg-accent/50"
+            : "border-destructive/60 bg-destructive/5"
+        }`}
+      >
+        <div className="text-foreground font-semibold">
+          {plan.feasible ? "Your bundle has enough fat quarters" : "Heads up — your bundle won't be enough"}
+        </div>
+        <p className="text-foreground mt-1">{plan.feasibilityMessage}</p>
+      </div>
+
+      <div className="bg-card border-border rounded-xl border-2 p-4 text-sm">
+        <div className="text-foreground font-semibold">Per-FQ cutting summary</div>
+        <dl className="text-foreground mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+          <dt className="text-muted-foreground">Raw FQ size</dt>
+          <dd>{plan.rawWidthIn}&quot; × {plan.rawHeightIn}&quot;</dd>
+          <dt className="text-muted-foreground">Trim per side</dt>
+          <dd>{plan.trimMarginIn}&quot;</dd>
+          <dt className="text-muted-foreground">Usable after trim</dt>
+          <dd>{plan.usableWidthIn.toFixed(2)}&quot; × {plan.usableHeightIn.toFixed(2)}&quot;</dd>
+          <dt className="text-muted-foreground">Square cut size</dt>
+          <dd>{plan.squareCutSizeIn}&quot;</dd>
+          <dt className="text-muted-foreground">Yield per FQ</dt>
+          <dd>{plan.squaresAcross} × {plan.squaresDown} = <strong>{plan.squaresPerFq} squares</strong></dd>
+        </dl>
+      </div>
+
+      <ul className="text-muted-foreground list-disc space-y-1 pl-5 text-sm">
+        {plan.notes.map((n, i) => (
+          <li key={i}>{n}</li>
+        ))}
+      </ul>
+
+      <div className="space-y-4">
+        {plan.fabrics.map((line) => (
+          <FatQuarterFabricCard key={line.fabric} line={line} plan={plan} photo={photos[line.fabric]} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FatQuarterFabricCard({
+  line,
+  plan,
+  photo,
+}: {
+  line: FatQuarterPlan["fabrics"][number];
+  plan: FatQuarterPlan;
+  photo?: string;
+}) {
+  const SCALE = 10; // 1 inch = 10px
+  const fqW = plan.usableWidthIn * SCALE;
+  const fqH = plan.usableHeightIn * SCALE;
+  const cellW = plan.squareCutSizeIn * SCALE;
+  const cellH = plan.squareCutSizeIn * SCALE;
+  const fabricColor = FABRIC_COLORS[line.fabric];
+  const fill = `color-mix(in oklab, ${fabricColor} 30%, white)`;
+  const PAD = 12;
+  const svgW = fqW + PAD * 2;
+  const svgH = fqH + PAD * 2;
+
+  return (
+    <div className="bg-card border-border rounded-xl border-2 p-4">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <span
+            className="border-border inline-block h-10 w-10 rounded border"
+            style={photo ? { backgroundImage: `url(${photo})`, backgroundSize: "cover", backgroundPosition: "center" } : { background: fabricColor }}
+          />
+          <span className="text-foreground font-semibold">Fabric {line.fabric}</span>
+        </div>
+        <span className="text-muted-foreground text-sm">
+          {line.fqNeeded} fat quarter{line.fqNeeded === 1 ? "" : "s"} ({line.squaresNeeded} squares total)
+        </span>
+      </div>
+
+      <ol className="text-foreground mb-3 list-decimal space-y-1 pl-5 text-sm">
+        <li>
+          Pull <strong>{line.fqNeeded}</strong> fat quarter{line.fqNeeded === 1 ? "" : "s"} of Fabric {line.fabric} from your bundle.
+        </li>
+        <li>
+          Square up each FQ by trimming <strong>{plan.trimMarginIn}&quot;</strong> off all four sides → usable {plan.usableWidthIn.toFixed(2)}&quot; × {plan.usableHeightIn.toFixed(2)}&quot;.
+        </li>
+        <li>
+          Sub-cut a <strong>{plan.squaresAcross} × {plan.squaresDown}</strong> grid of {plan.squareCutSizeIn}&quot; squares = <strong>{plan.squaresPerFq} squares per FQ</strong>.
+        </li>
+        <li>
+          Total squares of Fabric {line.fabric}: <strong>{line.squaresNeeded}</strong>.
+        </li>
+      </ol>
+
+      <div className="overflow-x-auto">
+        <svg width={svgW} height={svgH} className="block" role="img" aria-label={`Fat quarter cutting grid for Fabric ${line.fabric}`}>
+          <rect x={PAD} y={PAD} width={fqW} height={fqH} fill={fill} stroke={fabricColor} strokeWidth={1.5} rx={2} />
+          {Array.from({ length: plan.squaresDown }).map((_, r) =>
+            Array.from({ length: plan.squaresAcross }).map((_, c) => (
+              <rect
+                key={`${r}-${c}`}
+                x={PAD + c * cellW}
+                y={PAD + r * cellH}
+                width={cellW}
+                height={cellH}
+                fill="none"
+                stroke={fabricColor}
+                strokeWidth={1}
+                strokeDasharray="3 3"
+                opacity={0.85}
+              />
+            )),
+          )}
+        </svg>
+      </div>
+    </div>
+  );
+}
+
 

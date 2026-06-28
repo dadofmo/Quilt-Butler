@@ -213,6 +213,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
   if (s.pattern === "simple-squares") {
     const cut = s.blockSize + SEAM;
+    // Skip block-fabric yardage when sourcing from fat quarters — the FQ
+    // planner handles the squares. Sashing/border math below still runs
+    // because those come from yardage bolts.
+    const fromFatQuarter = s.fabricSource === "fat-quarter";
     // Patchwork mode: split block count across the user's chosen palette
     // (2–12 fabrics) using the per-cell mix from the preview grid.
     const mix = computePatchworkMix(s);
@@ -222,18 +226,23 @@ export function calculateYardage(s: PlannerState): CalcResult {
         const pct = mix[fab];
         if (!pct || pct <= 0) continue;
         const count = Math.ceil(blockCount * pct);
-        addSquares(reqs[fab], `Squares (Fabric ${fab})`, count, cut, s.fabricWidth);
+        if (!fromFatQuarter) {
+          addSquares(reqs[fab], `Squares (Fabric ${fab})`, count, cut, s.fabricWidth);
+        }
         lines.push(`Fabric ${fab}: ${count} squares (${Math.round(pct * 100)}% of layout)`);
       }
       notes.push(`Cut ${blockCount} squares total at ${cut}" (finished ${s.blockSize}" + 1/2" for seam allowance), split across your fabrics:`);
       lines.forEach((l) => notes.push(l));
     } else {
       const squareFab = (s.assignments["squares"] ?? "A") as FabricKey;
-      addSquares(reqs[squareFab], "Squares", blockCount, cut, s.fabricWidth);
+      if (!fromFatQuarter) {
+        addSquares(reqs[squareFab], "Squares", blockCount, cut, s.fabricWidth);
+      }
       notes.push(
         `Cut ${blockCount} squares of Fabric ${squareFab} at ${cut}" (finished ${s.blockSize}" + 1/2" for seam allowance).`,
       );
     }
+
 
     // Optional sashing between blocks (Simple Squares).
     if (sashWidth > 0) {
@@ -1913,5 +1922,132 @@ export function computePrecutPlan(s: PlannerState): PrecutPlan | null {
     notes,
   };
 }
+
+
+// ============================================================================
+// FAT QUARTER PLANNER — pilot for Simple Squares only.
+//
+// Returns null when the planner isn't in fat-quarter mode (or the pattern
+// isn't supported). The card on ResultsPage tells the user how many fat
+// quarters of each fabric they need and how many squares they'll yield.
+// ============================================================================
+
+export interface FatQuarterFabricLine {
+  fabric: FabricKey;
+  /** Total finished squares needed of this fabric, across the whole quilt. */
+  squaresNeeded: number;
+  /** How many fat quarters of THIS fabric are needed. */
+  fqNeeded: number;
+  /** How many squares fit per fat quarter at the chosen trim margin. */
+  squaresPerFq: number;
+}
+
+export interface FatQuarterPlan {
+  pattern: "simple-squares";
+  /** Cut size of each square (finished + 0.5" seam). */
+  squareCutSizeIn: number;
+  /** Raw FQ size as entered by the user. */
+  rawWidthIn: number;
+  rawHeightIn: number;
+  /** Trim margin per side. */
+  trimMarginIn: number;
+  /** Usable dimensions after subtracting 2× trim margin. */
+  usableWidthIn: number;
+  usableHeightIn: number;
+  /** Max squares cuttable from one FQ at the chosen square size. */
+  squaresPerFq: number;
+  /** Grid breakdown: how many squares across / down per FQ. */
+  squaresAcross: number;
+  squaresDown: number;
+  fabrics: FatQuarterFabricLine[];
+  totalFqNeeded: number;
+  fqAvailable: number;
+  feasible: boolean;
+  feasibilityMessage: string;
+  notes: string[];
+}
+
+export function computeFatQuarterPlan(s: PlannerState): FatQuarterPlan | null {
+  if (s.fabricSource !== "fat-quarter") return null;
+  if (s.pattern !== "simple-squares") return null;
+
+  const cut = s.blockSize + SEAM;
+  const trim = Math.max(0, s.fatQuarterTrimMargin ?? 0.5);
+  const usableW = Math.max(0, (s.fatQuarterWidth || 18) - 2 * trim);
+  const usableH = Math.max(0, (s.fatQuarterHeight || 21) - 2 * trim);
+  // Try both FQ orientations and pick the one that yields more squares.
+  const grid1 = { across: Math.floor(usableW / cut), down: Math.floor(usableH / cut) };
+  const grid2 = { across: Math.floor(usableH / cut), down: Math.floor(usableW / cut) };
+  const yield1 = grid1.across * grid1.down;
+  const yield2 = grid2.across * grid2.down;
+  const best = yield2 > yield1 ? grid2 : grid1;
+  const squaresPerFq = Math.max(0, best.across * best.down);
+
+  const sashWidth = Math.max(0, s.sashingWidth || 0);
+  const sashAdd = sashWidth;
+  const innerW = s.quiltWidth - 2 * s.borderWidth;
+  const innerH = s.quiltHeight - 2 * s.borderWidth;
+  const blocksAcross = Math.max(1, Math.floor((innerW + sashAdd) / (s.blockSize + sashAdd)));
+  const blocksDown = Math.max(1, Math.floor((innerH + sashAdd) / (s.blockSize + sashAdd)));
+  const blockCount = blocksAcross * blocksDown;
+
+  // Per-fabric square allocation: mirrors the simple-squares yardage path.
+  const mix = computePatchworkMix(s);
+  const squaresByFabric: Partial<Record<FabricKey, number>> = {};
+  if (mix) {
+    for (const fab of ALL_FABRIC_KEYS) {
+      const pct = mix[fab];
+      if (!pct || pct <= 0) continue;
+      squaresByFabric[fab] = Math.ceil(blockCount * pct);
+    }
+  } else {
+    const squareFab = (s.assignments["squares"] ?? "A") as FabricKey;
+    squaresByFabric[squareFab] = blockCount;
+  }
+
+  const fabrics: FatQuarterFabricLine[] = ALL_FABRIC_KEYS
+    .filter((f) => (squaresByFabric[f] ?? 0) > 0)
+    .map((f) => {
+      const squaresNeeded = squaresByFabric[f]!;
+      const fqNeeded = squaresPerFq > 0 ? Math.ceil(squaresNeeded / squaresPerFq) : Infinity;
+      return { fabric: f, squaresNeeded, fqNeeded, squaresPerFq };
+    });
+
+  const totalFqNeeded = fabrics.reduce((sum, l) => sum + (isFinite(l.fqNeeded) ? l.fqNeeded : 0), 0);
+  const fqAvailable = Math.max(1, s.fatQuarterCount || 20);
+  const feasible = squaresPerFq > 0 && totalFqNeeded <= fqAvailable;
+  const feasibilityMessage = squaresPerFq <= 0
+    ? `Your block size (${s.blockSize}") is too big for a ${s.fatQuarterWidth}" × ${s.fatQuarterHeight}" fat quarter after trimming ${trim}" off each side. Try a smaller block size, a smaller trim margin, or larger fat quarters.`
+    : feasible
+      ? `Your bundle is plenty — you'll use ${totalFqNeeded} of your ${fqAvailable} fat quarters for the blocks (${fqAvailable - totalFqNeeded} left over).`
+      : `Your bundle isn't enough — you need ${totalFqNeeded} fat quarters but only have ${fqAvailable}. Either buy more, reduce the quilt size, or pick a smaller block size to fit more squares per FQ.`;
+
+  const notes: string[] = [
+    `Quilt grid: ${blocksAcross} × ${blocksDown} = ${blockCount} squares at ${s.blockSize}" finished.`,
+    `From each ${s.fatQuarterWidth}" × ${s.fatQuarterHeight}" fat quarter, trim ${trim}" off all 4 sides for a clean ${usableW.toFixed(2)}" × ${usableH.toFixed(2)}" usable rectangle, then sub-cut a ${best.across} × ${best.down} grid of ${cut}" squares = ${squaresPerFq} squares per FQ.`,
+    `Cutting tip: lay your fat quarter flat, square up one corner with your ruler, then make parallel cuts every ${cut}" until you've got your row of squares.`,
+    `Backing, batting, binding, sashing, and any border are still bought as regular yardage — see those sections below.`,
+  ];
+
+  return {
+    pattern: "simple-squares",
+    squareCutSizeIn: cut,
+    rawWidthIn: s.fatQuarterWidth || 18,
+    rawHeightIn: s.fatQuarterHeight || 21,
+    trimMarginIn: trim,
+    usableWidthIn: usableW,
+    usableHeightIn: usableH,
+    squaresPerFq,
+    squaresAcross: best.across,
+    squaresDown: best.down,
+    fabrics,
+    totalFqNeeded,
+    fqAvailable,
+    feasible,
+    feasibilityMessage,
+    notes,
+  };
+}
+
 
 
