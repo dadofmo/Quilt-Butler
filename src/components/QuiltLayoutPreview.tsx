@@ -595,7 +595,7 @@ function MiniBlock({
     }
     case "sawtooth-star": {
       const star = get("star", "A");
-      const centerFab = (a["center"] ?? a["star"] ?? "A") as FabricKey;
+      const centerFab = (assignments["center"] ?? assignments["star"] ?? "A") as FabricKey;
       const center = get("center", centerFab);
       const bg = get("bg", "B");
       const u = 200 / 4;
