@@ -17,6 +17,8 @@ Object.defineProperty(window, "matchMedia", {
 
 // localStorage is used by the planner store; jsdom already provides it,
 // but make absolutely sure it's clean between tests.
+import { beforeEach } from "vitest";
+
 beforeEach(() => {
   try {
     window.localStorage.clear();
