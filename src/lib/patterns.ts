@@ -71,7 +71,7 @@ export const PATTERNS: PatternDef[] = [
     id: "simple-squares",
     name: "Simple Squares",
     hasMath: true,
-    intro: "A grid of identical squares — the easiest pattern for beginners. Pick one fabric for all the squares, plus an optional border fabric. Optionally add plain sashing strips between blocks for a framed look.",
+    intro: "A grid of squares — the easiest pattern for beginners. Choose how many fabrics you want (2–12), then tap squares in the preview to design your patchwork. Add an optional border, and optional plain sashing strips between blocks for a framed look.",
     sections: [
       { id: "squares", label: "Squares", defaultFabric: "A", hint: "Every square in the grid uses this fabric." },
       {
