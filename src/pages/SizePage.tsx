@@ -81,19 +81,38 @@ function SizeStepInner() {
   // roll mode the block-fabric input ("Fabric width" bolt) is replaced with
   // a strip-count input, and block size is locked to 6" (3 strips × 2" fin.).
   const jellyRollEligible = isRailFence;
-  const [fabricSource, setFabricSource] = useState<"yardage" | "jelly-roll">(
-    jellyRollEligible ? planner.fabricSource : "yardage",
+  const fatQuarterEligible = isSimpleSquares;
+  const precutEligible = jellyRollEligible || fatQuarterEligible;
+  const [fabricSource, setFabricSource] = useState<"yardage" | "jelly-roll" | "fat-quarter">(
+    precutEligible ? planner.fabricSource : "yardage",
   );
   const [stripCountText, setStripCountText] = useState(
     planner.jellyRollStripCount ? String(planner.jellyRollStripCount) : "40",
   );
+  const [fqWidthText, setFqWidthText] = useState(
+    planner.fatQuarterWidth ? String(planner.fatQuarterWidth) : "18",
+  );
+  const [fqHeightText, setFqHeightText] = useState(
+    planner.fatQuarterHeight ? String(planner.fatQuarterHeight) : "21",
+  );
+  const [fqTrimText, setFqTrimText] = useState(
+    typeof planner.fatQuarterTrimMargin === "number" && !isNaN(planner.fatQuarterTrimMargin)
+      ? String(planner.fatQuarterTrimMargin)
+      : "0.5",
+  );
+  const [fqCountText, setFqCountText] = useState(
+    planner.fatQuarterCount ? String(planner.fatQuarterCount) : "20",
+  );
+  const [showFqTrimHelp, setShowFqTrimHelp] = useState(false);
   const isJellyRoll = jellyRollEligible && fabricSource === "jelly-roll";
+  const isFatQuarter = fatQuarterEligible && fabricSource === "fat-quarter";
 
   // In jelly-roll mode, lock block size to 6" so the live preview and the
   // downstream fit/grid math stay consistent with what the user will sew.
   useEffect(() => {
     if (isJellyRoll && blockSizeText !== "6") setBlockSizeText("6");
   }, [isJellyRoll, blockSizeText]);
+
 
 
 
