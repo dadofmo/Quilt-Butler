@@ -106,7 +106,12 @@ const initial: PlannerState = {
   itemPrices: {},
   fabricSource: "yardage",
   jellyRollStripCount: 40,
+  fatQuarterWidth: 18,
+  fatQuarterHeight: 21,
+  fatQuarterTrimMargin: 0.5,
+  fatQuarterCount: 20,
 };
+
 
 function loadPlannerState(): PlannerState {
   if (typeof window === "undefined") return initial;
