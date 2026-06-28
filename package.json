@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "audit:math": "bun run scripts/audit-yardage.ts"
+    "audit:math": "bun run scripts/audit-yardage.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verify": "bun run audit:math && bun run test && bun run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
