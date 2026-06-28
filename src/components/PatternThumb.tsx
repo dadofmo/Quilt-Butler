@@ -119,16 +119,9 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
               <rect x={x} y={60} width={30} height={30} fill={C.d} />
             </g>
           ))}
-          {/* Jelly Roll Friendly badge */}
-          <image
-            href={jellyRollBadge.url}
-            x={52}
-            y={52}
-            width={38}
-            height={38}
-            preserveAspectRatio="xMidYMid meet"
-          />
+          {/* Jelly Roll Friendly badge moved to overlay in PatternPickerPage */}
         </svg>
+
       );
     case "log-cabin": {
       const u = 90 / 8;
