@@ -118,7 +118,7 @@ function PatternPickerInner() {
                   <PatternThumb pattern={p.id} size={THUMB_PX} />
                   {(p.id === "rail-fence" || p.id === "simple-squares") && (
                     <img
-                      src={p.id === "rail-fence" ? jellyRollBadge.url : fatQuarterBadge.url}
+                      src={p.id === "rail-fence" ? jellyRollBadge : fatQuarterBadge}
                       alt={p.id === "rail-fence" ? "Jelly Roll Friendly" : "Fat Quarter Friendly"}
                       className="pointer-events-none absolute -translate-x-1/2 translate-y-1/2"
                       style={{
