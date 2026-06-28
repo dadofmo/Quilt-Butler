@@ -311,11 +311,12 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       );
     }
     case "sawtooth-star": {
-      // 4×4 grid (u=22.5). Center 2×2 = star fabric. Four corners = bg.
+      // 4×4 grid (u=22.5). Center 2×2 = contrasting center fabric. Four corners = bg.
       // 8 HST cells with star triangle at inner corner pointing toward center.
       const u = 90 / 4;
       const star = C.a;
       const bg = C.b;
+      const center = C.c;
       // For each HST cell, "starCorner" = which corner the star (inner) triangle's right-angle sits at.
       const hsts: Array<[number, number, "TL" | "TR" | "BL" | "BR"]> = [
         [1, 0, "BL"], [2, 0, "BR"],
