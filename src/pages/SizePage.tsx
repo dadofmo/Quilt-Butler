@@ -1000,7 +1000,7 @@ function SizeStepInner() {
 
         <button
           onClick={next}
-          disabled={!blockSizeValid || !borderValid || (!isJellyRoll && !fabricWidthValid) || (isJellyRoll && !stripCountValid) || (isSashed && !sashingValid) || (isSnowball && !cornerAccentValid)}
+          disabled={!blockSizeValid || !borderValid || (!isJellyRoll && !isFatQuarter && !fabricWidthValid) || (isJellyRoll && !stripCountValid) || (isFatQuarter && (!fqWidthValid || !fqHeightValid || !fqTrimValid || !fqCountValid)) || (isSashed && !sashingValid) || (isSnowball && !cornerAccentValid)}
           className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed w-full rounded-xl px-6 py-4 text-lg font-semibold shadow-sm transition-colors"
         >
           Assign fabrics →
