@@ -1,7 +1,5 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import jellyRollBadge from "@/assets/jelly-roll-badge.png.asset.json";
-import fatQuarterBadge from "@/assets/fat-quarter-badge.png.asset.json";
 
 
 interface Props {
