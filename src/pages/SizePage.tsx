@@ -382,15 +382,29 @@ function SizeStepInner() {
     !isJellyRoll ||
     (stripCountText.trim() !== "" && !isNaN(stripCountNum) && stripCountNum > 0);
 
+  const fqWidthNum = Number(fqWidthText);
+  const fqHeightNum = Number(fqHeightText);
+  const fqTrimNum = Number(fqTrimText);
+  const fqCountNum = Number(fqCountText);
+  const fqWidthValid = !isFatQuarter || (fqWidthText.trim() !== "" && !isNaN(fqWidthNum) && fqWidthNum > 0);
+  const fqHeightValid = !isFatQuarter || (fqHeightText.trim() !== "" && !isNaN(fqHeightNum) && fqHeightNum > 0);
+  const fqTrimValid = !isFatQuarter || (
+    fqTrimText.trim() !== "" && !isNaN(fqTrimNum) && fqTrimNum >= 0 && fqTrimNum <= 2 &&
+    (!fqWidthValid || fqTrimNum * 2 < fqWidthNum) &&
+    (!fqHeightValid || fqTrimNum * 2 < fqHeightNum)
+  );
+  const fqCountValid = !isFatQuarter || (fqCountText.trim() !== "" && !isNaN(fqCountNum) && fqCountNum > 0);
+
   const next = () => {
-    // In jelly-roll mode the bolt-width field is hidden; we still need a
+    // In precut modes the bolt-width field is hidden; we still need a
     // fabric width for border/sashing/backing/binding math, so default to 44".
-    const effectiveFabricWidth = isJellyRoll
+    const effectiveFabricWidth = (isJellyRoll || isFatQuarter)
       ? (fabricWidthValid ? fabricWidthNum : 44)
       : fabricWidthNum;
     if (!blockSizeValid || !borderValid) return;
-    if (!isJellyRoll && !fabricWidthValid) return;
+    if (!isJellyRoll && !isFatQuarter && !fabricWidthValid) return;
     if (isJellyRoll && !stripCountValid) return;
+    if (isFatQuarter && (!fqWidthValid || !fqHeightValid || !fqTrimValid || !fqCountValid)) return;
     if (isSashed && !sashingValid) return;
     if (isSnowball && !cornerAccentValid) return;
     setPlanner({
@@ -402,11 +416,16 @@ function SizeStepInner() {
       borderWidth: border,
       sashingWidth: isSashed ? sashingNum : planner.sashingWidth,
       cornerAccentSize: isSnowball ? cornerAccentNum : planner.cornerAccentSize,
-      fabricSource: isJellyRoll ? "jelly-roll" : "yardage",
+      fabricSource: isJellyRoll ? "jelly-roll" : isFatQuarter ? "fat-quarter" : "yardage",
       jellyRollStripCount: isJellyRoll ? stripCountNum : planner.jellyRollStripCount,
+      fatQuarterWidth: isFatQuarter ? fqWidthNum : planner.fatQuarterWidth,
+      fatQuarterHeight: isFatQuarter ? fqHeightNum : planner.fatQuarterHeight,
+      fatQuarterTrimMargin: isFatQuarter ? fqTrimNum : planner.fatQuarterTrimMargin,
+      fatQuarterCount: isFatQuarter ? fqCountNum : planner.fatQuarterCount,
     });
     navigate("/fabrics");
   };
+
 
 
   return (
