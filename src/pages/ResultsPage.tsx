@@ -260,6 +260,13 @@ function ResultsStepInner() {
             </Section>
           )}
 
+          {fqPlan && (
+            <Section title="Fat quarter plan">
+              <FatQuarterPlanCard plan={fqPlan} photos={planner.fabricPhotos} />
+            </Section>
+          )}
+
+
           <Section title="Cutting diagrams">
             <div className="space-y-4">
               {/* In print: keep Fabric A on page 1 with the summary, then
