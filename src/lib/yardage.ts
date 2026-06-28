@@ -1168,6 +1168,11 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const hstCut = u + HST_EXTRA;
 
     const starFab = (s.assignments["star"] ?? "A") as FabricKey;
+    // Center square can be the same as the star points (traditional 2-color
+    // look) or a different fabric for a contrasting center. Falls back to the
+    // star fabric so older sessions without a `center` assignment stay
+    // identical to the previous output.
+    const centerFab = (s.assignments["center"] ?? starFab) as FabricKey;
     const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
 
     const centerCount = blockCount;
@@ -1175,20 +1180,22 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const hstStarCount = 8 * blockCount;
     const hstBgCount = 8 * blockCount;
 
-    addSquares(reqs[starFab], "Star center squares", centerCount, centerCut, s.fabricWidth);
-    addSquares(reqs[starFab], "HST starting squares (star fabric)", hstStarCount, hstCut, s.fabricWidth);
+    addSquares(reqs[centerFab], "Star center squares", centerCount, centerCut, s.fabricWidth);
+    addSquares(reqs[starFab], "HST starting squares (star points)", hstStarCount, hstCut, s.fabricWidth);
     addSquares(reqs[bgFab], "Background corner squares", cornerCount, cornerCut, s.fabricWidth);
     addSquares(reqs[bgFab], "HST starting squares (background)", hstBgCount, hstCut, s.fabricWidth);
 
     notes.push(
       `Each block uses a 4×4 grid where each small unit = ${u.toFixed(2)}" finished.`,
     );
-    notes.push(
-      `Each block uses: 1 center square at ${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}" (star fabric), 8 HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" (star fabric), 4 corner squares at ${cornerCut.toFixed(2)}" × ${cornerCut.toFixed(2)}" (background), and 8 HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" (background).`,
-    );
-    notes.push(
-      `Across all ${blockCount} blocks: ${centerCount} center squares and ${hstStarCount} HST starting squares of Fabric ${starFab} (star); ${cornerCount} corner squares and ${hstBgCount} HST starting squares of Fabric ${bgFab} (background).`,
-    );
+    const centerNote = centerFab === starFab
+      ? `Each block uses: 1 center square at ${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}" (star fabric), 8 HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" (star fabric), 4 corner squares at ${cornerCut.toFixed(2)}" × ${cornerCut.toFixed(2)}" (background), and 8 HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" (background).`
+      : `Each block uses: 1 center square at ${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}" (Fabric ${centerFab} — center), 8 HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" (Fabric ${starFab} — star points), 4 corner squares at ${cornerCut.toFixed(2)}" × ${cornerCut.toFixed(2)}" (Fabric ${bgFab} — background), and 8 HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" (Fabric ${bgFab} — background).`;
+    notes.push(centerNote);
+    const totalsNote = centerFab === starFab
+      ? `Across all ${blockCount} blocks: ${centerCount} center squares and ${hstStarCount} HST starting squares of Fabric ${starFab} (star); ${cornerCount} corner squares and ${hstBgCount} HST starting squares of Fabric ${bgFab} (background).`
+      : `Across all ${blockCount} blocks: ${centerCount} center squares of Fabric ${centerFab} (center); ${hstStarCount} HST starting squares of Fabric ${starFab} (star points); ${cornerCount} corner squares and ${hstBgCount} HST starting squares of Fabric ${bgFab} (background).`;
+    notes.push(totalsNote);
     notes.push(
       `HST construction: pair one star starting square with one background starting square right sides together. Draw a diagonal line corner to corner on the lighter square. Sew a scant 1/4" on each side of the line. Cut apart on the line to yield 2 HST units. Press open and trim each unit to ${(u + SEAM).toFixed(3)}" square (finished ${u.toFixed(2)}"). Each block needs 8 HST units — 4 pairs yield exactly 8.`,
     );

@@ -385,13 +385,19 @@ export const PATTERNS: PatternDef[] = [
     name: "Sawtooth Star",
     hasMath: true,
     intro:
-      "The Sawtooth Star is built on a 4×4 grid of equal units. The center four cells form one large star center square. The four corners are background squares. The eight remaining cells are Half Square Triangle units — each with a star-colored triangle pointing inward toward the center and a background triangle filling the outer corner. Together the eight HST units create the eight star points.",
+      "The Sawtooth Star is built on a 4×4 grid of equal units. The center four cells form one large center square. The four corners are background squares. The eight remaining cells are Half Square Triangle units — each with a star-colored triangle pointing inward and a background triangle filling the outer corner. The center square is its own fabric choice — use the same fabric as the star points for a traditional 2-color look, or pick a contrasting fabric to make the center pop.",
     sections: [
       {
         id: "star",
-        label: "Star fabric",
+        label: "Star points",
         defaultFabric: "A",
-        hint: "The large center square and the star-colored triangles in the eight HST units — forms the star shape.",
+        hint: "The 8 star-point triangles in the HST units — forms the points of the star.",
+      },
+      {
+        id: "center",
+        label: "Center square",
+        defaultFabric: "C",
+        hint: "The large 2×2 square in the middle of the star. Pick the same fabric as the star points for a traditional 2-color block, or a different fabric for a contrasting center.",
       },
       {
         id: "bg",
@@ -402,7 +408,7 @@ export const PATTERNS: PatternDef[] = [
       {
         id: "sashing",
         label: "Sashing between blocks",
-        defaultFabric: "C",
+        defaultFabric: "D",
         hint: "Optional strips of fabric that separate each Sawtooth Star block — set sashing to 0\" on the previous step if you don't want any.",
       },
       borderSection,

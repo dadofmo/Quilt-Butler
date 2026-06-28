@@ -483,6 +483,8 @@ function renderInner(
     }
     case "sawtooth-star": {
       const star = get("star", "A");
+      const centerFab = (a["center"] ?? a["star"] ?? "A") as FabricKey;
+      const center = get("center", centerFab);
       const bg = get("bg", "B");
       const u = 200 / 4;
       const hsts: Array<[number, number, "TL" | "TR" | "BL" | "BR"]> = [
@@ -501,7 +503,7 @@ function renderInner(
       return (
         <>
           <rect width={200} height={200} fill={bg} />
-          <rect x={u} y={u} width={2 * u} height={2 * u} fill={star} />
+          <rect x={u} y={u} width={2 * u} height={2 * u} fill={center} />
           {hsts.map(([c, r, sc]) => (
             <g key={`${c}-${r}`}>
               <polygon points={tri(c, r, sc)} fill={star} />
