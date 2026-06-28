@@ -929,6 +929,30 @@ console.log("\n=== Sawtooth Star: 50×65, 12\" block, no border, 2\" sashing ===
   check("SS-star(sash) C strip length", c.pieces[0].w, 12.5);
 }
 
+console.log("\n=== Sawtooth Star: 50×65, 12\" block, contrasting center fabric (C) ===");
+{
+  // Assigning a different fabric to the center square should move the 1 center
+  // square per block to that fabric and leave the HST star squares on A.
+  const s = {
+    ...base(),
+    pattern: "sawtooth-star" as const,
+    blockSize: 12,
+    assignments: { star: "A", center: "C", bg: "B" } as Record<string, FabricKey>,
+  };
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("SS-star(center) A buckets", a.pieces.length, 1);
+  check("SS-star(center) A HST count", a.pieces[0].count, 160);
+  check("SS-star(center) A HST cut", a.pieces[0].w, 3.875);
+  check("SS-star(center) C buckets", c.pieces.length, 1);
+  check("SS-star(center) C center count", c.pieces[0].count, 20);
+  check("SS-star(center) C center cut", c.pieces[0].w, 6.5);
+  check("SS-star(center) B corner count", b.pieces[0].count, 80);
+  check("SS-star(center) B HST count", b.pieces[1].count, 160);
+}
+
 // =========================================================================
 // CHURN DASH — 3×3 grid, 1 center + 4 HST corners + 4 bar units
 // =========================================================================
