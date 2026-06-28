@@ -115,6 +115,32 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
               <rect x={x} y={60} width={30} height={30} fill={C.d} />
             </g>
           ))}
+          {/* Jelly Roll Friendly badge */}
+          <g>
+            <circle cx={74} cy={74} r={16} fill="#ffffff" stroke="#2aa7a0" strokeWidth={2} />
+            <text
+              x={74}
+              y={71}
+              textAnchor="middle"
+              fontSize={6}
+              fontWeight={700}
+              fill="#2aa7a0"
+              fontFamily="system-ui, sans-serif"
+            >
+              JELLY ROLL
+            </text>
+            <text
+              x={74}
+              y={79}
+              textAnchor="middle"
+              fontSize={6}
+              fontWeight={700}
+              fill="#2aa7a0"
+              fontFamily="system-ui, sans-serif"
+            >
+              FRIENDLY
+            </text>
+          </g>
         </svg>
       );
     case "log-cabin": {
