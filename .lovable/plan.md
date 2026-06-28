@@ -1,72 +1,55 @@
 ## Goal
+Make the fat-quarter trim margin a user-editable field in the Simple Squares fat-quarter flow, with beginner-friendly guidance.
 
-End every chat with high confidence that all 20 patterns are mathematically, visually, and functionally correct — not just "the audit passed."
+## Decisions locked in so far
+- Default FQ size: **Standard 42" bolt** → 18" × 21" raw.
+- User confirms FQ size **every time** (no remembering).
+- Default trim margin: **0.5" per side** (this plan adds the override).
 
-## Why we can't ever say "zero errors of any kind"
+## UI changes (SizePage.tsx, fat-quarter mode for Simple Squares)
 
-Software has three classes of errors and they need different defenses:
+Add a new input directly under the FQ width/height inputs:
 
-1. **Math/yardage errors** — wrong cut counts, wrong yardage, broken sashing/border formulas. Catchable by automated tests.
-2. **Visual/render errors** — the right fabric token painted in the wrong region (your Bear Paw scare). Hard to fully automate; needs structural checks + a visual spot check.
-3. **UX/copy errors** — confusing labels, misleading hints (the real Bear Paw issue). Only humans catch these reliably.
+```text
+Trim margin per side:  [ 0.5 ] inches   (default)
+                       ▸ Why does this matter?
+```
 
-The plan below drives #1 and #2 to near-zero automatically, and gives you a 5-minute checklist for #3.
+- Numeric input, step 0.125, min 0.25, max 1.5.
+- "Why does this matter?" is a collapsible (shadcn `Collapsible` / `Accordion`) so the page stays clean for users who don't care.
+- Inline helper text under the field (always visible, one line):
+  *"We shrink each fat quarter by this much on all 4 sides before cutting. Default 0.5" works for most cottons."*
 
-## What already protects you
+### Expanded "Why does this matter?" content (beginner copy)
 
-- `bun audit:math` — `scripts/audit-yardage.ts` runs hundreds of hand-calculated checks against `calculateYardage` for every pattern with math.
-- `tsgo` typecheck on every change — catches missing fields, bad fabric keys, undefined sections.
-- The "Core" memory rule forces every piece through `addSquares` / `addRails`, so no renderer can silently fabricate yardage.
+> **Why we trim the edges of a fat quarter**
+>
+> Fat quarters are cut from a bolt of fabric, and the cut edges are almost never perfectly straight. The two "selvage" edges (the tightly woven factory edges) are also stiffer than the rest of the fabric and don't sew well into a quilt. Before cutting your squares, quilters "square up" the fat quarter by trimming a little off all four sides so you start with clean, straight, usable fabric.
+>
+> **How to pick a number**
+> - **0.25" (1/4 inch)** — Fat quarters from a high-quality quilt shop that look clean and straight.
+> - **0.5" (1/2 inch) — recommended default.** Safe for most quilt-shop cottons. Covers normal selvage width and small cutting wobbles.
+> - **0.75"–1"** — Fat quarters from a bargain bin, pre-washed fabric (which frays), or pieces that look crooked or have a wide printed selvage.
+>
+> **When in doubt, go bigger.** Trimming a little extra costs you a few squares; trimming too little means your finished squares may have selvage or frayed edges showing.
 
-## What I'll add
+## Math wiring (yardage.ts)
 
-### A. Pattern-coverage test (Vitest, automated)
+- `computeFatQuarterPlan()` (or wherever the FQ math lives for Simple Squares) takes `trimMargin` as a parameter instead of a hardcoded 0.5.
+- Usable FQ dimensions = `(fqWidth - 2*trimMargin) × (fqHeight - 2*trimMargin)`.
+- Squares-per-FQ recomputes from those usable dimensions.
+- Clamp: if `trimMargin * 2 >= min(fqWidth, fqHeight) - squareSize`, show an inline error: *"Trim margin too large — no squares fit. Try a smaller value."*
 
-Iterates over every entry in `src/lib/patterns.ts`. For each pattern:
+## State
 
-1. Builds a default `PlannerState` and calls `calculateYardage` — must not throw and must return ≥1 fabric.
-2. Asserts every `section.defaultFabric` actually appears in `PatternDiagram` and `QuiltLayoutPreview` output (queried via `data-fabric` attributes I'll add to each fill).
-3. Asserts every fabric the renderer paints corresponds to a declared section — catches orphan paints.
-4. Warns (not fails) if a pattern has no hand-calc case in `audit-yardage.ts`.
+- New state field `trimMargin: number` in SizePage, default `0.5`.
+- Passed through to the FQ plan card on ResultsPage so the "X squares per fat quarter" number reflects the override.
 
-### B. Snapshot tests for the 1-block and full-quilt diagrams
+## Out of scope
+- No change to the bolt-fabric path.
+- No change to other patterns.
+- No persistence across sessions (matches your "ask every time" decision for FQ size).
 
-Render each pattern with a fixed fabric-assignment seed and snapshot the SVG. Any unintended structural change in any renderer fails with a diff — would have caught the Streak of Lightning regressions automatically.
-
-### C. Yardage audit expansion
-
-Extend `scripts/audit-yardage.ts` so every pattern has at least:
-- a small case (no sashing, no border)
-- a sashing + border case
-- a fabric-pooling case (two sections share a fabric letter)
-
-### D. Manual 5-minute smoke checklist
-
-`docs/PATTERN-SMOKE-CHECK.md` — one page you walk through before any release:
-- Open each pattern, confirm Step 2 "1 BLOCK" colors match "FULL QUILT" colors per fabric letter
-- Confirm Step 3 yardage row exists for every assigned fabric letter
-- Confirm finished size on Step 3 matches Step 2
-- Jelly-roll only on Rail Fence
-
-### E. Pre-release ritual
-
-Single command `bun verify` runs in order:
-1. `tsgo` typecheck
-2. `bun audit:math`
-3. `bun test` (the new specs)
-4. `bun run build`
-
-## Works for future patterns
-
-All four automated checks iterate `patterns.ts`, so new patterns are picked up automatically. The only thing not automatic is the hand-calc cases in `audit-yardage.ts` — the coverage test prints a warning when they're missing so it can't be silently forgotten.
-
-## Scope of files
-
-- **New**: `vitest.config.ts`, `src/test/setup.ts`, `src/lib/__tests__/patterns-coverage.test.ts`, `src/components/__tests__/pattern-renderers.test.tsx`, `docs/PATTERN-SMOKE-CHECK.md`
-- **Edited**: `scripts/audit-yardage.ts` (broader cases), `package.json` (add `test` + `verify` scripts, add `vitest` + `@testing-library/react` + `@testing-library/jest-dom` + `jsdom` devDeps), `tsconfig.app.json` (add `vitest/globals`), `docs/CHANGE-SAFETY.md` (document ritual), `src/components/PatternDiagram.tsx` + `QuiltLayoutPreview.tsx` + `PatternThumb.tsx` (add non-visual `data-fabric` attributes to fills — no pixel changes)
-- **Untouched**: every pattern's math, fabric defaults, yardage.ts, patterns.ts content, license flow.
-
-## Honest caveats
-
-- Tests catch what they assert. Snapshots catch *changes*, not original mistakes — if a renderer was wrong on day one, the snapshot freezes the wrong output until the manual smoke check finds it.
-- "Zero errors of any kind" is not provable in software; "every known class of error automatically guarded plus one human smoke pass" is the achievable bar.
+## Verification
+- Add an audit case in `scripts/audit-yardage.ts` with `trimMargin: 0.25` and `trimMargin: 1.0` to lock the math.
+- Run `bun run verify`.
