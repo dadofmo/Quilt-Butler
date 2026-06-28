@@ -483,7 +483,8 @@ function renderInner(
     }
     case "sawtooth-star": {
       const star = get("star", "A");
-      const center = get("center", star);
+      const centerFab = (a["center"] ?? a["star"] ?? "A") as FabricKey;
+      const center = get("center", centerFab);
       const bg = get("bg", "B");
       const u = 200 / 4;
       const hsts: Array<[number, number, "TL" | "TR" | "BL" | "BR"]> = [
