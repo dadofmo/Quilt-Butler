@@ -64,12 +64,24 @@ export interface PlannerState {
   itemPrices: Record<string, string>;
   /** Where the block fabric comes from. "yardage" = traditional bolt (default,
    *  used by every existing flow). "jelly-roll" = pre-cut 2.5" strips
-   *  (currently only supported on Rail Fence — block fabric comes from the
-   *  jelly roll; border/sashing/backing/batting/binding still use yardage). */
-  fabricSource: "yardage" | "jelly-roll";
+   *  (currently only supported on Rail Fence). "fat-quarter" = pre-cut
+   *  ~18"×21" fabric rectangles (currently only supported on Simple Squares).
+   *  Border/sashing/backing/batting/binding still use yardage in every mode. */
+  fabricSource: "yardage" | "jelly-roll" | "fat-quarter";
   /** How many 2.5" strips are in the user's jelly roll (industry standard 40). */
   jellyRollStripCount: number;
+  /** Raw width of one fat quarter the user owns, in inches. Defaults to 18"
+   *  (the Standard 42"-bolt FQ). Wide-bolt FQs are typically 19"–21" wide. */
+  fatQuarterWidth: number;
+  /** Raw height of one fat quarter the user owns, in inches. Defaults to 21". */
+  fatQuarterHeight: number;
+  /** How much fabric the user trims off EACH side of every FQ when squaring up
+   *  (selvage + crooked-edge allowance). Default 0.5". User-overridable. */
+  fatQuarterTrimMargin: number;
+  /** How many fat quarters the user owns (for feasibility messaging). */
+  fatQuarterCount: number;
 }
+
 
 const initial: PlannerState = {
   pattern: null,
