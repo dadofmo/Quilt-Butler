@@ -40,6 +40,8 @@ function ResultsStepInner() {
 
   const result = calculateYardage(planner);
   const precut = computePrecutPlan(planner);
+  const fqPlan = computeFatQuarterPlan(planner);
+
 
 
   // Compute the ACTUAL finished size from the same math the calculator uses,
