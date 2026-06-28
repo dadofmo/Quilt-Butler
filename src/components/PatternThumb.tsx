@@ -79,16 +79,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
               <rect key={`${x}-${y}`} x={x + 1} y={y + 1} width={20.5} height={20.5} fill={C.a} />
             )),
           )}
-          {/* Fat Quarter Friendly badge */}
-          <image
-            href={fatQuarterBadge.url}
-            x={52}
-            y={52}
-            width={38}
-            height={38}
-            preserveAspectRatio="xMidYMid meet"
-          />
         </svg>
+
       );
     case "nine-patch":
       return (
