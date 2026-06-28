@@ -1,71 +1,37 @@
-## Goal
-Let users assign a separate fabric to the Sawtooth Star **center square**, independent of the star-point fabric — matching how many quilters actually make this block (reference photo: green points, pink HST backgrounds against green corners, teal center).
+## What's actually happening
 
-## Changes
+The Bear Paw block has **two different things that look like sashing**:
 
-### 1. `src/lib/patterns.ts` — Sawtooth Star sections
-Add a new `center` section and tighten the `star` hint so each fabric maps to one visual area.
+1. **Inside each block** — the green cross-strips you see in the "1 BLOCK" image. These are part of the block itself and use the **Background fabric (C)**. They separate the four paw units within a single block.
+2. **Between blocks** — the orange strips you see in the "YOUR FULL QUILT" image. These use the **Sashing between blocks fabric (E)** you selected.
 
-```
-sections: [
-  { id: "star",    label: "Star points",   defaultFabric: "A",
-    hint: "The 8 star-point triangles in the HST units." },
-  { id: "center",  label: "Center square", defaultFabric: "C",
-    hint: "The large square in the middle of the star — can match the star points or be a different accent fabric." },
-  { id: "bg",      label: "Background",    defaultFabric: "B",
-    hint: "The 4 corner squares and the background triangles in each HST unit." },
-  { id: "sashing", label: "Sashing between blocks", defaultFabric: "D", hint: "…" },
-  borderSection,
-]
-```
+So the renderer is actually working correctly:
+- 1 BLOCK view → shows only one block, so between-block sashing isn't visible (by definition).
+- Full quilt view → correctly shows orange (E) between blocks.
 
-Update the `intro` to mention the center square is its own fabric choice (can match star points for a traditional 2-color look, or contrast for a pop of color).
+This is a **labeling / UX problem**, not a math or render bug. The two sections look identical in the picker, so changing "Sashing between blocks" feels like it should update the green strips inside the block too.
 
-### 2. `src/lib/yardage.ts` — sawtooth-star branch (~lines 1157–1198)
-Route the 1 center square per block to a new fabric:
+## Fix
 
-```ts
-const starFab   = (s.assignments["star"]   ?? "A") as FabricKey;
-const centerFab = (s.assignments["center"] ?? starFab) as FabricKey; // falls back to star
-const bgFab     = (s.assignments["bg"]     ?? "B") as FabricKey;
+Update wording in `src/lib/patterns.ts` for the Bear Paw `bg` section so users understand the green in-block strips come from the Background fabric, not the between-block sashing:
 
-addSquares(reqs[centerFab], "Star center squares", centerCount, centerCut, s.fabricWidth);
-addSquares(reqs[starFab],   "HST starting squares (star points)", hstStarCount, hstCut, s.fabricWidth);
-addSquares(reqs[bgFab],     "Background corner squares", cornerCount, cornerCut, s.fabricWidth);
-addSquares(reqs[bgFab],     "HST starting squares (background)", hstBgCount, hstCut, s.fabricWidth);
-```
+- Keep `Background` label but tighten the hint to explicitly call out: "Also forms the cross-strips inside each block that separate the four paws (visible in the 1 BLOCK preview)."
+- Tighten the "Sashing between blocks" hint to: "Only appears in the full quilt view between blocks — not inside a single block."
 
-Update the descriptive notes (lines 1187/1190) to name the center fabric separately. When `centerFab === starFab`, keep the legacy wording so the existing "traditional" 2-color quilter sees no change.
+No renderer, no yardage, no math changes.
 
-### 3. Renderers — use the center fabric for the inner 2u×2u square
-- `src/components/PatternDiagram.tsx` (~line 484): read `center = get("center", star)` and paint the center 2×2 block with `center` instead of `star`.
-- `src/components/QuiltLayoutPreview.tsx` (~line 596): same change.
-- `src/components/PatternThumb.tsx` (~line 313): same change so Step 1 thumbnail can show the 3-fabric look (default A points, B bg, C center).
+## How to verify the other 19 patterns don't have this issue
 
-No changes to HST geometry — only the center fill.
+I'll do a one-time audit (read-only, no code changes) and report back:
 
-### 4. `scripts/audit-yardage.ts`
-Add (or update) a Sawtooth Star case that assigns a distinct `center` fabric and asserts:
-- center fabric receives exactly `blockCount` squares at `(2u + 0.5)"`.
-- star fabric no longer carries the center square.
-- bg fabric counts unchanged.
-Also keep an existing case where center is left unset → falls back to star fabric, identical yardage to today (backward compatibility).
+- For every pattern in `src/lib/patterns.ts`, list every fabric section.
+- Cross-check against the renderer in `src/components/PatternDiagram.tsx` and `QuiltLayoutPreview.tsx` to confirm each section's fabric token is actually painted somewhere.
+- Flag any pattern (like Bear Paw) where two sections paint visually similar regions in different views, so we can preemptively clarify the hint copy.
 
-### 5. Backward compatibility
-Existing saved planner states have no `assignments.center`. The `?? starFab` fallback means:
-- Yardage totals stay identical to today's output.
-- Diagrams render identical (center painted with star color).
-Users who want the new look just pick a fabric for "Center square" on the Assign Fabrics step.
+Bear Paw is the only pattern with an in-block "cross" that mirrors between-block sashing, so I expect zero other hits — but I'll confirm.
 
-## Verification
-- `bun audit:math` — must pass all 20 patterns, including the new and legacy Sawtooth Star cases.
-- Manual smoke: open Sawtooth Star → Step 3 shows the new "Center square" row; assigning Fabric C updates Step 2 diagram, Step 3 preview, and Results page diagram + cutting list (center square now under Fabric C, HST starting squares still under Fabric A).
-- Confirm license/paywall flow untouched (no changes to any of those files).
+## Files touched
 
-## Files to change
-- `src/lib/patterns.ts`
-- `src/lib/yardage.ts`
-- `src/components/PatternDiagram.tsx`
-- `src/components/QuiltLayoutPreview.tsx`
-- `src/components/PatternThumb.tsx`
-- `scripts/audit-yardage.ts`
+- `src/lib/patterns.ts` — hint text only, two sections.
+
+Nothing else changes. Yardage math, audit script, and all renderers stay untouched.
