@@ -445,9 +445,9 @@ function SizeStepInner() {
           )}
         </Field>
 
-        {/* Fabric source: yardage vs jelly roll. Only shown for patterns that
-            support jelly roll (currently Rail Fence only). */}
-        {jellyRollEligible && (
+        {/* Fabric source: yardage vs precut. Only shown for patterns that
+            support precut sources (Rail Fence → jelly roll, Simple Squares → fat quarter). */}
+        {precutEligible && (
         <Field label="What fabric are you using?">
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button
@@ -462,26 +462,44 @@ function SizeStepInner() {
               <div className="text-foreground text-base font-semibold">Yardage from a bolt</div>
               <div className="text-muted-foreground text-xs mt-0.5">Cut from a flat bolt of fabric (the classic way).</div>
             </button>
-            <button
-              type="button"
-              onClick={() => setFabricSource("jelly-roll")}
-              className={`rounded-xl border-2 px-4 py-3 text-left transition-colors ${
-                fabricSource === "jelly-roll"
-                  ? "border-primary bg-primary/5"
-                  : "border-input bg-card hover:bg-muted/40"
-              }`}
-            >
-              <div className="text-foreground text-base font-semibold">Jelly roll</div>
-              <div className="text-muted-foreground text-xs mt-0.5">
-                Pre-cut 2.5" strips, already bundled — fastest way to start a Rail Fence quilt.
-              </div>
-            </button>
+            {jellyRollEligible && (
+              <button
+                type="button"
+                onClick={() => setFabricSource("jelly-roll")}
+                className={`rounded-xl border-2 px-4 py-3 text-left transition-colors ${
+                  fabricSource === "jelly-roll"
+                    ? "border-primary bg-primary/5"
+                    : "border-input bg-card hover:bg-muted/40"
+                }`}
+              >
+                <div className="text-foreground text-base font-semibold">Jelly roll</div>
+                <div className="text-muted-foreground text-xs mt-0.5">
+                  Pre-cut 2.5" strips, already bundled — fastest way to start a Rail Fence quilt.
+                </div>
+              </button>
+            )}
+            {fatQuarterEligible && (
+              <button
+                type="button"
+                onClick={() => setFabricSource("fat-quarter")}
+                className={`rounded-xl border-2 px-4 py-3 text-left transition-colors ${
+                  fabricSource === "fat-quarter"
+                    ? "border-primary bg-primary/5"
+                    : "border-input bg-card hover:bg-muted/40"
+                }`}
+              >
+                <div className="text-foreground text-base font-semibold">Fat quarters</div>
+                <div className="text-muted-foreground text-xs mt-0.5">
+                  Pre-cut ~18" × 21" rectangles — great for using a bundle on a Simple Squares quilt.
+                </div>
+              </button>
+            )}
           </div>
         </Field>
         )}
 
 
-        {!isJellyRoll && (
+        {!isJellyRoll && !isFatQuarter && (
           <Field label="Fabric width (your bolt, in inches)">
             <input
               type="text"
@@ -526,6 +544,113 @@ function SizeStepInner() {
             )}
           </Field>
         )}
+
+        {isFatQuarter && (
+          <>
+            <Field label="Fat quarter size (inches)">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-xs font-medium">Width</label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={fqWidthText}
+                    onChange={(e) => setFqWidthText(e.target.value)}
+                    placeholder="18"
+                    aria-invalid={!fqWidthValid}
+                    className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+                  />
+                </div>
+                <div>
+                  <label className="text-muted-foreground mb-1 block text-xs font-medium">Height</label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={fqHeightText}
+                    onChange={(e) => setFqHeightText(e.target.value)}
+                    placeholder="21"
+                    aria-invalid={!fqHeightValid}
+                    className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+                  />
+                </div>
+              </div>
+              <p className="text-muted-foreground mt-2 text-xs leading-snug">
+                Default is <strong>18&quot; × 21&quot;</strong> — the standard fat quarter cut from a 42&quot; bolt. Wide-bolt FQs (cut from 44&quot;–45&quot; bolts) can be a little larger; check the label or measure one. Confirm this every time, because mixing a different size will throw off how many squares you can cut.
+              </p>
+              {(!fqWidthValid || !fqHeightValid) && (
+                <p className="text-destructive mt-2 text-sm font-medium">
+                  Please enter positive numbers for width and height.
+                </p>
+              )}
+            </Field>
+
+            <Field label="Trim margin per side (inches)">
+              <input
+                type="text"
+                inputMode="decimal"
+                value={fqTrimText}
+                onChange={(e) => setFqTrimText(e.target.value)}
+                placeholder="0.5"
+                aria-invalid={!fqTrimValid}
+                className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+              />
+              <p className="text-muted-foreground mt-2 text-xs leading-snug">
+                We shrink each fat quarter by this much on all 4 sides before cutting squares. Default <strong>0.5&quot;</strong> works for most quilt-shop cottons.
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowFqTrimHelp((v) => !v)}
+                className="text-primary mt-2 text-xs font-medium underline"
+              >
+                {showFqTrimHelp ? "Hide explanation" : "Why does this matter? (read this if you're not sure)"}
+              </button>
+              {showFqTrimHelp && (
+                <div className="bg-accent/40 border-primary/20 mt-2 rounded-lg border-2 p-3 text-xs leading-relaxed">
+                  <p className="text-foreground font-semibold">Why we trim the edges of a fat quarter</p>
+                  <p className="text-muted-foreground mt-1">
+                    Fat quarters are cut from a bolt of fabric, and the cut edges are almost never perfectly straight. The two <strong>selvage</strong> edges (the tightly woven factory edges) are also stiffer than the rest of the fabric and don&apos;t sew well into a quilt. Before cutting your squares, quilters &quot;square up&quot; the fat quarter by trimming a little off all four sides so you start with clean, straight, usable fabric.
+                  </p>
+                  <p className="text-foreground mt-2 font-semibold">How to pick a number</p>
+                  <ul className="text-muted-foreground mt-1 list-disc space-y-1 pl-5">
+                    <li><strong>0.25&quot; (1/4 inch)</strong> — Fat quarters from a high-quality quilt shop that look clean and straight.</li>
+                    <li><strong>0.5&quot; (1/2 inch) — recommended default.</strong> Safe for most quilt-shop cottons. Covers normal selvage width and small cutting wobbles.</li>
+                    <li><strong>0.75&quot;–1&quot;</strong> — Bargain-bin fat quarters, pre-washed fabric (which frays), or pieces that look crooked or have a wide printed selvage.</li>
+                  </ul>
+                  <p className="text-foreground mt-2 font-semibold">When in doubt, go bigger.</p>
+                  <p className="text-muted-foreground mt-1">
+                    Trimming a little extra costs you a few squares; trimming too little means your finished squares may have selvage or frayed edges showing.
+                  </p>
+                </div>
+              )}
+              {fqTrimText.trim() !== "" && !fqTrimValid && (
+                <p className="text-destructive mt-2 text-sm font-medium">
+                  Enter a trim margin between 0 and 2 inches that leaves usable fabric on each side.
+                </p>
+              )}
+            </Field>
+
+            <Field label="How many fat quarters do you have?">
+              <input
+                type="text"
+                inputMode="numeric"
+                value={fqCountText}
+                onChange={(e) => setFqCountText(e.target.value)}
+                placeholder="e.g. 20"
+                aria-invalid={!fqCountValid}
+                className="bg-card border-input focus:ring-ring w-full rounded-xl border-2 px-4 py-3 text-base focus:outline-none focus:ring-2"
+              />
+              <p className="text-muted-foreground mt-2 text-xs leading-snug">
+                Bundles often come in <strong>10, 20, or 40</strong>. Backing, batting, binding, sashing, and any border are still bought as regular yardage.
+              </p>
+              {!fqCountValid && (
+                <p className="text-destructive mt-2 text-sm font-medium">
+                  Please enter a positive number of fat quarters.
+                </p>
+              )}
+            </Field>
+          </>
+        )}
+
 
         {!isJellyRoll && (
           <Field label="Block size (finished, in inches)">
