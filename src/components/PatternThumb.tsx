@@ -335,7 +335,7 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         <svg {...common}>
           <rect width={90} height={90} fill={bg} />
           {/* Center 2×2 star square */}
-          <rect x={u} y={u} width={2 * u} height={2 * u} fill={star} />
+          <rect x={u} y={u} width={2 * u} height={2 * u} fill={center} />
           {/* 8 HST cells */}
           {hsts.map(([c, r, sc]) => (
             <g key={`${c}-${r}`}>
