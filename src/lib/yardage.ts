@@ -213,6 +213,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
   if (s.pattern === "simple-squares") {
     const cut = s.blockSize + SEAM;
+    // Skip block-fabric yardage when sourcing from fat quarters — the FQ
+    // planner handles the squares. Sashing/border math below still runs
+    // because those come from yardage bolts.
+    const fromFatQuarter = s.fabricSource === "fat-quarter";
     // Patchwork mode: split block count across the user's chosen palette
     // (2–12 fabrics) using the per-cell mix from the preview grid.
     const mix = computePatchworkMix(s);
@@ -222,18 +226,23 @@ export function calculateYardage(s: PlannerState): CalcResult {
         const pct = mix[fab];
         if (!pct || pct <= 0) continue;
         const count = Math.ceil(blockCount * pct);
-        addSquares(reqs[fab], `Squares (Fabric ${fab})`, count, cut, s.fabricWidth);
+        if (!fromFatQuarter) {
+          addSquares(reqs[fab], `Squares (Fabric ${fab})`, count, cut, s.fabricWidth);
+        }
         lines.push(`Fabric ${fab}: ${count} squares (${Math.round(pct * 100)}% of layout)`);
       }
       notes.push(`Cut ${blockCount} squares total at ${cut}" (finished ${s.blockSize}" + 1/2" for seam allowance), split across your fabrics:`);
       lines.forEach((l) => notes.push(l));
     } else {
       const squareFab = (s.assignments["squares"] ?? "A") as FabricKey;
-      addSquares(reqs[squareFab], "Squares", blockCount, cut, s.fabricWidth);
+      if (!fromFatQuarter) {
+        addSquares(reqs[squareFab], "Squares", blockCount, cut, s.fabricWidth);
+      }
       notes.push(
         `Cut ${blockCount} squares of Fabric ${squareFab} at ${cut}" (finished ${s.blockSize}" + 1/2" for seam allowance).`,
       );
     }
+
 
     // Optional sashing between blocks (Simple Squares).
     if (sashWidth > 0) {
