@@ -10,8 +10,8 @@ import { isUnlocked } from "@/lib/license";
 import { Lock } from "lucide-react";
 
 import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
-import jellyRollBadge from "@/assets/jelly-roll-badge.png.asset.json";
-import fatQuarterBadge from "@/assets/fat-quarter-badge.png.asset.json";
+import jellyRollBadge from "@/assets/jelly-roll-badge.png";
+import fatQuarterBadge from "@/assets/fat-quarter-badge.png";
 
 const THUMB_PX = 110;
 const BADGE_PX = 70; // 50% bigger than the prior ~46px badge
@@ -118,7 +118,7 @@ function PatternPickerInner() {
                   <PatternThumb pattern={p.id} size={THUMB_PX} />
                   {(p.id === "rail-fence" || p.id === "simple-squares") && (
                     <img
-                      src={p.id === "rail-fence" ? jellyRollBadge.url : fatQuarterBadge.url}
+                      src={p.id === "rail-fence" ? jellyRollBadge : fatQuarterBadge}
                       alt={p.id === "rail-fence" ? "Jelly Roll Friendly" : "Fat Quarter Friendly"}
                       className="pointer-events-none absolute -translate-x-1/2 translate-y-1/2"
                       style={{
