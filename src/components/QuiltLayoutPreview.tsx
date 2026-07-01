@@ -295,7 +295,8 @@ function MiniBlock({
   photos?: Partial<Record<FabricKey, string>>;
   irishPlain?: boolean;
   /** Snowball Block: when true, swap which fabric is the main square vs. the
-   *  corner accent (used on alternating grid cells to create the checkerboard). */
+   *  corner accent. Shoofly: when true, swap Fabric A ↔ Fabric B for the
+   *  alternate-blocks checkerboard. Used on alternating grid cells. */
   swap?: boolean;
 }) {
   // Fallback resolves through the pattern definition (single source of truth
