@@ -430,6 +430,7 @@ function SizeStepInner() {
       fatQuarterHeight: isFatQuarter ? fqHeightNum : planner.fatQuarterHeight,
       fatQuarterTrimMargin: isFatQuarter ? fqTrimNum : planner.fatQuarterTrimMargin,
       fatQuarterCount: isFatQuarter ? fqCountNum : planner.fatQuarterCount,
+      alternateBlocks: supportsAlternate ? alternateBlocks : false,
     });
     navigate("/fabrics");
   };
