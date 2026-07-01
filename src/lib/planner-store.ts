@@ -81,6 +81,11 @@ export interface PlannerState {
   fatQuarterTrimMargin: number;
   /** How many fat quarters the user owns (for feasibility messaging). */
   fatQuarterCount: number;
+  /** When true (and the current pattern opts in via `supportsAlternate`),
+   *  swap Fabric A ↔ Fabric B on every other block to create a checkerboard
+   *  alternation across the whole quilt. Piece counts are unchanged; only
+   *  the per-fabric split flips. Ignored for patterns that don't opt in. */
+  alternateBlocks: boolean;
 }
 
 
