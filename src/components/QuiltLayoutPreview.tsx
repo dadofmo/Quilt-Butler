@@ -749,6 +749,41 @@ function MiniBlock({
         </>
       );
     }
+    case "shoofly": {
+      // Shoofly full-quilt tile. Matches the single-block diagram exactly.
+      // When swap is true (alternateBlocks + odd cell), Fabric A and B trade
+      // roles for the checkerboard alternation.
+      const bgFab = get("bg", "A");
+      const accentFab = get("accent", "B");
+      const bg = swap ? accentFab : bgFab;
+      const accent = swap ? bgFab : accentFab;
+      const u = 200 / 3;
+      const corners: Array<[number, number, "TL" | "TR" | "BL" | "BR"]> = [
+        [0, 0, "BR"],
+        [2, 0, "BL"],
+        [0, 2, "TR"],
+        [2, 2, "TL"],
+      ];
+      const opp = { TL: "BR", BR: "TL", TR: "BL", BL: "TR" } as const;
+      const tri = (col: number, row: number, c: "TL" | "TR" | "BL" | "BR") => {
+        const x = col * u, y = row * u;
+        const TL = `${x},${y}`, TR = `${x + u},${y}`, BL = `${x},${y + u}`, BR = `${x + u},${y + u}`;
+        const map = { TL: `${TL} ${TR} ${BL}`, TR: `${TL} ${TR} ${BR}`, BL: `${TL} ${BL} ${BR}`, BR: `${TR} ${BL} ${BR}` };
+        return map[c];
+      };
+      return (
+        <>
+          <rect width={200} height={200} fill={bg} />
+          <rect x={u} y={u} width={u} height={u} fill={accent} />
+          {corners.map(([c, r, sc]) => (
+            <g key={`${c}-${r}`}>
+              <polygon points={tri(c, r, sc)} fill={accent} />
+              <polygon points={tri(c, r, opp[sc])} fill={bg} />
+            </g>
+          ))}
+        </>
+      );
+    }
   }
 }
 
