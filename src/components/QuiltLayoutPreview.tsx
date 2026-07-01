@@ -175,7 +175,17 @@ export function QuiltLayoutPreview({
             )}
             {Array.from({ length: blocksDown }).map((_, j) =>
               Array.from({ length: blocksAcross }).map((_, i) => {
-                const rotate = pattern === "rail-fence" && (i + j) % 2 === 1;
+                // Rail Fence: rotate every other block 90° for the woven look.
+                // Jacob's Ladder (with alternateBlocks on, which we default to
+                // true on Step 2): rotate every other block 90° so the ladder
+                // diagonals from neighboring blocks meet up to form the
+                // classic on-point diamond secondary pattern.
+                const railRotate = pattern === "rail-fence" && (i + j) % 2 === 1;
+                const jlRotate =
+                  pattern === "jacobs-ladder" &&
+                  alternateBlocks &&
+                  (i + j) % 2 === 1;
+                const rotate = railRotate || jlRotate;
                 const bx = i * (cellW + sashPxX);
                 const by = j * (cellH + sashPxY);
                 // Irish Chain alternates a chain block with a plain background
@@ -783,6 +793,46 @@ function MiniBlock({
           ))}
         </>
       );
+    }
+    case "jacobs-ladder": {
+      // Jacob's Ladder mini-block. Same geometry as PatternDiagram's
+      // jacobs-ladder case (200-unit viewBox, 6×6 unit grid, 3×3 arrangement
+      // of 2u sub-blocks: 5 four-patches + 4 HSTs). Rotation for alternate
+      // blocks is applied at the outer <g transform="rotate(90 100 100)">
+      // in the tile loop, so this component always draws the base
+      // (un-rotated) orientation.
+      const dark = get("dark", "A");
+      const light = get("light", "B");
+      const ladder = get("ladder", "D");
+      const u = 200 / 6;
+      const nodes: React.ReactNode[] = [];
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          const x = 2 * c * u, y = 2 * r * u;
+          if ((r + c) % 2 === 0) {
+            nodes.push(
+              <g key={`fp-${r}-${c}`}>
+                <rect x={x} y={y} width={u} height={u} fill={dark} />
+                <rect x={x + u} y={y} width={u} height={u} fill={light} />
+                <rect x={x} y={y + u} width={u} height={u} fill={light} />
+                <rect x={x + u} y={y + u} width={u} height={u} fill={dark} />
+              </g>,
+            );
+          } else {
+            const TL = `${x},${y}`;
+            const TR = `${x + 2 * u},${y}`;
+            const BL = `${x},${y + 2 * u}`;
+            const BR = `${x + 2 * u},${y + 2 * u}`;
+            nodes.push(
+              <g key={`hst-${r}-${c}`}>
+                <polygon points={`${TL} ${TR} ${BR}`} fill={ladder} />
+                <polygon points={`${TL} ${BL} ${BR}`} fill={light} />
+              </g>,
+            );
+          }
+        }
+      }
+      return <>{nodes}</>;
     }
   }
 }
