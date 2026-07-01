@@ -263,6 +263,7 @@ function FabricsStepInner() {
                   sashingFabric={sashingFabric}
                   cornerstoneFabric={hasCornerstones ? cornerstoneFabric : undefined}
                   photos={planner.fabricPhotos}
+                  alternateBlocks={planner.alternateBlocks}
                 />
                 <p className="text-muted-foreground mt-4 text-center text-xs leading-relaxed">
                   You&apos;re designing <strong>one block</strong>. That block will be sewn{" "}
