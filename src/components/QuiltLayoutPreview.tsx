@@ -176,15 +176,13 @@ export function QuiltLayoutPreview({
             {Array.from({ length: blocksDown }).map((_, j) =>
               Array.from({ length: blocksAcross }).map((_, i) => {
                 // Rail Fence: rotate every other block 90° for the woven look.
-                // Jacob's Ladder (with alternateBlocks on, which we default to
-                // true on Step 2): rotate every other block 90° so the ladder
-                // diagonals from neighboring blocks meet up to form the
-                // classic on-point diamond secondary pattern.
+                // Jacob's Ladder: always rotate every other block 90° so the
+                // ladder diagonals from neighboring blocks meet up to form the
+                // classic on-point diamond secondary pattern — this is
+                // intrinsic to the pattern, not user-toggleable.
                 const railRotate = pattern === "rail-fence" && (i + j) % 2 === 1;
                 const jlRotate =
-                  pattern === "jacobs-ladder" &&
-                  alternateBlocks &&
-                  (i + j) % 2 === 1;
+                  pattern === "jacobs-ladder" && (i + j) % 2 === 1;
                 const rotate = railRotate || jlRotate;
                 const bx = i * (cellW + sashPxX);
                 const by = j * (cellH + sashPxY);
