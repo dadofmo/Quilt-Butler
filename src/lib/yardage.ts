@@ -164,9 +164,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isStreak = s.pattern === "streak-of-lightning";
   const isBowTie = s.pattern === "bow-tie";
   const isShoofly = s.pattern === "shoofly";
+  const isJacobsLadder = s.pattern === "jacobs-ladder";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -1676,6 +1677,73 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "jacobs-ladder") {
+    // Jacob's Ladder: classic 3×3 nine-patch of nine sub-blocks —
+    //   5 four-patches at (0,0),(0,2),(1,1),(2,0),(2,2) + 4 HSTs at
+    //   (0,1),(1,0),(1,2),(2,1). Sub-block = 2u × 2u where u = blockSize/6.
+    //
+    // Per block:
+    //   Fabric A (dark FP squares):        10 small squares @ (u + 0.5)"
+    //   Fabric B (light FP + HST bg):      10 small squares @ (u + 0.5)"
+    //                                       + 2 HST starting squares @ (2u + 0.875)"
+    //   Fabric C (ladder HST accent):      2 HST starting squares @ (2u + 0.875)"
+    // 2 pairs (C-start + B-start) yield 4 HST units — exactly the 4 needed.
+    //
+    // `alternateBlocks` only rotates blocks 90° in the layout preview; piece
+    // counts and cut sizes are identical whether it's on or off.
+    const u = s.blockSize / 6;
+    const smallCut = u + SEAM;
+    const hstCut = 2 * u + HST_EXTRA;
+    const darkFab = (s.assignments["dark"] ?? "A") as FabricKey;
+    const lightFab = (s.assignments["light"] ?? "B") as FabricKey;
+    const ladderFab = (s.assignments["ladder"] ?? "D") as FabricKey;
+
+    const darkSmallCount = 10 * blockCount;
+    const lightSmallCount = 10 * blockCount;
+    const lightHstCount = 2 * blockCount;
+    const ladderHstCount = 2 * blockCount;
+
+    addSquares(reqs[darkFab], "Four-patch dark squares", darkSmallCount, smallCut, s.fabricWidth);
+    addSquares(reqs[lightFab], "Four-patch light squares", lightSmallCount, smallCut, s.fabricWidth);
+    addSquares(reqs[lightFab], "HST starting squares (background)", lightHstCount, hstCut, s.fabricWidth);
+    addSquares(reqs[ladderFab], "HST starting squares (ladder accent)", ladderHstCount, hstCut, s.fabricWidth);
+
+    notes.push(
+      `Each block is a 3×3 arrangement of nine 2u × 2u sub-blocks (u = ${u.toFixed(3)}" finished, 6u = ${s.blockSize}" finished block): FIVE four-patches at the four corners + the center, and FOUR half-square-triangle units on the edges. Each four-patch = 2 dark squares + 2 light squares alternating. Each HST = one large ladder-accent triangle + one background triangle sharing a diagonal.`,
+    );
+    notes.push(
+      `Each block uses: 10 dark small squares (Fabric ${darkFab}) at ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}", 10 light small squares (Fabric ${lightFab}) at ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}", 2 background HST starting squares (Fabric ${lightFab}) at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}", and 2 ladder-accent HST starting squares (Fabric ${ladderFab}) at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}".`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: Fabric ${darkFab} = ${darkSmallCount} small squares. Fabric ${lightFab} = ${lightSmallCount} small squares + ${lightHstCount} HST starting squares. Fabric ${ladderFab} = ${ladderHstCount} HST starting squares.`,
+    );
+    notes.push(
+      `HST construction: pair one Fabric ${lightFab} HST starting square with one Fabric ${ladderFab} HST starting square right sides together (RST). Draw a diagonal line corner to corner on the lighter square. Sew a scant 1/4" on each side of the line. Cut apart on the line to yield 2 HST units. Press open and trim each unit to ${(2 * u + SEAM).toFixed(3)}" square (finished ${(2 * u).toFixed(3)}"). Each block needs 4 HSTs — 2 pairs yield exactly 4.`,
+    );
+    notes.push(
+      `Four-patch construction: for each of the 5 four-patches in every block, sew 2 dark squares and 2 light squares into a 2×2 grid, alternating dark/light on the diagonal so dark ends up in opposite corners of the four-patch. Press seams toward the darker fabric so they nest.`,
+    );
+    notes.push(
+      `Jacob's Ladder Assembly Tip: build all ${5 * blockCount} four-patches and all ${4 * blockCount} HST units first. Then lay each block out in a 3×3 arrangement — four-patches at the four corners + the center, HSTs on the four edges. Rotate each HST so its ladder-accent triangle sits on the block's corner-to-corner diagonal side (all 4 HSTs oriented the same way). Sew each block into 3 rows of 3 sub-blocks, then join the rows. Once every block is finished, arrange them in your ${blocksAcross} × ${blocksDown} grid on the floor — for the classic diamond secondary pattern, rotate every other block 90° in a checkerboard so the ladder diagonals from neighboring blocks meet up and form the on-point diamonds. Sew the blocks into rows, then join the rows.`,
+    );
+
+    // Optional sashing between blocks (Jacob's Ladder). Note that the classic
+    // effect only reads with 0" sashing so the ladders connect — we still
+    // support user-chosen sashing but the tip above already recommends 0".
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Note: sashing separates the blocks and will interrupt the diagonal ladder effect — the classic look uses 0" sashing.`,
+      );
+    }
   }
 
 
@@ -1742,7 +1810,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "four-patch" ||
     s.pattern === "streak-of-lightning" ||
     s.pattern === "bow-tie" ||
-    s.pattern === "shoofly";
+    s.pattern === "shoofly" ||
+    s.pattern === "jacobs-ladder";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
