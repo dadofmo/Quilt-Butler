@@ -22,7 +22,8 @@ export type PatternId =
   | "snowball-block"
   | "four-patch"
   | "streak-of-lightning"
-  | "bow-tie";
+  | "bow-tie"
+  | "shoofly";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
