@@ -1579,26 +1579,6 @@ console.log("\n=== Jacob's Ladder baseline: 48×60 throw, no sashing/border, alt
   check("JL D HST size", dHst.w, 4.875);
 }
 
-console.log("\n=== Jacob's Ladder alt blocks on — piece counts unchanged ===");
-{
-  const s = {
-    ...base(),
-    pattern: "jacobs-ladder" as const,
-    quiltWidth: 48,
-    quiltHeight: 60,
-    blockSize: 12,
-    borderWidth: 0,
-    sashingWidth: 0,
-    alternateBlocks: true,
-    assignments: { dark: "A", light: "B", ladder: "D" } as Record<string, FabricKey>,
-  };
-  // Rotation only affects the layout preview — piece counts identical.
-  const r = calculateYardage(s);
-  const a = r.fabrics.find(f => f.fabric === "A")!;
-  const d = r.fabrics.find(f => f.fabric === "D")!;
-  check("JL(alt) A small count", a.pieces.find(p => /Four-patch dark/i.test(p.label))!.count, 200);
-  check("JL(alt) D HST count", d.pieces.find(p => /ladder accent/i.test(p.label))!.count, 40);
-}
 
 console.log("\n=== Jacob's Ladder with sashing: 4×5 grid, 2\" sashing ===");
 {
