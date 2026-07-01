@@ -66,9 +66,9 @@ function ResultsStepInner() {
   const isFourPatch = planner.pattern === "four-patch";
   const isStreak = planner.pattern === "streak-of-lightning";
   const isBowTie = planner.pattern === "bow-tie";
-  // All listed patterns support optional sashing (0 = none).
+  // Any pattern that declares a sashing section supports optional sashing (0 = none).
   const rawSash = planner.sashingWidth ?? 0;
-  const sashing = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie) ? Math.max(0, rawSash) : 0;
+  const sashing = patternHasSashingSection(getPattern(planner.pattern)) ? Math.max(0, rawSash) : 0;
   const useSashedMath = sashing > 0;
   const innerW = planner.quiltWidth - 2 * planner.borderWidth;
   const innerH = planner.quiltHeight - 2 * planner.borderWidth;
