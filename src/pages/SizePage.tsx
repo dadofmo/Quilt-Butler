@@ -796,6 +796,36 @@ function SizeStepInner() {
           </Field>
         )}
 
+        {/* Reusable "Alternate blocks" toggle. Only rendered when the current
+            pattern opts in via supportsAlternate (currently: Shoofly). When on,
+            fabrics A and B swap roles on every other block for a checkerboard
+            look. Rendering wires this into <QuiltLayoutPreview alternateBlocks>
+            and the yardage math splits piece counts accordingly. */}
+        {supportsAlternate && (
+          <Field label="Alternate blocks (optional)">
+            <label className="bg-card border-input flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4">
+              <input
+                type="checkbox"
+                checked={alternateBlocks}
+                onChange={(e) => setAlternateBlocks(e.target.checked)}
+                className="mt-1 h-5 w-5 shrink-0 accent-current"
+              />
+              <div>
+                <div className="text-base font-medium">
+                  Swap fabrics on every other block
+                </div>
+                <p className="text-muted-foreground mt-1 text-xs leading-snug">
+                  When on, Fabric A and Fabric B trade roles on alternating
+                  blocks — creating a checkerboard effect across the finished
+                  quilt. Leave off for the traditional single-block-repeated
+                  look.
+                </p>
+              </div>
+            </label>
+          </Field>
+        )}
+
+
         {/* Finished quilt size — actual size produced by the current block +
             border choices, with a visual layout preview, plus bullet
             suggestions for getting to the desired size when the math
