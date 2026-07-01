@@ -58,6 +58,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Bow Tie quilt block diagram showing a 2x2 grid of plain squares with a small on-point center square forming the knot at the seam intersection",
   shoofly:
     "Shoofly quilt block diagram showing a 3x3 grid with four half-square-triangle corners pointing inward, a center accent square, and four plain background side squares",
+  "jacobs-ladder":
+    "Jacob's Ladder quilt block diagram showing a 6x6 grid built from five four-patches at the four corners and center plus four large half-square-triangle units on the edges, with the accent triangles forming the classic diagonal ladder band across the block",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
