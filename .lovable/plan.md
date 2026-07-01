@@ -1,43 +1,56 @@
-# Fix: Shoofly sashing not rendered + border color wrong
+# Plan: Add "Jacob's Ladder" pattern
 
-## What's broken
+## Block anatomy (6×6 grid of small units)
 
-Shoofly's sashing width (3") is honored by the yardage math (Fabric C shows up as "Sashing strips between blocks — 2 yd" in the shopping list) but is **ignored by the two preview surfaces**, and that also cascades into the wrong border color:
+The block is a 3×3 arrangement of 2×2-unit sub-units:
 
-1. **`src/pages/FabricsPage.tsx`** has two hardcoded "is this pattern sashed?" lists (lines 55–65 for `hasSashing`, lines 218–237 for the layout preview's `isSashed`). Neither includes `shoofly`.
-2. **`src/pages/ResultsPage.tsx`** line 71 has the same hardcoded list for the Results-page "Your full quilt" preview. Also missing `shoofly`.
+```
+[FP] [HST] [FP ]
+[HST][FP ] [HST]
+[FP] [HST] [FP ]
+```
 
-Effect on the user's screenshot:
-- `hasSashing = false` on the Fabrics step → no sashing gaps drawn → and `getEffectiveBorderDefault(pattern, false, false)` picks the first unused letter *ignoring sashing*, which is **C (green)** instead of **D**. That's the green border in the "Your full quilt" image.
-- The shopping list still lists sashing = C (green, 2 yd) and border = D (pink, 1.25 yd) because `computeYardageRequirements` reads the sashing section directly from `patterns.ts`.
+- 5 four-patches (FP) at the four corners + center. Each FP = 2×2 small squares alternating Fabric A (dark) / Fabric B (light).
+- 4 half-square-triangle blocks (HST) on the edges. All 4 HSTs in a single block share the same diagonal orientation so the "ladder" runs corner-to-corner across the block. Dark triangle = Fabric C, light triangle = Fabric B.
 
-## Fix (surgical)
+## 3-fabric setup
 
-Replace the hardcoded lists with a single derivation from the pattern definition so no future pattern can regress the same way:
+- **Fabric A** — Four-patch dark squares (default: dark)
+- **Fabric B** — Four-patch light squares + HST background triangle (default: light)
+- **Fabric C** — HST diagonal accent triangle (default: dark; can match A or contrast)
 
-- Add a small helper `patternHasSashingSection(pattern)` in `src/lib/patterns.ts` = `pattern.sections.some(s => s.id === "sashing")`.
-- **`src/pages/FabricsPage.tsx`** — replace both hardcoded booleans with `patternHasSashingSection(pattern)`. Same for the layout-preview block. Nothing else changes.
-- **`src/pages/ResultsPage.tsx`** — replace the same hardcoded list on line 71 with `patternHasSashingSection(pattern)`.
+Sharing B between the four-patch light squares and the HST background is what makes the ladder read as continuous. Giving C its own slot lets a user pick a different dark for the diagonal, but defaulting C = same tone as A reproduces the classic reference.
 
-No changes to `patterns.ts` shoofly definition (already has the sashing section), no changes to `yardage.ts` (already correct), no changes to `QuiltLayoutPreview.tsx` (already correct — it just receives `sashingWidth={0}` from the pages).
+## Getting the reference quilt (the diamond secondary pattern)
 
-## Guardrail so this doesn't happen again
+The right-hand reference image is Jacob's Ladder tiled with **every other block rotated 90°**. Rotating a block 90° flips the direction of its ladder diagonal. When 4 neighboring blocks meet at a corner in a checkerboard rotation pattern, their HST hypotenuses join to form the big on-point diamond, and their four-patches line up edge-to-edge to form the checkerboard chains between diamonds.
 
-Extend `src/lib/__tests__/patterns-coverage.test.ts` with a new test that, for every pattern that declares a sashing section:
+Implementation:
+- Add `supportsAlternate: true` to the pattern (same field Shoofly uses).
+- Extend `QuiltLayoutPreview` for Jacob's Ladder so `alternateBlocks = true` **rotates** every other block 90° (checkerboard by `(row+col) % 2`), rather than swapping A/B like Shoofly does.
+- Default `alternateBlocks` to **true** when the user picks Jacob's Ladder so the "Your full quilt" preview matches the reference out of the box. User can uncheck for a straight-set variant.
 
-1. Sets `sashingWidth = 3` in a fake `PlannerState`.
-2. Runs `computeYardageRequirements` and asserts the sashing fabric appears with `count > 0`.
-3. Renders `<QuiltLayoutPreview>` with the same props FabricsPage/ResultsPage would pass, and asserts the SVG contains a `<rect>` filled with the sashing fabric (i.e. sashing gaps are drawn).
+Yardage stays identical whether alternate is on or off — rotation doesn't change piece counts, only orientation.
 
-This catches the exact regression: pattern declares sashing → math counts it → preview must render it. Any future pattern that adds a sashing section but forgets to wire it into a page will fail this test.
+## Files to add / edit
 
-Also add a second assertion in the same loop: `getEffectiveBorderDefault(pattern, /*hasSashing=*/true, /*hasCornerstones=*/false)` must not collide with the sashing fabric — this catches the "border defaults to green because we forgot sashing exists" side effect.
+- `src/lib/planner-store.ts` — add `"jacobs-ladder"` to `PatternId`.
+- `src/lib/patterns.ts` — register pattern with 3 sections (fourPatchDark, fourPatchLight, ladder), `supportsAlternate: true`, intro copy, sashing/border support.
+- `src/lib/yardage.ts` — new `computeJacobsLadder` case: per block = 10 dark small squares (A) + 10 light small squares (B) + 4 HST units (C dark tri + B light tri). Use `addSquares` / HST helpers, pool by fabric letter.
+- `src/components/PatternThumb.tsx` — new SVG case: 6×6 grid, FPs and HSTs as described, brand palette (A=blue, B=yellow, C=pink or A-tone).
+- `src/components/PatternDiagram.tsx` — same layout at diagram size honoring assignments.
+- `src/components/QuiltLayoutPreview.tsx` — add Jacob's Ladder rendering and handle `alternateBlocks` as **90° rotation** for this pattern.
+- `src/pages/SizePage.tsx` — the existing `supportsAlternate` toggle appears automatically; add label copy variant ("Rotate every other block (recommended)" for Jacob's Ladder).
+- `src/pages/PatternPickerPage.tsx` — when user picks `jacobs-ladder`, set `alternateBlocks: true` by default in planner state.
+- `scripts/audit-yardage.ts` — add Jacob's Ladder test cases (baseline, alternate on, with sashing).
+- `src/lib/__tests__/patterns-coverage.test.ts` + renderer snapshot — auto-picks up the new pattern; refresh snapshot.
+- `src/lib/__tests__/pattern-sashing.test.tsx` — auto-covers via the "every sashed pattern" loop.
 
 ## Verification
 
-- `bun run verify` (vitest + audit + build) — new test should pass after the FabricsPage/ResultsPage fix and fail if either page's shoofly wiring is reverted.
-- Manual smoke: pick Shoofly → Step 2 sashing 3" → Step 3 shows sashing picker + sashing gaps in preview + border defaults to D (pink) → Results shows sashing gaps in "Your full quilt".
+- `bun run verify` (vitest + audit + build) — all 250+ tests must pass, including new Jacob's Ladder audit cases and sashing guardrail.
+- Manual smoke: pick Jacob's Ladder → Step 2 default block 12" → Step 3 preview shows the diamond secondary pattern → toggle alternate off shows straight-set ladders all running the same direction → shopping list splits A/B/C correctly.
 
 ## Out of scope
 
-- Refactoring the other 18 patterns' hardcoded checks to use the helper too. The plan only removes the *sashing* list (the one that caused this bug) and leaves the isolated pattern-specific booleans in place to keep the diff small. They can migrate to the helper later.
+- No changes to other patterns' rotation behavior. `alternateBlocks` remains an A/B swap for Shoofly and becomes a 90° rotation for Jacob's Ladder — dispatched per-pattern inside `QuiltLayoutPreview`.
