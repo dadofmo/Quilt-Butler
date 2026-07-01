@@ -184,6 +184,12 @@ export function QuiltLayoutPreview({
                 // Snowball Block: fabrics A and B swap roles on every other
                 // cell — this is what creates the diamond pattern at the seams.
                 const snowballSwap = pattern === "snowball-block" && (i + j) % 2 === 1;
+                // Shoofly (and any future pattern) supports an opt-in
+                // "alternate blocks" toggle that swaps A ↔ B on every other
+                // block for a checkerboard look. Driven by the alternateBlocks
+                // prop set by Step 2.
+                const shooflySwap = pattern === "shoofly" && alternateBlocks && (i + j) % 2 === 1;
+                const swap = snowballSwap || shooflySwap;
                 return (
                   <svg
                     key={`${i}-${j}`}
@@ -208,7 +214,7 @@ export function QuiltLayoutPreview({
                         assignments={assignments}
                         photos={photos}
                         irishPlain={irishPlain}
-                        swap={snowballSwap}
+                        swap={swap}
                       />
                     )}
                   </svg>
