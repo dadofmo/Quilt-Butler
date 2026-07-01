@@ -1741,7 +1741,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "snowball-block" ||
     s.pattern === "four-patch" ||
     s.pattern === "streak-of-lightning" ||
-    s.pattern === "bow-tie";
+    s.pattern === "bow-tie" ||
+    s.pattern === "shoofly";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
