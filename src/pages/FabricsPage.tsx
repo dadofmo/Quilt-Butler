@@ -217,24 +217,7 @@ function FabricsStepInner() {
         <div className="bg-card mb-6 rounded-xl border-2 border-border p-4">
           {(() => {
             const isBearPaw = pattern.id === "bear-paw";
-            const isNinePatch = pattern.id === "nine-patch";
-            const isHst = pattern.id === "hst";
-            const isRailFence = pattern.id === "rail-fence";
-            const isLogCabin = pattern.id === "log-cabin";
-            const isOhioStar = pattern.id === "ohio-star";
-            const isFlyingGeese = pattern.id === "flying-geese";
-            const isD9P = pattern.id === "disappearing-nine-patch";
-            const isSquaresOnPoint = pattern.id === "squares-on-point";
-            const isPinwheel = pattern.id === "pinwheel";
-            const isPlusBlock = pattern.id === "plus-block";
-            const isChurnDash = pattern.id === "churn-dash";
-            const isSawtoothStar = pattern.id === "sawtooth-star";
-            const isFriendshipStar = pattern.id === "friendship-star";
-            const isSnowball = pattern.id === "snowball-block";
-            const isFourPatch = pattern.id === "four-patch";
-            const isStreak = pattern.id === "streak-of-lightning";
-            const isBowTie = pattern.id === "bow-tie";
-            const isSashed = isBearPaw || isNinePatch || isHst || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie;
+            const isSashed = patternHasSashingSection(pattern);
             const sashing = isSashed ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
