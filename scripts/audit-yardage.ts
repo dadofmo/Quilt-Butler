@@ -1542,6 +1542,90 @@ console.log("\n=== Rail Fence jelly roll: yardage mode unchanged ===");
 
 
 // =========================================================================
+// JACOB'S LADDER — 6×6 grid: 5 four-patches + 4 HSTs. u = blockSize / 6.
+// Per block: 10 A small + 10 B small @ (u+0.5)"; 2 B-HST + 2 C-HST @ (2u+0.875)".
+// Block size 12" → u=2", small=2.5", HST=4.875".
+// =========================================================================
+console.log("\n=== Jacob's Ladder baseline: 48×60 throw, no sashing/border, alt off ===");
+{
+  const s = {
+    ...base(),
+    pattern: "jacobs-ladder" as const,
+    quiltWidth: 48,
+    quiltHeight: 60,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    alternateBlocks: false,
+    assignments: { dark: "A", light: "B", ladder: "D" } as Record<string, FabricKey>,
+  };
+  // 4×5 = 20 blocks. A: 200 small @ 2.5". B: 200 small + 40 HST-start @ 4.875".
+  // D: 40 HST-start @ 4.875".
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const d = r.fabrics.find(f => f.fabric === "D")!;
+  const aSmall = a.pieces.find(p => /Four-patch dark/i.test(p.label))!;
+  const bSmall = b.pieces.find(p => /Four-patch light/i.test(p.label))!;
+  const bHst = b.pieces.find(p => /background/i.test(p.label))!;
+  const dHst = d.pieces.find(p => /ladder accent/i.test(p.label))!;
+  check("JL A small count", aSmall.count, 200);
+  check("JL A small size", aSmall.w, 2.5);
+  check("JL B small count", bSmall.count, 200);
+  check("JL B small size", bSmall.w, 2.5);
+  check("JL B HST count", bHst.count, 40);
+  check("JL B HST size", bHst.w, 4.875);
+  check("JL D HST count", dHst.count, 40);
+  check("JL D HST size", dHst.w, 4.875);
+}
+
+console.log("\n=== Jacob's Ladder alt blocks on — piece counts unchanged ===");
+{
+  const s = {
+    ...base(),
+    pattern: "jacobs-ladder" as const,
+    quiltWidth: 48,
+    quiltHeight: 60,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    alternateBlocks: true,
+    assignments: { dark: "A", light: "B", ladder: "D" } as Record<string, FabricKey>,
+  };
+  // Rotation only affects the layout preview — piece counts identical.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const d = r.fabrics.find(f => f.fabric === "D")!;
+  check("JL(alt) A small count", a.pieces.find(p => /Four-patch dark/i.test(p.label))!.count, 200);
+  check("JL(alt) D HST count", d.pieces.find(p => /ladder accent/i.test(p.label))!.count, 40);
+}
+
+console.log("\n=== Jacob's Ladder with sashing: 4×5 grid, 2\" sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "jacobs-ladder" as const,
+    quiltWidth: 60,
+    quiltHeight: 72,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 2,
+    alternateBlocks: true,
+    assignments: { dark: "A", light: "B", ladder: "D", sashing: "C" } as Record<string, FabricKey>,
+  };
+  // 60/12=5 across, 72/12=6 down → vSash=4*6=24, hSash=5*5=25, total=49.
+  const r = calculateYardage(s);
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("JL sash strip count", c.pieces[0].count, 49);
+  check("JL sash strip width", c.pieces[0].h, 2.5);
+  check("JL sash strip length", c.pieces[0].w, 12.5);
+}
+
+
+
+
+
+// =========================================================================
 // SUMMARY
 // =========================================================================
 console.log("\n=========================================");
