@@ -611,6 +611,41 @@ export const PATTERNS: PatternDef[] = [
       borderSection,
     ],
   },
+  {
+    id: "jacobs-ladder",
+    name: "Jacob's Ladder",
+    hasMath: true,
+    supportsAlternate: true,
+    intro:
+      "One of the most iconic traditional American blocks. Each block is a 3×3 arrangement of nine sub-blocks: five four-patches (at the four corners + the center) and four large half-square-triangle units (on the four edges), for a 6×6 mini-grid overall. When you tile the finished blocks and rotate every other block 90° (turn on \"Alternate blocks\" below — recommended!), the diagonals from neighboring blocks connect into the classic Jacob's Ladder diamond pattern with checkerboard chains running between the diamonds.",
+    sections: [
+      {
+        id: "dark",
+        label: "Four-patch dark squares (Fabric A)",
+        defaultFabric: "A",
+        hint: "The dark alternating squares inside every four-patch — 10 per block. Usually your boldest fabric.",
+      },
+      {
+        id: "light",
+        label: "Four-patch light squares + HST background (Fabric B)",
+        defaultFabric: "B",
+        hint: "The light alternating squares inside every four-patch AND the background half of each corner HST unit — pick a calm/light fabric that contrasts strongly with the dark and the ladder accent.",
+      },
+      {
+        id: "ladder",
+        label: "Ladder accent (Fabric C)",
+        defaultFabric: "D",
+        hint: "The large triangle on each of the 4 HST units — this is the fabric that forms the diagonal \"ladder\" band. Pick the same tone as Fabric A for the traditional 2-color look, or a distinct third fabric for extra pop.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips of fabric that separate each Jacob's Ladder block — set sashing to 0\" on the previous step for the classic look where the diagonals connect across neighboring blocks (recommended so the diamond secondary pattern reads).",
+      },
+      borderSection,
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

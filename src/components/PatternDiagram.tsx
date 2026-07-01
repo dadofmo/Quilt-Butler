@@ -709,6 +709,64 @@ function renderInner(
         </>
       );
     }
+    case "jacobs-ladder": {
+      // Full-size Jacob's Ladder single block. Uses 200-unit viewBox with a
+      // 6×6 unit grid (u = 200/6). See PatternThumb's jacobs-ladder case
+      // for the full geometry explanation — kept in lockstep here so the
+      // "1 block" diagram matches the tile exactly.
+      const dark = get("dark", "A");
+      const light = get("light", "B");
+      const ladder = get("ladder", "D");
+      const u = 200 / 6;
+      const nodes: React.ReactNode[] = [];
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          const x = 2 * c * u, y = 2 * r * u;
+          if ((r + c) % 2 === 0) {
+            nodes.push(
+              <g key={`fp-${r}-${c}`}>
+                <rect x={x} y={y} width={u} height={u} fill={dark} />
+                <rect x={x + u} y={y} width={u} height={u} fill={light} />
+                <rect x={x} y={y + u} width={u} height={u} fill={light} />
+                <rect x={x + u} y={y + u} width={u} height={u} fill={dark} />
+              </g>,
+            );
+          } else {
+            const TL = `${x},${y}`;
+            const TR = `${x + 2 * u},${y}`;
+            const BL = `${x},${y + 2 * u}`;
+            const BR = `${x + 2 * u},${y + 2 * u}`;
+            nodes.push(
+              <g key={`hst-${r}-${c}`}>
+                <polygon points={`${TL} ${TR} ${BR}`} fill={ladder} />
+                <polygon points={`${TL} ${BL} ${BR}`} fill={light} />
+              </g>,
+            );
+          }
+        }
+      }
+      return (
+        <>
+          {nodes}
+          {/* Subtle 6×6 grid lines so beginners can see the construction */}
+          <g stroke="white" strokeWidth={1} opacity={0.35}>
+            {[1, 2, 3, 4, 5].map((k) => (
+              <g key={k}>
+                <line x1={k * u} y1={0} x2={k * u} y2={200} />
+                <line x1={0} y1={k * u} x2={200} y2={k * u} />
+              </g>
+            ))}
+          </g>
+          {/* Slightly stronger sub-block boundaries (2u grid) */}
+          <g stroke="white" strokeWidth={2} opacity={0.7}>
+            <line x1={2 * u} y1={0} x2={2 * u} y2={200} />
+            <line x1={4 * u} y1={0} x2={4 * u} y2={200} />
+            <line x1={0} y1={2 * u} x2={200} y2={2 * u} />
+            <line x1={0} y1={4 * u} x2={200} y2={4 * u} />
+          </g>
+        </>
+      );
+    }
   }
 }
 

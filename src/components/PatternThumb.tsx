@@ -58,6 +58,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Bow Tie quilt block diagram showing a 2x2 grid of plain squares with a small on-point center square forming the knot at the seam intersection",
   shoofly:
     "Shoofly quilt block diagram showing a 3x3 grid with four half-square-triangle corners pointing inward, a center accent square, and four plain background side squares",
+  "jacobs-ladder":
+    "Jacob's Ladder quilt block diagram showing a 6x6 grid built from five four-patches at the four corners and center plus four large half-square-triangle units on the edges, with the accent triangles forming the classic diagonal ladder band across the block",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -521,6 +523,52 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
           ))}
         </svg>
       );
+    }
+    case "jacobs-ladder": {
+      // 6×6 grid (u=90/6=15). 3×3 arrangement of 2u × 2u sub-blocks:
+      //   FP at (r+c)%2 == 0 (5 sub-blocks: corners + center)
+      //   HST at (r+c)%2 == 1 (4 sub-blocks: edges)
+      // FP: 2×2 checkerboard with A (dark) on backslash cells, B (light) on
+      //     antidiagonal cells.
+      // HST: 2u square divided by backslash. Ladder accent (C) on the
+      //     UPPER-RIGHT half (TL-TR-BR). Background (B) on the LOWER-LEFT
+      //     half (TL-BL-BR). All 4 HSTs identical — combined with the FP
+      //     checkerboards, the accent triangles + dark FP cells form the
+      //     characteristic corner-to-corner ladder band.
+      const u = 90 / 6;
+      const dark = C.a;      // Fabric A
+      const light = C.b;     // Fabric B (also HST background)
+      const ladder = C.d;    // Fabric C (ladder accent — brand pink for pop)
+      const nodes: React.ReactNode[] = [];
+      for (let r = 0; r < 3; r++) {
+        for (let c = 0; c < 3; c++) {
+          const x = 2 * c * u, y = 2 * r * u;
+          if ((r + c) % 2 === 0) {
+            // Four-patch
+            nodes.push(
+              <g key={`fp-${r}-${c}`}>
+                <rect x={x} y={y} width={u} height={u} fill={dark} />
+                <rect x={x + u} y={y} width={u} height={u} fill={light} />
+                <rect x={x} y={y + u} width={u} height={u} fill={light} />
+                <rect x={x + u} y={y + u} width={u} height={u} fill={dark} />
+              </g>,
+            );
+          } else {
+            // HST — backslash split; ladder in upper-right, bg in lower-left.
+            const TL = `${x},${y}`;
+            const TR = `${x + 2 * u},${y}`;
+            const BL = `${x},${y + 2 * u}`;
+            const BR = `${x + 2 * u},${y + 2 * u}`;
+            nodes.push(
+              <g key={`hst-${r}-${c}`}>
+                <polygon points={`${TL} ${TR} ${BR}`} fill={ladder} />
+                <polygon points={`${TL} ${BL} ${BR}`} fill={light} />
+              </g>,
+            );
+          }
+        }
+      }
+      return <svg {...common}>{nodes}</svg>;
     }
   }
 }

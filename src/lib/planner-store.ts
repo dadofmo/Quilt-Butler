@@ -23,7 +23,8 @@ export type PatternId =
   | "four-patch"
   | "streak-of-lightning"
   | "bow-tie"
-  | "shoofly";
+  | "shoofly"
+  | "jacobs-ladder";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"

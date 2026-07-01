@@ -62,7 +62,12 @@ function PatternPickerInner() {
       if (s.id === "border") return;
       assignments[s.id] = s.defaultFabric;
     });
-    setPlanner({ pattern: id, assignments });
+    // Jacob's Ladder: default the alternate-blocks toggle to ON so the
+    // "Your full quilt" preview shows the diamond secondary pattern by
+    // default (the classic Jacob's Ladder look). User can uncheck on
+    // Step 2 for a straight-set variant.
+    const alternateBlocks = id === "jacobs-ladder" ? true : false;
+    setPlanner({ pattern: id, assignments, alternateBlocks });
     navigate("/size");
   };
 

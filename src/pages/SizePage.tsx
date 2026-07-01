@@ -69,7 +69,8 @@ function SizeStepInner() {
   const isStreak = planner.pattern === "streak-of-lightning";
   const isBowTie = planner.pattern === "bow-tie";
   const isShoofly = planner.pattern === "shoofly";
-  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly;
+  const isJacobsLadder = planner.pattern === "jacobs-ladder";
+  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder;
   // "Alternate blocks" toggle — opt-in per pattern via supportsAlternate.
   // Currently only Shoofly opts in; adding more patterns is a data-only change.
   const supportsAlternate = !!getPattern(planner.pattern)?.supportsAlternate;
