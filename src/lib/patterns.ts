@@ -13,6 +13,10 @@ export interface PatternDef {
   sections: PatternSection[];
   hasMath: boolean;
   intro: string;
+  /** Pattern opts into the reusable "alternate blocks" toggle on Step 2
+   *  (swap Fabric A ↔ Fabric B on every other block for a checkerboard).
+   *  Only 2-fabric block patterns should enable this. */
+  supportsAlternate?: boolean;
 }
 
 const borderSection: PatternSection = {
