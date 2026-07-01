@@ -24,6 +24,10 @@ interface Props {
    *  at sashing intersections (e.g. Nine Patch with optional sashing). */
   cornerstoneFabric?: FabricKey;
   photos?: Partial<Record<FabricKey, string>>;
+  /** When true (only meaningful for patterns whose sections support A/B role
+   *  swap — currently Shoofly via `supportsAlternate`), swap fabrics A ↔ B
+   *  on every other block for a checkerboard alternation across the quilt. */
+  alternateBlocks?: boolean;
 }
 
 export function QuiltLayoutPreview({
