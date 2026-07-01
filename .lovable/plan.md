@@ -1,55 +1,59 @@
-## Goal
-Make the fat-quarter trim margin a user-editable field in the Simple Squares fat-quarter flow, with beginner-friendly guidance.
 
-## Decisions locked in so far
-- Default FQ size: **Standard 42" bolt** → 18" × 21" raw.
-- User confirms FQ size **every time** (no remembering).
-- Default trim margin: **0.5" per side** (this plan adds the override).
+# Plan: Shoofly pattern + Alternate-blocks toggle
 
-## UI changes (SizePage.tsx, fat-quarter mode for Simple Squares)
+## Part 1 — New pattern: Shoofly
 
-Add a new input directly under the FQ width/height inputs:
+Classic 2-fabric 3×3 grid block. Fabrics: A (background), B (accent). 4 HST corners pointing inward + center accent square + 4 plain background sides.
 
-```text
-Trim margin per side:  [ 0.5 ] inches   (default)
-                       ▸ Why does this matter?
-```
+**Files to add/edit**
 
-- Numeric input, step 0.125, min 0.25, max 1.5.
-- "Why does this matter?" is a collapsible (shadcn `Collapsible` / `Accordion`) so the page stays clean for users who don't care.
-- Inline helper text under the field (always visible, one line):
-  *"We shrink each fat quarter by this much on all 4 sides before cutting. Default 0.5" works for most cottons."*
+- `src/lib/patterns.ts` — register `shoofly` with 2 sections (A background, B accent), `hasMath: true`, default block 12", sashing default 0", allows optional sashing/border like other blocks.
+- `src/lib/yardage.ts` — add Shoofly math. Per block:
+  - 4 HST corner units → cut 2 squares (one A, one B) at `cellFinished + 0.875"`, sliced diagonally → yields 4 HSTs (2 blocks worth of HSTs from each pair; use standard HST helper already used by Friendship Star / Ohio Star).
+  - 4 plain background squares (cellFinished + 0.5").
+  - 1 center accent square (cellFinished + 0.5").
+  - Route everything through `addSquares` — never push to `req.pieces` directly (memory rule).
+- `src/components/PatternDiagram.tsx` — render single Shoofly block per spec coords (300×300 viewBox, 100-unit cells, exact HST diagonals as specified so corners point inward toward center).
+- `src/components/PatternThumb.tsx` — brand-fabric mini version for Step 1 tile.
+- `src/components/QuiltLayoutPreview.tsx` — tile Shoofly across the full-quilt view (with alternation support, see Part 2).
+- `scripts/audit-yardage.ts` — add Shoofly case with expected piece counts.
+- `src/components/__tests__/pattern-renderers.test.tsx` — snapshot the new renderer.
+- Coverage test picks up the new pattern automatically via `PATTERNS`.
 
-### Expanded "Why does this matter?" content (beginner copy)
+## Part 2 — Reusable "Alternate blocks" toggle
 
-> **Why we trim the edges of a fat quarter**
->
-> Fat quarters are cut from a bolt of fabric, and the cut edges are almost never perfectly straight. The two "selvage" edges (the tightly woven factory edges) are also stiffer than the rest of the fabric and don't sew well into a quilt. Before cutting your squares, quilters "square up" the fat quarter by trimming a little off all four sides so you start with clean, straight, usable fabric.
->
-> **How to pick a number**
-> - **0.25" (1/4 inch)** — Fat quarters from a high-quality quilt shop that look clean and straight.
-> - **0.5" (1/2 inch) — recommended default.** Safe for most quilt-shop cottons. Covers normal selvage width and small cutting wobbles.
-> - **0.75"–1"** — Fat quarters from a bargain bin, pre-washed fabric (which frays), or pieces that look crooked or have a wide printed selvage.
->
-> **When in doubt, go bigger.** Trimming a little extra costs you a few squares; trimming too little means your finished squares may have selvage or frayed edges showing.
+New optional per-pattern feature: swap Fabric A ↔ Fabric B on every other block (checkerboard, like Snowball but user-controlled).
 
-## Math wiring (yardage.ts)
+**Data model** (`src/lib/planner-store.ts`)
+- Add `alternateBlocks: boolean` (default `false`) to `PlannerState` + `initial`.
+- Add matching field to test `baseState()` in `patterns-coverage.test.ts`.
 
-- `computeFatQuarterPlan()` (or wherever the FQ math lives for Simple Squares) takes `trimMargin` as a parameter instead of a hardcoded 0.5.
-- Usable FQ dimensions = `(fqWidth - 2*trimMargin) × (fqHeight - 2*trimMargin)`.
-- Squares-per-FQ recomputes from those usable dimensions.
-- Clamp: if `trimMargin * 2 >= min(fqWidth, fqHeight) - squareSize`, show an inline error: *"Trim margin too large — no squares fit. Try a smaller value."*
+**Pattern metadata** (`src/lib/patterns.ts`)
+- Add optional `supportsAlternate?: boolean` on the pattern definition.
+- Set `true` on Shoofly. (Snowball keeps its permanent checkerboard — no change.)
+- Leave other patterns untouched; easy to opt in later.
 
-## State
+**UI** (`src/pages/SizePage.tsx`)
+- When `getPattern(state.pattern)?.supportsAlternate`, show a checkbox: *"Alternate blocks — swap Fabric A and Fabric B on every other block"* with a one-line explainer. Hidden otherwise, so no impact on other patterns.
 
-- New state field `trimMargin: number` in SizePage, default `0.5`.
-- Passed through to the FQ plan card on ResultsPage so the "X squares per fat quarter" number reflects the override.
+**Rendering** (`src/components/QuiltLayoutPreview.tsx`)
+- If `alternateBlocks && supportsAlternate`, for each grid cell `(r,c)` with `(r+c)%2===1`, swap the fabrics assigned to sections A and B before rendering that block. Single-block preview and Step 2 patchwork preview unchanged.
+
+**Math** (`src/lib/yardage.ts`)
+- When `alternateBlocks` is on for a 2-fabric pattern, total piece counts don't change — but the per-fabric split does. For Shoofly: half the blocks use (A-background/B-accent), half use (B-background/A-accent). Effect: A and B each get 50% of what a single-orientation quilt would give A, plus 50% of what it would give B. Implement as a post-process swap on half the blocks when computing per-fabric totals.
+- Odd block counts: the extra block uses the primary orientation (A background). Document in a comment.
+
+**Audit** (`scripts/audit-yardage.ts`)
+- Add a Shoofly + alternateBlocks case verifying A and B totals balance vs the non-alternating case.
+
+## Technical notes
+
+- All fabric defaults come from `getPattern(id).sections[*].defaultFabric` — no hardcoded "A"/"B" in diagrams (memory rule).
+- HST math reuses the existing helper pattern (Friendship Star / Ohio Star). No new geometry helpers.
+- Backwards compatible: `alternateBlocks` defaults to `false`; existing saved states get it via the store's `{ ...initial, ...parsed }` merge.
+- Run `bun audit:math` + `bun run verify` after implementation.
 
 ## Out of scope
-- No change to the bolt-fabric path.
-- No change to other patterns.
-- No persistence across sessions (matches your "ask every time" decision for FQ size).
 
-## Verification
-- Add an audit case in `scripts/audit-yardage.ts` with `trimMargin: 0.25` and `trimMargin: 1.0` to lock the math.
-- Run `bun run verify`.
+- Extending the alternate toggle to patterns beyond Shoofly (Log Cabin, HST, Four Patch etc. could opt in later with just a `supportsAlternate: true` flag).
+- Changing Snowball's permanent checkerboard behavior.
