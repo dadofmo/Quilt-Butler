@@ -44,6 +44,7 @@ export function QuiltLayoutPreview({
   sashingFabric = "C",
   cornerstoneFabric,
   photos,
+  alternateBlocks = false,
 }: Props) {
   const blockCount = blocksAcross * blocksDown;
 
