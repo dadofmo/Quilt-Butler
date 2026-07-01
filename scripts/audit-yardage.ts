@@ -1475,7 +1475,8 @@ console.log("\n=== Shoofly with sashing: 4×5 grid, 2\" sashing ===");
   // 4 across, 5 down → vSash=3*5=15, hSash=4*4=16, total=31 at 2.5"×12.5".
   const r = calculateYardage(s);
   const c = r.fabrics.find(f => f.fabric === "C")!;
-  check("Shoofly sash strip count", c.pieces[0].count, 31);
+  // 60/12=5 across, 72/12=6 down → vSash=4*6=24, hSash=5*5=25, total=49.
+  check("Shoofly sash strip count", c.pieces[0].count, 49);
   check("Shoofly sash strip width", c.pieces[0].h, 2.5);
   check("Shoofly sash strip length", c.pieces[0].w, 12.5);
 }
