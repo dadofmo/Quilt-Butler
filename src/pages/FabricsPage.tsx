@@ -11,7 +11,7 @@ import {
 } from "@/lib/planner-store";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { FabricSwatchOption } from "@/components/FabricSwatchOption";
-import { getPattern, fabricsForPattern, getEffectiveBorderDefault } from "@/lib/patterns";
+import { getPattern, fabricsForPattern, getEffectiveBorderDefault, patternHasSashingSection } from "@/lib/patterns";
 
 export default function FabricsStep() {
   return (
