@@ -615,9 +615,8 @@ export const PATTERNS: PatternDef[] = [
     id: "jacobs-ladder",
     name: "Jacob's Ladder",
     hasMath: true,
-    supportsAlternate: true,
     intro:
-      "One of the most iconic traditional American blocks. Each block is a 3×3 arrangement of nine sub-blocks: five four-patches (at the four corners + the center) and four large half-square-triangle units (on the four edges), for a 6×6 mini-grid overall. When you tile the finished blocks and rotate every other block 90° (turn on \"Alternate blocks\" below — recommended!), the diagonals from neighboring blocks connect into the classic Jacob's Ladder diamond pattern with checkerboard chains running between the diamonds.",
+      "One of the most iconic traditional American blocks. Each block is a 3×3 arrangement of nine sub-blocks: five four-patches (at the four corners + the center) and four large half-square-triangle units (on the four edges), for a 6×6 mini-grid overall. Every other block is automatically rotated 90° when tiled so the diagonals from neighboring blocks connect into the classic Jacob's Ladder diamond pattern with checkerboard chains running between the diamonds.",
     sections: [
       {
         id: "dark",
