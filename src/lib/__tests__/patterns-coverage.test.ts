@@ -39,6 +39,7 @@ function baseState(): PlannerState {
     fatQuarterHeight: 21,
     fatQuarterTrimMargin: 0.5,
     fatQuarterCount: 20,
+    alternateBlocks: false,
 
   };
 }

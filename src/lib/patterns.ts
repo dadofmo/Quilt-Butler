@@ -13,6 +13,10 @@ export interface PatternDef {
   sections: PatternSection[];
   hasMath: boolean;
   intro: string;
+  /** Pattern opts into the reusable "alternate blocks" toggle on Step 2
+   *  (swap Fabric A ↔ Fabric B on every other block for a checkerboard).
+   *  Only 2-fabric block patterns should enable this. */
+  supportsAlternate?: boolean;
 }
 
 const borderSection: PatternSection = {
@@ -574,6 +578,35 @@ export const PATTERNS: PatternDef[] = [
         label: "Sashing between blocks",
         defaultFabric: "C",
         hint: "Optional strips of fabric that separate each Bow Tie block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      borderSection,
+    ],
+  },
+  {
+    id: "shoofly",
+    name: "Shoofly",
+    hasMath: true,
+    supportsAlternate: true,
+    intro:
+      "One of the most classic American beginner blocks — a 3×3 grid built from just two fabrics. Four Half Square Triangle corners point inward toward a center accent square, with four plain background squares filling the sides. Together the four corner triangles and the center form a loose diamond in the middle of every block. Turn on \"Alternate blocks\" below if you want Fabric A and Fabric B to swap roles on every other block for a checkerboard look.",
+    sections: [
+      {
+        id: "bg",
+        label: "Background (Fabric A)",
+        defaultFabric: "A",
+        hint: "The 4 plain side squares in every block, plus the background half of each corner triangle unit. Usually a calm/light fabric so the accent reads.",
+      },
+      {
+        id: "accent",
+        label: "Accent (Fabric B)",
+        defaultFabric: "B",
+        hint: "The 1 center square and the accent half of each corner triangle — together they form the loose diamond in the middle of every block. Pick a fabric that contrasts strongly with the background.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips of fabric that separate each Shoofly block — set sashing to 0\" on the previous step if you don't want any (the traditional look).",
       },
       borderSection,
     ],

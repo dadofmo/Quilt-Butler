@@ -56,6 +56,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Streak of Lightning quilt block diagram showing a 2x2 grid of half square triangle units forming a peak and valley chevron",
   "bow-tie":
     "Bow Tie quilt block diagram showing a 2x2 grid of plain squares with a small on-point center square forming the knot at the seam intersection",
+  shoofly:
+    "Shoofly quilt block diagram showing a 3x3 grid with four half-square-triangle corners pointing inward, a center accent square, and four plain background side squares",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -481,7 +483,47 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "shoofly": {
+      // Classic Shoofly: 3×3 grid, 4 accent-inward HSTs at corners, 4 plain
+      // background side squares, 1 accent center square. Brand palette:
+      // background = blue (A), accent = pink (D) for maximum contrast in the
+      // small tile view.
+      const u = 90 / 3;
+      const bg = C.a;
+      const accent = C.d;
+      // HST corner triangle: accent triangle sits in the corner nearest the
+      // block CENTER (i.e. pointing inward). Corners: TL cell → accent in BR;
+      // TR cell → accent in BL; BL cell → accent in TR; BR cell → accent in TL.
+      const corners: Array<[number, number, "TL" | "TR" | "BL" | "BR"]> = [
+        [0, 0, "BR"],
+        [2, 0, "BL"],
+        [0, 2, "TR"],
+        [2, 2, "TL"],
+      ];
+      const opp = { TL: "BR", BR: "TL", TR: "BL", BL: "TR" } as const;
+      const tri = (col: number, row: number, c: "TL" | "TR" | "BL" | "BR") => {
+        const x = col * u, y = row * u;
+        const TL = `${x},${y}`, TR = `${x + u},${y}`, BL = `${x},${y + u}`, BR = `${x + u},${y + u}`;
+        const map = { TL: `${TL} ${TR} ${BL}`, TR: `${TL} ${TR} ${BR}`, BL: `${TL} ${BL} ${BR}`, BR: `${TR} ${BL} ${BR}` };
+        return map[c];
+      };
+      return (
+        <svg {...common}>
+          <rect width={90} height={90} fill={bg} />
+          {/* Center accent square */}
+          <rect x={u} y={u} width={u} height={u} fill={accent} />
+          {/* HST corners — accent triangle pointing inward */}
+          {corners.map(([c, r, sc]) => (
+            <g key={`${c}-${r}`}>
+              <polygon points={tri(c, r, sc)} fill={accent} />
+              <polygon points={tri(c, r, opp[sc])} fill={bg} />
+            </g>
+          ))}
+        </svg>
+      );
+    }
   }
 }
+
 
 

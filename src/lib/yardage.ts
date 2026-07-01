@@ -163,9 +163,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isFourPatch = s.pattern === "four-patch";
   const isStreak = s.pattern === "streak-of-lightning";
   const isBowTie = s.pattern === "bow-tie";
+  const isShoofly = s.pattern === "shoofly";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -1563,7 +1564,121 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "shoofly") {
+    // Shoofly: classic 2-fabric 3×3 grid block.
+    //   - Fabric A (background): 4 plain side squares per block + background
+    //     halves of the 4 corner HST units.
+    //   - Fabric B (accent): 1 center square per block + accent halves of
+    //     the 4 corner HST units.
+    // HST construction (2 pairs per block → 4 HSTs, no waste): pair one
+    // bg-starting square + one accent-starting square RST, draw diagonal,
+    // sew 1/4" both sides of the line, cut apart → 2 HSTs. Each block needs
+    // 4 HSTs → 2 pairs → 2 bg-starting + 2 accent-starting squares per block.
+    //
+    // `alternateBlocks` (Step 2 toggle, gated by supportsAlternate on the
+    // pattern) swaps which fabric plays which role on every other block —
+    // even cells keep the primary orientation, odd cells flip. When an odd
+    // block count means one side has one extra, that extra block uses the
+    // primary orientation (matches how Snowball resolves odd totals).
+    const u = s.blockSize / 3;
+    const plainCut = u + SEAM;
+    const hstCut = u + HST_EXTRA;
+    const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
+    const accentFab = (s.assignments["accent"] ?? "B") as FabricKey;
+
+    // Walk the real grid so odd totals split exactly.
+    let evenBlocks = 0;
+    let oddBlocks = 0;
+    for (let r = 0; r < blocksDown; r++) {
+      for (let c = 0; c < blocksAcross; c++) {
+        if ((r + c) % 2 === 0) evenBlocks++;
+        else oddBlocks++;
+      }
+    }
+    const alt = !!s.alternateBlocks;
+    // Primary-orientation blocks use bgFab as background, accentFab as accent.
+    // Flipped blocks (only when alt is on) use accentFab as background, bgFab as accent.
+    const primaryBlocks = alt ? evenBlocks : blockCount;
+    const flippedBlocks = alt ? oddBlocks : 0;
+
+    // Per-block piece counts (per role):
+    //   background role: 4 plain side squares + 2 HST starting squares
+    //   accent role:     1 center square      + 2 HST starting squares
+    const bgPlainPrimary = 4 * primaryBlocks;
+    const bgHstPrimary = 2 * primaryBlocks;
+    const acCenterPrimary = 1 * primaryBlocks;
+    const acHstPrimary = 2 * primaryBlocks;
+
+    const bgPlainFlipped = 4 * flippedBlocks; // uses accentFab
+    const bgHstFlipped = 2 * flippedBlocks;   // uses accentFab
+    const acCenterFlipped = 1 * flippedBlocks; // uses bgFab
+    const acHstFlipped = 2 * flippedBlocks;   // uses bgFab
+
+    // Pool by fabric letter so if the user picks A === B (unlikely but valid),
+    // one labeled pile appears instead of two of the same fabric.
+    // Fabric bgFab totals (as background on primary + as accent on flipped):
+    const bgFab_plain = bgPlainPrimary;
+    const bgFab_hst = bgHstPrimary + acHstFlipped;
+    const bgFab_center = acCenterFlipped;
+    // Fabric accentFab totals (as accent on primary + as background on flipped):
+    const acFab_center = acCenterPrimary;
+    const acFab_hst = acHstPrimary + bgHstFlipped;
+    const acFab_plain = bgPlainFlipped;
+
+    if (bgFab === accentFab) {
+      // Same fabric plays every role — pool everything into one bucket.
+      const plain = bgFab_plain + acFab_plain;
+      const center = bgFab_center + acFab_center;
+      const hst = bgFab_hst + acFab_hst;
+      if (plain > 0) addSquares(reqs[bgFab], "Side squares", plain, plainCut, s.fabricWidth);
+      if (center > 0) addSquares(reqs[bgFab], "Center squares", center, plainCut, s.fabricWidth);
+      if (hst > 0) addSquares(reqs[bgFab], "HST starting squares (corners)", hst, hstCut, s.fabricWidth);
+    } else {
+      if (bgFab_plain > 0) addSquares(reqs[bgFab], "Side squares (background role)", bgFab_plain, plainCut, s.fabricWidth);
+      if (bgFab_center > 0) addSquares(reqs[bgFab], "Center squares (accent role on flipped blocks)", bgFab_center, plainCut, s.fabricWidth);
+      if (bgFab_hst > 0) addSquares(reqs[bgFab], "HST starting squares (corners)", bgFab_hst, hstCut, s.fabricWidth);
+      if (acFab_center > 0) addSquares(reqs[accentFab], "Center squares (accent role)", acFab_center, plainCut, s.fabricWidth);
+      if (acFab_plain > 0) addSquares(reqs[accentFab], "Side squares (background role on flipped blocks)", acFab_plain, plainCut, s.fabricWidth);
+      if (acFab_hst > 0) addSquares(reqs[accentFab], "HST starting squares (corners)", acFab_hst, hstCut, s.fabricWidth);
+    }
+
+    notes.push(
+      `Each block is a 3×3 grid where each small unit = ${u.toFixed(2)}" finished. Cut sizes: plain squares at ${plainCut.toFixed(2)}" × ${plainCut.toFixed(2)}", HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" (finished + 7/8" for the diagonal seam).`,
+    );
+    if (alt) {
+      notes.push(
+        `Alternate blocks is ON: ${evenBlocks} blocks use Fabric ${bgFab} as background + Fabric ${accentFab} as accent, and ${oddBlocks} blocks swap those roles — creating a checkerboard across the finished quilt.`,
+      );
+    } else {
+      notes.push(
+        `Across all ${blockCount} blocks: Fabric ${bgFab} = ${4 * blockCount} side squares + ${2 * blockCount} HST starting squares; Fabric ${accentFab} = ${blockCount} center squares + ${2 * blockCount} HST starting squares.`,
+      );
+    }
+    notes.push(
+      `HST construction: pair one Fabric ${bgFab} HST starting square with one Fabric ${accentFab} HST starting square right sides together (RST). Draw a diagonal line corner to corner on the lighter square. Sew a scant 1/4" on each side of the line. Cut apart on the line to yield 2 HST units. Press open and trim each unit to ${(u + SEAM).toFixed(3)}" square (finished ${u.toFixed(2)}"). Each block needs 4 corner HSTs — 2 pairs yield exactly 4.`,
+    );
+    notes.push(
+      `Shoofly Assembly Tip: Orient each corner HST so the accent triangle points INWARD toward the center square — when the block is finished you should see the 4 accent triangles + the center accent square form a loose diamond/cross shape in the middle. Lay out the 3×3 grid before sewing (accent corners inward, background sides, center accent), then sew into 3 rows and join the rows.${alt ? " Because Alternate blocks is on, sew both orientations in matching batches, then arrange them in a checkerboard across the quilt." : ""}`,
+    );
+
+    // Optional sashing between blocks (Shoofly).
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
+
+
 
 
   // Border
@@ -1626,7 +1741,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "snowball-block" ||
     s.pattern === "four-patch" ||
     s.pattern === "streak-of-lightning" ||
-    s.pattern === "bow-tie";
+    s.pattern === "bow-tie" ||
+    s.pattern === "shoofly";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

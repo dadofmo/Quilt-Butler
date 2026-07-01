@@ -664,7 +664,54 @@ function renderInner(
         </>
       );
     }
+    case "shoofly": {
+      // Shoofly single-block diagram. 3×3 grid on a 200-unit block:
+      //   - 4 side squares + 1 center square @ u=200/3
+      //   - 4 HST corners with the accent triangle pointing INWARD.
+      // Fabric assignment follows the pattern definition:
+      //   - bg = "A" (background/light) fills 4 side squares + background half of each HST
+      //   - accent = "B" (accent/dark) fills center + accent half of each HST
+      const bg = get("bg", "A");
+      const accent = get("accent", "B");
+      const u = 200 / 3;
+      const corners: Array<[number, number, "TL" | "TR" | "BL" | "BR"]> = [
+        [0, 0, "BR"],
+        [2, 0, "BL"],
+        [0, 2, "TR"],
+        [2, 2, "TL"],
+      ];
+      const opp = { TL: "BR", BR: "TL", TR: "BL", BL: "TR" } as const;
+      const tri = (col: number, row: number, c: "TL" | "TR" | "BL" | "BR") => {
+        const x = col * u, y = row * u;
+        const TL = `${x},${y}`, TR = `${x + u},${y}`, BL = `${x},${y + u}`, BR = `${x + u},${y + u}`;
+        const map = { TL: `${TL} ${TR} ${BL}`, TR: `${TL} ${TR} ${BR}`, BL: `${TL} ${BL} ${BR}`, BR: `${TR} ${BL} ${BR}` };
+        return map[c];
+      };
+      return (
+        <>
+          <rect width={200} height={200} fill={bg} />
+          <rect x={u} y={u} width={u} height={u} fill={accent} />
+          {corners.map(([c, r, sc]) => (
+            <g key={`${c}-${r}`}>
+              <polygon points={tri(c, r, sc)} fill={accent} />
+              <polygon points={tri(c, r, opp[sc])} fill={bg} />
+            </g>
+          ))}
+          {/* Subtle 3×3 grid lines so beginners can see the construction */}
+          <g stroke="white" strokeWidth={1} opacity={0.5}>
+            {[1, 2].map((k) => (
+              <g key={k}>
+                <line x1={k * u} y1={0} x2={k * u} y2={200} />
+                <line x1={0} y1={k * u} x2={200} y2={k * u} />
+              </g>
+            ))}
+          </g>
+        </>
+      );
+    }
   }
 }
+
+
 
 

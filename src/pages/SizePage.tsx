@@ -2,6 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { SIZE_PRESETS, setPlanner, usePlanner } from "@/lib/planner-store";
+import { getPattern } from "@/lib/patterns";
 import { useState, useMemo, useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
 
@@ -67,7 +68,14 @@ function SizeStepInner() {
   const isFourPatch = planner.pattern === "four-patch";
   const isStreak = planner.pattern === "streak-of-lightning";
   const isBowTie = planner.pattern === "bow-tie";
-  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie;
+  const isShoofly = planner.pattern === "shoofly";
+  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly;
+  // "Alternate blocks" toggle — opt-in per pattern via supportsAlternate.
+  // Currently only Shoofly opts in; adding more patterns is a data-only change.
+  const supportsAlternate = !!getPattern(planner.pattern)?.supportsAlternate;
+  const [alternateBlocks, setAlternateBlocks] = useState<boolean>(
+    !!planner.alternateBlocks,
+  );
   const [sashingText, setSashingText] = useState(
     // Preserve 0 explicitly (Nine Patch may legitimately use no sashing).
     typeof planner.sashingWidth === "number" && !isNaN(planner.sashingWidth)
@@ -422,6 +430,7 @@ function SizeStepInner() {
       fatQuarterHeight: isFatQuarter ? fqHeightNum : planner.fatQuarterHeight,
       fatQuarterTrimMargin: isFatQuarter ? fqTrimNum : planner.fatQuarterTrimMargin,
       fatQuarterCount: isFatQuarter ? fqCountNum : planner.fatQuarterCount,
+      alternateBlocks: supportsAlternate ? alternateBlocks : false,
     });
     navigate("/fabrics");
   };
@@ -773,9 +782,11 @@ function SizeStepInner() {
                                                 ? "Sashing separates each Snowball Block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
                                                 : isFourPatch
                                                   ? "Sashing separates each Four Patch block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."
-                                                  : isStreak
-                                                    ? "Sashing separates each Streak of Lightning block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 to keep the continuous zigzag effect (recommended)."
-                                                    : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
+                                                    : isStreak
+                                                      ? "Sashing separates each Streak of Lightning block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 to keep the continuous zigzag effect (recommended)."
+                                                      : isShoofly
+                                                        ? "Sashing separates each Shoofly block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for the classic edge-to-edge look (recommended)."
+                                                        : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">
@@ -784,6 +795,36 @@ function SizeStepInner() {
             )}
           </Field>
         )}
+
+        {/* Reusable "Alternate blocks" toggle. Only rendered when the current
+            pattern opts in via supportsAlternate (currently: Shoofly). When on,
+            fabrics A and B swap roles on every other block for a checkerboard
+            look. Rendering wires this into <QuiltLayoutPreview alternateBlocks>
+            and the yardage math splits piece counts accordingly. */}
+        {supportsAlternate && (
+          <Field label="Alternate blocks (optional)">
+            <label className="bg-card border-input flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4">
+              <input
+                type="checkbox"
+                checked={alternateBlocks}
+                onChange={(e) => setAlternateBlocks(e.target.checked)}
+                className="mt-1 h-5 w-5 shrink-0 accent-current"
+              />
+              <div>
+                <div className="text-base font-medium">
+                  Swap fabrics on every other block
+                </div>
+                <p className="text-muted-foreground mt-1 text-xs leading-snug">
+                  When on, Fabric A and Fabric B trade roles on alternating
+                  blocks — creating a checkerboard effect across the finished
+                  quilt. Leave off for the traditional single-block-repeated
+                  look.
+                </p>
+              </div>
+            </label>
+          </Field>
+        )}
+
 
         {/* Finished quilt size — actual size produced by the current block +
             border choices, with a visual layout preview, plus bullet

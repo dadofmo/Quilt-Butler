@@ -22,7 +22,8 @@ export type PatternId =
   | "snowball-block"
   | "four-patch"
   | "streak-of-lightning"
-  | "bow-tie";
+  | "bow-tie"
+  | "shoofly";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
@@ -80,6 +81,11 @@ export interface PlannerState {
   fatQuarterTrimMargin: number;
   /** How many fat quarters the user owns (for feasibility messaging). */
   fatQuarterCount: number;
+  /** When true (and the current pattern opts in via `supportsAlternate`),
+   *  swap Fabric A ↔ Fabric B on every other block to create a checkerboard
+   *  alternation across the whole quilt. Piece counts are unchanged; only
+   *  the per-fabric split flips. Ignored for patterns that don't opt in. */
+  alternateBlocks: boolean;
 }
 
 
@@ -110,6 +116,7 @@ const initial: PlannerState = {
   fatQuarterHeight: 21,
   fatQuarterTrimMargin: 0.5,
   fatQuarterCount: 20,
+  alternateBlocks: false,
 };
 
 

@@ -24,6 +24,10 @@ interface Props {
    *  at sashing intersections (e.g. Nine Patch with optional sashing). */
   cornerstoneFabric?: FabricKey;
   photos?: Partial<Record<FabricKey, string>>;
+  /** When true (only meaningful for patterns whose sections support A/B role
+   *  swap — currently Shoofly via `supportsAlternate`), swap fabrics A ↔ B
+   *  on every other block for a checkerboard alternation across the quilt. */
+  alternateBlocks?: boolean;
 }
 
 export function QuiltLayoutPreview({
@@ -40,6 +44,7 @@ export function QuiltLayoutPreview({
   sashingFabric = "C",
   cornerstoneFabric,
   photos,
+  alternateBlocks = false,
 }: Props) {
   const blockCount = blocksAcross * blocksDown;
 
@@ -179,6 +184,12 @@ export function QuiltLayoutPreview({
                 // Snowball Block: fabrics A and B swap roles on every other
                 // cell — this is what creates the diamond pattern at the seams.
                 const snowballSwap = pattern === "snowball-block" && (i + j) % 2 === 1;
+                // Shoofly (and any future pattern) supports an opt-in
+                // "alternate blocks" toggle that swaps A ↔ B on every other
+                // block for a checkerboard look. Driven by the alternateBlocks
+                // prop set by Step 2.
+                const shooflySwap = pattern === "shoofly" && alternateBlocks && (i + j) % 2 === 1;
+                const swap = snowballSwap || shooflySwap;
                 return (
                   <svg
                     key={`${i}-${j}`}
@@ -203,7 +214,7 @@ export function QuiltLayoutPreview({
                         assignments={assignments}
                         photos={photos}
                         irishPlain={irishPlain}
-                        swap={snowballSwap}
+                        swap={swap}
                       />
                     )}
                   </svg>
@@ -284,7 +295,8 @@ function MiniBlock({
   photos?: Partial<Record<FabricKey, string>>;
   irishPlain?: boolean;
   /** Snowball Block: when true, swap which fabric is the main square vs. the
-   *  corner accent (used on alternating grid cells to create the checkerboard). */
+   *  corner accent. Shoofly: when true, swap Fabric A ↔ Fabric B for the
+   *  alternate-blocks checkerboard. Used on alternating grid cells. */
   swap?: boolean;
 }) {
   // Fallback resolves through the pattern definition (single source of truth
@@ -734,6 +746,41 @@ function MiniBlock({
           <rect x={0} y={100} width={100} height={100} fill={b} />
           <rect x={100} y={100} width={100} height={100} fill={a} />
           <polygon points="100,50 150,100 100,150 50,100" fill={knot} />
+        </>
+      );
+    }
+    case "shoofly": {
+      // Shoofly full-quilt tile. Matches the single-block diagram exactly.
+      // When swap is true (alternateBlocks + odd cell), Fabric A and B trade
+      // roles for the checkerboard alternation.
+      const bgFab = get("bg", "A");
+      const accentFab = get("accent", "B");
+      const bg = swap ? accentFab : bgFab;
+      const accent = swap ? bgFab : accentFab;
+      const u = 200 / 3;
+      const corners: Array<[number, number, "TL" | "TR" | "BL" | "BR"]> = [
+        [0, 0, "BR"],
+        [2, 0, "BL"],
+        [0, 2, "TR"],
+        [2, 2, "TL"],
+      ];
+      const opp = { TL: "BR", BR: "TL", TR: "BL", BL: "TR" } as const;
+      const tri = (col: number, row: number, c: "TL" | "TR" | "BL" | "BR") => {
+        const x = col * u, y = row * u;
+        const TL = `${x},${y}`, TR = `${x + u},${y}`, BL = `${x},${y + u}`, BR = `${x + u},${y + u}`;
+        const map = { TL: `${TL} ${TR} ${BL}`, TR: `${TL} ${TR} ${BR}`, BL: `${TL} ${BL} ${BR}`, BR: `${TR} ${BL} ${BR}` };
+        return map[c];
+      };
+      return (
+        <>
+          <rect width={200} height={200} fill={bg} />
+          <rect x={u} y={u} width={u} height={u} fill={accent} />
+          {corners.map(([c, r, sc]) => (
+            <g key={`${c}-${r}`}>
+              <polygon points={tri(c, r, sc)} fill={accent} />
+              <polygon points={tri(c, r, opp[sc])} fill={bg} />
+            </g>
+          ))}
         </>
       );
     }

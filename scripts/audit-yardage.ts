@@ -1395,6 +1395,93 @@ console.log("\n=== Bow Tie: 50×65, 12\" block, no border, 2\" sashing ===");
 }
 
 // =========================================================================
+// SHOOFLY — 3×3 grid, 2 fabrics, HST corners pointing inward.
+// Block size 12" → u=4" finished. Plain cut = 4.5", HST cut = 4.875".
+// Per block: bg = 4 plain + 2 HST squares; accent = 1 center + 2 HST squares.
+// =========================================================================
+console.log("\n=== Shoofly baseline: 48×60 throw, no sashing, no border, no alt ===");
+{
+  const s = {
+    ...base(),
+    pattern: "shoofly" as const,
+    quiltWidth: 48,
+    quiltHeight: 60,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    alternateBlocks: false,
+    assignments: { bg: "A", accent: "B" } as Record<string, FabricKey>,
+  };
+  // 4×5 = 20 blocks. bg: 80 plain @4.5", 40 HST @4.875". accent: 20 center @4.5", 40 HST @4.875".
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const aPlain = a.pieces.find(p => /side squares/i.test(p.label))!;
+  const aHst = a.pieces.find(p => /HST/i.test(p.label))!;
+  const bCenter = b.pieces.find(p => /center/i.test(p.label))!;
+  const bHst = b.pieces.find(p => /HST/i.test(p.label))!;
+  check("Shoofly A side squares count", aPlain.count, 80);
+  check("Shoofly A side squares size", aPlain.w, 4.5);
+  check("Shoofly A HST count", aHst.count, 40);
+  check("Shoofly A HST size", aHst.w, 4.875);
+  check("Shoofly B center count", bCenter.count, 20);
+  check("Shoofly B center size", bCenter.w, 4.5);
+  check("Shoofly B HST count", bHst.count, 40);
+  check("Shoofly B HST size", bHst.w, 4.875);
+}
+
+console.log("\n=== Shoofly alternate blocks: 4×5 grid = 10 even + 10 odd ===");
+{
+  const s = {
+    ...base(),
+    pattern: "shoofly" as const,
+    quiltWidth: 48,
+    quiltHeight: 60,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    alternateBlocks: true,
+    assignments: { bg: "A", accent: "B" } as Record<string, FabricKey>,
+  };
+  // Even (10 blocks): A=bg, B=accent → A: 40 plain + 20 HST; B: 10 center + 20 HST.
+  // Odd  (10 blocks): B=bg, A=accent → B: 40 plain + 20 HST; A: 10 center + 20 HST.
+  // Pooled: A: 40 plain + 10 center + (20+20)=40 HST; B: 40 plain + 10 center + 40 HST.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const aHst = a.pieces.find(p => /HST/i.test(p.label))!;
+  const bHst = b.pieces.find(p => /HST/i.test(p.label))!;
+  check("Shoofly alt A HST total", aHst.count, 40);
+  check("Shoofly alt B HST total", bHst.count, 40);
+  // A has both plain side squares (bg role) AND center squares (flipped role).
+  const aPlain = a.pieces.find(p => /side squares/i.test(p.label))!;
+  const aCenter = a.pieces.find(p => /center/i.test(p.label))!;
+  check("Shoofly alt A plain count", aPlain.count, 40);
+  check("Shoofly alt A center count", aCenter.count, 10);
+}
+
+console.log("\n=== Shoofly with sashing: 4×5 grid, 2\" sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "shoofly" as const,
+    quiltWidth: 60,
+    quiltHeight: 72,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 2,
+    assignments: { bg: "A", accent: "B", sashing: "C" } as Record<string, FabricKey>,
+  };
+  // 4 across, 5 down → vSash=3*5=15, hSash=4*4=16, total=31 at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  // 60/12=5 across, 72/12=6 down → vSash=4*6=24, hSash=5*5=25, total=49.
+  check("Shoofly sash strip count", c.pieces[0].count, 49);
+  check("Shoofly sash strip width", c.pieces[0].h, 2.5);
+  check("Shoofly sash strip length", c.pieces[0].w, 12.5);
+}
+
+// =========================================================================
 // RAIL FENCE — JELLY ROLL PRECUT MODE
 // railsPerStrip = floor(42 / 6.5) = 6.
 // Block size locked to 6". Rails grouped by fabric (3 rail slots).
