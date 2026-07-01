@@ -56,6 +56,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Streak of Lightning quilt block diagram showing a 2x2 grid of half square triangle units forming a peak and valley chevron",
   "bow-tie":
     "Bow Tie quilt block diagram showing a 2x2 grid of plain squares with a small on-point center square forming the knot at the seam intersection",
+  shoofly:
+    "Shoofly quilt block diagram showing a 3x3 grid with four half-square-triangle corners pointing inward, a center accent square, and four plain background side squares",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
