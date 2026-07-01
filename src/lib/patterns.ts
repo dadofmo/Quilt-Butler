@@ -619,6 +619,17 @@ export function getPattern(id: PatternId | null): PatternDef | null {
 }
 
 /**
+ * True when the pattern declares an optional sashing section. Pages should
+ * use this instead of hardcoded pattern-id lists so newly added patterns
+ * with sashing don't silently regress the "Your full quilt" preview or
+ * border-default color math. See patterns-coverage.test for the guardrail.
+ */
+export function patternHasSashingSection(pattern: PatternDef | null): boolean {
+  if (!pattern) return false;
+  return pattern.sections.some((s) => s.id === "sashing");
+}
+
+/**
  * The fabrics a pattern actually uses = unique defaultFabric values across
  * all its sections (border included only when the user picked a border).
  * Returned in canonical order A, B, C, D.
