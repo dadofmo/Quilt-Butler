@@ -1261,7 +1261,64 @@ console.log("\n=== Four Patch: 50×65, 12\" block, no border, 2\" sashing ===");
 
 
 // =========================================================================
-// STREAK OF LIGHTNING
+// AUTUMN TINTS — 4×4 grid of 16 plain squares. Per block: A=8, B=4, C=2, D=2.
+// =========================================================================
+console.log("\n=== Autumn Tints: 50×65, 12\" block, no border, no sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "autumn-tints" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+  };
+  // 4×5 = 20 blocks. u = 3, cut = 3.5. Per strip floor(42.5/3.5) = 12.
+  // A: 8*20=160 squares → strips=ceil(160/12)=14 → inches=14*3.5=49.
+  // B: 4*20=80  squares → strips=ceil(80/12)=7   → inches=7*3.5=24.5.
+  // C: 2*20=40  squares → strips=ceil(40/12)=4   → inches=4*3.5=14.
+  // D: 2*20=40  squares → strips=ceil(40/12)=4   → inches=4*3.5=14.
+  const r = calculateYardage(s);
+  const expect: Record<string, [number, number, number]> = {
+    A: [160, 14, 49],
+    B: [80, 7, 24.5],
+    C: [40, 4, 14],
+    D: [40, 4, 14],
+  };
+  for (const fab of ["A", "B", "C", "D"] as FabricKey[]) {
+    const f = r.fabrics.find((x) => x.fabric === fab)!;
+    const [count, strips, inches] = expect[fab];
+    check(`AT ${fab} count`, f.pieces[0].count, count);
+    check(`AT ${fab} cut`, f.pieces[0].w, 3.5);
+    check(`AT ${fab} strips`, f.strips[0].count, strips);
+    check(`AT ${fab} inches`, f.totalInches, inches);
+  }
+}
+
+console.log("\n=== Autumn Tints: 50×65, 12\" block, no border, 2\" sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "autumn-tints" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 2,
+    assignments: {
+      dominant: "A",
+      background: "B",
+      accent1: "C",
+      accent2: "D",
+      sashing: "E",
+    } as Record<string, FabricKey>,
+  };
+  // Same block math as above; sashing E: vSash=(4-1)*5=15, hSash=(5-1)*4=16,
+  // total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const e = r.fabrics.find((f) => f.fabric === "E")!;
+  check("AT(sash) E strip count", e.pieces[0].count, 31);
+  check("AT(sash) E strip width", e.pieces[0].h, 2.5);
+  check("AT(sash) E strip length", e.pieces[0].w, 12.5);
+}
+
 // =========================================================================
 console.log("\n=== Streak of Lightning: 50×65, 12\" block, no border, no sashing ===");
 {
