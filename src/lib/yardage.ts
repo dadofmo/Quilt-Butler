@@ -165,9 +165,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isBowTie = s.pattern === "bow-tie";
   const isShoofly = s.pattern === "shoofly";
   const isJacobsLadder = s.pattern === "jacobs-ladder";
+  const isAutumnTints = s.pattern === "autumn-tints";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -1744,6 +1745,68 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Note: sashing separates the blocks and will interrupt the diagonal ladder effect — the classic look uses 0" sashing.`,
       );
     }
+  } else if (s.pattern === "autumn-tints") {
+    // Autumn Tints: 4×4 grid of 16 equal plain squares per block.
+    //   Per block:
+    //     Fabric A (dominant): 8 squares — two solid 2×2 groups (TL + BR corners)
+    //     Fabric B (background): 4 squares
+    //     Fabric C (accent 1): 2 squares
+    //     Fabric D (accent 2): 2 squares
+    // Every square is (blockSize/4) finished, cut at (blockSize/4 + 0.5)".
+    // Piece pooling by fabric letter — matches four-patch behavior — so
+    // two roles sharing a fabric share one labeled pile.
+    const u = s.blockSize / 4;
+    const cut = u + SEAM;
+    const domFab = (s.assignments["dominant"] ?? "A") as FabricKey;
+    const bgFab = (s.assignments["background"] ?? "B") as FabricKey;
+    const acc1Fab = (s.assignments["accent1"] ?? "C") as FabricKey;
+    const acc2Fab = (s.assignments["accent2"] ?? "D") as FabricKey;
+    const perRole: Array<[FabricKey, string, number]> = [
+      [domFab, "dominant", 8],
+      [bgFab, "background", 4],
+      [acc1Fab, "first accent", 2],
+      [acc2Fab, "second accent", 2],
+    ];
+    const pooled: Partial<Record<FabricKey, { roles: string[]; count: number }>> = {};
+    for (const [fab, role, per] of perRole) {
+      const entry = (pooled[fab] ??= { roles: [], count: 0 });
+      entry.roles.push(role);
+      entry.count += per * blockCount;
+    }
+    for (const fab of ALL_FABRIC_KEYS) {
+      const entry = pooled[fab];
+      if (!entry || entry.count <= 0) continue;
+      const label = `${entry.roles.join(" & ")} squares`;
+      addSquares(reqs[fab], label.charAt(0).toUpperCase() + label.slice(1), entry.count, cut, s.fabricWidth);
+    }
+
+    notes.push(
+      `Each block is a 4×4 grid of 16 equal squares — every square finishes at ${u.toFixed(2)}" and is cut at ${cut.toFixed(2)}" × ${cut.toFixed(2)}". No triangles, no diagonals.`,
+    );
+    const breakdown = perRole.map(
+      ([fab, role, per]) => `${per * blockCount} ${role} squares of Fabric ${fab}`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${breakdown.join(", ")}. Fabric ${domFab} forms two solid 2×2 corner groups (top-left + bottom-right) in every block.`,
+    );
+    notes.push(
+      `Autumn Tints Assembly Tip: for each block, arrange 16 squares in the 4×4 grid shown in the diagram — Fabric ${domFab} in a solid 2×2 at the top-left and again at the bottom-right, Fabric ${bgFab} in 4 squares, Fabric ${acc1Fab} in 2 squares, and Fabric ${acc2Fab} in 2 squares (see diagram for exact placement — the block has 180° rotational symmetry). Sew each row of 4 squares together with a scant 1/4" seam, pressing seams in alternating directions row by row so they nest. Then join the 4 rows. When laying out the finished quilt, keep every block in the same orientation — the rotational symmetry of the block itself creates the diagonal chain of Fabric ${domFab} corners that runs across the whole quilt.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Note: sashing separates the blocks and will interrupt the diagonal chain effect — the classic look uses 0" sashing.`,
+      );
+    }
   }
 
 
@@ -1811,7 +1874,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "streak-of-lightning" ||
     s.pattern === "bow-tie" ||
     s.pattern === "shoofly" ||
-    s.pattern === "jacobs-ladder";
+    s.pattern === "jacobs-ladder" ||
+    s.pattern === "autumn-tints";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

@@ -60,6 +60,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Shoofly quilt block diagram showing a 3x3 grid with four half-square-triangle corners pointing inward, a center accent square, and four plain background side squares",
   "jacobs-ladder":
     "Jacob's Ladder quilt block diagram showing a 6x6 grid built from five four-patches at the four corners and center plus four large half-square-triangle units on the edges, with the accent triangles forming the classic diagonal ladder band across the block",
+  "autumn-tints":
+    "Autumn Tints quilt block diagram showing a 4x4 grid of 16 plain squares with two solid 2x2 dominant fabric corners on the top-left and bottom-right, four background squares, and two accent fabrics placed on opposite corners with 180 degree rotational symmetry",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -569,6 +571,37 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         }
       }
       return <svg {...common}>{nodes}</svg>;
+    }
+    case "autumn-tints": {
+      // 4×4 grid (u = 90/4 = 22.5). Layout mirrors PatternDiagram exactly.
+      //   Row 0: A A B D
+      //   Row 1: A A C B
+      //   Row 2: B C A A
+      //   Row 3: D B A A
+      const u = 90 / 4;
+      const layout: string[][] = [
+        ["A", "A", "B", "D"],
+        ["A", "A", "C", "B"],
+        ["B", "C", "A", "A"],
+        ["D", "B", "A", "A"],
+      ];
+      const fillMap: Record<string, string> = { A: C.a, B: C.b, C: C.c, D: C.d };
+      return (
+        <svg {...common}>
+          {layout.flatMap((row, r) =>
+            row.map((k, c) => (
+              <rect
+                key={`${r}-${c}`}
+                x={c * u}
+                y={r * u}
+                width={u}
+                height={u}
+                fill={fillMap[k]}
+              />
+            )),
+          )}
+        </svg>
+      );
     }
   }
 }
