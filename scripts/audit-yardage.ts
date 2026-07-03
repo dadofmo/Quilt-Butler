@@ -1320,6 +1320,8 @@ console.log("\n=== Autumn Tints: 50×65, 12\" block, no border, 2\" sashing ==="
 }
 
 // =========================================================================
+// STREAK OF LIGHTNING
+// =========================================================================
 console.log("\n=== Streak of Lightning: 50×65, 12\" block, no border, no sashing ===");
 {
   const s = {
