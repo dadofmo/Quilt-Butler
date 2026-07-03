@@ -24,7 +24,8 @@ export type PatternId =
   | "streak-of-lightning"
   | "bow-tie"
   | "shoofly"
-  | "jacobs-ladder";
+  | "jacobs-ladder"
+  | "autumn-tints";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"

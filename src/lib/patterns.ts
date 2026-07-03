@@ -645,6 +645,46 @@ export const PATTERNS: PatternDef[] = [
       borderSection,
     ],
   },
+  {
+    id: "autumn-tints",
+    name: "Autumn Tints",
+    hasMath: true,
+    intro:
+      "A beginner-friendly 4-color block made entirely of plain squares — no triangles, no diagonal cuts. Each block is a 4×4 grid of 16 equal squares: Fabric A (dominant) fills two solid 2×2 corner groups on the top-left and bottom-right, Fabric B (background) fills 4 squares, and two accent fabrics (C and D) each appear in 2 squares placed on opposite corners. Because the block has 180° rotational symmetry, when you tile it across a quilt the dominant corners chain into a strong diagonal secondary pattern.",
+    sections: [
+      {
+        id: "dominant",
+        label: "Dominant squares (Fabric A — 8 per block)",
+        defaultFabric: "A",
+        hint: "The two 2×2 corner groups (top-left + bottom-right of every block). This is your main fabric — 8 squares per block.",
+      },
+      {
+        id: "background",
+        label: "Background squares (Fabric B — 4 per block)",
+        defaultFabric: "B",
+        hint: "The 4 background squares that separate the dominant corners from the accents — usually a light neutral so the accents pop.",
+      },
+      {
+        id: "accent1",
+        label: "First accent (Fabric C — 2 per block)",
+        defaultFabric: "C",
+        hint: "Two squares per block placed on opposite corners of the block interior.",
+      },
+      {
+        id: "accent2",
+        label: "Second accent (Fabric D — 2 per block)",
+        defaultFabric: "D",
+        hint: "Two squares per block placed on the other pair of opposite corners.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "E",
+        hint: "Optional strips of fabric that separate each Autumn Tints block — set sashing to 0\" on the previous step for the classic look where the dominant corners chain across neighboring blocks.",
+      },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
