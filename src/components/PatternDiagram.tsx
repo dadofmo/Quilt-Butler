@@ -767,6 +767,52 @@ function renderInner(
         </>
       );
     }
+    case "autumn-tints": {
+      // 4×4 grid of 16 plain squares. Rotationally symmetric layout:
+      //   Row 0: A A B D
+      //   Row 1: A A C B
+      //   Row 2: B C A A
+      //   Row 3: D B A A
+      // Fabric A forms two solid 2×2 corner groups (TL + BR). Subtle white
+      // grid lines match nine-patch / plus-block style so beginners can see
+      // each cut piece clearly.
+      const dom = get("dominant", "A");
+      const bg = get("background", "B");
+      const acc1 = get("accent1", "C");
+      const acc2 = get("accent2", "D");
+      const u = 200 / 4;
+      const layout: string[][] = [
+        ["A", "A", "B", "D"],
+        ["A", "A", "C", "B"],
+        ["B", "C", "A", "A"],
+        ["D", "B", "A", "A"],
+      ];
+      const fillMap: Record<string, string> = { A: dom, B: bg, C: acc1, D: acc2 };
+      return (
+        <>
+          {layout.flatMap((row, r) =>
+            row.map((k, c) => (
+              <rect
+                key={`${r}-${c}`}
+                x={c * u}
+                y={r * u}
+                width={u}
+                height={u}
+                fill={fillMap[k]}
+              />
+            )),
+          )}
+          <g stroke="white" strokeWidth={1} opacity={0.5}>
+            {[1, 2, 3].map((k) => (
+              <g key={k}>
+                <line x1={k * u} y1={0} x2={k * u} y2={200} />
+                <line x1={0} y1={k * u} x2={200} y2={k * u} />
+              </g>
+            ))}
+          </g>
+        </>
+      );
+    }
   }
 }
 

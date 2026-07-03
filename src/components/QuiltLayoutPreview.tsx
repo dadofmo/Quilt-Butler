@@ -832,6 +832,39 @@ function MiniBlock({
       }
       return <>{nodes}</>;
     }
+    case "autumn-tints": {
+      // 4×4 grid of 16 plain squares — no rotation between tiles. The block's
+      // 180° rotational symmetry produces the diagonal secondary automatically
+      // when tiled, so every block draws in the same base orientation.
+      const dom = get("dominant", "A");
+      const bg = get("background", "B");
+      const acc1 = get("accent1", "C");
+      const acc2 = get("accent2", "D");
+      const u = 200 / 4;
+      const layout: string[][] = [
+        ["A", "A", "B", "D"],
+        ["A", "A", "C", "B"],
+        ["B", "C", "A", "A"],
+        ["D", "B", "A", "A"],
+      ];
+      const fillMap: Record<string, string> = { A: dom, B: bg, C: acc1, D: acc2 };
+      return (
+        <>
+          {layout.flatMap((row, r) =>
+            row.map((k, c) => (
+              <rect
+                key={`${r}-${c}`}
+                x={c * u}
+                y={r * u}
+                width={u}
+                height={u}
+                fill={fillMap[k]}
+              />
+            )),
+          )}
+        </>
+      );
+    }
   }
 }
 
