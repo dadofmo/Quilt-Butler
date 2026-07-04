@@ -865,6 +865,59 @@ function MiniBlock({
         </>
       );
     }
+    case "woven-star": {
+      // Full-quilt tile — matches the single-block diagram exactly. No
+      // rotation between tiles so the diamond arms stay consistent.
+      const p1 = get("point1", "A");
+      const p2 = get("point2", "B");
+      const p3 = get("point3", "C");
+      const p4 = get("point4", "D");
+      const bg = get("bg", "E");
+      const u = 200 / 4;
+      const opp = { TL: "BR", BR: "TL", TR: "BL", BL: "TR" } as const;
+      const triHst = (col: number, row: number, c: "TL" | "TR" | "BL" | "BR") => {
+        const x = col * u, y = row * u;
+        const TL = `${x},${y}`, TR = `${x + u},${y}`, BL = `${x},${y + u}`, BR = `${x + u},${y + u}`;
+        const map = { TL: `${TL} ${TR} ${BL}`, TR: `${TL} ${TR} ${BR}`, BL: `${TL} ${BL} ${BR}`, BR: `${TR} ${BL} ${BR}` };
+        return map[c];
+      };
+      const triQst = (col: number, row: number, d: "N" | "E" | "S" | "W") => {
+        const x = col * u, y = row * u, cx = x + u / 2, cy = y + u / 2;
+        const TL = `${x},${y}`, TR = `${x + u},${y}`, BL = `${x},${y + u}`, BR = `${x + u},${y + u}`, C = `${cx},${cy}`;
+        const map = { N: `${TL} ${TR} ${C}`, E: `${TR} ${BR} ${C}`, S: `${BR} ${BL} ${C}`, W: `${BL} ${TL} ${C}` };
+        return map[d];
+      };
+      const edges: Array<[number, number, string, "TL" | "TR" | "BL" | "BR"]> = [
+        [1, 0, p3, "TR"], [2, 0, p1, "TL"],
+        [0, 1, p4, "BL"], [3, 1, p2, "BR"],
+        [0, 2, p1, "TL"], [3, 2, p3, "TR"],
+        [1, 3, p2, "BR"], [2, 3, p4, "BL"],
+      ];
+      const centers: Array<[number, number, Record<"N"|"E"|"S"|"W", string>]> = [
+        [1, 1, { N: p3, W: p4, E: p1, S: p2 }],
+        [2, 1, { N: p1, E: p2, W: p3, S: p4 }],
+        [1, 2, { N: p4, W: p1, E: p3, S: p2 }],
+        [2, 2, { N: p2, E: p3, W: p1, S: p4 }],
+      ];
+      return (
+        <>
+          <rect width={200} height={200} fill={bg} />
+          {edges.map(([c, r, col, sc]) => (
+            <g key={`hst-${c}-${r}`}>
+              <polygon points={triHst(c, r, sc)} fill={col} />
+              <polygon points={triHst(c, r, opp[sc])} fill={bg} />
+            </g>
+          ))}
+          {centers.map(([c, r, dirs]) => (
+            <g key={`qst-${c}-${r}`}>
+              {(["N", "E", "S", "W"] as const).map((d) => (
+                <polygon key={d} points={triQst(c, r, d)} fill={dirs[d]} />
+              ))}
+            </g>
+          ))}
+        </>
+      );
+    }
   }
 }
 
