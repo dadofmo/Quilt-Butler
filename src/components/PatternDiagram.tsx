@@ -813,6 +813,74 @@ function renderInner(
         </>
       );
     }
+    case "woven-star": {
+      // 4×4 grid. Corners = solid bg. 8 edge HSTs (colored diamond tip).
+      // 4 center QSTs (four triangles: N/E/S/W meeting at cell center).
+      const p1 = get("point1", "A");
+      const p2 = get("point2", "B");
+      const p3 = get("point3", "C");
+      const p4 = get("point4", "D");
+      const bg = get("bg", "E");
+      const u = 200 / 4;
+      // HST helpers
+      const opp = { TL: "BR", BR: "TL", TR: "BL", BL: "TR" } as const;
+      const triHst = (col: number, row: number, c: "TL" | "TR" | "BL" | "BR") => {
+        const x = col * u, y = row * u;
+        const TL = `${x},${y}`, TR = `${x + u},${y}`, BL = `${x},${y + u}`, BR = `${x + u},${y + u}`;
+        const map = { TL: `${TL} ${TR} ${BL}`, TR: `${TL} ${TR} ${BR}`, BL: `${TL} ${BL} ${BR}`, BR: `${TR} ${BL} ${BR}` };
+        return map[c];
+      };
+      // QST triangle at direction N/E/S/W (each meets at cell center)
+      const triQst = (col: number, row: number, d: "N" | "E" | "S" | "W") => {
+        const x = col * u, y = row * u, cx = x + u / 2, cy = y + u / 2;
+        const TL = `${x},${y}`, TR = `${x + u},${y}`, BL = `${x},${y + u}`, BR = `${x + u},${y + u}`, C = `${cx},${cy}`;
+        const map = { N: `${TL} ${TR} ${C}`, E: `${TR} ${BR} ${C}`, S: `${BR} ${BL} ${C}`, W: `${BL} ${TL} ${C}` };
+        return map[d];
+      };
+      // Edge HSTs: [col, row, colorFabric, colorCornerOfCell]
+      // Colored triangle sits at OUTER corner of cell so the diamond tip
+      // points away from block center.
+      const edges: Array<[number, number, string, "TL" | "TR" | "BL" | "BR"]> = [
+        [1, 0, p3, "TR"], [2, 0, p1, "TL"],
+        [0, 1, p4, "BL"], [3, 1, p2, "BR"],
+        [0, 2, p1, "TL"], [3, 2, p3, "TR"],
+        [1, 3, p2, "BR"], [2, 3, p4, "BL"],
+      ];
+      // Center QSTs (col, row): { N, E, S, W }
+      const centers: Array<[number, number, Record<"N"|"E"|"S"|"W", string>]> = [
+        [1, 1, { N: p3, W: p4, E: p1, S: p2 }],
+        [2, 1, { N: p1, E: p2, W: p3, S: p4 }],
+        [1, 2, { N: p4, W: p1, E: p3, S: p2 }],
+        [2, 2, { N: p2, E: p3, W: p1, S: p4 }],
+      ];
+      return (
+        <>
+          <rect width={200} height={200} fill={bg} />
+          {edges.map(([c, r, col, sc]) => (
+            <g key={`hst-${c}-${r}`}>
+              <polygon points={triHst(c, r, sc)} fill={col} />
+              <polygon points={triHst(c, r, opp[sc])} fill={bg} />
+            </g>
+          ))}
+          {centers.map(([c, r, dirs]) => (
+            <g key={`qst-${c}-${r}`}>
+              {(["N", "E", "S", "W"] as const).map((d) => (
+                <polygon key={d} points={triQst(c, r, d)} fill={dirs[d]} />
+              ))}
+            </g>
+          ))}
+          {/* Subtle 4×4 grid lines so beginners can see the construction */}
+          <g stroke="white" strokeWidth={1} opacity={0.5}>
+            {[1, 2, 3].map((k) => (
+              <g key={k}>
+                <line x1={k * u} y1={0} x2={k * u} y2={200} />
+                <line x1={0} y1={k * u} x2={200} y2={k * u} />
+              </g>
+            ))}
+          </g>
+        </>
+      );
+    }
   }
 }
 
