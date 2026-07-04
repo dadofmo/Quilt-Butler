@@ -62,6 +62,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Jacob's Ladder quilt block diagram showing a 6x6 grid built from five four-patches at the four corners and center plus four large half-square-triangle units on the edges, with the accent triangles forming the classic diagonal ladder band across the block",
   "autumn-tints":
     "Autumn Tints quilt block diagram showing a 4x4 grid of 16 plain squares with two solid 2x2 dominant fabric corners on the top-left and bottom-right, four background squares, and two accent fabrics placed on opposite corners with 180 degree rotational symmetry",
+  "woven-star":
+    "Woven Star quilt block diagram showing a 4x4 grid with four background corner squares, eight half-square-triangle edge units forming the diamond tips of four interlocking star arms, and four quarter-square-triangle center units where the arms cross through the middle of the block",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
