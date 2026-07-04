@@ -166,9 +166,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isShoofly = s.pattern === "shoofly";
   const isJacobsLadder = s.pattern === "jacobs-ladder";
   const isAutumnTints = s.pattern === "autumn-tints";
+  const isWovenStar = s.pattern === "woven-star";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isWovenStar)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -1807,6 +1808,70 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Note: sashing separates the blocks and will interrupt the diagonal chain effect — the classic look uses 0" sashing.`,
       );
     }
+  } else if (s.pattern === "woven-star") {
+    // Woven Star: 4×4 grid of equal units (u = blockSize / 4).
+    //   Per block:
+    //     Background: 4 corner squares (cut u+0.5) + 4 HST starting squares
+    //                 (cut u+0.875). Each HST pair yields 2 HSTs, so 4 pairs
+    //                 → 8 HSTs (2 per star arm).
+    //     Each star arm (A/B/C/D): 1 HST starting square (u+0.875) that pairs
+    //                              with one bg HST square → 2 HSTs of that
+    //                              arm's fabric. Plus 1 QST starting square
+    //                              (u+1.25) → 4 QST triangles per block.
+    // 4 corner squares (bg) + 8 HST edges + 4 QST center = exact 4×4 layout.
+    const u = s.blockSize / 4;
+    const cornerCut = u + SEAM;
+    const hstCut = u + HST_EXTRA;
+    const qstCut = u + 1.25;
+
+    const p1 = (s.assignments["point1"] ?? "A") as FabricKey;
+    const p2 = (s.assignments["point2"] ?? "B") as FabricKey;
+    const p3 = (s.assignments["point3"] ?? "C") as FabricKey;
+    const p4 = (s.assignments["point4"] ?? "D") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "E") as FabricKey;
+    const armFabs: FabricKey[] = [p1, p2, p3, p4];
+    const armLabels = ["A", "B", "C", "D"];
+
+    addSquares(reqs[bgFab], "Background corner squares", 4 * blockCount, cornerCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "HST starting squares (background)", 4 * blockCount, hstCut, s.fabricWidth);
+    armFabs.forEach((fab, i) => {
+      addSquares(reqs[fab], `HST starting squares (star arm ${armLabels[i]})`, blockCount, hstCut, s.fabricWidth);
+      addSquares(reqs[fab], `QST starting squares (star arm ${armLabels[i]})`, blockCount, qstCut, s.fabricWidth);
+    });
+
+    notes.push(
+      `Each block uses a 4×4 grid where each small unit = ${u.toFixed(2)}" finished. The four corners are plain background squares, the eight edge units are HSTs (one per star-arm tip), and the four center units are QSTs where the arms weave through each other.`,
+    );
+    notes.push(
+      `Per block, cut: 4 background corner squares at ${cornerCut.toFixed(2)}" × ${cornerCut.toFixed(2)}" (Fabric ${bgFab}), 4 background HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" (Fabric ${bgFab}), plus for EACH star arm 1 HST starting square at ${hstCut.toFixed(3)}" and 1 QST starting square at ${qstCut.toFixed(2)}" × ${qstCut.toFixed(2)}" (arms A=${p1}, B=${p2}, C=${p3}, D=${p4}). QST squares are cut larger to absorb the diagonal bias trim on both axes.`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${4 * blockCount} background corners and ${4 * blockCount} background HST squares (Fabric ${bgFab}); ${blockCount} HST square + ${blockCount} QST square each of Fabric ${p1}, ${p2}, ${p3}, ${p4}.`,
+    );
+    notes.push(
+      `HST construction: pair one arm HST starting square with one background HST starting square RST. Draw a diagonal line corner to corner on the lighter square. Sew a scant 1/4" on each side of the line. Cut apart on the line to yield 2 HST units. Press open and trim each unit to ${(u + SEAM).toFixed(3)}" square (finished ${u.toFixed(2)}"). Repeat for each star arm — you'll end up with 2 HSTs per arm (8 total per block).`,
+    );
+    notes.push(
+      `QST construction: each QST unit needs one triangle from all four arm fabrics. Cut each arm's QST square at ${qstCut.toFixed(2)}" (already done above). Slice each square across BOTH diagonals with a rotary cutter — you'll get 4 quarter-triangles per starting square. Rearrange the quarter-triangles so each finished QST unit has one triangle from each of the four arms; sew the four triangles into a square unit. You'll build 4 QST units per block, one for each center cell.`,
+    );
+    notes.push(
+      `Woven Star Assembly Tip: sew all 8 HSTs and all 4 QSTs first, then arrange the 4×4 grid — background corners at the four corners, HSTs on the eight edges (oriented so each colored triangle points OUTWARD to be the "tip" of its diamond), and QSTs in the four center cells (rotated so each arm's triangles line up with the adjacent HST of the same fabric — this is what creates the woven look). Sew each row of 4 units together with a scant 1/4" seam, pressing seams in alternating directions row by row so they nest. Then join the 4 rows. Keep every block in the same orientation across the quilt.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "F") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
@@ -1875,7 +1940,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "bow-tie" ||
     s.pattern === "shoofly" ||
     s.pattern === "jacobs-ladder" ||
-    s.pattern === "autumn-tints";
+    s.pattern === "autumn-tints" ||
+    s.pattern === "woven-star";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

@@ -685,6 +685,52 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "F" },
     ],
   },
+  {
+    id: "woven-star",
+    name: "Woven Star",
+    hasMath: true,
+    intro:
+      "The Woven Star is a striking 4×4 grid block that reads as four interlocking diamond arms crossing through a shared center. The four corners are plain background squares. Eight edge units are Half Square Triangles (HSTs) — each with a colored diamond tip and a background triangle. The four center units are Quarter Square Triangles (QSTs) where the four diamond arms weave over and under each other. Each of the four star arms uses its own fabric (A, B, C, D) so the woven effect really pops against the background (E).",
+    sections: [
+      {
+        id: "point1",
+        label: "Star arm A",
+        defaultFabric: "A",
+        hint: "The first of four star-arm fabrics — forms one interlocking diamond across the block.",
+      },
+      {
+        id: "point2",
+        label: "Star arm B",
+        defaultFabric: "B",
+        hint: "The second star-arm fabric — pick a contrasting color so the diamonds weave visibly.",
+      },
+      {
+        id: "point3",
+        label: "Star arm C",
+        defaultFabric: "C",
+        hint: "The third star-arm fabric.",
+      },
+      {
+        id: "point4",
+        label: "Star arm D",
+        defaultFabric: "D",
+        hint: "The fourth star-arm fabric — completes the four-way woven look.",
+      },
+      {
+        id: "bg",
+        label: "Background",
+        defaultFabric: "E",
+        hint: "The four plain corner squares and the background triangles behind the diamond tips — usually a light neutral so the arms pop.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "F",
+        hint: "Optional strips of fabric that separate each Woven Star block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "G" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
