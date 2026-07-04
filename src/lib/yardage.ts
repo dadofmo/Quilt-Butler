@@ -1940,7 +1940,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "bow-tie" ||
     s.pattern === "shoofly" ||
     s.pattern === "jacobs-ladder" ||
-    s.pattern === "autumn-tints";
+    s.pattern === "autumn-tints" ||
+    s.pattern === "woven-star";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
