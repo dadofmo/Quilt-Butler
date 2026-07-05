@@ -1665,59 +1665,56 @@ console.log("\n=== Jacob's Ladder with sashing: 4×5 grid, 2\" sashing ===");
 
 
 // =========================================================================
-// SUMMARY
+// CARD TRICK — 3×3 grid: 4 corner HSTs + 4 edge QSTs + 1 center QST per block
 // =========================================================================
-// =========================================================================
-// WOVEN STAR — 4×4 grid: 4 bg corners + 8 edge HSTs + 4 center QSTs per block
-// =========================================================================
-console.log("\n=== Woven Star: 50×65, 12\" block, no border, no sashing ===");
+console.log("\n=== Card Trick: 50×65, 12\" block, no border, no sashing ===");
 {
   const s = {
     ...base(),
-    pattern: "woven-star" as const,
+    pattern: "card-trick" as const,
     blockSize: 12,
     borderWidth: 0,
     sashingWidth: 0,
   };
-  // 4×5=20 blocks. u=3. cornerCut=3.5, hstCut=3.875, qstCut=4.25.
-  // BG(E): 80 corners@3.5 (perStrip=12, strips=7, inches=24.5) + 80 HST@3.875 (perStrip=10, strips=8, inches=31) → 55.5
-  // Each arm A/B/C/D: 20 HST@3.875 (strips=2, inches=7.75) + 20 QST@4.25 (perStrip=10, strips=2, inches=8.5) → 16.25
+  // 4×5=20 blocks. u=4. hstCut=4.875, qstCut=5.25.
+  // Per block:
+  //   Bg(E): 4 HST + 4 QST → across 20 blocks: 80 HST + 80 QST
+  //   Each card (A/B/C/D): 1 HST + 3 QST → across 20 blocks: 20 HST + 60 QST
   const r = calculateYardage(s);
   const e = r.fabrics.find(f => f.fabric === "E")!;
-  check("WS E buckets", e.pieces.length, 2);
-  check("WS E corner count", e.pieces[0].count, 80);
-  check("WS E corner cut", e.pieces[0].w, 3.5);
-  check("WS E HST count", e.pieces[1].count, 80);
-  check("WS E HST cut", e.pieces[1].w, 3.875);
-  check("WS E inches", e.totalInches, 55.5);
+  check("CT E buckets", e.pieces.length, 2);
+  check("CT E HST count", e.pieces[0].count, 80);
+  check("CT E HST cut", e.pieces[0].w, 4.875);
+  check("CT E QST count", e.pieces[1].count, 80);
+  check("CT E QST cut", e.pieces[1].w, 5.25);
   for (const fab of ["A", "B", "C", "D"] as FabricKey[]) {
     const f = r.fabrics.find(x => x.fabric === fab)!;
-    check(`WS ${fab} buckets`, f.pieces.length, 2);
-    check(`WS ${fab} HST count`, f.pieces[0].count, 20);
-    check(`WS ${fab} HST cut`, f.pieces[0].w, 3.875);
-    check(`WS ${fab} QST count`, f.pieces[1].count, 20);
-    check(`WS ${fab} QST cut`, f.pieces[1].w, 4.25);
-    check(`WS ${fab} inches`, f.totalInches, 16.25);
+    check(`CT ${fab} buckets`, f.pieces.length, 2);
+    check(`CT ${fab} HST count`, f.pieces[0].count, 20);
+    check(`CT ${fab} HST cut`, f.pieces[0].w, 4.875);
+    check(`CT ${fab} QST count`, f.pieces[1].count, 60);
+    check(`CT ${fab} QST cut`, f.pieces[1].w, 5.25);
   }
 }
 
-console.log("\n=== Woven Star: 50×65, 12\" block, 2\" sashing ===");
+console.log("\n=== Card Trick: 50×65, 12\" block, 2\" sashing ===");
 {
   const s = {
     ...base(),
-    pattern: "woven-star" as const,
+    pattern: "card-trick" as const,
     blockSize: 12,
     borderWidth: 0,
     sashingWidth: 2,
-    assignments: { point1: "A", point2: "B", point3: "C", point4: "D", bg: "E", sashing: "F" } as Record<string, FabricKey>,
+    assignments: { cardA: "A", cardB: "B", cardC: "C", cardD: "D", bg: "E", sashing: "F" } as Record<string, FabricKey>,
   };
   // vSash=(4-1)*5=15, hSash=(5-1)*4=16, total=31 strips at 2.5"×12.5".
   const r = calculateYardage(s);
   const f = r.fabrics.find(x => x.fabric === "F")!;
-  check("WS(sash) F strip count", f.pieces[0].count, 31);
-  check("WS(sash) F strip width", f.pieces[0].h, 2.5);
-  check("WS(sash) F strip length", f.pieces[0].w, 12.5);
+  check("CT(sash) F strip count", f.pieces[0].count, 31);
+  check("CT(sash) F strip width", f.pieces[0].h, 2.5);
+  check("CT(sash) F strip length", f.pieces[0].w, 12.5);
 }
+
 
 console.log("\n=========================================");
 if (failures.length === 0) {
