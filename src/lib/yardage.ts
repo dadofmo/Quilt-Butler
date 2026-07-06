@@ -1813,14 +1813,15 @@ export function calculateYardage(s: PlannerState): CalcResult {
     //   4 corner HSTs (one per card + background) — 1 HST unit needed per
     //     card, one starter pair (u+0.875) yields 2 HSTs (use 1, waste 1).
     //     → 1 HST starter of each card fabric + 4 HST starters of bg.
-    //   4 edge QST units (3-triangle): each cell needs 1 bg quarter + 2 card
-    //     quarters (from 2 adjacent cards). Convention: 1 QST starter
-    //     (u+1.25) per needed quarter, discard excess.
-    //     → 4 bg QST starters + 2 QST starters per card (each card is in 2
-    //       edge cells).
+    //   4 edge QST units (4-triangle): each cell needs 1 bg quarter + 3 card
+    //     quarters (2 from the card that lies "on top" in that cell, 1 from
+    //     its neighbor). Convention: 1 QST starter (u+1.25) per needed
+    //     quarter, discard excess.
+    //     → 4 bg QST starters + 3 QST starters per card across the edges
+    //       (2 in its "double" cell + 1 in its neighbor's cell).
     //   1 center QST unit: 4 quarters, one per card.
     //     → 1 QST starter per card.
-    //   Per-card QST total: 2 (edges) + 1 (center) = 3 QST starters.
+    //   Per-card QST total: 3 (edges) + 1 (center) = 4 QST starters.
     const u = s.blockSize / 3;
     const hstCut = u + HST_EXTRA;
     const qstCut = u + 1.25;
