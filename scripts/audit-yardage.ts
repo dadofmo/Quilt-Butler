@@ -1679,7 +1679,8 @@ console.log("\n=== Card Trick: 50×65, 12\" block, no border, no sashing ===");
   // 4×5=20 blocks. u=4. hstCut=4.875, qstCut=5.25.
   // Per block:
   //   Bg(E): 4 HST + 4 QST → across 20 blocks: 80 HST + 80 QST
-  //   Each card (A/B/C/D): 1 HST + 3 QST → across 20 blocks: 20 HST + 60 QST
+  //   Each card (A/B/C/D): 1 HST + 4 QST (3 edge quarters + 1 center)
+  //     → across 20 blocks: 20 HST + 80 QST
   const r = calculateYardage(s);
   const e = r.fabrics.find(f => f.fabric === "E")!;
   check("CT E buckets", e.pieces.length, 2);
@@ -1692,7 +1693,7 @@ console.log("\n=== Card Trick: 50×65, 12\" block, no border, no sashing ===");
     check(`CT ${fab} buckets`, f.pieces.length, 2);
     check(`CT ${fab} HST count`, f.pieces[0].count, 20);
     check(`CT ${fab} HST cut`, f.pieces[0].w, 4.875);
-    check(`CT ${fab} QST count`, f.pieces[1].count, 60);
+    check(`CT ${fab} QST count`, f.pieces[1].count, 80);
     check(`CT ${fab} QST cut`, f.pieces[1].w, 5.25);
   }
 }

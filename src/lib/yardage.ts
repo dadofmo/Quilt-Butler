@@ -1838,23 +1838,23 @@ export function calculateYardage(s: PlannerState): CalcResult {
     addSquares(reqs[bgFab], "QST starting squares (edge backgrounds)", 4 * blockCount, qstCut, s.fabricWidth);
     cardFabs.forEach((fab, i) => {
       addSquares(reqs[fab], `HST starting squares (Card ${cardLabels[i]} corner)`, blockCount, hstCut, s.fabricWidth);
-      addSquares(reqs[fab], `QST starting squares (Card ${cardLabels[i]} — 2 edge + 1 center)`, 3 * blockCount, qstCut, s.fabricWidth);
+      addSquares(reqs[fab], `QST starting squares (Card ${cardLabels[i]} — 3 edge + 1 center)`, 4 * blockCount, qstCut, s.fabricWidth);
     });
 
     notes.push(
-      `Each block is a 3×3 grid where each cell = ${u.toFixed(2)}" finished. The four corners are HSTs (background + one card), the four edge cells are 3-triangle QST units (background + two neighboring cards), and the center cell is a 4-triangle QST where all four cards meet.`,
+      `Each block is a 3×3 grid where each cell = ${u.toFixed(2)}" finished. The four corners are HSTs (background + one card), the four edge cells are 4-triangle QST units (1 background quarter + 3 card quarters — the card that lies "on top" in that cell contributes 2, its neighbor 1), and the center cell is a 4-triangle QST where all four cards meet.`,
     );
     notes.push(
-      `Per block, cut: 4 background HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" (Fabric ${bgFab}), 4 background QST starting squares at ${qstCut.toFixed(2)}" × ${qstCut.toFixed(2)}" (Fabric ${bgFab}), and for EACH card 1 HST starting square at ${hstCut.toFixed(3)}" + 3 QST starting squares at ${qstCut.toFixed(2)}" (cards A=${cA}, B=${cB}, C=${cC}, D=${cD}). QST squares are cut larger to absorb the diagonal bias trim on both axes.`,
+      `Per block, cut: 4 background HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" (Fabric ${bgFab}), 4 background QST starting squares at ${qstCut.toFixed(2)}" × ${qstCut.toFixed(2)}" (Fabric ${bgFab}), and for EACH card 1 HST starting square at ${hstCut.toFixed(3)}" + 4 QST starting squares at ${qstCut.toFixed(2)}" (cards A=${cA}, B=${cB}, C=${cC}, D=${cD}). QST squares are cut larger to absorb the diagonal bias trim on both axes.`,
     );
     notes.push(
-      `Across all ${blockCount} blocks: ${4 * blockCount} background HST squares and ${4 * blockCount} background QST squares (Fabric ${bgFab}); for each card, ${blockCount} HST square + ${3 * blockCount} QST squares (Fabrics ${cA}, ${cB}, ${cC}, ${cD}).`,
+      `Across all ${blockCount} blocks: ${4 * blockCount} background HST squares and ${4 * blockCount} background QST squares (Fabric ${bgFab}); for each card, ${blockCount} HST square + ${4 * blockCount} QST squares (Fabrics ${cA}, ${cB}, ${cC}, ${cD}).`,
     );
     notes.push(
       `HST construction (corner units): pair one card HST starting square with one background HST starting square RST. Draw a diagonal line corner to corner on the lighter square. Sew a scant 1/4" on each side of the line. Cut apart on the line to yield 2 HST units — use one for this corner and set the extra aside (or use it in another project). Trim each unit to ${(u + SEAM).toFixed(3)}" square. Repeat for each of the 4 corners so every card fabric has its own HST corner.`,
     );
     notes.push(
-      `QST construction (edge + center units): cut each QST starting square at ${qstCut.toFixed(2)}", then slice each square across BOTH diagonals — you'll get 4 quarter-triangles per starting square. For each of the 4 edge cells, combine 1 background quarter with 2 quarters from the two neighboring cards. For the 1 center cell, combine 1 quarter from EACH of the four cards so all four card fabrics meet at the block's center point. Sew the quarters into square units, trimming to ${(u + SEAM).toFixed(3)}" finished.`,
+      `QST construction (edge + center units): cut each QST starting square at ${qstCut.toFixed(2)}", then slice each square across BOTH diagonals — you'll get 4 quarter-triangles per starting square. For each of the 4 edge cells, combine 1 background quarter (on the outside edge) with 3 card quarters: 2 from the card that lies "on top" in that cell and 1 from its neighboring card. For the 1 center cell, combine 1 quarter from EACH of the four cards so all four card fabrics meet at the block's center point. Sew the quarters into square units, trimming to ${(u + SEAM).toFixed(3)}" finished.`,
     );
     notes.push(
       `Card Trick Assembly Tip: build the 9 units first (4 HST corners + 5 QST units — 4 edges and 1 center), then arrange them in the 3×3 grid so each 'card' diamond is centered on one of the four internal grid intersections. Card A occupies the top-left quadrant, Card B the top-right, Card C the bottom-right, and Card D the bottom-left — all four cards meet at the exact center of the block. Sew each row of 3 units together with a scant 1/4" seam, then join the 3 rows. Keep every block in the same orientation across the quilt so the four card colors line up consistently.`,
