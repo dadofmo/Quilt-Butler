@@ -622,11 +622,11 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         { r: 0, c: 0, tris: [["TL TR BL", "bg"], ["TR BR BL", "A"]] },
         { r: 0, c: 1, tris: [["TL TR CC", "bg"], ["TL BL CC", "A"], ["BL BR CC", "A"], ["TR BR CC", "B"]] },
         { r: 0, c: 2, tris: [["TL TR BR", "bg"], ["TL BR BL", "B"]] },
-        { r: 1, c: 0, tris: [["TL BL CC", "bg"], ["TL TR CC", "A"], ["TR BR CC", "A"], ["BL BR CC", "D"]] },
+        { r: 1, c: 0, tris: [["TL BL CC", "bg"], ["TL TR CC", "A"], ["TR BR CC", "D"], ["BL BR CC", "D"]] },
         { r: 1, c: 1, tris: [["TL TR CC", "A"], ["TR BR CC", "B"], ["BL BR CC", "C"], ["TL BL CC", "D"]] },
         { r: 1, c: 2, tris: [["TR BR CC", "bg"], ["TL TR CC", "B"], ["TL BL CC", "B"], ["BL BR CC", "C"]] },
         { r: 2, c: 0, tris: [["TL BL BR", "bg"], ["TL TR BR", "D"]] },
-        { r: 2, c: 1, tris: [["BL BR CC", "bg"], ["TL TR CC", "D"], ["TL BL CC", "D"], ["TR BR CC", "C"]] },
+        { r: 2, c: 1, tris: [["BL BR CC", "bg"], ["TL TR CC", "C"], ["TL BL CC", "D"], ["TR BR CC", "C"]] },
         { r: 2, c: 2, tris: [["BL BR TR", "bg"], ["TL TR BL", "C"]] },
       ];
       return (
