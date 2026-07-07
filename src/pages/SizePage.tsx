@@ -2,7 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { SIZE_PRESETS, setPlanner, usePlanner } from "@/lib/planner-store";
-import { getPattern } from "@/lib/patterns";
+import { getPattern, patternHasSashingSection } from "@/lib/patterns";
 import { useState, useMemo, useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
 
