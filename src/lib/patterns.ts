@@ -694,25 +694,25 @@ export const PATTERNS: PatternDef[] = [
     sections: [
       {
         id: "cardA",
-        label: "Card A",
+        label: "Top Left Card",
         defaultFabric: "A",
         hint: "The first card diamond — sits in the top-left quadrant of the block.",
       },
       {
         id: "cardB",
-        label: "Card B",
+        label: "Top Right Card",
         defaultFabric: "B",
-        hint: "The second card diamond — top-right quadrant. Pick something that contrasts with Card A.",
+        hint: "The second card diamond — top-right quadrant. Pick something that contrasts with the Top Left Card.",
       },
       {
         id: "cardC",
-        label: "Card C",
+        label: "Bottom Right Card",
         defaultFabric: "C",
         hint: "The third card diamond — bottom-right quadrant.",
       },
       {
         id: "cardD",
-        label: "Card D",
+        label: "Bottom Left Card",
         defaultFabric: "D",
         hint: "The fourth card diamond — bottom-left quadrant.",
       },

@@ -815,7 +815,7 @@ function renderInner(
     }
     case "card-trick": {
       // 3×3 grid. 4 corner HSTs, 4 edge 3-triangle QSTs, 1 center 4-triangle
-      // QST. Card A occupies the top-left quadrant, B top-right, C bottom-
+      // QST. Top Left Card occupies the top-left quadrant, Top Right Card top-
       // right, D bottom-left — all four cards meet at the exact block center.
       const A = get("cardA", "A");
       const B = get("cardB", "B");
