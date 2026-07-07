@@ -2,7 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { SIZE_PRESETS, setPlanner, usePlanner } from "@/lib/planner-store";
-import { getPattern } from "@/lib/patterns";
+import { getPattern, patternHasSashingSection } from "@/lib/patterns";
 import { useState, useMemo, useEffect } from "react";
 import { AlertTriangle } from "lucide-react";
 
@@ -70,7 +70,12 @@ function SizeStepInner() {
   const isBowTie = planner.pattern === "bow-tie";
   const isShoofly = planner.pattern === "shoofly";
   const isJacobsLadder = planner.pattern === "jacobs-ladder";
-  const isSashed = isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder;
+  // Sashing eligibility is driven by the pattern definition — any pattern
+  // that declares a `sashing` section in patterns.ts automatically gets the
+  // sashing input on this screen. This keeps the Size step in sync with the
+  // Assign Fabrics step (which uses patternHasSashingSection) and prevents
+  // future patterns from silently missing the sashing control here.
+  const isSashed = patternHasSashingSection(getPattern(planner.pattern));
   // "Alternate blocks" toggle — opt-in per pattern via supportsAlternate.
   // Currently only Shoofly opts in; adding more patterns is a data-only change.
   const supportsAlternate = !!getPattern(planner.pattern)?.supportsAlternate;
