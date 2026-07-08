@@ -1717,6 +1717,58 @@ console.log("\n=== Card Trick: 50×65, 12\" block, 2\" sashing ===");
 }
 
 
+// =========================================================================
+// OH SUSANNAH — 4×4 grid: 12 plain outer squares + 4 HSTs in center 2×2
+// =========================================================================
+console.log("\n=== Oh Susannah: 50×65, 12\" block, no border, no sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "oh-susannah" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+  };
+  // 4×5=20 blocks. u=3, plainCut=3.5, hstCut=3.875.
+  // Per block:
+  //   A: 4 plain + 2 HST starters → 80 plain, 40 HST across 20 blocks
+  //   B: 4 plain → 80 plain
+  //   C: 4 plain + 2 HST starters → 80 plain, 40 HST
+  const r = calculateYardage(s);
+  const A = r.fabrics.find(f => f.fabric === "A")!;
+  check("OS A buckets", A.pieces.length, 2);
+  check("OS A plain count", A.pieces[0].count, 80);
+  check("OS A plain cut", A.pieces[0].w, 3.5);
+  check("OS A HST count", A.pieces[1].count, 40);
+  check("OS A HST cut", A.pieces[1].w, 3.875);
+  const B = r.fabrics.find(f => f.fabric === "B")!;
+  check("OS B buckets", B.pieces.length, 1);
+  check("OS B plain count", B.pieces[0].count, 80);
+  const C = r.fabrics.find(f => f.fabric === "C")!;
+  check("OS C plain count", C.pieces[0].count, 80);
+  check("OS C HST count", C.pieces[1].count, 40);
+  check("OS C HST cut", C.pieces[1].w, 3.875);
+}
+
+console.log("\n=== Oh Susannah: 50×65, 12\" block, 2\" sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "oh-susannah" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 2,
+    assignments: { dominant: "A", secondary: "B", bg: "C", sashing: "D" } as Record<string, FabricKey>,
+  };
+  // 31 sashing strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const d = r.fabrics.find(x => x.fabric === "D")!;
+  check("OS(sash) D strip count", d.pieces[0].count, 31);
+  check("OS(sash) D strip width", d.pieces[0].h, 2.5);
+  check("OS(sash) D strip length", d.pieces[0].w, 12.5);
+}
+
+
 console.log("\n=========================================");
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
