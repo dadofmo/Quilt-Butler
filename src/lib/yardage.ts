@@ -1874,6 +1874,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
       notes.push(
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
+    }
   } else if (s.pattern === "oh-susannah") {
     // Oh Susannah: 4×4 grid, u = blockSize/4. Per block:
     //   Fabric A (dominant): 4 plain squares (outer ring) + 2 HST starter
