@@ -167,9 +167,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isJacobsLadder = s.pattern === "jacobs-ladder";
   const isAutumnTints = s.pattern === "autumn-tints";
   const isCardTrick = s.pattern === "card-trick";
+  const isOhSusannah = s.pattern === "oh-susannah";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -1874,6 +1875,72 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "oh-susannah") {
+    // Oh Susannah: 4×4 grid, u = blockSize/4. Per block:
+    //   Fabric A (dominant): 4 plain squares (outer ring) + 2 HST starter
+    //                        squares (2 pairs → 4 HST units, one per center cell)
+    //   Fabric B (secondary): 4 plain squares (outer ring) — no HSTs
+    //   Fabric C (background): 4 plain squares (block corners) + 2 HST starter
+    //                          squares (paired with A to form the 4 center HSTs)
+    // Every plain square finishes at u"; HST starter squares are u+0.875".
+    const u = s.blockSize / 4;
+    const plainCut = u + SEAM;
+    const hstCut = u + HST_EXTRA;
+    const domFab = (s.assignments["dominant"] ?? "A") as FabricKey;
+    const secFab = (s.assignments["secondary"] ?? "B") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "C") as FabricKey;
+
+    const domPlain = 4 * blockCount;
+    const domHst = 2 * blockCount;
+    const secPlain = 4 * blockCount;
+    const bgPlain = 4 * blockCount;
+    const bgHst = 2 * blockCount;
+
+    // Pool per fabric letter so shared letters (e.g. A === C) collapse to one
+    // pile, matching how the other multi-role patterns handle pooling.
+    type Bucket = { plain: number; hst: number };
+    const buckets: Partial<Record<FabricKey, Bucket>> = {};
+    const add = (fab: FabricKey, plain: number, hst: number) => {
+      const b = (buckets[fab] ??= { plain: 0, hst: 0 });
+      b.plain += plain; b.hst += hst;
+    };
+    add(domFab, domPlain, domHst);
+    add(secFab, secPlain, 0);
+    add(bgFab, bgPlain, bgHst);
+    for (const fab of ALL_FABRIC_KEYS) {
+      const b = buckets[fab];
+      if (!b) continue;
+      if (b.plain > 0) addSquares(reqs[fab], "Plain squares", b.plain, plainCut, s.fabricWidth);
+      if (b.hst > 0) addSquares(reqs[fab], "HST starting squares (center 2×2)", b.hst, hstCut, s.fabricWidth);
+    }
+
+    notes.push(
+      `Each block is a 4×4 grid where each cell finishes at ${u.toFixed(2)}". The 12 outer-ring cells are plain squares; the center 2×2 is 4 Half Square Triangle units. Plain squares cut at ${plainCut.toFixed(2)}" × ${plainCut.toFixed(2)}"; HST starting squares cut at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" (finished + 7/8" for the diagonal seam).`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: Fabric ${domFab} = ${domPlain} plain squares + ${domHst} HST starting squares; Fabric ${secFab} = ${secPlain} plain squares; Fabric ${bgFab} = ${bgPlain} plain squares (block corners) + ${bgHst} HST starting squares.`,
+    );
+    notes.push(
+      `HST construction (center 2×2): pair one Fabric ${domFab} HST starting square with one Fabric ${bgFab} HST starting square right sides together (RST). Draw a diagonal line corner to corner on the lighter square. Sew a scant 1/4" on each side of the line. Cut apart on the line to yield 2 HST units. Press open and trim each unit to ${(u + SEAM).toFixed(3)}" square (finished ${u.toFixed(2)}"). Each block needs 4 center HSTs — 2 pairs yield exactly 4.`,
+    );
+    notes.push(
+      `Oh Susannah Assembly Tip: lay out each block in the 4×4 grid — Fabric ${bgFab} in the 4 outer corners, Fabric ${domFab} in the 4 "cross-arm" positions at (top-mid-left), (mid-left-top?), etc. and Fabric ${secFab} in the OTHER 4 outer-ring cells. Rotate each center HST so the Fabric ${domFab} triangle sits at the OUTER corner of its cell and the Fabric ${bgFab} triangle points toward the block CENTER — the 4 background triangles will meet to form a diamond in the middle. Sew each row of 4 units together with a scant 1/4" seam, pressing seams in alternating directions row by row so they nest. Then join the 4 rows. Keep every block in the same orientation across the quilt so the center diamonds line up cleanly.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
@@ -1943,7 +2010,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "shoofly" ||
     s.pattern === "jacobs-ladder" ||
     s.pattern === "autumn-tints" ||
-    s.pattern === "card-trick";
+    s.pattern === "card-trick" ||
+    s.pattern === "oh-susannah";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

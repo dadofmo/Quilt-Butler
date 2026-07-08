@@ -908,6 +908,59 @@ function MiniBlock({
         </>
       );
     }
+    case "oh-susannah": {
+      // Full-quilt tile — matches the single-block diagram exactly. No
+      // rotation so the diamond and cross line up consistently.
+      const A = get("dominant", "A");
+      const B = get("secondary", "B");
+      const bg = get("bg", "C");
+      const u = 200 / 4;
+      const layout: (string | null)[][] = [
+        ["C", "A", "B", "C"],
+        ["B", null, null, "A"],
+        ["A", null, null, "B"],
+        ["C", "B", "A", "C"],
+      ];
+      const fillMap: Record<string, string> = { A, B, C: bg };
+      const hstACorner: Record<string, "TL" | "TR" | "BL" | "BR"> = {
+        "1,1": "TL", "1,2": "TR", "2,1": "BL", "2,2": "BR",
+      };
+      const triPts = (
+        r: number, c: number,
+        corner: "TL" | "TR" | "BL" | "BR",
+        which: "A" | "C",
+      ) => {
+        const x = c * u, y = r * u;
+        const TL = `${x},${y}`, TR = `${x + u},${y}`, BL = `${x},${y + u}`, BR = `${x + u},${y + u}`;
+        const adj = { TL: [TR, BL], TR: [TL, BR], BL: [TL, BR], BR: [TR, BL] } as const;
+        const opp = { TL: BR, TR: BL, BL: TR, BR: TL } as const;
+        const cornerPt = { TL, TR, BL, BR }[corner];
+        const [a1, a2] = adj[corner];
+        return which === "A"
+          ? `${cornerPt} ${a1} ${a2}`
+          : `${opp[corner]} ${a1} ${a2}`;
+      };
+      return (
+        <>
+          {layout.flatMap((row, r) =>
+            row.map((k, c) => {
+              if (k !== null) {
+                return (
+                  <rect key={`p-${r}-${c}`} x={c * u} y={r * u} width={u} height={u} fill={fillMap[k]} />
+                );
+              }
+              const corner = hstACorner[`${r},${c}`];
+              return (
+                <g key={`h-${r}-${c}`}>
+                  <polygon points={triPts(r, c, corner, "A")} fill={A} />
+                  <polygon points={triPts(r, c, corner, "C")} fill={bg} />
+                </g>
+              );
+            }),
+          )}
+        </>
+      );
+    }
   }
 }
 

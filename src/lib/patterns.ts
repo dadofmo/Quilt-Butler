@@ -731,6 +731,40 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "G" },
     ],
   },
+  {
+    id: "oh-susannah",
+    name: "Oh Susannah",
+    hasMath: true,
+    intro:
+      "Oh Susannah is a classic 4×4 block built from just three fabrics: a dominant accent (Fabric A), a secondary accent (Fabric B), and a background (Fabric C). Plain squares run around the outside of the block; four Half Square Triangle units in the center 2×2 meet along their diagonals to form a large background diamond in the middle. The four A squares in the outer ring plus the four A corner triangles of the center HSTs read as a plus/cross around the diamond, with the B squares filling the opposite arms and the C corners quietly framing the whole block.",
+    sections: [
+      {
+        id: "dominant",
+        label: "Dominant accent (Fabric A)",
+        defaultFabric: "A",
+        hint: "Forms the plus/cross around the center diamond — 4 plain squares in the block's outer ring plus the outer-corner triangle of each of the 4 center HST units. Usually your boldest fabric.",
+      },
+      {
+        id: "secondary",
+        label: "Secondary accent (Fabric B)",
+        defaultFabric: "B",
+        hint: "The 4 plain squares in the OTHER pair of outer-ring arms. Pick something that contrasts with Fabric A. Fabric B never appears in the center HSTs.",
+      },
+      {
+        id: "bg",
+        label: "Background (Fabric C)",
+        defaultFabric: "C",
+        hint: "The 4 plain corner squares of the block AND the center-facing triangle of each of the 4 HSTs — those four triangles join to form the large diamond in the middle of the block. Usually a calm/light fabric so the accents pop.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "D",
+        hint: "Optional strips of fabric that separate each Oh Susannah block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

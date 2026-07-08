@@ -64,6 +64,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Autumn Tints quilt block diagram showing a 4x4 grid of 16 plain squares with two solid 2x2 dominant fabric corners on the top-left and bottom-right, four background squares, and two accent fabrics placed on opposite corners with 180 degree rotational symmetry",
   "card-trick":
     "Card Trick quilt block diagram showing a 3x3 grid with four card-colored diamonds set on point, one in each quadrant of the block, meeting at the center and framed by background triangles in the four outer corners",
+  "oh-susannah":
+    "Oh Susannah quilt block diagram showing a 4x4 grid with plain squares around the outside and four half-square-triangle units in the center that meet to form a large diamond of background fabric in the middle of the block",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -641,6 +643,57 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
               />
             ));
           })}
+        </svg>
+      );
+    }
+    case "oh-susannah": {
+      // 4×4 grid (u = 90/4 = 22.5). Plain squares around the outside;
+      // 4 HSTs in the center 2×2 with A at the outer corner and C toward
+      // the block center — the C triangles form a diamond in the middle.
+      const u = 90 / 4;
+      const bg = C.c;
+      const A = C.a;
+      const B = C.b;
+      const layout: (string | null)[][] = [
+        ["C", "A", "B", "C"],
+        ["B", null, null, "A"],
+        ["A", null, null, "B"],
+        ["C", "B", "A", "C"],
+      ];
+      const fillMap: Record<string, string> = { A, B, C: bg };
+      const hstACorner: Record<string, "TL" | "TR" | "BL" | "BR"> = {
+        "1,1": "TL", "1,2": "TR", "2,1": "BL", "2,2": "BR",
+      };
+      const triPts = (r: number, c: number, corner: "TL" | "TR" | "BL" | "BR", which: "A" | "C") => {
+        const x = c * u, y = r * u;
+        const TL = `${x},${y}`, TR = `${x + u},${y}`, BL = `${x},${y + u}`, BR = `${x + u},${y + u}`;
+        // Triangle A = corner + two adjacent corners; Triangle C = opposite corner + same two adjacent.
+        const adj = { TL: [TR, BL], TR: [TL, BR], BL: [TL, BR], BR: [TR, BL] } as const;
+        const opp = { TL: BR, TR: BL, BL: TR, BR: TL } as const;
+        const cornerPt = { TL, TR, BL, BR }[corner];
+        const [a1, a2] = adj[corner];
+        return which === "A"
+          ? `${cornerPt} ${a1} ${a2}`
+          : `${opp[corner]} ${a1} ${a2}`;
+      };
+      return (
+        <svg {...common}>
+          {layout.flatMap((row, r) =>
+            row.map((k, c) => {
+              if (k !== null) {
+                return (
+                  <rect key={`p-${r}-${c}`} x={c * u} y={r * u} width={u} height={u} fill={fillMap[k]} />
+                );
+              }
+              const corner = hstACorner[`${r},${c}`];
+              return (
+                <g key={`h-${r}-${c}`}>
+                  <polygon points={triPts(r, c, corner, "A")} fill={A} />
+                  <polygon points={triPts(r, c, corner, "C")} fill={bg} />
+                </g>
+              );
+            }),
+          )}
         </svg>
       );
     }
