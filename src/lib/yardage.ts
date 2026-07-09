@@ -1941,6 +1941,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
       notes.push(
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
+    }
   } else if (s.pattern === "twin-star") {
     // Twin Star: 3×3 grid, u = blockSize/3. Per block:
     //   Fabric C (bg): 5 plain squares (4 corners + center) + 1 QST starter
