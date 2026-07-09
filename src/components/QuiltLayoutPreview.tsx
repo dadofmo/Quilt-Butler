@@ -961,7 +961,60 @@ function MiniBlock({
         </>
       );
     }
+    case "twin-star": {
+      // Full-quilt tile — matches the single-block diagram exactly. No
+      // rotation between tiles so the star lines up consistently.
+      const A = get("star", "A");
+      const B = get("point", "B");
+      const bg = get("bg", "C");
+      const N = 200, U = N / 3;
+      const CORNERS = ["TL", "TR", "BR", "BL"] as const;
+      const rot = (pt: string, n: number) => {
+        if (pt === "CC") return pt;
+        const i = CORNERS.indexOf(pt as (typeof CORNERS)[number]);
+        return CORNERS[(i + n) % 4];
+      };
+      const cellPts = (r: number, c: number) => {
+        const x = c * U, y = r * U;
+        return {
+          TL: `${x},${y}`, TR: `${x + U},${y}`, BR: `${x + U},${y + U}`,
+          BL: `${x},${y + U}`, CC: `${x + U / 2},${y + U / 2}`,
+        } as Record<string, string>;
+      };
+      const edgeCells = [
+        { r: 0, c: 1, n: 0 },
+        { r: 1, c: 2, n: 1 },
+        { r: 2, c: 1, n: 2 },
+        { r: 1, c: 0, n: 3 },
+      ];
+      const plainCells: Array<[number, number]> = [
+        [0, 0], [0, 2], [2, 0], [2, 2], [1, 1],
+      ];
+      const baseTris = [
+        { pts: ["TL", "BL", "BR"], fill: A },
+        { pts: ["TL", "TR", "CC"], fill: B },
+        { pts: ["TR", "BR", "CC"], fill: bg },
+      ];
+      return (
+        <>
+          {plainCells.map(([r, c]) => (
+            <rect key={`p-${r}-${c}`} x={c * U} y={r * U} width={U} height={U} fill={bg} />
+          ))}
+          {edgeCells.flatMap(({ r, c, n }) => {
+            const p = cellPts(r, c);
+            return baseTris.map((t, i) => (
+              <polygon
+                key={`e-${r}-${c}-${i}`}
+                points={t.pts.map((v) => p[rot(v, n)]).join(" ")}
+                fill={t.fill}
+              />
+            ));
+          })}
+        </>
+      );
+    }
   }
 }
+
 
 
