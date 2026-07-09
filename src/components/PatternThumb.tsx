@@ -66,6 +66,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Card Trick quilt block diagram showing a 3x3 grid with four card-colored diamonds set on point, one in each quadrant of the block, meeting at the center and framed by background triangles in the four outer corners",
   "oh-susannah":
     "Oh Susannah quilt block diagram showing a 4x4 grid with plain squares around the outside and four half-square-triangle units in the center that meet to form a large diamond of background fabric in the middle of the block",
+  "twin-star":
+    "Twin Star quilt block diagram showing a 3x3 grid with plain background corners and center, and four edge cells each split into a large accent triangle plus two small triangles that rotate around the center to form two nested pinwheel-style stars",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
