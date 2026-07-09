@@ -930,6 +930,71 @@ function renderInner(
         </>
       );
     }
+    case "twin-star": {
+      // 3×3 grid on a 200 viewBox. Corners + center = plain background.
+      // Each edge cell is a 3-triangle unit (Fabric A large + Fabric B small
+      // point + Fabric C small bg quarter), rotated 90° CW around the block:
+      //   top-center → middle-right → bottom-center → middle-left.
+      // Base (top-center, n=0):
+      //   A: TL, BL, BR   B: TL, TR, CC   C: TR, BR, CC
+      const A = get("star", "A");
+      const B = get("point", "B");
+      const bg = get("bg", "C");
+      const N = 200, U = N / 3;
+      const CORNERS = ["TL", "TR", "BR", "BL"] as const;
+      const rot = (pt: string, n: number) => {
+        if (pt === "CC") return pt;
+        const i = CORNERS.indexOf(pt as (typeof CORNERS)[number]);
+        return CORNERS[(i + n) % 4];
+      };
+      const cellPts = (r: number, c: number) => {
+        const x = c * U, y = r * U;
+        return {
+          TL: `${x},${y}`, TR: `${x + U},${y}`, BR: `${x + U},${y + U}`,
+          BL: `${x},${y + U}`, CC: `${x + U / 2},${y + U / 2}`,
+        } as Record<string, string>;
+      };
+      const edgeCells: Array<{ r: number; c: number; n: number }> = [
+        { r: 0, c: 1, n: 0 },  // top-center
+        { r: 1, c: 2, n: 1 },  // middle-right
+        { r: 2, c: 1, n: 2 },  // bottom-center
+        { r: 1, c: 0, n: 3 },  // middle-left
+      ];
+      const plainCells: Array<[number, number]> = [
+        [0, 0], [0, 2], [2, 0], [2, 2], [1, 1],
+      ];
+      const baseTris: Array<{ pts: string[]; fill: string }> = [
+        { pts: ["TL", "BL", "BR"], fill: A },
+        { pts: ["TL", "TR", "CC"], fill: B },
+        { pts: ["TR", "BR", "CC"], fill: bg },
+      ];
+      return (
+        <>
+          {plainCells.map(([r, c]) => (
+            <rect key={`p-${r}-${c}`} x={c * U} y={r * U} width={U} height={U} fill={bg} />
+          ))}
+          {edgeCells.flatMap(({ r, c, n }) => {
+            const p = cellPts(r, c);
+            return baseTris.map((t, i) => (
+              <polygon
+                key={`e-${r}-${c}-${i}`}
+                points={t.pts.map((v) => p[rot(v, n)]).join(" ")}
+                fill={t.fill}
+              />
+            ));
+          })}
+          {/* Subtle 3×3 grid lines so beginners can see the construction */}
+          <g stroke="white" strokeWidth={1} opacity={0.45}>
+            {[1, 2].map((k) => (
+              <g key={k}>
+                <line x1={k * U} y1={0} x2={k * U} y2={200} />
+                <line x1={0} y1={k * U} x2={200} y2={k * U} />
+              </g>
+            ))}
+          </g>
+        </>
+      );
+    }
   }
 }
 
