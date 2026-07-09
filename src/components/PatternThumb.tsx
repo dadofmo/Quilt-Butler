@@ -699,6 +699,57 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "twin-star": {
+      // 3×3 grid (u = 90/3 = 30). Corners + center plain background;
+      // 4 edge cells are rotated 3-triangle units. See PatternDiagram
+      // twin-star case for the shared geometry table.
+      const u = 90 / 3;
+      const A = C.a, B = C.b, bg = C.c;
+      const CORNERS = ["TL", "TR", "BR", "BL"] as const;
+      const rot = (pt: string, n: number) => {
+        if (pt === "CC") return pt;
+        const i = CORNERS.indexOf(pt as (typeof CORNERS)[number]);
+        return CORNERS[(i + n) % 4];
+      };
+      const cellPts = (r: number, c: number) => {
+        const x = c * u, y = r * u;
+        return {
+          TL: `${x},${y}`, TR: `${x + u},${y}`, BR: `${x + u},${y + u}`,
+          BL: `${x},${y + u}`, CC: `${x + u / 2},${y + u / 2}`,
+        } as Record<string, string>;
+      };
+      const edgeCells = [
+        { r: 0, c: 1, n: 0 },
+        { r: 1, c: 2, n: 1 },
+        { r: 2, c: 1, n: 2 },
+        { r: 1, c: 0, n: 3 },
+      ];
+      const plainCells: Array<[number, number]> = [
+        [0, 0], [0, 2], [2, 0], [2, 2], [1, 1],
+      ];
+      const baseTris = [
+        { pts: ["TL", "BL", "BR"], fill: A },
+        { pts: ["TL", "TR", "CC"], fill: B },
+        { pts: ["TR", "BR", "CC"], fill: bg },
+      ];
+      return (
+        <svg {...common}>
+          {plainCells.map(([r, c]) => (
+            <rect key={`p-${r}-${c}`} x={c * u} y={r * u} width={u} height={u} fill={bg} />
+          ))}
+          {edgeCells.flatMap(({ r, c, n }) => {
+            const p = cellPts(r, c);
+            return baseTris.map((t, i) => (
+              <polygon
+                key={`e-${r}-${c}-${i}`}
+                points={t.pts.map((v) => p[rot(v, n)]).join(" ")}
+                fill={t.fill}
+              />
+            ));
+          })}
+        </svg>
+      );
+    }
   }
 }
 
