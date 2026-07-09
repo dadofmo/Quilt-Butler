@@ -168,9 +168,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAutumnTints = s.pattern === "autumn-tints";
   const isCardTrick = s.pattern === "card-trick";
   const isOhSusannah = s.pattern === "oh-susannah";
+  const isTwinStar = s.pattern === "twin-star";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -1941,7 +1942,76 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "twin-star") {
+    // Twin Star: 3×3 grid, u = blockSize/3. Per block:
+    //   Fabric C (bg): 5 plain squares (4 corners + center) + 1 QST starter
+    //                  (4 small quarter-triangles, one per edge cell).
+    //   Fabric A (large star): 2 HST starter squares (cut on ONE diagonal only
+    //                          → 4 half-triangles, one per edge cell).
+    //   Fabric B (small point): 1 QST starter (4 quarter-triangles, one per
+    //                           edge cell).
+    // Plain cut u+SEAM; HST cut u+0.875; QST cut u+1.25.
+    const u = s.blockSize / 3;
+    const plainCut = u + SEAM;
+    const hstCut = u + HST_EXTRA;
+    const qstCut = u + 1.25;
+    const starFab = (s.assignments["star"] ?? "A") as FabricKey;
+    const pointFab = (s.assignments["point"] ?? "B") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "C") as FabricKey;
+
+    // Pool by fabric letter so shared letters collapse.
+    type Bucket = { plain: number; hst: number; qst: number };
+    const buckets: Partial<Record<FabricKey, Bucket>> = {};
+    const add = (fab: FabricKey, plain: number, hst: number, qst: number) => {
+      const b = (buckets[fab] ??= { plain: 0, hst: 0, qst: 0 });
+      b.plain += plain; b.hst += hst; b.qst += qst;
+    };
+    add(bgFab, 5 * blockCount, 0, 1 * blockCount);
+    add(starFab, 0, 2 * blockCount, 0);
+    add(pointFab, 0, 0, 1 * blockCount);
+    for (const fab of ALL_FABRIC_KEYS) {
+      const b = buckets[fab];
+      if (!b) continue;
+      if (b.plain > 0) addSquares(reqs[fab], "Plain squares (background corners + center)", b.plain, plainCut, s.fabricWidth);
+      if (b.hst > 0) addSquares(reqs[fab], "HST starting squares (large star triangles)", b.hst, hstCut, s.fabricWidth);
+      if (b.qst > 0) addSquares(reqs[fab], "QST starting squares (small triangles)", b.qst, qstCut, s.fabricWidth);
+    }
+
+    notes.push(
+      `Each block is a 3×3 grid where each cell finishes at ${u.toFixed(2)}". The 4 corners and center cell are plain background squares (Fabric ${bgFab}); the 4 edge cells are 3-triangle units (1 large Fabric ${starFab} triangle + 1 small Fabric ${pointFab} triangle + 1 small Fabric ${bgFab} triangle) rotated 90° around the block to form two nested stars.`,
+    );
+    notes.push(
+      `Per block, cut: 5 background plain squares at ${plainCut.toFixed(2)}" × ${plainCut.toFixed(2)}" (Fabric ${bgFab}); 2 HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" of Fabric ${starFab}; 1 QST starting square at ${qstCut.toFixed(2)}" × ${qstCut.toFixed(2)}" of Fabric ${pointFab}; and 1 QST starting square at ${qstCut.toFixed(2)}" × ${qstCut.toFixed(2)}" of Fabric ${bgFab}.`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: Fabric ${bgFab} = ${5 * blockCount} plain squares + ${blockCount} QST starting squares; Fabric ${starFab} = ${2 * blockCount} HST starting squares; Fabric ${pointFab} = ${blockCount} QST starting squares.`,
+    );
+    notes.push(
+      `HST construction (large star triangles): cut each Fabric ${starFab} HST starting square once corner-to-corner on the diagonal to yield 2 large half-triangles. Each starter square produces 2 large star triangles; each block needs 4, so 2 starter squares per block.`,
+    );
+    notes.push(
+      `QST construction (small triangles): cut each QST starting square across BOTH diagonals to yield 4 quarter-triangles per square. Each block needs 4 small Fabric ${pointFab} quarters (one per edge cell) and 4 small Fabric ${bgFab} quarters (one per edge cell) — so 1 QST square of each fabric per block covers it exactly.`,
+    );
+    notes.push(
+      `Twin Star Assembly Tip: build each edge cell by sewing the small Fabric ${pointFab} + Fabric ${bgFab} quarter-triangles together along their short edges into a triangle unit, then sew that unit onto the large Fabric ${starFab} half-triangle along the cell's diagonal. Trim to ${(u + SEAM).toFixed(3)}" square. Rotate the 4 edge units 90° around the block (top-center → middle-right → bottom-center → middle-left) so all 4 large Fabric ${starFab} triangles spin the same direction — this is what makes the two nested stars appear. Sew each row of 3 units together with a scant 1/4" seam, then join the 3 rows. Keep every block in the same orientation across the quilt so the stars line up consistently.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
+
 
 
 
@@ -2011,7 +2081,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "jacobs-ladder" ||
     s.pattern === "autumn-tints" ||
     s.pattern === "card-trick" ||
-    s.pattern === "oh-susannah";
+    s.pattern === "oh-susannah" ||
+    s.pattern === "twin-star";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

@@ -765,6 +765,40 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "E" },
     ],
   },
+  {
+    id: "twin-star",
+    name: "Twin Star",
+    hasMath: true,
+    intro:
+      "Twin Star is a classic 3×3 block built from just three fabrics. The 4 corners and the center are plain background squares. Each of the 4 edge cells is a 3-triangle unit made of one large accent triangle (Fabric A) plus two small triangles (Fabric B point + Fabric C background quarter). The edge units rotate 90° around the block so Fabric A's large triangles form a bold 4-point pinwheel star radiating from the center, and Fabric B's small triangles form a second, smaller star nested inside it.",
+    sections: [
+      {
+        id: "star",
+        label: "Large star (Fabric A)",
+        defaultFabric: "A",
+        hint: "The 4 big triangles that form the dominant pinwheel star — one per edge cell. Usually your boldest fabric so the star reads clearly.",
+      },
+      {
+        id: "point",
+        label: "Secondary star point (Fabric B)",
+        defaultFabric: "B",
+        hint: "The 4 small triangles that form the nested secondary star. Pick a color that contrasts with both the large star and the background.",
+      },
+      {
+        id: "bg",
+        label: "Background (Fabric C)",
+        defaultFabric: "C",
+        hint: "Fills the 4 corner squares, the center square, and one small triangle in each edge cell. Usually a calm/light fabric so both stars pop.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "D",
+        hint: "Optional strips of fabric that separate each Twin Star block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

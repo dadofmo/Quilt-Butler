@@ -66,6 +66,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Card Trick quilt block diagram showing a 3x3 grid with four card-colored diamonds set on point, one in each quadrant of the block, meeting at the center and framed by background triangles in the four outer corners",
   "oh-susannah":
     "Oh Susannah quilt block diagram showing a 4x4 grid with plain squares around the outside and four half-square-triangle units in the center that meet to form a large diamond of background fabric in the middle of the block",
+  "twin-star":
+    "Twin Star quilt block diagram showing a 3x3 grid with plain background corners and center, and four edge cells each split into a large accent triangle plus two small triangles that rotate around the center to form two nested pinwheel-style stars",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -694,6 +696,57 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
               );
             }),
           )}
+        </svg>
+      );
+    }
+    case "twin-star": {
+      // 3×3 grid (u = 90/3 = 30). Corners + center plain background;
+      // 4 edge cells are rotated 3-triangle units. See PatternDiagram
+      // twin-star case for the shared geometry table.
+      const u = 90 / 3;
+      const A = C.a, B = C.b, bg = C.c;
+      const CORNERS = ["TL", "TR", "BR", "BL"] as const;
+      const rot = (pt: string, n: number) => {
+        if (pt === "CC") return pt;
+        const i = CORNERS.indexOf(pt as (typeof CORNERS)[number]);
+        return CORNERS[(i + n) % 4];
+      };
+      const cellPts = (r: number, c: number) => {
+        const x = c * u, y = r * u;
+        return {
+          TL: `${x},${y}`, TR: `${x + u},${y}`, BR: `${x + u},${y + u}`,
+          BL: `${x},${y + u}`, CC: `${x + u / 2},${y + u / 2}`,
+        } as Record<string, string>;
+      };
+      const edgeCells = [
+        { r: 0, c: 1, n: 0 },
+        { r: 1, c: 2, n: 1 },
+        { r: 2, c: 1, n: 2 },
+        { r: 1, c: 0, n: 3 },
+      ];
+      const plainCells: Array<[number, number]> = [
+        [0, 0], [0, 2], [2, 0], [2, 2], [1, 1],
+      ];
+      const baseTris = [
+        { pts: ["TL", "BL", "BR"], fill: A },
+        { pts: ["TL", "TR", "CC"], fill: B },
+        { pts: ["TR", "BR", "CC"], fill: bg },
+      ];
+      return (
+        <svg {...common}>
+          {plainCells.map(([r, c]) => (
+            <rect key={`p-${r}-${c}`} x={c * u} y={r * u} width={u} height={u} fill={bg} />
+          ))}
+          {edgeCells.flatMap(({ r, c, n }) => {
+            const p = cellPts(r, c);
+            return baseTris.map((t, i) => (
+              <polygon
+                key={`e-${r}-${c}-${i}`}
+                points={t.pts.map((v) => p[rot(v, n)]).join(" ")}
+                fill={t.fill}
+              />
+            ));
+          })}
         </svg>
       );
     }

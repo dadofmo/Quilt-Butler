@@ -27,7 +27,8 @@ export type PatternId =
   | "jacobs-ladder"
   | "autumn-tints"
   | "card-trick"
-  | "oh-susannah";
+  | "oh-susannah"
+  | "twin-star";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
