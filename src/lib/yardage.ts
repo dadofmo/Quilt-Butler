@@ -1944,12 +1944,14 @@ export function calculateYardage(s: PlannerState): CalcResult {
     }
   } else if (s.pattern === "twin-star") {
     // Twin Star: 3×3 grid, u = blockSize/3. Per block:
-    //   Fabric C (bg): 5 plain squares (4 corners + center) + 1 QST starter
-    //                  (4 small quarter-triangles, one per edge cell).
+    //   Fabric C (bg): 5 plain squares (4 corners + center) ONLY — never
+    //                  appears inside any edge unit.
     //   Fabric A (large star): 2 HST starter squares (cut on ONE diagonal only
     //                          → 4 half-triangles, one per edge cell).
     //   Fabric B (small point): 1 QST starter (4 quarter-triangles, one per
     //                           edge cell).
+    //   Fabric D (second point): 1 QST starter (4 quarter-triangles, one per
+    //                            edge cell) — a fully distinct fabric from bg.
     // Plain cut u+SEAM; HST cut u+0.875; QST cut u+1.25.
     const u = s.blockSize / 3;
     const plainCut = u + SEAM;
@@ -1957,6 +1959,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const qstCut = u + 1.25;
     const starFab = (s.assignments["star"] ?? "A") as FabricKey;
     const pointFab = (s.assignments["point"] ?? "B") as FabricKey;
+    const point2Fab = (s.assignments["point2"] ?? "D") as FabricKey;
     const bgFab = (s.assignments["bg"] ?? "C") as FabricKey;
 
     // Pool by fabric letter so shared letters collapse.
@@ -1966,9 +1969,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
       const b = (buckets[fab] ??= { plain: 0, hst: 0, qst: 0 });
       b.plain += plain; b.hst += hst; b.qst += qst;
     };
-    add(bgFab, 5 * blockCount, 0, 1 * blockCount);
+    add(bgFab, 5 * blockCount, 0, 0);
     add(starFab, 0, 2 * blockCount, 0);
     add(pointFab, 0, 0, 1 * blockCount);
+    add(point2Fab, 0, 0, 1 * blockCount);
     for (const fab of ALL_FABRIC_KEYS) {
       const b = buckets[fab];
       if (!b) continue;
@@ -1978,26 +1982,26 @@ export function calculateYardage(s: PlannerState): CalcResult {
     }
 
     notes.push(
-      `Each block is a 3×3 grid where each cell finishes at ${u.toFixed(2)}". The 4 corners and center cell are plain background squares (Fabric ${bgFab}); the 4 edge cells are 3-triangle units (1 large Fabric ${starFab} triangle + 1 small Fabric ${pointFab} triangle + 1 small Fabric ${bgFab} triangle) rotated 90° around the block to form two nested stars.`,
+      `Each block is a 3×3 grid where each cell finishes at ${u.toFixed(2)}". The 4 corners and center cell are plain background squares (Fabric ${bgFab}); the 4 edge cells are 3-triangle units (1 large Fabric ${starFab} triangle + 1 small Fabric ${pointFab} triangle + 1 small Fabric ${point2Fab} triangle) rotated 90° around the block. Fabric ${bgFab} never appears inside an edge unit.`,
     );
     notes.push(
-      `Per block, cut: 5 background plain squares at ${plainCut.toFixed(2)}" × ${plainCut.toFixed(2)}" (Fabric ${bgFab}); 2 HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" of Fabric ${starFab}; 1 QST starting square at ${qstCut.toFixed(2)}" × ${qstCut.toFixed(2)}" of Fabric ${pointFab}; and 1 QST starting square at ${qstCut.toFixed(2)}" × ${qstCut.toFixed(2)}" of Fabric ${bgFab}.`,
+      `Per block, cut: 5 background plain squares at ${plainCut.toFixed(2)}" × ${plainCut.toFixed(2)}" (Fabric ${bgFab}); 2 HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}" of Fabric ${starFab}; 1 QST starting square at ${qstCut.toFixed(2)}" × ${qstCut.toFixed(2)}" of Fabric ${pointFab}; and 1 QST starting square at ${qstCut.toFixed(2)}" × ${qstCut.toFixed(2)}" of Fabric ${point2Fab}.`,
     );
     notes.push(
-      `Across all ${blockCount} blocks: Fabric ${bgFab} = ${5 * blockCount} plain squares + ${blockCount} QST starting squares; Fabric ${starFab} = ${2 * blockCount} HST starting squares; Fabric ${pointFab} = ${blockCount} QST starting squares.`,
+      `Across all ${blockCount} blocks: Fabric ${bgFab} = ${5 * blockCount} plain squares; Fabric ${starFab} = ${2 * blockCount} HST starting squares; Fabric ${pointFab} = ${blockCount} QST starting squares; Fabric ${point2Fab} = ${blockCount} QST starting squares.`,
     );
     notes.push(
       `HST construction (large star triangles): cut each Fabric ${starFab} HST starting square once corner-to-corner on the diagonal to yield 2 large half-triangles. Each starter square produces 2 large star triangles; each block needs 4, so 2 starter squares per block.`,
     );
     notes.push(
-      `QST construction (small triangles): cut each QST starting square across BOTH diagonals to yield 4 quarter-triangles per square. Each block needs 4 small Fabric ${pointFab} quarters (one per edge cell) and 4 small Fabric ${bgFab} quarters (one per edge cell) — so 1 QST square of each fabric per block covers it exactly.`,
+      `QST construction (small triangles): cut each QST starting square across BOTH diagonals to yield 4 quarter-triangles per square. Each block needs 4 small Fabric ${pointFab} quarters (one per edge cell) and 4 small Fabric ${point2Fab} quarters (one per edge cell) — so 1 QST square of each fabric per block covers it exactly.`,
     );
     notes.push(
-      `Twin Star Assembly Tip: build each edge cell by sewing the small Fabric ${pointFab} + Fabric ${bgFab} quarter-triangles together along their short edges into a triangle unit, then sew that unit onto the large Fabric ${starFab} half-triangle along the cell's diagonal. Trim to ${(u + SEAM).toFixed(3)}" square. Rotate the 4 edge units 90° around the block (top-center → middle-right → bottom-center → middle-left) so all 4 large Fabric ${starFab} triangles spin the same direction — this is what makes the two nested stars appear. Sew each row of 3 units together with a scant 1/4" seam, then join the 3 rows. Keep every block in the same orientation across the quilt so the stars line up consistently.`,
+      `Twin Star Assembly Tip: build each edge cell by sewing the small Fabric ${pointFab} + Fabric ${point2Fab} quarter-triangles together along their short edges into a triangle unit, then sew that unit onto the large Fabric ${starFab} half-triangle along the cell's diagonal. Trim to ${(u + SEAM).toFixed(3)}" square. Rotate the 4 edge units 90° around the block (top-center → middle-right → bottom-center → middle-left) so all 4 large Fabric ${starFab} triangles spin the same direction — this is what makes the two nested stars appear. Sew each row of 3 units together with a scant 1/4" seam, then join the 3 rows. Keep every block in the same orientation across the quilt so the stars line up consistently.`,
     );
 
     if (sashWidth > 0) {
-      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
       const sashCutW = sashWidth + SEAM;
       const sashCutL = s.blockSize + SEAM;
       const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
