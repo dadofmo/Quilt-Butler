@@ -1770,7 +1770,7 @@ console.log("\n=== Oh Susannah: 50×65, 12\" block, 2\" sashing ===");
 
 
 // =========================================================================
-// TWIN STAR — 3×3 grid: 5 plain bg squares + 4 large-star HSTs + 4 small QSTs
+// TWIN STAR — 3×3 grid: 5 plain bg squares + 4 large-star HSTs + 4 small B QSTs + 4 small D QSTs
 // =========================================================================
 console.log("\n=== Twin Star: 50×65, 12\" block, no border, no sashing ===");
 {
@@ -1782,22 +1782,26 @@ console.log("\n=== Twin Star: 50×65, 12\" block, no border, no sashing ===");
     sashingWidth: 0,
   };
   // 4×5=20 blocks. u=4. plainCut=4.5, hstCut=4.875, qstCut=5.25.
-  // Per block: A = 2 HST; B = 1 QST; C = 5 plain + 1 QST.
-  // Across 20 blocks: A = 40 HST; B = 20 QST; C = 100 plain + 20 QST.
+  // Per block: A = 2 HST; B = 1 QST; D = 1 QST; C = 5 plain (NO QST — bg
+  // never appears inside an edge unit any more).
+  // Across 20 blocks: A = 40 HST; B = 20 QST; D = 20 QST; C = 100 plain.
   const r = calculateYardage(s);
   const A = r.fabrics.find(f => f.fabric === "A")!;
   check("TS A buckets", A.pieces.length, 1);
   check("TS A HST count", A.pieces[0].count, 40);
   check("TS A HST cut", A.pieces[0].w, 4.875);
   const B = r.fabrics.find(f => f.fabric === "B")!;
+  check("TS B buckets", B.pieces.length, 1);
   check("TS B QST count", B.pieces[0].count, 20);
   check("TS B QST cut", B.pieces[0].w, 5.25);
+  const D = r.fabrics.find(f => f.fabric === "D")!;
+  check("TS D buckets", D.pieces.length, 1);
+  check("TS D QST count", D.pieces[0].count, 20);
+  check("TS D QST cut", D.pieces[0].w, 5.25);
   const C = r.fabrics.find(f => f.fabric === "C")!;
-  check("TS C buckets", C.pieces.length, 2);
+  check("TS C buckets", C.pieces.length, 1);
   check("TS C plain count", C.pieces[0].count, 100);
   check("TS C plain cut", C.pieces[0].w, 4.5);
-  check("TS C QST count", C.pieces[1].count, 20);
-  check("TS C QST cut", C.pieces[1].w, 5.25);
 }
 
 console.log("\n=== Twin Star: 50×65, 12\" block, 2\" sashing ===");
@@ -1808,14 +1812,14 @@ console.log("\n=== Twin Star: 50×65, 12\" block, 2\" sashing ===");
     blockSize: 12,
     borderWidth: 0,
     sashingWidth: 2,
-    assignments: { star: "A", point: "B", bg: "C", sashing: "D" } as Record<string, FabricKey>,
+    assignments: { star: "A", point: "B", point2: "D", bg: "C", sashing: "E" } as Record<string, FabricKey>,
   };
   // 31 sashing strips at 2.5"×12.5".
   const r = calculateYardage(s);
-  const d = r.fabrics.find(x => x.fabric === "D")!;
-  check("TS(sash) D strip count", d.pieces[0].count, 31);
-  check("TS(sash) D strip width", d.pieces[0].h, 2.5);
-  check("TS(sash) D strip length", d.pieces[0].w, 12.5);
+  const e = r.fabrics.find(x => x.fabric === "E")!;
+  check("TS(sash) E strip count", e.pieces[0].count, 31);
+  check("TS(sash) E strip width", e.pieces[0].h, 2.5);
+  check("TS(sash) E strip length", e.pieces[0].w, 12.5);
 }
 
 

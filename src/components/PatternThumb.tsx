@@ -701,10 +701,10 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     }
     case "twin-star": {
       // 3×3 grid (u = 90/3 = 30). Corners + center plain background;
-      // 4 edge cells are rotated 3-triangle units. See PatternDiagram
-      // twin-star case for the shared geometry table.
+      // 4 edge cells are rotated 3-triangle units (A large + B small + D
+      // small). Background (Fabric C) never appears inside edge units.
       const u = 90 / 3;
-      const A = C.a, B = C.b, bg = C.c;
+      const A = C.a, B = C.b, D = C.d, bg = C.c;
       const CORNERS = ["TL", "TR", "BR", "BL"] as const;
       const rot = (pt: string, n: number) => {
         if (pt === "CC") return pt;
@@ -730,7 +730,7 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       const baseTris = [
         { pts: ["TL", "BL", "BR"], fill: A },
         { pts: ["TL", "TR", "CC"], fill: B },
-        { pts: ["TR", "BR", "CC"], fill: bg },
+        { pts: ["TR", "BR", "CC"], fill: D },
       ];
       return (
         <svg {...common}>
