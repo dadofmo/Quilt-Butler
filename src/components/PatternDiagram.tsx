@@ -933,12 +933,14 @@ function renderInner(
     case "twin-star": {
       // 3×3 grid on a 200 viewBox. Corners + center = plain background.
       // Each edge cell is a 3-triangle unit (Fabric A large + Fabric B small
-      // point + Fabric C small bg quarter), rotated 90° CW around the block:
+      // point + Fabric D small second point). Background (Fabric C) NEVER
+      // appears inside an edge unit. Units rotate 90° CW around the block:
       //   top-center → middle-right → bottom-center → middle-left.
       // Base (top-center, n=0):
-      //   A: TL, BL, BR   B: TL, TR, CC   C: TR, BR, CC
+      //   A: TL, BL, BR   B: TL, TR, CC   D: TR, BR, CC
       const A = get("star", "A");
       const B = get("point", "B");
+      const D = get("point2", "D");
       const bg = get("bg", "C");
       const N = 200, U = N / 3;
       const CORNERS = ["TL", "TR", "BR", "BL"] as const;
@@ -966,7 +968,7 @@ function renderInner(
       const baseTris: Array<{ pts: string[]; fill: string }> = [
         { pts: ["TL", "BL", "BR"], fill: A },
         { pts: ["TL", "TR", "CC"], fill: B },
-        { pts: ["TR", "BR", "CC"], fill: bg },
+        { pts: ["TR", "BR", "CC"], fill: D },
       ];
       return (
         <>
