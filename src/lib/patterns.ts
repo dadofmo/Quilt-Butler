@@ -770,7 +770,7 @@ export const PATTERNS: PatternDef[] = [
     name: "Twin Star",
     hasMath: true,
     intro:
-      "Twin Star is a classic 3×3 block built from just three fabrics. The 4 corners and the center are plain background squares. Each of the 4 edge cells is a 3-triangle unit made of one large accent triangle (Fabric A) plus two small triangles (Fabric B point + Fabric C background quarter). The edge units rotate 90° around the block so Fabric A's large triangles form a bold 4-point pinwheel star radiating from the center, and Fabric B's small triangles form a second, smaller star nested inside it.",
+      "Twin Star is a classic 3×3 block built from four fabrics. The 4 corners and the center are plain Fabric C (background) squares. Each of the 4 edge cells is a 3-triangle unit made of one large accent triangle (Fabric A) plus two small triangles (Fabric B point + Fabric D second point). The edge units rotate 90° around the block so Fabric A's large triangles form a bold 4-point pinwheel star radiating from the center, and Fabrics B and D form two nested secondary stars. Fabric C never appears inside the edge units.",
     sections: [
       {
         id: "star",
@@ -782,21 +782,27 @@ export const PATTERNS: PatternDef[] = [
         id: "point",
         label: "Secondary star point (Fabric B)",
         defaultFabric: "B",
-        hint: "The 4 small triangles that form the nested secondary star. Pick a color that contrasts with both the large star and the background.",
+        hint: "One of the two small triangles in each edge cell. Pick a color that contrasts with the large star, the background, and Fabric D.",
+      },
+      {
+        id: "point2",
+        label: "Second star point (Fabric D)",
+        defaultFabric: "D",
+        hint: "The other small triangle in each edge cell — a fully distinct fabric from the background. It forms a second nested star alongside Fabric B.",
       },
       {
         id: "bg",
         label: "Background (Fabric C)",
         defaultFabric: "C",
-        hint: "Fills the 4 corner squares, the center square, and one small triangle in each edge cell. Usually a calm/light fabric so both stars pop.",
+        hint: "Fills the 4 corner squares and the center square only. Never used inside the edge units, so the corners read as clean, plain squares.",
       },
       {
         id: "sashing",
         label: "Sashing between blocks",
-        defaultFabric: "D",
+        defaultFabric: "E",
         hint: "Optional strips of fabric that separate each Twin Star block — set sashing to 0\" on the previous step if you don't want any.",
       },
-      { ...borderSection, defaultFabric: "E" },
+      { ...borderSection, defaultFabric: "F" },
     ],
   },
 ];
