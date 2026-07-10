@@ -963,9 +963,12 @@ function MiniBlock({
     }
     case "twin-star": {
       // Full-quilt tile — matches the single-block diagram exactly. No
-      // rotation between tiles so the star lines up consistently.
+      // rotation between tiles so the star lines up consistently. Fabric C
+      // (background) appears ONLY in corners + center, never inside an edge
+      // unit; the third edge triangle is Fabric D.
       const A = get("star", "A");
       const B = get("point", "B");
+      const D = get("point2", "D");
       const bg = get("bg", "C");
       const N = 200, U = N / 3;
       const CORNERS = ["TL", "TR", "BR", "BL"] as const;
@@ -993,7 +996,7 @@ function MiniBlock({
       const baseTris = [
         { pts: ["TL", "BL", "BR"], fill: A },
         { pts: ["TL", "TR", "CC"], fill: B },
-        { pts: ["TR", "BR", "CC"], fill: bg },
+        { pts: ["TR", "BR", "CC"], fill: D },
       ];
       return (
         <>
