@@ -997,6 +997,55 @@ function renderInner(
         </>
       );
     }
+    case "star-and-cross": {
+      // 5×5 unit grid on a 200 viewBox → u = 40. Rectangles + squares only.
+      // Layout (per spec, scaled from 500→200):
+      //   Corners (2u×2u): top rect (bg, 2u×u) + bottom row of two u×u squares
+      //     (one bg, one accent). Accent square always sits nearest center.
+      //   Cross arms (Fabric C): top/bottom u×2u rectangles + left/right 2u×u
+      //   Center (Fabric D): 1 u×u square at (2u,2u).
+      const bg = get("bg", "A");
+      const acc = get("accent", "B");
+      const cross = get("cross", "C");
+      const center = get("center", "D");
+      const U = 40; // 200 / 5
+      return (
+        <>
+          {/* Top-left corner unit */}
+          <rect x={0} y={0} width={2 * U} height={U} fill={bg} />
+          <rect x={0} y={U} width={U} height={U} fill={bg} />
+          <rect x={U} y={U} width={U} height={U} fill={acc} />
+          {/* Top-right corner unit (mirrored horizontally) */}
+          <rect x={3 * U} y={0} width={2 * U} height={U} fill={bg} />
+          <rect x={3 * U} y={U} width={U} height={U} fill={acc} />
+          <rect x={4 * U} y={U} width={U} height={U} fill={bg} />
+          {/* Bottom-left corner unit (mirrored vertically) */}
+          <rect x={0} y={3 * U} width={U} height={U} fill={bg} />
+          <rect x={U} y={3 * U} width={U} height={U} fill={acc} />
+          <rect x={0} y={4 * U} width={2 * U} height={U} fill={bg} />
+          {/* Bottom-right corner unit (mirrored both) */}
+          <rect x={3 * U} y={3 * U} width={U} height={U} fill={acc} />
+          <rect x={4 * U} y={3 * U} width={U} height={U} fill={bg} />
+          <rect x={3 * U} y={4 * U} width={2 * U} height={U} fill={bg} />
+          {/* Cross arms */}
+          <rect x={2 * U} y={0} width={U} height={2 * U} fill={cross} />
+          <rect x={2 * U} y={3 * U} width={U} height={2 * U} fill={cross} />
+          <rect x={0} y={2 * U} width={2 * U} height={U} fill={cross} />
+          <rect x={3 * U} y={2 * U} width={2 * U} height={U} fill={cross} />
+          {/* Center square */}
+          <rect x={2 * U} y={2 * U} width={U} height={U} fill={center} />
+          {/* Subtle 5×5 grid lines so beginners can see construction */}
+          <g stroke="white" strokeWidth={0.75} opacity={0.35}>
+            {[1, 2, 3, 4].map((k) => (
+              <g key={k}>
+                <line x1={k * U} y1={0} x2={k * U} y2={200} />
+                <line x1={0} y1={k * U} x2={200} y2={k * U} />
+              </g>
+            ))}
+          </g>
+        </>
+      );
+    }
   }
 }
 
