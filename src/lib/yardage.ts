@@ -2015,6 +2015,75 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "star-and-cross") {
+    // Star & Cross: 5×5 unit grid, u = blockSize/5. Rectangles + squares only.
+    // Per block:
+    //   Fabric A (bg):     4 large 2u×u rectangles (top/bottom of each corner
+    //                      unit) + 4 small u×u squares (outer-diagonal square
+    //                      of each corner unit).
+    //   Fabric B (accent): 4 small u×u squares (inner square of each corner
+    //                      unit, always next to the cross).
+    //   Fabric C (cross):  4 large 2u×u rectangles (top/bottom/left/right arms).
+    //                      The vertical arms are cut u×2u — same 2u×u piece
+    //                      shape, just rotated when assembling.
+    //   Fabric D (center): 1 small u×u square.
+    const u = s.blockSize / 5;
+    const sqCut = u + SEAM;
+    const rectLong = 2 * u + SEAM;
+    const rectShort = u + SEAM;
+
+    const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
+    const accFab = (s.assignments["accent"] ?? "B") as FabricKey;
+    const crossFab = (s.assignments["cross"] ?? "C") as FabricKey;
+    const centerFab = (s.assignments["center"] ?? "D") as FabricKey;
+
+    // Pool by fabric letter so shared letters collapse into one pile per shape.
+    type Bucket = { squares: number; rects: number };
+    const buckets: Partial<Record<FabricKey, Bucket>> = {};
+    const add = (fab: FabricKey, squares: number, rects: number) => {
+      const b = (buckets[fab] ??= { squares: 0, rects: 0 });
+      b.squares += squares;
+      b.rects += rects;
+    };
+    add(bgFab, 4 * blockCount, 4 * blockCount);
+    add(accFab, 4 * blockCount, 0);
+    add(crossFab, 0, 4 * blockCount);
+    add(centerFab, 1 * blockCount, 0);
+    for (const fab of ALL_FABRIC_KEYS) {
+      const b = buckets[fab];
+      if (!b) continue;
+      if (b.squares > 0) {
+        addSquares(reqs[fab], `Small squares (${u.toFixed(2)}" finished)`, b.squares, sqCut, s.fabricWidth);
+      }
+      if (b.rects > 0) {
+        addRails(reqs[fab], `Rectangles (${(2 * u).toFixed(2)}" × ${u.toFixed(2)}" finished)`, b.rects, rectLong, rectShort, s.fabricWidth);
+      }
+    }
+
+    notes.push(
+      `Each block is a 5×5 unit grid where each unit finishes at ${u.toFixed(2)}". The block uses only rectangles and squares — no triangles. Per block cut: 4 background rectangles at ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}" (Fabric ${bgFab}); 4 background squares at ${sqCut.toFixed(2)}" × ${sqCut.toFixed(2)}" (Fabric ${bgFab}); 4 accent squares at ${sqCut.toFixed(2)}" × ${sqCut.toFixed(2)}" (Fabric ${accFab}); 4 cross-arm rectangles at ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}" (Fabric ${crossFab}); 1 center square at ${sqCut.toFixed(2)}" × ${sqCut.toFixed(2)}" (Fabric ${centerFab}).`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: Fabric ${bgFab} = ${4 * blockCount} rectangles + ${4 * blockCount} squares; Fabric ${accFab} = ${4 * blockCount} squares; Fabric ${crossFab} = ${4 * blockCount} rectangles; Fabric ${centerFab} = ${blockCount} squares.`,
+    );
+    notes.push(
+      `Star & Cross Assembly Tip: build each block as 5 rows of pieces, top to bottom. Row 1: background rect | cross rect (rotated so the ${(2 * u).toFixed(2)}" edge is vertical, i.e. cut u×2u — or sew the two matching short-arm halves together) | background rect. Row 2: background sq | accent sq | cross rect (vertical) | accent sq | background sq. Row 3: cross rect (horizontal) | cross rect (horizontal — the two center squares of the middle row are the two horizontal arms) | center sq | cross rect (horizontal) | cross rect (horizontal). Row 4 mirrors row 2 vertically. Row 5 mirrors row 1. In practice the easiest construction is a 3×3 macro layout: 4 corner units (each = 1 rect + 2 squares), 4 arm rects, and 1 center square — assemble each corner unit first, then join corners + arms + center as a 3×3 grid. The accent square in every corner unit must sit adjacent to the cross (nearest the center of the block).`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
