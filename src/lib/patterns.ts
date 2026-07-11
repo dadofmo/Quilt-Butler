@@ -805,6 +805,46 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "F" },
     ],
   },
+  {
+    id: "star-and-cross",
+    name: "Star & Cross",
+    hasMath: true,
+    intro:
+      "Star & Cross is a beginner-friendly 4-fabric block built entirely from rectangles and squares — no triangles anywhere. Each block is a 5×5 grid: a bold plus/cross of Fabric C runs through the center horizontal and vertical rows, with a small Fabric D square where the arms meet. The four 2×2 corner units each show a Fabric A background rectangle across the top and, beneath it, one Fabric A background square and one Fabric B accent square — the accent square always sits next to the cross, nearest the center of the block.",
+    sections: [
+      {
+        id: "bg",
+        label: "Background (Fabric A)",
+        defaultFabric: "A",
+        hint: "Fills the four large corner rectangles and one small square in each corner unit — 4 large rectangles + 4 small squares per block. Usually a calm/light fabric so the cross and accents pop.",
+      },
+      {
+        id: "accent",
+        label: "Corner accent squares (Fabric B)",
+        defaultFabric: "B",
+        hint: "The 4 small accent squares — one per corner, always positioned right next to the cross arms (nearest the center of the block). Pick a color that pops against the background.",
+      },
+      {
+        id: "cross",
+        label: "Cross arms (Fabric C)",
+        defaultFabric: "C",
+        hint: "The 4 solid rectangles forming the plus/cross through the block — top, bottom, left, right arms. Usually your boldest fabric so the cross reads clearly.",
+      },
+      {
+        id: "center",
+        label: "Center square (Fabric D)",
+        defaultFabric: "D",
+        hint: "The single small square where the four cross arms meet in the middle of every block.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "E",
+        hint: "Optional strips of fabric that separate each Star & Cross block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
