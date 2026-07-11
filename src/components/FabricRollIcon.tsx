@@ -31,6 +31,7 @@ export const PATTERN_DIFFICULTY: Record<PatternId, 1 | 2 | 3 | 4 | 5> = {
   "card-trick": 4,
   "oh-susannah": 3,
   "twin-star": 4,
+  "star-and-cross": 1,
 };
 
 interface Props {
