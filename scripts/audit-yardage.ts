@@ -1823,7 +1823,63 @@ console.log("\n=== Twin Star: 50×65, 12\" block, 2\" sashing ===");
 }
 
 
-console.log("\n=========================================");
+// =========================================================================
+// STAR & CROSS — 5×5 unit grid: rectangles + squares only, 4 fabrics.
+// =========================================================================
+console.log("\n=== Star & Cross: 50×65, 10\" block, no border, no sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "star-and-cross" as const,
+    blockSize: 10,
+    borderWidth: 0,
+    sashingWidth: 0,
+  };
+  // 5×6 = 30 blocks. u = 2. sqCut = 2.5. rectLong = 4.5, rectShort = 2.5.
+  // Per block: A = 4 rects + 4 squares; B = 4 squares; C = 4 rects; D = 1 square.
+  // Across 30 blocks: A = 120 rects + 120 squares; B = 120 squares;
+  //                   C = 120 rects; D = 30 squares.
+  const r = calculateYardage(s);
+  const A = r.fabrics.find(f => f.fabric === "A")!;
+  check("S&C A buckets", A.pieces.length, 2);
+  // pieces are pushed in order: squares first, then rects.
+  check("S&C A squares count", A.pieces[0].count, 120);
+  check("S&C A squares cut", A.pieces[0].w, 2.5);
+  check("S&C A rects count", A.pieces[1].count, 120);
+  check("S&C A rects long", A.pieces[1].w, 4.5);
+  check("S&C A rects short", A.pieces[1].h, 2.5);
+  const B = r.fabrics.find(f => f.fabric === "B")!;
+  check("S&C B buckets", B.pieces.length, 1);
+  check("S&C B squares count", B.pieces[0].count, 120);
+  check("S&C B squares cut", B.pieces[0].w, 2.5);
+  const C = r.fabrics.find(f => f.fabric === "C")!;
+  check("S&C C buckets", C.pieces.length, 1);
+  check("S&C C rects count", C.pieces[0].count, 120);
+  check("S&C C rects long", C.pieces[0].w, 4.5);
+  const D = r.fabrics.find(f => f.fabric === "D")!;
+  check("S&C D buckets", D.pieces.length, 1);
+  check("S&C D center count", D.pieces[0].count, 30);
+  check("S&C D center cut", D.pieces[0].w, 2.5);
+}
+
+console.log("\n=== Star & Cross: 50×65, 10\" block, 2\" sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "star-and-cross" as const,
+    blockSize: 10,
+    borderWidth: 0,
+    sashingWidth: 2,
+    assignments: { bg: "A", accent: "B", cross: "C", center: "D", sashing: "E" } as Record<string, FabricKey>,
+  };
+  // 5 across × 6 down = 30 blocks. Sashing strips = 4×6 + 5×5 = 24 + 25 = 49
+  // at 2.5" × 10.5".
+  const r = calculateYardage(s);
+  const e = r.fabrics.find(x => x.fabric === "E")!;
+  check("S&C(sash) E strip count", e.pieces[0].count, 49);
+  check("S&C(sash) E strip width", e.pieces[0].h, 2.5);
+  check("S&C(sash) E strip length", e.pieces[0].w, 10.5);
+}
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {
