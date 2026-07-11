@@ -1016,6 +1016,36 @@ function MiniBlock({
         </>
       );
     }
+    case "star-and-cross": {
+      // Full-quilt tile — matches the single-block diagram exactly. No
+      // rotation between tiles so the cross runs cleanly through each block.
+      const bg = get("bg", "A");
+      const acc = get("accent", "B");
+      const cross = get("cross", "C");
+      const center = get("center", "D");
+      const U = 40; // 200 / 5
+      return (
+        <>
+          <rect x={0} y={0} width={2 * U} height={U} fill={bg} />
+          <rect x={0} y={U} width={U} height={U} fill={bg} />
+          <rect x={U} y={U} width={U} height={U} fill={acc} />
+          <rect x={3 * U} y={0} width={2 * U} height={U} fill={bg} />
+          <rect x={3 * U} y={U} width={U} height={U} fill={acc} />
+          <rect x={4 * U} y={U} width={U} height={U} fill={bg} />
+          <rect x={0} y={3 * U} width={U} height={U} fill={bg} />
+          <rect x={U} y={3 * U} width={U} height={U} fill={acc} />
+          <rect x={0} y={4 * U} width={2 * U} height={U} fill={bg} />
+          <rect x={3 * U} y={3 * U} width={U} height={U} fill={acc} />
+          <rect x={4 * U} y={3 * U} width={U} height={U} fill={bg} />
+          <rect x={3 * U} y={4 * U} width={2 * U} height={U} fill={bg} />
+          <rect x={2 * U} y={0} width={U} height={2 * U} fill={cross} />
+          <rect x={2 * U} y={3 * U} width={U} height={2 * U} fill={cross} />
+          <rect x={0} y={2 * U} width={2 * U} height={U} fill={cross} />
+          <rect x={3 * U} y={2 * U} width={2 * U} height={U} fill={cross} />
+          <rect x={2 * U} y={2 * U} width={U} height={U} fill={center} />
+        </>
+      );
+    }
   }
 }
 

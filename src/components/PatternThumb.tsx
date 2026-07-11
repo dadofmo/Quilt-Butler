@@ -68,6 +68,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Oh Susannah quilt block diagram showing a 4x4 grid with plain squares around the outside and four half-square-triangle units in the center that meet to form a large diamond of background fabric in the middle of the block",
   "twin-star":
     "Twin Star quilt block diagram showing a 3x3 grid with plain background corners and center, and four edge cells each split into a large accent triangle plus two small triangles that rotate around the center to form two nested pinwheel-style stars",
+  "star-and-cross":
+    "Star and Cross quilt block diagram showing a 5x5 grid with a solid cross of dark-red rectangles running through the middle, a small peach center square where the cross arms meet, and four corner units each with a plain background rectangle on top and one background plus one orange accent square below",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -747,6 +749,35 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
               />
             ));
           })}
+        </svg>
+      );
+    }
+    case "star-and-cross": {
+      // 5×5 unit grid, u = 90/5 = 18. Rectangles + squares only.
+      const U = 18;
+      const bg = C.a, acc = C.b, cross = C.c, center = C.d;
+      return (
+        <svg {...common}>
+          {/* Corners */}
+          <rect x={0} y={0} width={2 * U} height={U} fill={bg} />
+          <rect x={0} y={U} width={U} height={U} fill={bg} />
+          <rect x={U} y={U} width={U} height={U} fill={acc} />
+          <rect x={3 * U} y={0} width={2 * U} height={U} fill={bg} />
+          <rect x={3 * U} y={U} width={U} height={U} fill={acc} />
+          <rect x={4 * U} y={U} width={U} height={U} fill={bg} />
+          <rect x={0} y={3 * U} width={U} height={U} fill={bg} />
+          <rect x={U} y={3 * U} width={U} height={U} fill={acc} />
+          <rect x={0} y={4 * U} width={2 * U} height={U} fill={bg} />
+          <rect x={3 * U} y={3 * U} width={U} height={U} fill={acc} />
+          <rect x={4 * U} y={3 * U} width={U} height={U} fill={bg} />
+          <rect x={3 * U} y={4 * U} width={2 * U} height={U} fill={bg} />
+          {/* Cross arms */}
+          <rect x={2 * U} y={0} width={U} height={2 * U} fill={cross} />
+          <rect x={2 * U} y={3 * U} width={U} height={2 * U} fill={cross} />
+          <rect x={0} y={2 * U} width={2 * U} height={U} fill={cross} />
+          <rect x={3 * U} y={2 * U} width={2 * U} height={U} fill={cross} />
+          {/* Center */}
+          <rect x={2 * U} y={2 * U} width={U} height={U} fill={center} />
         </svg>
       );
     }
