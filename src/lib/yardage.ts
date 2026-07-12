@@ -2243,7 +2243,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "card-trick" ||
     s.pattern === "oh-susannah" ||
     s.pattern === "twin-star" ||
-    s.pattern === "star-and-cross";
+    s.pattern === "star-and-cross" ||
+    s.pattern === "idaho-beauty";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
