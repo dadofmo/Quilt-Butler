@@ -845,6 +845,40 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "F" },
     ],
   },
+  {
+    id: "idaho-beauty",
+    name: "Idaho Beauty",
+    hasMath: true,
+    intro:
+      "Idaho Beauty is a traditional 5×5 grid block built from three fabrics. Eight plain background squares fill the outer corners and edge midpoints, five solid accent squares form an X through the block, four on-point diamonds form a plus around the center, and eight geese chevrons all point inward from the block's edges — combining into a symmetrical star/compass effect when the blocks tile.",
+    sections: [
+      {
+        id: "bg",
+        label: "Background (Fabric A)",
+        defaultFabric: "A",
+        hint: "Fills the 8 plain outer squares of every block, the on-point diamond center of each of the 4 diamond units, and the two corner triangles that flank the goose in every geese unit. Usually a light/calm fabric.",
+      },
+      {
+        id: "accent",
+        label: "Accent triangles (Fabric B)",
+        defaultFabric: "B",
+        hint: "The 4 corner triangles that frame each on-point diamond, and the large goose triangle in every one of the 8 geese units — pick a fabric that contrasts strongly with the background.",
+      },
+      {
+        id: "solid",
+        label: "Solid squares (Fabric C)",
+        defaultFabric: "C",
+        hint: "The 5 plain, uncut squares that form the X through the middle of every block. Fabric C never appears in any triangle — pick a mid-tone that reads distinct from both A and B.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "D",
+        hint: "Optional strips of fabric that separate each Idaho Beauty block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

@@ -4,7 +4,7 @@ import { fabricFill } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
-import { PatternDiagram } from "./PatternDiagram";
+import { PatternDiagram, IdahoBeautyBlock } from "./PatternDiagram";
 
 interface Props {
   pattern: PatternId;
@@ -1045,6 +1045,12 @@ function MiniBlock({
           <rect x={2 * U} y={2 * U} width={U} height={U} fill={center} />
         </>
       );
+    }
+    case "idaho-beauty": {
+      const bg = get("bg", "A");
+      const acc = get("accent", "B");
+      const solid = get("solid", "C");
+      return <IdahoBeautyBlock U={40} bg={bg} acc={acc} solid={solid} />;
     }
   }
 }

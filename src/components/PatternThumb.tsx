@@ -70,6 +70,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Twin Star quilt block diagram showing a 3x3 grid with plain background corners and center, and four edge cells each split into a large accent triangle plus two small triangles that rotate around the center to form two nested pinwheel-style stars",
   "star-and-cross":
     "Star and Cross quilt block diagram showing a 5x5 grid with a solid cross of dark-red rectangles running through the middle, a small peach center square where the cross arms meet, and four corner units each with a plain background rectangle on top and one background plus one orange accent square below",
+  "idaho-beauty":
+    "Idaho Beauty quilt block diagram showing a 5x5 grid with cream background corners, four teal on-point diamonds forming a plus around the center, five aqua solid squares in an X, and eight teal geese chevrons pointing inward from the edges toward the center",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -778,6 +780,83 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
           <rect x={3 * U} y={2 * U} width={2 * U} height={U} fill={cross} />
           {/* Center */}
           <rect x={2 * U} y={2 * U} width={U} height={U} fill={center} />
+        </svg>
+      );
+    }
+    case "idaho-beauty": {
+      // 5×5 grid, U = 90/5 = 18. Fabric A bg, B accent triangles, C solid.
+      const U = 18;
+      const bg = C.a, acc = C.b, solid = C.c;
+      const cells: { r: number; c: number; type: "A" | "C" | "diamond" | "gD" | "gU" | "gR" | "gL" }[] = [
+        { r: 0, c: 0, type: "A" }, { r: 0, c: 2, type: "A" }, { r: 0, c: 4, type: "A" },
+        { r: 2, c: 0, type: "A" }, { r: 2, c: 4, type: "A" },
+        { r: 4, c: 0, type: "A" }, { r: 4, c: 2, type: "A" }, { r: 4, c: 4, type: "A" },
+        { r: 1, c: 1, type: "C" }, { r: 1, c: 3, type: "C" }, { r: 2, c: 2, type: "C" },
+        { r: 3, c: 1, type: "C" }, { r: 3, c: 3, type: "C" },
+        { r: 1, c: 2, type: "diamond" }, { r: 2, c: 1, type: "diamond" },
+        { r: 2, c: 3, type: "diamond" }, { r: 3, c: 2, type: "diamond" },
+        { r: 0, c: 1, type: "gD" }, { r: 0, c: 3, type: "gD" },
+        { r: 4, c: 1, type: "gU" }, { r: 4, c: 3, type: "gU" },
+        { r: 1, c: 0, type: "gR" }, { r: 3, c: 0, type: "gR" },
+        { r: 1, c: 4, type: "gL" }, { r: 3, c: 4, type: "gL" },
+      ];
+      const h = U / 2;
+      return (
+        <svg {...common}>
+          {cells.map(({ r, c, type }) => {
+            const x = c * U, y = r * U;
+            if (type === "A") return <rect key={`${r}-${c}`} x={x} y={y} width={U} height={U} fill={bg} />;
+            if (type === "C") return <rect key={`${r}-${c}`} x={x} y={y} width={U} height={U} fill={solid} />;
+            if (type === "diamond") {
+              return (
+                <g key={`${r}-${c}`}>
+                  <polygon points={`${x},${y} ${x + h},${y} ${x},${y + h}`} fill={acc} />
+                  <polygon points={`${x + U},${y} ${x + U},${y + h} ${x + h},${y}`} fill={acc} />
+                  <polygon points={`${x + U},${y + U} ${x + h},${y + U} ${x + U},${y + h}`} fill={acc} />
+                  <polygon points={`${x},${y + U} ${x},${y + h} ${x + h},${y + U}`} fill={acc} />
+                  <polygon points={`${x + h},${y} ${x + U},${y + h} ${x + h},${y + U} ${x},${y + h}`} fill={bg} />
+                </g>
+              );
+            }
+            if (type === "gD") {
+              return (
+                <g key={`${r}-${c}`}>
+                  <polygon points={`${x},${y} ${x + h},${y} ${x + h},${y + U}`} fill={acc} />
+                  <polygon points={`${x + h},${y} ${x + U},${y} ${x + h},${y + U}`} fill={acc} />
+                  <polygon points={`${x},${y} ${x},${y + U} ${x + h},${y + U}`} fill={bg} />
+                  <polygon points={`${x + U},${y} ${x + U},${y + U} ${x + h},${y + U}`} fill={bg} />
+                </g>
+              );
+            }
+            if (type === "gU") {
+              return (
+                <g key={`${r}-${c}`}>
+                  <polygon points={`${x},${y + U} ${x + h},${y + U} ${x + h},${y}`} fill={acc} />
+                  <polygon points={`${x + h},${y + U} ${x + U},${y + U} ${x + h},${y}`} fill={acc} />
+                  <polygon points={`${x},${y + U} ${x},${y} ${x + h},${y}`} fill={bg} />
+                  <polygon points={`${x + U},${y + U} ${x + U},${y} ${x + h},${y}`} fill={bg} />
+                </g>
+              );
+            }
+            if (type === "gR") {
+              return (
+                <g key={`${r}-${c}`}>
+                  <polygon points={`${x},${y} ${x},${y + h} ${x + U},${y + h}`} fill={acc} />
+                  <polygon points={`${x},${y + h} ${x},${y + U} ${x + U},${y + h}`} fill={acc} />
+                  <polygon points={`${x},${y} ${x + U},${y} ${x + U},${y + h}`} fill={bg} />
+                  <polygon points={`${x},${y + U} ${x + U},${y + U} ${x + U},${y + h}`} fill={bg} />
+                </g>
+              );
+            }
+            return (
+              <g key={`${r}-${c}`}>
+                <polygon points={`${x + U},${y} ${x + U},${y + h} ${x},${y + h}`} fill={acc} />
+                <polygon points={`${x + U},${y + h} ${x + U},${y + U} ${x},${y + h}`} fill={acc} />
+                <polygon points={`${x + U},${y} ${x},${y} ${x},${y + h}`} fill={bg} />
+                <polygon points={`${x + U},${y + U} ${x},${y + U} ${x},${y + h}`} fill={bg} />
+              </g>
+            );
+          })}
         </svg>
       );
     }
