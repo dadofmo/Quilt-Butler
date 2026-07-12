@@ -1880,6 +1880,59 @@ console.log("\n=== Star & Cross: 50×65, 10\" block, 2\" sashing ===");
   check("S&C(sash) E strip width", e.pieces[0].h, 2.5);
   check("S&C(sash) E strip length", e.pieces[0].w, 10.5);
 }
+
+console.log("\n=== Idaho Beauty: 50×65, 10\" block, no sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "idaho-beauty" as const,
+    blockSize: 10,
+    borderWidth: 0,
+    sashingWidth: 0,
+  };
+  // 5×6 = 30 blocks. u = 2. bigCut = 2.5. cornerCut = 1.5.
+  // rectLong = 2.875, rectShort = 1.875.
+  // Per block: A = 12 big squares + 8 HRT rects; B = 16 corner squares + 8 HRT rects;
+  //            C = 5 big squares.
+  // Across 30 blocks: A = 360 big + 240 rects; B = 480 corners + 240 rects; C = 150 big.
+  const r = calculateYardage(s);
+  const A = r.fabrics.find(f => f.fabric === "A")!;
+  check("IB A buckets", A.pieces.length, 2);
+  check("IB A big count", A.pieces[0].count, 360);
+  check("IB A big cut", A.pieces[0].w, 2.5);
+  check("IB A rects count", A.pieces[1].count, 240);
+  check("IB A rects long", A.pieces[1].w, 2.875);
+  check("IB A rects short", A.pieces[1].h, 1.875);
+  const B = r.fabrics.find(f => f.fabric === "B")!;
+  check("IB B buckets", B.pieces.length, 2);
+  check("IB B corner count", B.pieces[0].count, 480);
+  check("IB B corner cut", B.pieces[0].w, 1.5);
+  check("IB B rects count", B.pieces[1].count, 240);
+  check("IB B rects long", B.pieces[1].w, 2.875);
+  const C = r.fabrics.find(f => f.fabric === "C")!;
+  check("IB C buckets", C.pieces.length, 1);
+  check("IB C big count", C.pieces[0].count, 150);
+  check("IB C big cut", C.pieces[0].w, 2.5);
+}
+
+console.log("\n=== Idaho Beauty: 50×65, 10\" block, 2\" sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "idaho-beauty" as const,
+    blockSize: 10,
+    borderWidth: 0,
+    sashingWidth: 2,
+    assignments: { bg: "A", accent: "B", solid: "C", sashing: "D" } as Record<string, FabricKey>,
+  };
+  // 5×6 = 30 blocks. Sashing = 4×6 + 5×5 = 49 strips at 2.5" × 10.5".
+  const r = calculateYardage(s);
+  const d = r.fabrics.find(x => x.fabric === "D")!;
+  check("IB(sash) D strip count", d.pieces[0].count, 49);
+  check("IB(sash) D strip width", d.pieces[0].h, 2.5);
+  check("IB(sash) D strip length", d.pieces[0].w, 10.5);
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {
