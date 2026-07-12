@@ -1046,6 +1046,12 @@ function MiniBlock({
         </>
       );
     }
+    case "idaho-beauty": {
+      const bg = get("bg", "A");
+      const acc = get("accent", "B");
+      const solid = get("solid", "C");
+      return <IdahoBeautyBlock U={40} bg={bg} acc={acc} solid={solid} />;
+    }
   }
 }
 
