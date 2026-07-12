@@ -1166,8 +1166,6 @@ function IdahoBeautyBlock({
         <polygon points={`${x + U},${y + U} ${x},${y + U} ${x},${y + h}`} fill={bg} />
       </g>
     );
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    tris;
   };
 
   return (
