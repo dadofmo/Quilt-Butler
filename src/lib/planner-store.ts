@@ -29,7 +29,8 @@ export type PatternId =
   | "card-trick"
   | "oh-susannah"
   | "twin-star"
-  | "star-and-cross";
+  | "star-and-cross"
+  | "idaho-beauty";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
