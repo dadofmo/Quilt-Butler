@@ -2085,6 +2085,91 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "idaho-beauty") {
+    // Idaho Beauty: 5×5 unit grid, u = blockSize / 5. Per block:
+    //   Plain squares: 8 Fabric A + 5 Fabric C at (u + SEAM).
+    //   Diamond units (4/block): each = 1 Fabric A base square at (u + SEAM)
+    //     + 4 Fabric B corner squares at (u/2 + SEAM) applied via
+    //     stitch-and-flip (same corner method as Snowball Block).
+    //   Geese units (8/block): each = 1 Fabric B + 1 Fabric A HRT starter
+    //     rectangle at (u/2 + HST_EXTRA) × (u + HST_EXTRA). Sew RST along
+    //     the diagonal, cut apart → 2 mirror half-rectangle-triangle units,
+    //     which combine to a full geese cell (one pair per cell).
+    const u = s.blockSize / 5;
+    const bigCut = u + SEAM;
+    const cornerCut = u / 2 + SEAM;
+    const rectShort = u / 2 + HST_EXTRA;
+    const rectLong = u + HST_EXTRA;
+
+    const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
+    const accFab = (s.assignments["accent"] ?? "B") as FabricKey;
+    const solidFab = (s.assignments["solid"] ?? "C") as FabricKey;
+
+    // Pool by fabric letter so shared letters collapse into one pile per
+    // shape/size bucket.
+    type Bucket = {
+      bigSquares: number;   // (u + SEAM) squares
+      cornerSquares: number; // (u/2 + SEAM) squares
+      hrtRects: number;      // (u/2 + HST_EXTRA) × (u + HST_EXTRA) rectangles
+    };
+    const buckets: Partial<Record<FabricKey, Bucket>> = {};
+    const add = (fab: FabricKey, big: number, corner: number, hrt: number) => {
+      const b = (buckets[fab] ??= { bigSquares: 0, cornerSquares: 0, hrtRects: 0 });
+      b.bigSquares += big;
+      b.cornerSquares += corner;
+      b.hrtRects += hrt;
+    };
+    // Fabric A: 8 plain + 4 diamond-base big squares, 0 corners, 8 HRT starters.
+    add(bgFab, (8 + 4) * blockCount, 0, 8 * blockCount);
+    // Fabric B: 0 big, 4×4 = 16 corner squares, 8 HRT starters.
+    add(accFab, 0, 16 * blockCount, 8 * blockCount);
+    // Fabric C: 5 big plain squares only — never used in any triangle.
+    add(solidFab, 5 * blockCount, 0, 0);
+
+    for (const fab of ALL_FABRIC_KEYS) {
+      const b = buckets[fab];
+      if (!b) continue;
+      if (b.bigSquares > 0) {
+        addSquares(reqs[fab], `Squares (${u.toFixed(2)}" finished)`, b.bigSquares, bigCut, s.fabricWidth);
+      }
+      if (b.cornerSquares > 0) {
+        addSquares(reqs[fab], `Corner squares for diamond stitch-and-flip (${(u / 2).toFixed(2)}" finished)`, b.cornerSquares, cornerCut, s.fabricWidth);
+      }
+      if (b.hrtRects > 0) {
+        addRails(reqs[fab], `Half-rectangle-triangle starter rectangles (${(u / 2).toFixed(2)}" × ${u.toFixed(2)}" finished)`, b.hrtRects, rectLong, rectShort, s.fabricWidth);
+      }
+    }
+
+    notes.push(
+      `Each block is a 5×5 unit grid where every unit finishes at ${u.toFixed(2)}". Per block cut: 8 Fabric ${bgFab} background squares + 5 Fabric ${solidFab} solid squares (the X through the middle) at ${bigCut.toFixed(2)}" × ${bigCut.toFixed(2)}"; 4 Fabric ${bgFab} diamond base squares at ${bigCut.toFixed(2)}" × ${bigCut.toFixed(2)}"; 16 Fabric ${accFab} corner squares at ${cornerCut.toFixed(2)}" × ${cornerCut.toFixed(2)}" (4 per diamond unit); and 8 pairs of half-rectangle-triangle starters — 8 Fabric ${accFab} + 8 Fabric ${bgFab} rectangles at ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}" (one pair per geese unit).`,
+    );
+    notes.push(
+      `Fabric ${solidFab} only appears as plain, uncut squares — never inside a triangle. If you picked the same letter for the background and accent, the pieces still cut fine; they'll just pool into a single pile per size.`,
+    );
+    notes.push(
+      `Diamond units (4 per block): use the stitch-and-flip corner method. Place a Fabric ${accFab} ${cornerCut.toFixed(2)}" corner square RST on a corner of a Fabric ${bgFab} ${bigCut.toFixed(2)}" base square. Draw a diagonal on the small square from the outer corner to the inner corner. Sew on the line, trim the outer corner ~1/4" beyond the seam, press the small triangle open. Repeat on all 4 corners — Fabric ${bgFab} becomes the on-point diamond and Fabric ${accFab} fills the 4 corner triangles. Trim to ${bigCut.toFixed(2)}" square if needed.`,
+    );
+    notes.push(
+      `Geese units (8 per block, 2 pointing to each side of the block): each unit is 2 mirror-image half-rectangle triangles (HRT). Layer one Fabric ${accFab} + one Fabric ${bgFab} starter rectangle RST. Draw a diagonal corner-to-corner, sew a scant 1/4" on each side of the line, then cut on the line — this yields 2 HRTs with opposite orientations. Trim each to ${(u / 2 + SEAM).toFixed(2)}" × ${bigCut.toFixed(2)}". Sew the mirrored pair back together along the long straight edge with Fabric ${accFab} triangles meeting in the middle — the two accent triangles form one large chevron/goose pointing to the block's center. All 8 geese must have their apex pointing inward.`,
+    );
+    notes.push(
+      `Idaho Beauty Assembly Tip: build each block as 5 rows of 5 units. Row 1 & 5: A | goose | A | goose | A. Row 2 & 4: goose | C-solid | diamond | C-solid | goose. Row 3: A | diamond | C-solid | diamond | A. Rotate each geese unit so its apex points toward the block's center (down for row 1, up for row 5, right for column 1, left for column 5). The 5 Fabric ${solidFab} squares form an X across the block, the 4 diamonds form a plus around the center, and the 8 geese chevrons all point inward — check this visually before joining rows.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
