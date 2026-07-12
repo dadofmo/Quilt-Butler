@@ -1124,15 +1124,8 @@ function IdahoBeautyBlock({
     // Geese — 4 triangles, all with apex at the cell edge midpoint pointing
     // toward the block center. `dir` chooses which edge holds the apex.
     const h = U / 2;
-    let tris: [string, string, string, string][];
-    // Each tuple: "x1,y1 x2,y2 x3,y3", fill = acc or bg
-    // Order: acc-half1, acc-half2, bg-half1, bg-half2
     if (type === "gD") {
       // apex at (x+U/2, y+U) — bottom center
-      tris = [
-        [`${x},${y} ${x + h},${y} ${x + h},${y + U}`, acc, "acc", "l"],
-        [`${x + h},${y} ${x + U},${y} ${x + h},${y + U}`, acc, "acc", "r"],
-      ];
       return (
         <g key={`ib-${r}-${c}`}>
           <polygon points={`${x},${y} ${x + h},${y} ${x + h},${y + U}`} fill={acc} />
