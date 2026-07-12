@@ -4,7 +4,7 @@ import { fabricFill } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
-import { PatternDiagram } from "./PatternDiagram";
+import { PatternDiagram, IdahoBeautyBlock } from "./PatternDiagram";
 
 interface Props {
   pattern: PatternId;
