@@ -1058,10 +1058,14 @@ function renderInner(
 /** Shared renderer for Idaho Beauty — used by both the single-block diagram
  *  and the full-quilt tile so the two previews stay pixel-identical.
  *
- *  Geometry is NOT a uniform 5×5 grid. It's a 3×3 core of full-size cells
- *  surrounded by a border ring that is HALF the width of a core cell.
- *  In a 400-unit reference space: border strip = 50, core cell = 100.
- *  Scaled here by `size` so callers can pass any dimension.
+ *  Geometry is a UNIFORM 5×5 grid (u = size / 5). Per the pattern spec:
+ *    Row 0: A | geese-D | A | geese-D | A
+ *    Row 1: geese-R | C | diamond | C | geese-L
+ *    Row 2: A       | diamond | C | diamond | A
+ *    Row 3: geese-R | C | diamond | C | geese-L
+ *    Row 4: A | geese-U | A | geese-U | A
+ *  A = background, B = accent triangles, C = solid squares. When these blocks
+ *  tile edge-to-edge the star/compass secondary pattern emerges naturally.
  */
 function IdahoBeautyBlock({
   size,
@@ -1076,121 +1080,95 @@ function IdahoBeautyBlock({
   solid: string;
   showGrid?: boolean;
 }) {
-  const b = size / 8;      // border strip width  (=50 in 400-space)
-  const c = size / 4;      // core cell size      (=100 in 400-space)
-  const S = size;
+  const U = size / 5;
 
-  // --- Flying-geese rectangle (w × h), one large B triangle + 2 small A
-  // corner triangles. `dir` = which edge the apex points to.
-  const Goose = ({
-    x, y, w, h, dir, k,
-  }: { x: number; y: number; w: number; h: number; dir: "D" | "U" | "R" | "L"; k: string }) => {
+  // Flying-goose in a u×u cell with apex toward one edge.
+  const Goose = ({ x, y, dir, k }: { x: number; y: number; dir: "D" | "U" | "R" | "L"; k: string }) => {
     if (dir === "D") {
-      // base along top, apex bottom-center
       return (
         <g key={k}>
-          <polygon points={`${x},${y} ${x + w},${y} ${x + w / 2},${y + h}`} fill={acc} />
-          <polygon points={`${x},${y} ${x + w / 2},${y + h} ${x},${y + h}`} fill={bg} />
-          <polygon points={`${x + w},${y} ${x + w / 2},${y + h} ${x + w},${y + h}`} fill={bg} />
+          <polygon points={`${x},${y} ${x + U},${y} ${x + U / 2},${y + U}`} fill={acc} />
+          <polygon points={`${x},${y} ${x + U / 2},${y + U} ${x},${y + U}`} fill={bg} />
+          <polygon points={`${x + U},${y} ${x + U / 2},${y + U} ${x + U},${y + U}`} fill={bg} />
         </g>
       );
     }
     if (dir === "U") {
-      // base along bottom, apex top-center
       return (
         <g key={k}>
-          <polygon points={`${x},${y + h} ${x + w},${y + h} ${x + w / 2},${y}`} fill={acc} />
-          <polygon points={`${x},${y + h} ${x + w / 2},${y} ${x},${y}`} fill={bg} />
-          <polygon points={`${x + w},${y + h} ${x + w / 2},${y} ${x + w},${y}`} fill={bg} />
+          <polygon points={`${x},${y + U} ${x + U},${y + U} ${x + U / 2},${y}`} fill={acc} />
+          <polygon points={`${x},${y + U} ${x + U / 2},${y} ${x},${y}`} fill={bg} />
+          <polygon points={`${x + U},${y + U} ${x + U / 2},${y} ${x + U},${y}`} fill={bg} />
         </g>
       );
     }
     if (dir === "R") {
-      // base along left edge, apex right-center
       return (
         <g key={k}>
-          <polygon points={`${x},${y} ${x},${y + h} ${x + w},${y + h / 2}`} fill={acc} />
-          <polygon points={`${x},${y} ${x + w},${y + h / 2} ${x + w},${y}`} fill={bg} />
-          <polygon points={`${x},${y + h} ${x + w},${y + h / 2} ${x + w},${y + h}`} fill={bg} />
+          <polygon points={`${x},${y} ${x},${y + U} ${x + U},${y + U / 2}`} fill={acc} />
+          <polygon points={`${x},${y} ${x + U},${y + U / 2} ${x + U},${y}`} fill={bg} />
+          <polygon points={`${x},${y + U} ${x + U},${y + U / 2} ${x + U},${y + U}`} fill={bg} />
         </g>
       );
     }
-    // L — base along right edge, apex left-center
     return (
       <g key={k}>
-        <polygon points={`${x + w},${y} ${x + w},${y + h} ${x},${y + h / 2}`} fill={acc} />
-        <polygon points={`${x + w},${y} ${x},${y + h / 2} ${x},${y}`} fill={bg} />
-        <polygon points={`${x + w},${y + h} ${x},${y + h / 2} ${x},${y + h}`} fill={bg} />
+        <polygon points={`${x + U},${y} ${x + U},${y + U} ${x},${y + U / 2}`} fill={acc} />
+        <polygon points={`${x + U},${y} ${x},${y + U / 2} ${x},${y}`} fill={bg} />
+        <polygon points={`${x + U},${y + U} ${x},${y + U / 2} ${x},${y + U}`} fill={bg} />
       </g>
     );
   };
 
-  // Diamond unit: on-point Fabric A square inside a c×c cell with 4 Fabric B
-  // corner triangles.
+  // Diamond unit: 4 accent (B) corner triangles + on-point background (A) diamond.
   const Diamond = ({ x, y, k }: { x: number; y: number; k: string }) => (
     <g key={k}>
-      <polygon points={`${x},${y} ${x + c / 2},${y} ${x},${y + c / 2}`} fill={acc} />
-      <polygon points={`${x + c},${y} ${x + c},${y + c / 2} ${x + c / 2},${y}`} fill={acc} />
-      <polygon points={`${x + c},${y + c} ${x + c / 2},${y + c} ${x + c},${y + c / 2}`} fill={acc} />
-      <polygon points={`${x},${y + c} ${x},${y + c / 2} ${x + c / 2},${y + c}`} fill={acc} />
+      <polygon points={`${x},${y} ${x + U / 2},${y} ${x},${y + U / 2}`} fill={acc} />
+      <polygon points={`${x + U},${y} ${x + U},${y + U / 2} ${x + U / 2},${y}`} fill={acc} />
+      <polygon points={`${x + U},${y + U} ${x + U / 2},${y + U} ${x + U},${y + U / 2}`} fill={acc} />
+      <polygon points={`${x},${y + U} ${x},${y + U / 2} ${x + U / 2},${y + U}`} fill={acc} />
       <polygon
-        points={`${x + c / 2},${y} ${x + c},${y + c / 2} ${x + c / 2},${y + c} ${x},${y + c / 2}`}
+        points={`${x + U / 2},${y} ${x + U},${y + U / 2} ${x + U / 2},${y + U} ${x},${y + U / 2}`}
         fill={bg}
       />
     </g>
   );
 
-  // Core cell positions (0-indexed 0..2 inside the 3×3 core, offset by b).
-  const coreX = (cc: number) => b + cc * c;
-  const coreY = (cr: number) => b + cr * c;
+  type CellType = "A" | "C" | "diamond" | "gD" | "gU" | "gR" | "gL";
+  const cells: { r: number; c: number; type: CellType }[] = [
+    // Plain background (A) — 4 outer corners + 4 outer edge-midpoints (row/col 2 outer cells)
+    { r: 0, c: 0, type: "A" }, { r: 0, c: 2, type: "A" }, { r: 0, c: 4, type: "A" },
+    { r: 2, c: 0, type: "A" }, { r: 2, c: 4, type: "A" },
+    { r: 4, c: 0, type: "A" }, { r: 4, c: 2, type: "A" }, { r: 4, c: 4, type: "A" },
+    // Solid C squares — X pattern (quadrant centers + true center)
+    { r: 1, c: 1, type: "C" }, { r: 1, c: 3, type: "C" }, { r: 2, c: 2, type: "C" },
+    { r: 3, c: 1, type: "C" }, { r: 3, c: 3, type: "C" },
+    // Diamonds — plus pattern around the true center
+    { r: 1, c: 2, type: "diamond" }, { r: 2, c: 1, type: "diamond" },
+    { r: 2, c: 3, type: "diamond" }, { r: 3, c: 2, type: "diamond" },
+    // Geese — all apexes point toward the block center
+    { r: 0, c: 1, type: "gD" }, { r: 0, c: 3, type: "gD" },
+    { r: 4, c: 1, type: "gU" }, { r: 4, c: 3, type: "gU" },
+    { r: 1, c: 0, type: "gR" }, { r: 3, c: 0, type: "gR" },
+    { r: 1, c: 4, type: "gL" }, { r: 3, c: 4, type: "gL" },
+  ];
 
   return (
     <>
-      {/* ----- Outer corner squares (Fabric A, b×b) ----- */}
-      <rect x={0}     y={0}     width={b} height={b} fill={bg} />
-      <rect x={S - b} y={0}     width={b} height={b} fill={bg} />
-      <rect x={0}     y={S - b} width={b} height={b} fill={bg} />
-      <rect x={S - b} y={S - b} width={b} height={b} fill={bg} />
-
-      {/* ----- Top border: geese(D) | plain A | geese(D) ----- */}
-      <Goose k="tL" x={b}         y={0} w={c} h={b} dir="D" />
-      <rect  x={b + c}     y={0} width={c} height={b} fill={bg} />
-      <Goose k="tR" x={b + 2 * c} y={0} w={c} h={b} dir="D" />
-
-      {/* ----- Bottom border: geese(U) | plain A | geese(U) ----- */}
-      <Goose k="bL" x={b}         y={S - b} w={c} h={b} dir="U" />
-      <rect  x={b + c}     y={S - b} width={c} height={b} fill={bg} />
-      <Goose k="bR" x={b + 2 * c} y={S - b} w={c} h={b} dir="U" />
-
-      {/* ----- Left border: geese(R) / plain A / geese(R) ----- */}
-      <Goose k="lT" x={0} y={b}         w={b} h={c} dir="R" />
-      <rect  x={0} y={b + c}     width={b} height={c} fill={bg} />
-      <Goose k="lB" x={0} y={b + 2 * c} w={b} h={c} dir="R" />
-
-      {/* ----- Right border: geese(L) / plain A / geese(L) ----- */}
-      <Goose k="rT" x={S - b} y={b}         w={b} h={c} dir="L" />
-      <rect  x={S - b} y={b + c}     width={b} height={c} fill={bg} />
-      <Goose k="rB" x={S - b} y={b + 2 * c} w={b} h={c} dir="L" />
-
-      {/* ----- Inner 3×3 core: 5 solid-C squares (X) + 4 diamonds (plus) ----- */}
-      {/* Solids at corners + center */}
-      {[[0, 0], [0, 2], [1, 1], [2, 0], [2, 2]].map(([r, cc]) => (
-        <rect key={`s-${r}-${cc}`} x={coreX(cc)} y={coreY(r)} width={c} height={c} fill={solid} />
-      ))}
-      {/* Diamonds at edge midpoints */}
-      {[[0, 1], [1, 0], [1, 2], [2, 1]].map(([r, cc]) => (
-        <Diamond key={`d-${r}-${cc}`} k={`d-${r}-${cc}`} x={coreX(cc)} y={coreY(r)} />
-      ))}
-
+      {cells.map(({ r, c, type }) => {
+        const x = c * U, y = r * U;
+        const k = `ib-${r}-${c}`;
+        if (type === "A") return <rect key={k} x={x} y={y} width={U} height={U} fill={bg} />;
+        if (type === "C") return <rect key={k} x={x} y={y} width={U} height={U} fill={solid} />;
+        if (type === "diamond") return <Diamond key={k} k={k} x={x} y={y} />;
+        return <Goose key={k} k={k} x={x} y={y} dir={type === "gD" ? "D" : type === "gU" ? "U" : type === "gR" ? "R" : "L"} />;
+      })}
       {showGrid && (
         <g stroke="white" strokeWidth={0.75} opacity={0.35} fill="none">
-          {/* Ring boundary */}
-          <rect x={b} y={b} width={3 * c} height={3 * c} />
-          {/* Core 3×3 separators */}
-          {[1, 2].map((k) => (
+          {[1, 2, 3, 4].map((k) => (
             <g key={k}>
-              <line x1={b + k * c} y1={b} x2={b + k * c} y2={b + 3 * c} />
-              <line x1={b} y1={b + k * c} x2={b + 3 * c} y2={b + k * c} />
+              <line x1={k * U} y1={0} x2={k * U} y2={5 * U} />
+              <line x1={0} y1={k * U} x2={5 * U} y2={k * U} />
             </g>
           ))}
         </g>
