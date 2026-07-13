@@ -1050,7 +1050,7 @@ function MiniBlock({
       const bg = get("bg", "A");
       const acc = get("accent", "B");
       const solid = get("solid", "C");
-      return <IdahoBeautyBlock U={40} bg={bg} acc={acc} solid={solid} />;
+      return <IdahoBeautyBlock size={200} bg={bg} acc={acc} solid={solid} />;
     }
   }
 }

@@ -1050,133 +1050,147 @@ function renderInner(
       const bg = get("bg", "A");
       const acc = get("accent", "B");
       const solid = get("solid", "C");
-      const U = 40; // 200 / 5
-      return <IdahoBeautyBlock U={U} bg={bg} acc={acc} solid={solid} showGrid />;
+      return <IdahoBeautyBlock size={200} bg={bg} acc={acc} solid={solid} showGrid />;
     }
   }
 }
 
 /** Shared renderer for Idaho Beauty — used by both the single-block diagram
- *  and the full-quilt tile so the two previews stay pixel-identical. */
+ *  and the full-quilt tile so the two previews stay pixel-identical.
+ *
+ *  Geometry is NOT a uniform 5×5 grid. It's a 3×3 core of full-size cells
+ *  surrounded by a border ring that is HALF the width of a core cell.
+ *  In a 400-unit reference space: border strip = 50, core cell = 100.
+ *  Scaled here by `size` so callers can pass any dimension.
+ */
 function IdahoBeautyBlock({
-  U,
+  size,
   bg,
   acc,
   solid,
   showGrid,
 }: {
-  U: number;
+  size: number;
   bg: string;
   acc: string;
   solid: string;
   showGrid?: boolean;
 }) {
-  type CellType = "A" | "C" | "diamond" | "gD" | "gU" | "gR" | "gL";
-  const cells: { r: number; c: number; type: CellType }[] = [
-    // Plain background (Fabric A) — 8 outer squares
-    { r: 0, c: 0, type: "A" }, { r: 0, c: 2, type: "A" }, { r: 0, c: 4, type: "A" },
-    { r: 2, c: 0, type: "A" }, { r: 2, c: 4, type: "A" },
-    { r: 4, c: 0, type: "A" }, { r: 4, c: 2, type: "A" }, { r: 4, c: 4, type: "A" },
-    // Solid Fabric C squares — X pattern around center
-    { r: 1, c: 1, type: "C" }, { r: 1, c: 3, type: "C" }, { r: 2, c: 2, type: "C" },
-    { r: 3, c: 1, type: "C" }, { r: 3, c: 3, type: "C" },
-    // Diamond units — plus pattern around center
-    { r: 1, c: 2, type: "diamond" }, { r: 2, c: 1, type: "diamond" },
-    { r: 2, c: 3, type: "diamond" }, { r: 3, c: 2, type: "diamond" },
-    // Geese apex-down (top row)
-    { r: 0, c: 1, type: "gD" }, { r: 0, c: 3, type: "gD" },
-    // Geese apex-up (bottom row)
-    { r: 4, c: 1, type: "gU" }, { r: 4, c: 3, type: "gU" },
-    // Geese apex-right (left column)
-    { r: 1, c: 0, type: "gR" }, { r: 3, c: 0, type: "gR" },
-    // Geese apex-left (right column)
-    { r: 1, c: 4, type: "gL" }, { r: 3, c: 4, type: "gL" },
-  ];
+  const b = size / 8;      // border strip width  (=50 in 400-space)
+  const c = size / 4;      // core cell size      (=100 in 400-space)
+  const S = size;
 
-  const total = U * 5;
-
-  const renderCell = (r: number, c: number, type: CellType) => {
-    const x = c * U;
-    const y = r * U;
-    if (type === "A") {
-      return <rect key={`ib-${r}-${c}`} x={x} y={y} width={U} height={U} fill={bg} />;
-    }
-    if (type === "C") {
-      return <rect key={`ib-${r}-${c}`} x={x} y={y} width={U} height={U} fill={solid} />;
-    }
-    if (type === "diamond") {
-      // On-point Fabric A square, 4 Fabric B corner triangles.
+  // --- Flying-geese rectangle (w × h), one large B triangle + 2 small A
+  // corner triangles. `dir` = which edge the apex points to.
+  const Goose = ({
+    x, y, w, h, dir, k,
+  }: { x: number; y: number; w: number; h: number; dir: "D" | "U" | "R" | "L"; k: string }) => {
+    if (dir === "D") {
+      // base along top, apex bottom-center
       return (
-        <g key={`ib-${r}-${c}`}>
-          {/* B corner triangles */}
-          <polygon points={`${x},${y} ${x + U / 2},${y} ${x},${y + U / 2}`} fill={acc} />
-          <polygon points={`${x + U},${y} ${x + U},${y + U / 2} ${x + U / 2},${y}`} fill={acc} />
-          <polygon points={`${x + U},${y + U} ${x + U / 2},${y + U} ${x + U},${y + U / 2}`} fill={acc} />
-          <polygon points={`${x},${y + U} ${x},${y + U / 2} ${x + U / 2},${y + U}`} fill={acc} />
-          {/* A on-point diamond */}
-          <polygon
-            points={`${x + U / 2},${y} ${x + U},${y + U / 2} ${x + U / 2},${y + U} ${x},${y + U / 2}`}
-            fill={bg}
-          />
+        <g key={k}>
+          <polygon points={`${x},${y} ${x + w},${y} ${x + w / 2},${y + h}`} fill={acc} />
+          <polygon points={`${x},${y} ${x + w / 2},${y + h} ${x},${y + h}`} fill={bg} />
+          <polygon points={`${x + w},${y} ${x + w / 2},${y + h} ${x + w},${y + h}`} fill={bg} />
         </g>
       );
     }
-    // Geese — 4 triangles, all with apex at the cell edge midpoint pointing
-    // toward the block center. `dir` chooses which edge holds the apex.
-    const h = U / 2;
-    if (type === "gD") {
-      // apex at (x+U/2, y+U) — bottom center
+    if (dir === "U") {
+      // base along bottom, apex top-center
       return (
-        <g key={`ib-${r}-${c}`}>
-          <polygon points={`${x},${y} ${x + h},${y} ${x + h},${y + U}`} fill={acc} />
-          <polygon points={`${x + h},${y} ${x + U},${y} ${x + h},${y + U}`} fill={acc} />
-          <polygon points={`${x},${y} ${x},${y + U} ${x + h},${y + U}`} fill={bg} />
-          <polygon points={`${x + U},${y} ${x + U},${y + U} ${x + h},${y + U}`} fill={bg} />
+        <g key={k}>
+          <polygon points={`${x},${y + h} ${x + w},${y + h} ${x + w / 2},${y}`} fill={acc} />
+          <polygon points={`${x},${y + h} ${x + w / 2},${y} ${x},${y}`} fill={bg} />
+          <polygon points={`${x + w},${y + h} ${x + w / 2},${y} ${x + w},${y}`} fill={bg} />
         </g>
       );
     }
-    if (type === "gU") {
-      // apex at (x+U/2, y) — top center
+    if (dir === "R") {
+      // base along left edge, apex right-center
       return (
-        <g key={`ib-${r}-${c}`}>
-          <polygon points={`${x},${y + U} ${x + h},${y + U} ${x + h},${y}`} fill={acc} />
-          <polygon points={`${x + h},${y + U} ${x + U},${y + U} ${x + h},${y}`} fill={acc} />
-          <polygon points={`${x},${y + U} ${x},${y} ${x + h},${y}`} fill={bg} />
-          <polygon points={`${x + U},${y + U} ${x + U},${y} ${x + h},${y}`} fill={bg} />
+        <g key={k}>
+          <polygon points={`${x},${y} ${x},${y + h} ${x + w},${y + h / 2}`} fill={acc} />
+          <polygon points={`${x},${y} ${x + w},${y + h / 2} ${x + w},${y}`} fill={bg} />
+          <polygon points={`${x},${y + h} ${x + w},${y + h / 2} ${x + w},${y + h}`} fill={bg} />
         </g>
       );
     }
-    if (type === "gR") {
-      // apex at (x+U, y+U/2) — right center
-      return (
-        <g key={`ib-${r}-${c}`}>
-          <polygon points={`${x},${y} ${x},${y + h} ${x + U},${y + h}`} fill={acc} />
-          <polygon points={`${x},${y + h} ${x},${y + U} ${x + U},${y + h}`} fill={acc} />
-          <polygon points={`${x},${y} ${x + U},${y} ${x + U},${y + h}`} fill={bg} />
-          <polygon points={`${x},${y + U} ${x + U},${y + U} ${x + U},${y + h}`} fill={bg} />
-        </g>
-      );
-    }
-    // gL — apex at (x, y+U/2) — left center
+    // L — base along right edge, apex left-center
     return (
-      <g key={`ib-${r}-${c}`}>
-        <polygon points={`${x + U},${y} ${x + U},${y + h} ${x},${y + h}`} fill={acc} />
-        <polygon points={`${x + U},${y + h} ${x + U},${y + U} ${x},${y + h}`} fill={acc} />
-        <polygon points={`${x + U},${y} ${x},${y} ${x},${y + h}`} fill={bg} />
-        <polygon points={`${x + U},${y + U} ${x},${y + U} ${x},${y + h}`} fill={bg} />
+      <g key={k}>
+        <polygon points={`${x + w},${y} ${x + w},${y + h} ${x},${y + h / 2}`} fill={acc} />
+        <polygon points={`${x + w},${y} ${x},${y + h / 2} ${x},${y}`} fill={bg} />
+        <polygon points={`${x + w},${y + h} ${x},${y + h / 2} ${x},${y + h}`} fill={bg} />
       </g>
     );
   };
 
+  // Diamond unit: on-point Fabric A square inside a c×c cell with 4 Fabric B
+  // corner triangles.
+  const Diamond = ({ x, y, k }: { x: number; y: number; k: string }) => (
+    <g key={k}>
+      <polygon points={`${x},${y} ${x + c / 2},${y} ${x},${y + c / 2}`} fill={acc} />
+      <polygon points={`${x + c},${y} ${x + c},${y + c / 2} ${x + c / 2},${y}`} fill={acc} />
+      <polygon points={`${x + c},${y + c} ${x + c / 2},${y + c} ${x + c},${y + c / 2}`} fill={acc} />
+      <polygon points={`${x},${y + c} ${x},${y + c / 2} ${x + c / 2},${y + c}`} fill={acc} />
+      <polygon
+        points={`${x + c / 2},${y} ${x + c},${y + c / 2} ${x + c / 2},${y + c} ${x},${y + c / 2}`}
+        fill={bg}
+      />
+    </g>
+  );
+
+  // Core cell positions (0-indexed 0..2 inside the 3×3 core, offset by b).
+  const coreX = (cc: number) => b + cc * c;
+  const coreY = (cr: number) => b + cr * c;
+
   return (
     <>
-      {cells.map((cell) => renderCell(cell.r, cell.c, cell.type))}
+      {/* ----- Outer corner squares (Fabric A, b×b) ----- */}
+      <rect x={0}     y={0}     width={b} height={b} fill={bg} />
+      <rect x={S - b} y={0}     width={b} height={b} fill={bg} />
+      <rect x={0}     y={S - b} width={b} height={b} fill={bg} />
+      <rect x={S - b} y={S - b} width={b} height={b} fill={bg} />
+
+      {/* ----- Top border: geese(D) | plain A | geese(D) ----- */}
+      <Goose k="tL" x={b}         y={0} w={c} h={b} dir="D" />
+      <rect  x={b + c}     y={0} width={c} height={b} fill={bg} />
+      <Goose k="tR" x={b + 2 * c} y={0} w={c} h={b} dir="D" />
+
+      {/* ----- Bottom border: geese(U) | plain A | geese(U) ----- */}
+      <Goose k="bL" x={b}         y={S - b} w={c} h={b} dir="U" />
+      <rect  x={b + c}     y={S - b} width={c} height={b} fill={bg} />
+      <Goose k="bR" x={b + 2 * c} y={S - b} w={c} h={b} dir="U" />
+
+      {/* ----- Left border: geese(R) / plain A / geese(R) ----- */}
+      <Goose k="lT" x={0} y={b}         w={b} h={c} dir="R" />
+      <rect  x={0} y={b + c}     width={b} height={c} fill={bg} />
+      <Goose k="lB" x={0} y={b + 2 * c} w={b} h={c} dir="R" />
+
+      {/* ----- Right border: geese(L) / plain A / geese(L) ----- */}
+      <Goose k="rT" x={S - b} y={b}         w={b} h={c} dir="L" />
+      <rect  x={S - b} y={b + c}     width={b} height={c} fill={bg} />
+      <Goose k="rB" x={S - b} y={b + 2 * c} w={b} h={c} dir="L" />
+
+      {/* ----- Inner 3×3 core: 5 solid-C squares (X) + 4 diamonds (plus) ----- */}
+      {/* Solids at corners + center */}
+      {[[0, 0], [0, 2], [1, 1], [2, 0], [2, 2]].map(([r, cc]) => (
+        <rect key={`s-${r}-${cc}`} x={coreX(cc)} y={coreY(r)} width={c} height={c} fill={solid} />
+      ))}
+      {/* Diamonds at edge midpoints */}
+      {[[0, 1], [1, 0], [1, 2], [2, 1]].map(([r, cc]) => (
+        <Diamond key={`d-${r}-${cc}`} k={`d-${r}-${cc}`} x={coreX(cc)} y={coreY(r)} />
+      ))}
+
       {showGrid && (
-        <g stroke="white" strokeWidth={0.75} opacity={0.35}>
-          {[1, 2, 3, 4].map((k) => (
+        <g stroke="white" strokeWidth={0.75} opacity={0.35} fill="none">
+          {/* Ring boundary */}
+          <rect x={b} y={b} width={3 * c} height={3 * c} />
+          {/* Core 3×3 separators */}
+          {[1, 2].map((k) => (
             <g key={k}>
-              <line x1={k * U} y1={0} x2={k * U} y2={total} />
-              <line x1={0} y1={k * U} x2={total} y2={k * U} />
+              <line x1={b + k * c} y1={b} x2={b + k * c} y2={b + 3 * c} />
+              <line x1={b} y1={b + k * c} x2={b + 3 * c} y2={b + k * c} />
             </g>
           ))}
         </g>
