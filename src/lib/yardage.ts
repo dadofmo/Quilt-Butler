@@ -2086,20 +2086,19 @@ export function calculateYardage(s: PlannerState): CalcResult {
       );
     }
   } else if (s.pattern === "idaho-beauty") {
-    // Idaho Beauty: 5×5 unit grid, u = blockSize / 5. Per block:
-    //   Plain squares: 8 Fabric A + 5 Fabric C at (u + SEAM).
-    //   Diamond units (4/block): each = 1 Fabric A base square at (u + SEAM)
-    //     + 4 Fabric B corner squares at (u/2 + SEAM) applied via
-    //     stitch-and-flip (same corner method as Snowball Block).
-    //   Geese units (8/block): each = 1 Fabric B + 1 Fabric A HRT starter
-    //     rectangle at (u/2 + HST_EXTRA) × (u + HST_EXTRA). Sew RST along
-    //     the diagonal, cut apart → 2 mirror half-rectangle-triangle units,
-    //     which combine to a full geese cell (one pair per cell).
-    const u = s.blockSize / 5;
-    const bigCut = u + SEAM;
-    const cornerCut = u / 2 + SEAM;
-    const rectShort = u / 2 + HST_EXTRA;
-    const rectLong = u + HST_EXTRA;
+    // Idaho Beauty: 3×3 core surrounded by a half-width outer ring.
+    // In finished sizes: core = blockSize / 4, outer ring = core / 2.
+    // Per block:
+    //   Fabric A: 4 small outer-corner squares, 4 core diamond-base squares,
+    //     and 12 half-width rectangles (4 plain outer middles + 8 goose bases).
+    //   Fabric B: 32 small corner squares (16 for diamonds + 16 for geese).
+    //   Fabric C: 5 plain core squares in the X pattern.
+    const core = s.blockSize / 4;
+    const ring = core / 2;
+    const coreCut = core + SEAM;
+    const ringCut = ring + SEAM;
+    const ringRectLong = core + SEAM;
+    const ringRectShort = ring + SEAM;
 
     const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
     const accFab = (s.assignments["accent"] ?? "B") as FabricKey;
@@ -2108,52 +2107,52 @@ export function calculateYardage(s: PlannerState): CalcResult {
     // Pool by fabric letter so shared letters collapse into one pile per
     // shape/size bucket.
     type Bucket = {
-      bigSquares: number;   // (u + SEAM) squares
-      cornerSquares: number; // (u/2 + SEAM) squares
-      hrtRects: number;      // (u/2 + HST_EXTRA) × (u + HST_EXTRA) rectangles
+      coreSquares: number; // (core + SEAM) squares
+      ringSquares: number; // (ring + SEAM) squares
+      ringRects: number;   // (core + SEAM) × (ring + SEAM) rectangles
     };
     const buckets: Partial<Record<FabricKey, Bucket>> = {};
-    const add = (fab: FabricKey, big: number, corner: number, hrt: number) => {
-      const b = (buckets[fab] ??= { bigSquares: 0, cornerSquares: 0, hrtRects: 0 });
-      b.bigSquares += big;
-      b.cornerSquares += corner;
-      b.hrtRects += hrt;
+    const add = (fab: FabricKey, coreSq: number, ringSq: number, ringRect: number) => {
+      const b = (buckets[fab] ??= { coreSquares: 0, ringSquares: 0, ringRects: 0 });
+      b.coreSquares += coreSq;
+      b.ringSquares += ringSq;
+      b.ringRects += ringRect;
     };
-    // Fabric A: 8 plain + 4 diamond-base big squares, 0 corners, 8 HRT starters.
-    add(bgFab, (8 + 4) * blockCount, 0, 8 * blockCount);
-    // Fabric B: 0 big, 4×4 = 16 corner squares, 8 HRT starters.
-    add(accFab, 0, 16 * blockCount, 8 * blockCount);
-    // Fabric C: 5 big plain squares only — never used in any triangle.
+    // Fabric A: 4 diamond bases, 4 small true-corner squares, 12 half-width rectangles.
+    add(bgFab, 4 * blockCount, 4 * blockCount, 12 * blockCount);
+    // Fabric B: 16 diamond corner squares + 16 goose corner squares.
+    add(accFab, 0, 32 * blockCount, 0);
+    // Fabric C: 5 core squares only — never used in any triangle.
     add(solidFab, 5 * blockCount, 0, 0);
 
     for (const fab of ALL_FABRIC_KEYS) {
       const b = buckets[fab];
       if (!b) continue;
-      if (b.bigSquares > 0) {
-        addSquares(reqs[fab], `Squares (${u.toFixed(2)}" finished)`, b.bigSquares, bigCut, s.fabricWidth);
+      if (b.coreSquares > 0) {
+        addSquares(reqs[fab], `Core squares (${core.toFixed(2)}" finished)`, b.coreSquares, coreCut, s.fabricWidth);
       }
-      if (b.cornerSquares > 0) {
-        addSquares(reqs[fab], `Corner squares for diamond stitch-and-flip (${(u / 2).toFixed(2)}" finished)`, b.cornerSquares, cornerCut, s.fabricWidth);
+      if (b.ringSquares > 0) {
+        addSquares(reqs[fab], `Small outer-ring/corner squares (${ring.toFixed(2)}" finished)`, b.ringSquares, ringCut, s.fabricWidth);
       }
-      if (b.hrtRects > 0) {
-        addRails(reqs[fab], `Half-rectangle-triangle starter rectangles (${(u / 2).toFixed(2)}" × ${u.toFixed(2)}" finished)`, b.hrtRects, rectLong, rectShort, s.fabricWidth);
+      if (b.ringRects > 0) {
+        addRails(reqs[fab], `Half-width outer-ring rectangles (${core.toFixed(2)}" × ${ring.toFixed(2)}" finished)`, b.ringRects, ringRectLong, ringRectShort, s.fabricWidth);
       }
     }
 
     notes.push(
-      `Each block is a 5×5 unit grid where every unit finishes at ${u.toFixed(2)}". Per block cut: 8 Fabric ${bgFab} background squares + 5 Fabric ${solidFab} solid squares (the X through the middle) at ${bigCut.toFixed(2)}" × ${bigCut.toFixed(2)}"; 4 Fabric ${bgFab} diamond base squares at ${bigCut.toFixed(2)}" × ${bigCut.toFixed(2)}"; 16 Fabric ${accFab} corner squares at ${cornerCut.toFixed(2)}" × ${cornerCut.toFixed(2)}" (4 per diamond unit); and 8 pairs of half-rectangle-triangle starters — 8 Fabric ${accFab} + 8 Fabric ${bgFab} rectangles at ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}" (one pair per geese unit).`,
+      `Each Idaho Beauty block is a 3×3 core surrounded by a half-width outer ring. The 3×3 core cells finish at ${core.toFixed(2)}"; the outside ring finishes at ${ring.toFixed(2)}" wide. Per block cut: 4 Fabric ${bgFab} core diamond-base squares + 5 Fabric ${solidFab} solid core squares at ${coreCut.toFixed(2)}" × ${coreCut.toFixed(2)}"; 4 Fabric ${bgFab} small corner squares at ${ringCut.toFixed(2)}" × ${ringCut.toFixed(2)}"; 12 Fabric ${bgFab} half-width rectangles at ${ringRectLong.toFixed(2)}" × ${ringRectShort.toFixed(2)}"; and 32 Fabric ${accFab} small corner squares at ${ringCut.toFixed(2)}" × ${ringCut.toFixed(2)}" for the diamond and goose triangles.`,
     );
     notes.push(
-      `Fabric ${solidFab} only appears as plain, uncut squares — never inside a triangle. If you picked the same letter for the background and accent, the pieces still cut fine; they'll just pool into a single pile per size.`,
+      `Fabric ${solidFab} only appears as plain, uncut core squares — never inside a triangle. The outside ring is intentionally half the width of the core cells, matching the reference block proportions.`,
     );
     notes.push(
-      `Diamond units (4 per block): use the stitch-and-flip corner method. Place a Fabric ${accFab} ${cornerCut.toFixed(2)}" corner square RST on a corner of a Fabric ${bgFab} ${bigCut.toFixed(2)}" base square. Draw a diagonal on the small square from the outer corner to the inner corner. Sew on the line, trim the outer corner ~1/4" beyond the seam, press the small triangle open. Repeat on all 4 corners — Fabric ${bgFab} becomes the on-point diamond and Fabric ${accFab} fills the 4 corner triangles. Trim to ${bigCut.toFixed(2)}" square if needed.`,
+      `Diamond units (4 per block): use the stitch-and-flip corner method. Place a Fabric ${accFab} ${ringCut.toFixed(2)}" corner square RST on a corner of a Fabric ${bgFab} ${coreCut.toFixed(2)}" base square. Draw a diagonal on the small square from the outer corner to the inner corner. Sew on the line, trim the outer corner ~1/4" beyond the seam, press the small triangle open. Repeat on all 4 corners — Fabric ${bgFab} becomes the on-point diamond and Fabric ${accFab} fills the 4 corner triangles. Trim to ${coreCut.toFixed(2)}" square if needed.`,
     );
     notes.push(
-      `Geese units (8 per block, 2 pointing to each side of the block): each unit is 2 mirror-image half-rectangle triangles (HRT). Layer one Fabric ${accFab} + one Fabric ${bgFab} starter rectangle RST. Draw a diagonal corner-to-corner, sew a scant 1/4" on each side of the line, then cut on the line — this yields 2 HRTs with opposite orientations. Trim each to ${(u / 2 + SEAM).toFixed(2)}" × ${bigCut.toFixed(2)}". Sew the mirrored pair back together along the long straight edge with Fabric ${accFab} triangles meeting in the middle — the two accent triangles form one large chevron/goose pointing to the block's center. All 8 geese must have their apex pointing inward.`,
+      `Outer-ring geese units (8 per block, 2 per side): start with one Fabric ${bgFab} ${ringRectLong.toFixed(2)}" × ${ringRectShort.toFixed(2)}" rectangle and two Fabric ${accFab} ${ringCut.toFixed(2)}" corner squares. Stitch-and-flip one accent square onto each end so the Fabric ${bgFab} triangle points inward toward the block center and the Fabric ${accFab} triangles stay in the outside corners. Rotate these half-width units around the block just like the reference image.`,
     );
     notes.push(
-      `Idaho Beauty Assembly Tip: build each block as 5 rows of 5 units. Row 1 & 5: A | goose | A | goose | A. Row 2 & 4: goose | C-solid | diamond | C-solid | goose. Row 3: A | diamond | C-solid | diamond | A. Rotate each geese unit so its apex points toward the block's center (down for row 1, up for row 5, right for column 1, left for column 5). The 5 Fabric ${solidFab} squares form an X across the block, the 4 diamonds form a plus around the center, and the 8 geese chevrons all point inward — check this visually before joining rows.`,
+      `Idaho Beauty Assembly Tip: build a half-width outer ring around the 3×3 core. Top and bottom rows are: small Fabric ${bgFab} square | goose | Fabric ${bgFab} rectangle | goose | small Fabric ${bgFab} square. The 3×3 core is: ${solidFab} | diamond | ${solidFab}; diamond | ${solidFab} | diamond; ${solidFab} | diamond | ${solidFab}. The left and right ring sides are goose | Fabric ${bgFab} rectangle | goose, with every Fabric ${bgFab} goose triangle pointing inward.`,
     );
 
     if (sashWidth > 0) {
