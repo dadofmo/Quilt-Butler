@@ -1055,17 +1055,12 @@ function renderInner(
   }
 }
 
-/** Shared renderer for Idaho Beauty — used by both the single-block diagram
- *  and the full-quilt tile so the two previews stay pixel-identical.
+/** Shared renderer for Idaho Beauty — used by the thumb, single-block diagram,
+ *  and full-quilt tile so every preview stays pixel-identical.
  *
- *  Geometry is a UNIFORM 5×5 grid (u = size / 5). Per the pattern spec:
- *    Row 0: A | geese-D | A | geese-D | A
- *    Row 1: geese-R | C | diamond | C | geese-L
- *    Row 2: A       | diamond | C | diamond | A
- *    Row 3: geese-R | C | diamond | C | geese-L
- *    Row 4: A | geese-U | A | geese-U | A
- *  A = background, B = accent triangles, C = solid squares. When these blocks
- *  tile edge-to-edge the star/compass secondary pattern emerges naturally.
+ *  True geometry is a 3×3 core of full-size cells surrounded by a half-width
+ *  outer ring. In a 400×400 drafting space: border ring = 50, core cells = 100.
+ *  A = cream/background, B = teal triangles, C = aqua solid core squares.
  */
 function IdahoBeautyBlock({
   size,
@@ -1080,95 +1075,137 @@ function IdahoBeautyBlock({
   solid: string;
   showGrid?: boolean;
 }) {
-  const U = size / 5;
+  const border = size / 8;
+  const core = size / 4;
+  const p0 = 0;
+  const p1 = border;
+  const p2 = border + core;
+  const p3 = border + core * 2;
+  const p4 = border + core * 3;
+  const p5 = size;
+  const grid = [p1, p2, p3, p4];
 
-  // Flying-goose in a u×u cell with apex toward one edge.
-  const Goose = ({ x, y, dir, k }: { x: number; y: number; dir: "D" | "U" | "R" | "L"; k: string }) => {
+  // Half-width flying-geese unit. The cream/background triangle points inward,
+  // matching the uploaded reference; teal/accent fills the two outside corners.
+  const Goose = ({
+    x,
+    y,
+    w,
+    h,
+    dir,
+    k,
+  }: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    dir: "D" | "U" | "R" | "L";
+    k: string;
+  }) => {
     if (dir === "D") {
       return (
         <g key={k}>
-          <polygon points={`${x},${y} ${x + U},${y} ${x + U / 2},${y + U}`} fill={acc} />
-          <polygon points={`${x},${y} ${x + U / 2},${y + U} ${x},${y + U}`} fill={bg} />
-          <polygon points={`${x + U},${y} ${x + U / 2},${y + U} ${x + U},${y + U}`} fill={bg} />
+          <polygon points={`${x},${y} ${x + w},${y} ${x + w / 2},${y + h}`} fill={bg} />
+          <polygon points={`${x},${y} ${x + w / 2},${y + h} ${x},${y + h}`} fill={acc} />
+          <polygon points={`${x + w},${y} ${x + w / 2},${y + h} ${x + w},${y + h}`} fill={acc} />
         </g>
       );
     }
     if (dir === "U") {
       return (
         <g key={k}>
-          <polygon points={`${x},${y + U} ${x + U},${y + U} ${x + U / 2},${y}`} fill={acc} />
-          <polygon points={`${x},${y + U} ${x + U / 2},${y} ${x},${y}`} fill={bg} />
-          <polygon points={`${x + U},${y + U} ${x + U / 2},${y} ${x + U},${y}`} fill={bg} />
+          <polygon points={`${x},${y + h} ${x + w},${y + h} ${x + w / 2},${y}`} fill={bg} />
+          <polygon points={`${x},${y + h} ${x + w / 2},${y} ${x},${y}`} fill={acc} />
+          <polygon points={`${x + w},${y + h} ${x + w / 2},${y} ${x + w},${y}`} fill={acc} />
         </g>
       );
     }
     if (dir === "R") {
       return (
         <g key={k}>
-          <polygon points={`${x},${y} ${x},${y + U} ${x + U},${y + U / 2}`} fill={acc} />
-          <polygon points={`${x},${y} ${x + U},${y + U / 2} ${x + U},${y}`} fill={bg} />
-          <polygon points={`${x},${y + U} ${x + U},${y + U / 2} ${x + U},${y + U}`} fill={bg} />
+          <polygon points={`${x},${y} ${x},${y + h} ${x + w},${y + h / 2}`} fill={bg} />
+          <polygon points={`${x},${y} ${x + w},${y + h / 2} ${x + w},${y}`} fill={acc} />
+          <polygon points={`${x},${y + h} ${x + w},${y + h / 2} ${x + w},${y + h}`} fill={acc} />
         </g>
       );
     }
     return (
       <g key={k}>
-        <polygon points={`${x + U},${y} ${x + U},${y + U} ${x},${y + U / 2}`} fill={acc} />
-        <polygon points={`${x + U},${y} ${x},${y + U / 2} ${x},${y}`} fill={bg} />
-        <polygon points={`${x + U},${y + U} ${x},${y + U / 2} ${x},${y + U}`} fill={bg} />
+        <polygon points={`${x + w},${y} ${x + w},${y + h} ${x},${y + h / 2}`} fill={bg} />
+        <polygon points={`${x + w},${y} ${x},${y + h / 2} ${x},${y}`} fill={acc} />
+        <polygon points={`${x + w},${y + h} ${x},${y + h / 2} ${x},${y + h}`} fill={acc} />
       </g>
     );
   };
 
-  // Diamond unit: 4 accent (B) corner triangles + on-point background (A) diamond.
+  // Core diamond unit: 4 accent (B) corner triangles + on-point background (A) diamond.
   const Diamond = ({ x, y, k }: { x: number; y: number; k: string }) => (
     <g key={k}>
-      <polygon points={`${x},${y} ${x + U / 2},${y} ${x},${y + U / 2}`} fill={acc} />
-      <polygon points={`${x + U},${y} ${x + U},${y + U / 2} ${x + U / 2},${y}`} fill={acc} />
-      <polygon points={`${x + U},${y + U} ${x + U / 2},${y + U} ${x + U},${y + U / 2}`} fill={acc} />
-      <polygon points={`${x},${y + U} ${x},${y + U / 2} ${x + U / 2},${y + U}`} fill={acc} />
+      <polygon points={`${x},${y} ${x + core / 2},${y} ${x},${y + core / 2}`} fill={acc} />
+      <polygon points={`${x + core},${y} ${x + core},${y + core / 2} ${x + core / 2},${y}`} fill={acc} />
+      <polygon points={`${x + core},${y + core} ${x + core / 2},${y + core} ${x + core},${y + core / 2}`} fill={acc} />
+      <polygon points={`${x},${y + core} ${x},${y + core / 2} ${x + core / 2},${y + core}`} fill={acc} />
       <polygon
-        points={`${x + U / 2},${y} ${x + U},${y + U / 2} ${x + U / 2},${y + U} ${x},${y + U / 2}`}
+        points={`${x + core / 2},${y} ${x + core},${y + core / 2} ${x + core / 2},${y + core} ${x},${y + core / 2}`}
         fill={bg}
       />
     </g>
   );
 
-  type CellType = "A" | "C" | "diamond" | "gD" | "gU" | "gR" | "gL";
-  const cells: { r: number; c: number; type: CellType }[] = [
-    // Plain background (A) — 4 outer corners + 4 outer edge-midpoints (row/col 2 outer cells)
-    { r: 0, c: 0, type: "A" }, { r: 0, c: 2, type: "A" }, { r: 0, c: 4, type: "A" },
-    { r: 2, c: 0, type: "A" }, { r: 2, c: 4, type: "A" },
-    { r: 4, c: 0, type: "A" }, { r: 4, c: 2, type: "A" }, { r: 4, c: 4, type: "A" },
-    // Solid C squares — X pattern (quadrant centers + true center)
-    { r: 1, c: 1, type: "C" }, { r: 1, c: 3, type: "C" }, { r: 2, c: 2, type: "C" },
-    { r: 3, c: 1, type: "C" }, { r: 3, c: 3, type: "C" },
-    // Diamonds — plus pattern around the true center
-    { r: 1, c: 2, type: "diamond" }, { r: 2, c: 1, type: "diamond" },
-    { r: 2, c: 3, type: "diamond" }, { r: 3, c: 2, type: "diamond" },
-    // Geese — all apexes point toward the block center
-    { r: 0, c: 1, type: "gD" }, { r: 0, c: 3, type: "gD" },
-    { r: 4, c: 1, type: "gU" }, { r: 4, c: 3, type: "gU" },
-    { r: 1, c: 0, type: "gR" }, { r: 3, c: 0, type: "gR" },
-    { r: 1, c: 4, type: "gL" }, { r: 3, c: 4, type: "gL" },
-  ];
-
   return (
     <>
-      {cells.map(({ r, c, type }) => {
-        const x = c * U, y = r * U;
-        const k = `ib-${r}-${c}`;
-        if (type === "A") return <rect key={k} x={x} y={y} width={U} height={U} fill={bg} />;
-        if (type === "C") return <rect key={k} x={x} y={y} width={U} height={U} fill={solid} />;
-        if (type === "diamond") return <Diamond key={k} k={k} x={x} y={y} />;
-        return <Goose key={k} k={k} x={x} y={y} dir={type === "gD" ? "D" : type === "gU" ? "U" : type === "gR" ? "R" : "L"} />;
-      })}
+      {/* Outer half-width ring */}
+      <rect x={p0} y={p0} width={border} height={border} fill={bg} />
+      <Goose k="ib-top-left" x={p1} y={p0} w={core} h={border} dir="D" />
+      <rect x={p2} y={p0} width={core} height={border} fill={bg} />
+      <Goose k="ib-top-right" x={p3} y={p0} w={core} h={border} dir="D" />
+      <rect x={p4} y={p0} width={border} height={border} fill={bg} />
+
+      <Goose k="ib-left-top" x={p0} y={p1} w={border} h={core} dir="R" />
+      <rect x={p0} y={p2} width={border} height={core} fill={bg} />
+      <Goose k="ib-left-bottom" x={p0} y={p3} w={border} h={core} dir="R" />
+
+      <Goose k="ib-right-top" x={p4} y={p1} w={border} h={core} dir="L" />
+      <rect x={p4} y={p2} width={border} height={core} fill={bg} />
+      <Goose k="ib-right-bottom" x={p4} y={p3} w={border} h={core} dir="L" />
+
+      <rect x={p0} y={p4} width={border} height={border} fill={bg} />
+      <Goose k="ib-bottom-left" x={p1} y={p4} w={core} h={border} dir="U" />
+      <rect x={p2} y={p4} width={core} height={border} fill={bg} />
+      <Goose k="ib-bottom-right" x={p3} y={p4} w={core} h={border} dir="U" />
+      <rect x={p4} y={p4} width={border} height={border} fill={bg} />
+
+      {/* 3×3 core */}
+      <rect x={p1} y={p1} width={core} height={core} fill={solid} />
+      <Diamond k="ib-diamond-top" x={p2} y={p1} />
+      <rect x={p3} y={p1} width={core} height={core} fill={solid} />
+      <Diamond k="ib-diamond-left" x={p1} y={p2} />
+      <rect x={p2} y={p2} width={core} height={core} fill={solid} />
+      <Diamond k="ib-diamond-right" x={p3} y={p2} />
+      <rect x={p1} y={p3} width={core} height={core} fill={solid} />
+      <Diamond k="ib-diamond-bottom" x={p2} y={p3} />
+      <rect x={p3} y={p3} width={core} height={core} fill={solid} />
+
       {showGrid && (
         <g stroke="white" strokeWidth={0.75} opacity={0.35} fill="none">
-          {[1, 2, 3, 4].map((k) => (
+          {grid.map((pos) => (
+            <g key={pos}>
+              <line x1={pos} y1={0} x2={pos} y2={size} />
+              <line x1={0} y1={pos} x2={size} y2={pos} />
+            </g>
+          ))}
+          {[
+            [p1 + core / 2, p0, p1 + core / 2, p1],
+            [p3 + core / 2, p0, p3 + core / 2, p1],
+            [p1 + core / 2, p4, p1 + core / 2, p5],
+            [p3 + core / 2, p4, p3 + core / 2, p5],
+            [p0, p1 + core / 2, p1, p1 + core / 2],
+            [p0, p3 + core / 2, p1, p3 + core / 2],
+            [p4, p1 + core / 2, p5, p1 + core / 2],
+            [p4, p3 + core / 2, p5, p3 + core / 2],
+          ].map(([x1, y1, x2, y2], k) => (
             <g key={k}>
-              <line x1={k * U} y1={0} x2={k * U} y2={5 * U} />
-              <line x1={0} y1={k * U} x2={5 * U} y2={k * U} />
+              <line x1={x1} y1={y1} x2={x2} y2={y2} />
             </g>
           ))}
         </g>
