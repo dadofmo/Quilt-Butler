@@ -850,25 +850,25 @@ export const PATTERNS: PatternDef[] = [
     name: "Idaho Beauty",
     hasMath: true,
     intro:
-      "Idaho Beauty is a traditional 5×5 grid block built from three fabrics. Eight plain background squares fill the outer corners and edge midpoints, five solid accent squares form an X through the block, four on-point diamonds form a plus around the center, and eight geese chevrons all point inward from the block's edges — combining into a symmetrical star/compass effect when the blocks tile.",
+      "Idaho Beauty is built as a 3×3 core of full-size cells surrounded by a half-width outer ring. Four on-point diamonds form a plus around the center, five solid accent squares form an X through the core, and eight half-width geese units sit in the outside ring with their background triangles pointing inward toward the block center.",
     sections: [
       {
         id: "bg",
         label: "Background (Fabric A)",
         defaultFabric: "A",
-        hint: "Fills the 8 plain outer squares of every block, the on-point diamond center of each of the 4 diamond units, and the two corner triangles that flank the goose in every geese unit. Usually a light/calm fabric.",
+        hint: "Fills the small outer-corner squares, the plain half-width outer-ring rectangles, the inward triangle of every goose unit, and the on-point diamond center of each of the 4 diamond units. Usually a light/calm fabric.",
       },
       {
         id: "accent",
         label: "Accent triangles (Fabric B)",
         defaultFabric: "B",
-        hint: "The 4 corner triangles that frame each on-point diamond, and the large goose triangle in every one of the 8 geese units — pick a fabric that contrasts strongly with the background.",
+        hint: "The 4 corner triangles that frame each on-point diamond, plus the two outside corner triangles in every half-width goose unit — pick a fabric that contrasts strongly with the background.",
       },
       {
         id: "solid",
         label: "Solid squares (Fabric C)",
         defaultFabric: "C",
-        hint: "The 5 plain, uncut squares that form the X through the middle of every block. Fabric C never appears in any triangle — pick a mid-tone that reads distinct from both A and B.",
+        hint: "The 5 plain, uncut full-size squares that form the X through the 3×3 core. Fabric C never appears in any triangle — pick a mid-tone that reads distinct from both A and B.",
       },
       {
         id: "sashing",
