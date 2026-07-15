@@ -797,6 +797,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "checkerboard": {
+      return (
+        <svg {...common}>
+          <CheckerboardBlock size={90} a={C.a} b={C.b} c={C.c} d={C.d} />
+        </svg>
+      );
+    }
   }
 }
 
