@@ -1278,7 +1278,7 @@ function IdahoBeautyBlock({
   );
 }
 
-export { IdahoBeautyBlock };
+export { IdahoBeautyBlock, CheckerboardBlock };
 
 
 
