@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock } from "./PatternDiagram";
 
 
 interface Props {
