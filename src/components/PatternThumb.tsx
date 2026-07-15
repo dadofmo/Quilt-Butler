@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock } from "./PatternDiagram";
 
 
 interface Props {
@@ -73,6 +73,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Star and Cross quilt block diagram showing a 5x5 grid with a solid cross of dark-red rectangles running through the middle, a small peach center square where the cross arms meet, and four corner units each with a plain background rectangle on top and one background plus one orange accent square below",
   "idaho-beauty":
     "Idaho Beauty quilt block diagram showing a 5x5 grid with cream background corners, four teal on-point diamonds forming a plus around the center, five aqua solid squares in an X, and eight teal geese chevrons pointing inward from the edges toward the center",
+  checkerboard:
+    "Checkerboard quilt block diagram showing two overlapping hourglass shapes — a large orange and tan corner-to-corner hourglass with a smaller mint and cream diamond hourglass nested inside, rotated 45 degrees, all four fabrics meeting at the block center",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -792,6 +794,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return (
         <svg {...common}>
           <IdahoBeautyBlock size={90} bg={bg} acc={acc} solid={solid} />
+        </svg>
+      );
+    }
+    case "checkerboard": {
+      return (
+        <svg {...common}>
+          <CheckerboardBlock size={90} a={C.a} b={C.b} c={C.c} d={C.d} />
         </svg>
       );
     }

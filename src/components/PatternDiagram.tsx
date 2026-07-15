@@ -1052,7 +1052,71 @@ function renderInner(
       const solid = get("solid", "C");
       return <IdahoBeautyBlock size={200} bg={bg} acc={acc} solid={solid} showGrid />;
     }
+    case "checkerboard": {
+      const a = get("outerA", "A");
+      const b = get("outerB", "B");
+      const c = get("innerC", "C");
+      const d = get("innerD", "D");
+      return <CheckerboardBlock size={200} a={a} b={b} c={c} d={d} />;
+    }
   }
+}
+
+/** Shared renderer for Checkerboard — nested hourglass block.
+ *  Outer 4 QST triangles meet at block center; A fills top+bottom, B fills
+ *  left+right. Inner smaller on-point diamond (corners at 12.5%/87.5% of each
+ *  edge midpoint via 3/16 and 13/16 fractions) split by its own diagonals
+ *  into 4 quarters; C fills one diagonal pair, D fills the other. */
+function CheckerboardBlock({
+  size,
+  a,
+  b,
+  c,
+  d,
+}: {
+  size: number;
+  a: string;
+  b: string;
+  c: string;
+  d: string;
+}) {
+  const S = size;
+  const cx = S / 2;
+  const cy = S / 2;
+  // Inner diamond corners: 12.5% inset from each edge midpoint, i.e. corners
+  // at (cx, S/8), (7S/8, cy), (cx, 7S/8), (S/8, cy). This matches the
+  // 400→(200,50) etc. specification the block was authored against.
+  const inTop = { x: cx, y: S / 8 };
+  const inRight = { x: (7 * S) / 8, y: cy };
+  const inBot = { x: cx, y: (7 * S) / 8 };
+  const inLeft = { x: S / 8, y: cy };
+  // Outer 4 quarters. Each is a triangle from one block edge to the matching
+  // inner-diamond corner, plus the two block-corner triangles that connect it
+  // to the neighboring inner-diamond corners — so each outer quarter is a
+  // quadrilateral spanning one full edge and half of each adjacent edge, with
+  // its "inner" vertex at the inner-diamond corner.
+  //
+  // Concretely, the outer region is split into 4 kites meeting at the CENTER
+  // via the two block diagonals, with A on top+bottom, B on left+right. The
+  // small inner diamond then overlays the middle, hiding the center portion.
+  return (
+    <>
+      {/* Outer top A: from top edge down to block center along both diagonals */}
+      <polygon points={`0,0 ${S},0 ${cx},${cy}`} fill={a} />
+      {/* Outer right B */}
+      <polygon points={`${S},0 ${S},${S} ${cx},${cy}`} fill={b} />
+      {/* Outer bottom A */}
+      <polygon points={`${S},${S} 0,${S} ${cx},${cy}`} fill={a} />
+      {/* Outer left B */}
+      <polygon points={`0,${S} 0,0 ${cx},${cy}`} fill={b} />
+      {/* Inner diamond, split into 4 quarters by its own diagonals through center.
+          C fills upper-right + lower-left; D fills upper-left + lower-right. */}
+      <polygon points={`${inTop.x},${inTop.y} ${inRight.x},${inRight.y} ${cx},${cy}`} fill={c} />
+      <polygon points={`${inRight.x},${inRight.y} ${inBot.x},${inBot.y} ${cx},${cy}`} fill={d} />
+      <polygon points={`${inBot.x},${inBot.y} ${inLeft.x},${inLeft.y} ${cx},${cy}`} fill={c} />
+      <polygon points={`${inLeft.x},${inLeft.y} ${inTop.x},${inTop.y} ${cx},${cy}`} fill={d} />
+    </>
+  );
 }
 
 /** Shared renderer for Idaho Beauty — used by the thumb, single-block diagram,
@@ -1214,7 +1278,7 @@ function IdahoBeautyBlock({
   );
 }
 
-export { IdahoBeautyBlock };
+export { IdahoBeautyBlock, CheckerboardBlock };
 
 
 

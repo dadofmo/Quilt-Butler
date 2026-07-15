@@ -1933,6 +1933,51 @@ console.log("\n=== Idaho Beauty: 50×65, 10\" block, 2\" sashing ===");
   check("IB(sash) D strip length", d.pieces[0].w, 10.5);
 }
 
+console.log("\n=== Checkerboard: 50×65, 12\" block, no sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "checkerboard" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+  };
+  // 4×5=20 blocks. outerCut = 13.25, innerCut = 0.75*12 + 1.25 = 10.25.
+  // Per block: A=2 outer, B=2 outer, C=2 inner, D=2 inner
+  // Across 20 blocks: A=40 outer, B=40 outer, C=40 inner, D=40 inner.
+  const r = calculateYardage(s);
+  const A = r.fabrics.find(f => f.fabric === "A")!;
+  check("CB A count", A.pieces[0].count, 40);
+  check("CB A cut", A.pieces[0].w, 13.25);
+  const B = r.fabrics.find(f => f.fabric === "B")!;
+  check("CB B count", B.pieces[0].count, 40);
+  check("CB B cut", B.pieces[0].w, 13.25);
+  const C = r.fabrics.find(f => f.fabric === "C")!;
+  check("CB C count", C.pieces[0].count, 40);
+  check("CB C cut", C.pieces[0].w, 10.25);
+  const D = r.fabrics.find(f => f.fabric === "D")!;
+  check("CB D count", D.pieces[0].count, 40);
+  check("CB D cut", D.pieces[0].w, 10.25);
+}
+
+console.log("\n=== Checkerboard: 50×65, 12\" block, 2\" sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "checkerboard" as const,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 2,
+    assignments: { outerA: "A", outerB: "B", innerC: "C", innerD: "D", sashing: "E" } as Record<string, FabricKey>,
+  };
+  // 4×5=20 blocks. vSash=(4-1)*5=15, hSash=(5-1)*4=16, total=31 strips at 2.5"×12.5".
+  const r = calculateYardage(s);
+  const e = r.fabrics.find(x => x.fabric === "E")!;
+  check("CB(sash) E strip count", e.pieces[0].count, 31);
+  check("CB(sash) E strip width", e.pieces[0].h, 2.5);
+  check("CB(sash) E strip length", e.pieces[0].w, 12.5);
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {

@@ -879,6 +879,46 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "E" },
     ],
   },
+  {
+    id: "checkerboard",
+    name: "Checkerboard",
+    hasMath: true,
+    intro:
+      "Checkerboard is a nested hourglass block: a large corner-to-corner hourglass in two fabrics (A top+bottom, B left+right) with a smaller diamond-shaped hourglass nested at the center, rotated 45°, in two more fabrics (C and D on the inner diagonal pairs). All four fabrics meet cleanly at the center.",
+    sections: [
+      {
+        id: "outerA",
+        label: "Outer top+bottom (Fabric A)",
+        defaultFabric: "A",
+        hint: "The two large triangles that fill the top and bottom of the outer hourglass. Usually your boldest fabric.",
+      },
+      {
+        id: "outerB",
+        label: "Outer left+right (Fabric B)",
+        defaultFabric: "B",
+        hint: "The two large triangles that fill the left and right of the outer hourglass — pick a fabric that contrasts with Fabric A.",
+      },
+      {
+        id: "innerC",
+        label: "Inner diagonal pair (Fabric C)",
+        defaultFabric: "C",
+        hint: "Two of the four small triangles inside the center diamond, forming one diagonal bow-tie through the center.",
+      },
+      {
+        id: "innerD",
+        label: "Inner opposite diagonal pair (Fabric D)",
+        defaultFabric: "D",
+        hint: "The other two small triangles inside the center diamond — the opposite diagonal bow-tie.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "E",
+        hint: "Optional strips of fabric that separate each Checkerboard block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

@@ -171,9 +171,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isTwinStar = s.pattern === "twin-star";
   const isStarAndCross = s.pattern === "star-and-cross";
   const isIdahoBeauty = s.pattern === "idaho-beauty";
+  const isCheckerboard = s.pattern === "checkerboard";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -2169,6 +2170,62 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "checkerboard") {
+    // Checkerboard: nested hourglass block. Two overlapping QST-style units
+    // sharing a center: an outer full-block hourglass (Fabric A top+bottom,
+    // Fabric B left+right) and a smaller inner diamond hourglass rotated 45°
+    // (Fabric C on one diagonal, Fabric D on the other).
+    //
+    // Per block, following the "1 QST starter per needed quarter, discard
+    // excess" convention already used by Card Trick:
+    //   Outer: 2 A + 2 B quarters → 2 A + 2 B QST starters at (S + 1.25")
+    //   Inner: 2 C + 2 D quarters at inner-diamond scale. The inner diamond's
+    //          diagonals span 0.75 × S, so its inscribed QST unit finishes at
+    //          0.75 × S → starter at (0.75S + 1.25").
+    const S = s.blockSize;
+    const outerCut = S + 1.25;
+    const innerFinished = 0.75 * S;
+    const innerCut = innerFinished + 1.25;
+    const aFab = (s.assignments["outerA"] ?? "A") as FabricKey;
+    const bFab = (s.assignments["outerB"] ?? "B") as FabricKey;
+    const cFab = (s.assignments["innerC"] ?? "C") as FabricKey;
+    const dFab = (s.assignments["innerD"] ?? "D") as FabricKey;
+
+    addSquares(reqs[aFab], "Outer QST starting squares (top + bottom)", 2 * blockCount, outerCut, s.fabricWidth);
+    addSquares(reqs[bFab], "Outer QST starting squares (left + right)", 2 * blockCount, outerCut, s.fabricWidth);
+    addSquares(reqs[cFab], "Inner QST starting squares (diagonal pair 1)", 2 * blockCount, innerCut, s.fabricWidth);
+    addSquares(reqs[dFab], "Inner QST starting squares (diagonal pair 2)", 2 * blockCount, innerCut, s.fabricWidth);
+
+    notes.push(
+      `Each block is a nested hourglass: 4 large outer QST quarter-triangles (2 Fabric ${aFab} top+bottom + 2 Fabric ${bFab} left+right) surround 4 smaller inner QST quarter-triangles (2 Fabric ${cFab} + 2 Fabric ${dFab}) that meet at the block center. All four fabrics touch at the exact center.`,
+    );
+    notes.push(
+      `Per block, cut: 2 Fabric ${aFab} + 2 Fabric ${bFab} outer QST starting squares at ${outerCut.toFixed(2)}" × ${outerCut.toFixed(2)}" (finished ${S}" + 1.25" for two diagonal seams), and 2 Fabric ${cFab} + 2 Fabric ${dFab} inner QST starting squares at ${innerCut.toFixed(2)}" × ${innerCut.toFixed(2)}" (inner finished ${innerFinished.toFixed(2)}" + 1.25").`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${2 * blockCount} outer QST squares each of Fabrics ${aFab} and ${bFab}; ${2 * blockCount} inner QST squares each of Fabrics ${cFab} and ${dFab}.`,
+    );
+    notes.push(
+      `QST construction: slice each QST starting square across BOTH diagonals to yield 4 quarter-triangles per starter. Combine 2 Fabric ${aFab} + 2 Fabric ${bFab} outer quarters into one large hourglass unit (Fabric ${aFab} at top and bottom, Fabric ${bFab} at left and right). Combine 2 Fabric ${cFab} + 2 Fabric ${dFab} inner quarters into a smaller hourglass unit — this becomes the on-point diamond that sits inside the outer hourglass, rotated 45° so its points touch the outer hourglass's inner seams.`,
+    );
+    notes.push(
+      `Checkerboard Assembly Tip: build the small inner diamond hourglass first, then applique or set it into the center of the outer hourglass so all four fabric points meet cleanly at the block center. Keep every block in the same orientation across the quilt so the outer top/bottom and left/right fabrics line up consistently.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
@@ -2243,7 +2300,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "oh-susannah" ||
     s.pattern === "twin-star" ||
     s.pattern === "star-and-cross" ||
-    s.pattern === "idaho-beauty";
+    s.pattern === "idaho-beauty" ||
+    s.pattern === "checkerboard";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
