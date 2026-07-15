@@ -1052,6 +1052,13 @@ function MiniBlock({
       const solid = get("solid", "C");
       return <IdahoBeautyBlock size={200} bg={bg} acc={acc} solid={solid} />;
     }
+    case "checkerboard": {
+      const a = get("outerA", "A");
+      const b = get("outerB", "B");
+      const c = get("innerC", "C");
+      const d = get("innerD", "D");
+      return <CheckerboardBlock size={200} a={a} b={b} c={c} d={d} />;
+    }
   }
 }
 
