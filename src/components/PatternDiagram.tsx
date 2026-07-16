@@ -1083,13 +1083,15 @@ function CheckerboardBlock({
   const S = size;
   const cx = S / 2;
   const cy = S / 2;
-  // Inner diamond corners: 12.5% inset from each edge midpoint, i.e. corners
-  // at (cx, S/8), (7S/8, cy), (cx, 7S/8), (S/8, cy). This matches the
-  // 400→(200,50) etc. specification the block was authored against.
-  const inTop = { x: cx, y: S / 8 };
-  const inRight = { x: (7 * S) / 8, y: cy };
-  const inBot = { x: cx, y: (7 * S) / 8 };
-  const inLeft = { x: S / 8, y: cy };
+  // Inner diamond corners: 10% inset from each block edge midpoint. In a
+  // 400×400 drafting space this puts the diamond points at (200,40),
+  // (360,200), (200,360), (40,200) per the reference — the outer corner
+  // triangles become thin slivers and the diamond fills nearly the whole block.
+  const inset = S / 10;
+  const inTop = { x: cx, y: inset };
+  const inRight = { x: S - inset, y: cy };
+  const inBot = { x: cx, y: S - inset };
+  const inLeft = { x: inset, y: cy };
   // Outer 4 quarters. Each is a triangle from one block edge to the matching
   // inner-diamond corner, plus the two block-corner triangles that connect it
   // to the neighboring inner-diamond corners — so each outer quarter is a
