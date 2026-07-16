@@ -884,7 +884,7 @@ export const PATTERNS: PatternDef[] = [
     name: "Checkerboard",
     hasMath: true,
     intro:
-      "Checkerboard is a nested hourglass block: a large corner-to-corner hourglass in two fabrics (A top+bottom, B left+right) with a smaller diamond-shaped hourglass nested at the center, rotated 45°, in two more fabrics (C and D on the inner diagonal pairs). All four fabrics meet cleanly at the center.",
+      "Checkerboard is a nested block: a full-block hourglass on the outside (Fabric A top+bottom, Fabric B left+right) with an on-point square filling the middle. That inner on-point square is pieced from 4 smaller squares in a 2×2 pinwheel — Fabric C in the top and bottom positions, Fabric D in the left and right positions — so all four fabrics meet cleanly at the block center.",
     sections: [
       {
         id: "outerA",
@@ -900,15 +900,15 @@ export const PATTERNS: PatternDef[] = [
       },
       {
         id: "innerC",
-        label: "Inner diagonal pair (Fabric C)",
+        label: "Inner top+bottom squares (Fabric C)",
         defaultFabric: "C",
-        hint: "Two of the four small triangles inside the center diamond, forming one diagonal bow-tie through the center.",
+        hint: "Two of the four small on-point squares inside the center diamond — they sit in the top and bottom positions of the inner 2×2 pinwheel.",
       },
       {
         id: "innerD",
-        label: "Inner opposite diagonal pair (Fabric D)",
+        label: "Inner left+right squares (Fabric D)",
         defaultFabric: "D",
-        hint: "The other two small triangles inside the center diamond — the opposite diagonal bow-tie.",
+        hint: "The other two small on-point squares inside the center diamond — they sit in the left and right positions of the inner 2×2 pinwheel.",
       },
       {
         id: "sashing",
