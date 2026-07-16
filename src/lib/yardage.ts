@@ -2171,21 +2171,21 @@ export function calculateYardage(s: PlannerState): CalcResult {
       );
     }
   } else if (s.pattern === "checkerboard") {
-    // Checkerboard: nested hourglass block. Two overlapping QST-style units
-    // sharing a center: an outer full-block hourglass (Fabric A top+bottom,
-    // Fabric B left+right) and a smaller inner diamond hourglass rotated 45°
-    // (Fabric C on one diagonal, Fabric D on the other).
+    // Checkerboard: nested block. Outer is a full-block QST hourglass
+    // (Fabric A top+bottom, Fabric B left+right). Inner is an on-point
+    // square filling the middle — pieced as a plain 2×2 of smaller squares
+    // (Fabric C in the top+bottom positions, Fabric D in left+right), then
+    // set on-point into the outer hourglass.
     //
-    // Per block, following the "1 QST starter per needed quarter, discard
-    // excess" convention already used by Card Trick:
-    //   Outer: 2 A + 2 B quarters → 2 A + 2 B QST starters at (S + 1.25")
-    //   Inner: 2 C + 2 D quarters at inner-diamond scale. The inner diamond's
-    //          diagonals span 0.75 × S, so its inscribed QST unit finishes at
-    //          0.75 × S → starter at (0.75S + 1.25").
+    // Inner geometry (from a 400-unit block, diamond points at edge
+    // midpoints): the inner on-point square has finished DIAGONAL = S, so
+    // finished side = S · √2 / 2. That inner square is built from a 2×2 of
+    // small squares, each with finished side = S · √2 / 4 (≈ 0.3536 · S),
+    // cut at (S · √2 / 4) + 0.5" for a standard 1/4" seam allowance.
     const S = s.blockSize;
     const outerCut = S + 1.25;
-    const innerFinished = 0.75 * S;
-    const innerCut = innerFinished + 1.25;
+    const innerSquareFinished = (S * Math.SQRT2) / 4;
+    const innerSquareCut = innerSquareFinished + SEAM;
     const aFab = (s.assignments["outerA"] ?? "A") as FabricKey;
     const bFab = (s.assignments["outerB"] ?? "B") as FabricKey;
     const cFab = (s.assignments["innerC"] ?? "C") as FabricKey;
@@ -2193,23 +2193,26 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
     addSquares(reqs[aFab], "Outer QST starting squares (top + bottom)", 2 * blockCount, outerCut, s.fabricWidth);
     addSquares(reqs[bFab], "Outer QST starting squares (left + right)", 2 * blockCount, outerCut, s.fabricWidth);
-    addSquares(reqs[cFab], "Inner QST starting squares (diagonal pair 1)", 2 * blockCount, innerCut, s.fabricWidth);
-    addSquares(reqs[dFab], "Inner QST starting squares (diagonal pair 2)", 2 * blockCount, innerCut, s.fabricWidth);
+    addSquares(reqs[cFab], "Inner small squares (top + bottom positions)", 2 * blockCount, innerSquareCut, s.fabricWidth);
+    addSquares(reqs[dFab], "Inner small squares (left + right positions)", 2 * blockCount, innerSquareCut, s.fabricWidth);
 
     notes.push(
-      `Each block is a nested hourglass: 4 large outer QST quarter-triangles (2 Fabric ${aFab} top+bottom + 2 Fabric ${bFab} left+right) surround 4 smaller inner QST quarter-triangles (2 Fabric ${cFab} + 2 Fabric ${dFab}) that meet at the block center. All four fabrics touch at the exact center.`,
+      `Each block is a nested design: 4 large outer QST quarter-triangles (2 Fabric ${aFab} top+bottom + 2 Fabric ${bFab} left+right) form the outer hourglass, and inside them sits an on-point square pieced from a 2×2 of 4 small plain squares (2 Fabric ${cFab} in the top+bottom positions + 2 Fabric ${dFab} in the left+right positions). All four fabrics meet at the exact block center.`,
     );
     notes.push(
-      `Per block, cut: 2 Fabric ${aFab} + 2 Fabric ${bFab} outer QST starting squares at ${outerCut.toFixed(2)}" × ${outerCut.toFixed(2)}" (finished ${S}" + 1.25" for two diagonal seams), and 2 Fabric ${cFab} + 2 Fabric ${dFab} inner QST starting squares at ${innerCut.toFixed(2)}" × ${innerCut.toFixed(2)}" (inner finished ${innerFinished.toFixed(2)}" + 1.25").`,
+      `Per block, cut: 2 Fabric ${aFab} + 2 Fabric ${bFab} outer QST starting squares at ${outerCut.toFixed(2)}" × ${outerCut.toFixed(2)}" (finished ${S}" + 1.25" for two diagonal seams), and 2 Fabric ${cFab} + 2 Fabric ${dFab} inner plain squares at ${innerSquareCut.toFixed(2)}" × ${innerSquareCut.toFixed(2)}" (finished ${innerSquareFinished.toFixed(2)}" + 1/2" for seam allowance).`,
     );
     notes.push(
-      `Across all ${blockCount} blocks: ${2 * blockCount} outer QST squares each of Fabrics ${aFab} and ${bFab}; ${2 * blockCount} inner QST squares each of Fabrics ${cFab} and ${dFab}.`,
+      `Across all ${blockCount} blocks: ${2 * blockCount} outer QST squares each of Fabrics ${aFab} and ${bFab}; ${2 * blockCount} inner plain squares each of Fabrics ${cFab} and ${dFab}.`,
     );
     notes.push(
-      `QST construction: slice each QST starting square across BOTH diagonals to yield 4 quarter-triangles per starter. Combine 2 Fabric ${aFab} + 2 Fabric ${bFab} outer quarters into one large hourglass unit (Fabric ${aFab} at top and bottom, Fabric ${bFab} at left and right). Combine 2 Fabric ${cFab} + 2 Fabric ${dFab} inner quarters into a smaller hourglass unit — this becomes the on-point diamond that sits inside the outer hourglass, rotated 45° so its points touch the outer hourglass's inner seams.`,
+      `Outer hourglass construction: slice each outer QST starting square across BOTH diagonals to yield 4 quarter-triangles per starter. Combine 2 Fabric ${aFab} + 2 Fabric ${bFab} quarters into one full-block hourglass unit (Fabric ${aFab} at top and bottom, Fabric ${bFab} at left and right).`,
     );
     notes.push(
-      `Checkerboard Assembly Tip: build the small inner diamond hourglass first, then applique or set it into the center of the outer hourglass so all four fabric points meet cleanly at the block center. Keep every block in the same orientation across the quilt so the outer top/bottom and left/right fabrics line up consistently.`,
+      `Inner on-point square: arrange the 4 small squares in a 2×2 grid — Fabric ${cFab} in the top-left and bottom-right positions, Fabric ${dFab} in the top-right and bottom-left positions (a simple checkerboard 2×2). Sew each row of 2, then join the rows to make one small pieced square. Rotate that pieced square 45° so it sits on-point — its 4 corners now point up/down/left/right, with Fabric ${cFab} landing at the top and bottom positions and Fabric ${dFab} at the left and right.`,
+    );
+    notes.push(
+      `Checkerboard Assembly Tip: build the 2×2 inner square first and set it on-point at the block center, then piece it into the outer hourglass so all four fabric points meet cleanly at the true center. Keep every block in the same orientation across the quilt so the outer top/bottom and left/right fabrics line up consistently.`,
     );
 
     if (sashWidth > 0) {
