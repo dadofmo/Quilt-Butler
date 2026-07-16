@@ -1083,40 +1083,33 @@ function CheckerboardBlock({
   const S = size;
   const cx = S / 2;
   const cy = S / 2;
-  // Inner diamond corners: 10% inset from each block edge midpoint. In a
-  // 400×400 drafting space this puts the diamond points at (200,40),
-  // (360,200), (200,360), (40,200) per the reference — the outer corner
-  // triangles become thin slivers and the diamond fills nearly the whole block.
-  const inset = S / 10;
-  const inTop = { x: cx, y: inset };
-  const inRight = { x: S - inset, y: cy };
-  const inBot = { x: cx, y: S - inset };
-  const inLeft = { x: inset, y: cy };
-  // Outer 4 quarters. Each is a triangle from one block edge to the matching
-  // inner-diamond corner, plus the two block-corner triangles that connect it
-  // to the neighboring inner-diamond corners — so each outer quarter is a
-  // quadrilateral spanning one full edge and half of each adjacent edge, with
-  // its "inner" vertex at the inner-diamond corner.
-  //
-  // Concretely, the outer region is split into 4 kites meeting at the CENTER
-  // via the two block diagonals, with A on top+bottom, B on left+right. The
-  // small inner diamond then overlays the middle, hiding the center portion.
+  // Inner diamond corners sit AT the block edge midpoints — the diamond fills
+  // the whole block on-point, leaving 4 outer corner right-triangles.
+  const inTop = { x: cx, y: 0 };
+  const inRight = { x: S, y: cy };
+  const inBot = { x: cx, y: S };
+  const inLeft = { x: 0, y: cy };
+  // Midpoints of the big diamond's 4 edges — used to split the diamond into
+  // 4 smaller on-point squares (pinwheel around the true center).
+  const mNE = { x: (inTop.x + inRight.x) / 2, y: (inTop.y + inRight.y) / 2 };
+  const mES = { x: (inRight.x + inBot.x) / 2, y: (inRight.y + inBot.y) / 2 };
+  const mSW = { x: (inBot.x + inLeft.x) / 2, y: (inBot.y + inLeft.y) / 2 };
+  const mWN = { x: (inLeft.x + inTop.x) / 2, y: (inLeft.y + inTop.y) / 2 };
+  // Outer 4 quarters via the two block diagonals; A top+bottom, B left+right.
+  // The diamond overlays the middle, so what remains visible is 8 corner-
+  // adjacent right-triangles (A near top/bottom edges, B near left/right).
   return (
     <>
-      {/* Outer top A: from top edge down to block center along both diagonals */}
       <polygon points={`0,0 ${S},0 ${cx},${cy}`} fill={a} />
-      {/* Outer right B */}
       <polygon points={`${S},0 ${S},${S} ${cx},${cy}`} fill={b} />
-      {/* Outer bottom A */}
       <polygon points={`${S},${S} 0,${S} ${cx},${cy}`} fill={a} />
-      {/* Outer left B */}
       <polygon points={`0,${S} 0,0 ${cx},${cy}`} fill={b} />
-      {/* Inner diamond, split into 4 quarters by its own diagonals through center.
-          C fills upper-right + lower-left; D fills upper-left + lower-right. */}
-      <polygon points={`${inTop.x},${inTop.y} ${inRight.x},${inRight.y} ${cx},${cy}`} fill={c} />
-      <polygon points={`${inRight.x},${inRight.y} ${inBot.x},${inBot.y} ${cx},${cy}`} fill={d} />
-      <polygon points={`${inBot.x},${inBot.y} ${inLeft.x},${inLeft.y} ${cx},${cy}`} fill={c} />
-      <polygon points={`${inLeft.x},${inLeft.y} ${inTop.x},${inTop.y} ${cx},${cy}`} fill={d} />
+      {/* Inner diamond split into 4 on-point squares meeting at center.
+          N & S small squares → C (mint); E & W → D (cream). */}
+      <polygon points={`${inTop.x},${inTop.y} ${mNE.x},${mNE.y} ${cx},${cy} ${mWN.x},${mWN.y}`} fill={c} />
+      <polygon points={`${inRight.x},${inRight.y} ${mES.x},${mES.y} ${cx},${cy} ${mNE.x},${mNE.y}`} fill={d} />
+      <polygon points={`${inBot.x},${inBot.y} ${mSW.x},${mSW.y} ${cx},${cy} ${mES.x},${mES.y}`} fill={c} />
+      <polygon points={`${inLeft.x},${inLeft.y} ${mWN.x},${mWN.y} ${cx},${cy} ${mSW.x},${mSW.y}`} fill={d} />
     </>
   );
 }
