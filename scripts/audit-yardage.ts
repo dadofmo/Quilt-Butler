@@ -1942,9 +1942,10 @@ console.log("\n=== Checkerboard: 50×65, 12\" block, no sashing ===");
     borderWidth: 0,
     sashingWidth: 0,
   };
-  // 4×5=20 blocks. outerCut = 13.25, innerCut = 0.75*12 + 1.25 = 10.25.
-  // Per block: A=2 outer, B=2 outer, C=2 inner, D=2 inner
-  // Across 20 blocks: A=40 outer, B=40 outer, C=40 inner, D=40 inner.
+  // 4×5=20 blocks. outerCut = 13.25. Inner is a 2×2 of plain squares set
+  // on-point — each small square finished = 12·√2/4 ≈ 4.2426", cut ≈ 4.7426".
+  // Per block: A=2 outer, B=2 outer, C=2 inner, D=2 inner.
+  const innerCut = (12 * Math.SQRT2) / 4 + 0.5;
   const r = calculateYardage(s);
   const A = r.fabrics.find(f => f.fabric === "A")!;
   check("CB A count", A.pieces[0].count, 40);
@@ -1954,10 +1955,10 @@ console.log("\n=== Checkerboard: 50×65, 12\" block, no sashing ===");
   check("CB B cut", B.pieces[0].w, 13.25);
   const C = r.fabrics.find(f => f.fabric === "C")!;
   check("CB C count", C.pieces[0].count, 40);
-  check("CB C cut", C.pieces[0].w, 10.25);
+  check("CB C cut", C.pieces[0].w, innerCut);
   const D = r.fabrics.find(f => f.fabric === "D")!;
   check("CB D count", D.pieces[0].count, 40);
-  check("CB D cut", D.pieces[0].w, 10.25);
+  check("CB D cut", D.pieces[0].w, innerCut);
 }
 
 console.log("\n=== Checkerboard: 50×65, 12\" block, 2\" sashing ===");
