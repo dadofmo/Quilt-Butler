@@ -133,7 +133,7 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
             <g key={i}>
               <rect x={x} y={0} width={30} height={30} fill={C.a} />
               <rect x={x} y={30} width={30} height={30} fill={C.b} />
-              <rect x={x} y={60} width={30} height={30} fill={C.d} />
+              <rect x={x} y={60} width={30} height={30} fill={C.c} />
             </g>
           ))}
           {/* Jelly Roll Friendly badge moved to overlay in PatternPickerPage */}
