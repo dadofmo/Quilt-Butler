@@ -127,7 +127,7 @@ function renderInner(
     case "rail-fence": {
       const r1 = get("rail1", "A");
       const r2 = get("rail2", "B");
-      const r3 = get("rail3", "D");
+      const r3 = get("rail3", "C");
       return (
         <>
           {[0, 1, 2, 3].map((i) => (
