@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Play } from "lucide-react";
 import type { ReactNode } from "react";
 import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
 
