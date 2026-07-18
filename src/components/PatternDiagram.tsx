@@ -1059,6 +1059,14 @@ function renderInner(
       const d = get("innerD", "D");
       return <CheckerboardBlock size={200} a={a} b={b} c={c} d={d} />;
     }
+    case "cabin-in-the-cotton": {
+      // Single-block preview shows an "even" position block (outer ring = Fabric D).
+      const center = get("center", "A");
+      const round1 = get("round1", "B");
+      const round2 = get("center", "A"); // Round 2 uses Fabric A (same as center)
+      const round3 = get("round3Even", "D");
+      return <CabinInTheCottonBlock size={200} center={center} round1={round1} round2={round2} round3={round3} />;
+    }
   }
 }
 
