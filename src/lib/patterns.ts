@@ -919,6 +919,46 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "F" },
     ],
   },
+  {
+    id: "cabin-in-the-cotton",
+    name: "Cabin in the Cotton",
+    hasMath: true,
+    intro:
+      "Cabin in the Cotton is a Courthouse Steps log cabin — strips are added in opposite pairs (top+bottom together, then left+right together) around a center square for three rounds. The outermost ring alternates between two fabrics (D and E) based on each block's position in the finished quilt, creating a striking two-tone checkerboard border effect across the entire top. Fabric A is used for both the center square and the middle (round 2) frame.",
+    sections: [
+      {
+        id: "center",
+        label: "Center square + Round 2 frame (Fabric A)",
+        defaultFabric: "A",
+        hint: "Used twice per block — the small square in the very middle AND the second ring of strips halfway out. Pick your dominant/anchor fabric.",
+      },
+      {
+        id: "round1",
+        label: "Round 1 frame (Fabric B)",
+        defaultFabric: "B",
+        hint: "The first ring of strips directly around the center square — pick a strong contrast with Fabric A so the frame reads clearly.",
+      },
+      {
+        id: "round3Even",
+        label: "Outer ring — Fabric D (checkerboard \"even\" blocks)",
+        defaultFabric: "D",
+        hint: "The outermost ring on blocks at even grid positions (top-left corner is even). Alternates with Fabric E across the quilt for a checkerboard two-tone border.",
+      },
+      {
+        id: "round3Odd",
+        label: "Outer ring — Fabric E (checkerboard \"odd\" blocks)",
+        defaultFabric: "E",
+        hint: "The outermost ring on blocks at odd grid positions — pick a fabric that contrasts with Fabric D so the checkerboard border reads across the quilt.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "F",
+        hint: "Optional strips between blocks — set sashing to 0\" on the previous step if you don't want any. Skipping sashing lets the outer rings of neighboring blocks meet edge-to-edge for the strongest checkerboard effect.",
+      },
+      { ...borderSection, defaultFabric: "G" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
