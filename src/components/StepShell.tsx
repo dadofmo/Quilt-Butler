@@ -25,7 +25,21 @@ export function StepShell({ step, title, subtitle, backTo, children }: Props) {
               <ArrowLeft className="h-4 w-4" /> Back
             </Link>
           ) : (
-            <span className="text-primary text-base font-semibold tracking-tight">QuiltButler</span>
+            <div className="flex items-center gap-2">
+              <span className="text-primary text-base font-semibold tracking-tight">QuiltButler</span>
+              {step === 1 && (
+                <a
+                  href="https://youtu.be/gZHv2ECdYzs?is=MmFNW_h7rKztFM-B"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold leading-tight text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+                  aria-label="Watch tutorial"
+                >
+                  <Play className="h-2.5 w-2.5 fill-current" />
+                  Tutorial
+                </a>
+              )}
+            </div>
           )}
           <span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
             Step {step} of 4
