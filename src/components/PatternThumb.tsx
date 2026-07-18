@@ -806,6 +806,29 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "cabin-in-the-cotton": {
+      // Thumb: show a 2×2 mini-quilt so the alternating outer-ring color
+      // (Fabric D vs E) is immediately visible.
+      const half = 45;
+      const D = "var(--fabric-d)";
+      const E = "var(--fabric-e)";
+      return (
+        <svg {...common}>
+          <svg x={0} y={0} width={half} height={half} viewBox="0 0 90 90" preserveAspectRatio="none">
+            <CabinInTheCottonBlock size={90} center={C.a} round1={C.b} round2={C.a} round3={D} />
+          </svg>
+          <svg x={half} y={0} width={half} height={half} viewBox="0 0 90 90" preserveAspectRatio="none">
+            <CabinInTheCottonBlock size={90} center={C.a} round1={C.b} round2={C.a} round3={E} />
+          </svg>
+          <svg x={0} y={half} width={half} height={half} viewBox="0 0 90 90" preserveAspectRatio="none">
+            <CabinInTheCottonBlock size={90} center={C.a} round1={C.b} round2={C.a} round3={E} />
+          </svg>
+          <svg x={half} y={half} width={half} height={half} viewBox="0 0 90 90" preserveAspectRatio="none">
+            <CabinInTheCottonBlock size={90} center={C.a} round1={C.b} round2={C.a} round3={D} />
+          </svg>
+        </svg>
+      );
+    }
   }
 }
 
