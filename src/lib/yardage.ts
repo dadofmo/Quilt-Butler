@@ -2230,6 +2230,97 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "cabin-in-the-cotton") {
+    // Courthouse Steps log cabin in a 300-unit drafting space:
+    //   center 60×60, ring strip width 40. Three rounds, each added in
+    //   opposite pairs (top+bottom, then left+right). Round 3 alternates
+    //   between Fabric D and Fabric E by (row+col) parity.
+    //
+    // In finished inches for block size S:
+    //   center finished side = S/5
+    //   ring strip finished width = 2S/15
+    //   Round 1: short = S/5,       tall = 7S/15
+    //   Round 2: short = 7S/15,     tall = 11S/15
+    //   Round 3: short = 11S/15,    tall = S
+    //
+    // Per block:
+    //   Fabric A (center + Round 2): 1 center square + 2 R2-short + 2 R2-tall
+    //   Fabric B (Round 1):          2 R1-short + 2 R1-tall
+    //   Fabric D or E (Round 3):     2 R3-short + 2 R3-tall  (whichever fabric this block uses)
+    const S = s.blockSize;
+    const stripFin = (2 * S) / 15;
+    const stripCut = stripFin + SEAM;
+    const centerCut = S / 5 + SEAM;
+    const r1Short = S / 5 + SEAM;
+    const r1Tall = (7 * S) / 15 + SEAM;
+    const r2Short = (7 * S) / 15 + SEAM;
+    const r2Tall = (11 * S) / 15 + SEAM;
+    const r3Short = (11 * S) / 15 + SEAM;
+    const r3Tall = S + SEAM;
+
+    const centerFab = (s.assignments["center"] ?? "A") as FabricKey;
+    const r1Fab = (s.assignments["round1"] ?? "B") as FabricKey;
+    const dFab = (s.assignments["round3Even"] ?? "D") as FabricKey;
+    const eFab = (s.assignments["round3Odd"] ?? "E") as FabricKey;
+
+    // Count blocks per outer-ring fabric by (row+col) parity.
+    let evenBlocks = 0;
+    for (let j = 0; j < blocksDown; j++) {
+      for (let i = 0; i < blocksAcross; i++) {
+        if ((i + j) % 2 === 0) evenBlocks++;
+      }
+    }
+    const oddBlocks = blockCount - evenBlocks;
+
+    // Fabric A: centers + Round 2 strips
+    addSquares(reqs[centerFab], "Center squares", blockCount, centerCut, s.fabricWidth);
+    addRails(reqs[centerFab], `Round 2 top + bottom strips (${r2Short.toFixed(2)}" × ${stripCut.toFixed(2)}")`, 2 * blockCount, r2Short, stripCut, s.fabricWidth);
+    addRails(reqs[centerFab], `Round 2 left + right strips (${r2Tall.toFixed(2)}" × ${stripCut.toFixed(2)}")`, 2 * blockCount, r2Tall, stripCut, s.fabricWidth);
+
+    // Fabric B: Round 1 strips
+    addRails(reqs[r1Fab], `Round 1 top + bottom strips (${r1Short.toFixed(2)}" × ${stripCut.toFixed(2)}")`, 2 * blockCount, r1Short, stripCut, s.fabricWidth);
+    addRails(reqs[r1Fab], `Round 1 left + right strips (${r1Tall.toFixed(2)}" × ${stripCut.toFixed(2)}")`, 2 * blockCount, r1Tall, stripCut, s.fabricWidth);
+
+    // Fabric D + E: Round 3 (outer ring)
+    if (evenBlocks > 0) {
+      addRails(reqs[dFab], `Round 3 top + bottom strips (${r3Short.toFixed(2)}" × ${stripCut.toFixed(2)}") — "even" blocks`, 2 * evenBlocks, r3Short, stripCut, s.fabricWidth);
+      addRails(reqs[dFab], `Round 3 left + right strips (${r3Tall.toFixed(2)}" × ${stripCut.toFixed(2)}") — "even" blocks`, 2 * evenBlocks, r3Tall, stripCut, s.fabricWidth);
+    }
+    if (oddBlocks > 0) {
+      addRails(reqs[eFab], `Round 3 top + bottom strips (${r3Short.toFixed(2)}" × ${stripCut.toFixed(2)}") — "odd" blocks`, 2 * oddBlocks, r3Short, stripCut, s.fabricWidth);
+      addRails(reqs[eFab], `Round 3 left + right strips (${r3Tall.toFixed(2)}" × ${stripCut.toFixed(2)}") — "odd" blocks`, 2 * oddBlocks, r3Tall, stripCut, s.fabricWidth);
+    }
+
+    notes.push(
+      `Cabin in the Cotton is a Courthouse Steps log cabin: a ${(S / 5).toFixed(2)}" center square (Fabric ${centerFab}), then three rings of ${stripFin.toFixed(2)}"-wide strips added in opposite pairs — Round 1 (Fabric ${r1Fab}), Round 2 (Fabric ${centerFab} again), and Round 3 outer ring which alternates by block position between Fabric ${dFab} and Fabric ${eFab}.`,
+    );
+    notes.push(
+      `Per block, cut: 1 center at ${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}" (Fabric ${centerFab}); 2 Round-1 short strips at ${r1Short.toFixed(2)}" × ${stripCut.toFixed(2)}" + 2 Round-1 tall strips at ${r1Tall.toFixed(2)}" × ${stripCut.toFixed(2)}" (Fabric ${r1Fab}); 2 Round-2 short at ${r2Short.toFixed(2)}" × ${stripCut.toFixed(2)}" + 2 Round-2 tall at ${r2Tall.toFixed(2)}" × ${stripCut.toFixed(2)}" (Fabric ${centerFab}); and 2 Round-3 short at ${r3Short.toFixed(2)}" × ${stripCut.toFixed(2)}" + 2 Round-3 tall at ${r3Tall.toFixed(2)}" × ${stripCut.toFixed(2)}" from Fabric ${dFab} OR Fabric ${eFab} depending on the block's position.`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${evenBlocks} blocks use Fabric ${dFab} for the outer ring and ${oddBlocks} blocks use Fabric ${eFab}, forming a checkerboard of outer rings across the finished quilt.`,
+    );
+    notes.push(
+      `How to sew each block (Courthouse Steps): place the center square in front of you. Sew Round 1's TOP strip and BOTTOM strip on first (both are the short length — they match the center's width). Press outward. Now sew Round 1's LEFT and RIGHT strips (the tall length — they span the center + both just-added strips). Press outward. Repeat for Round 2 with Fabric ${centerFab} (top+bottom first, then left+right), and Round 3 with either Fabric ${dFab} or Fabric ${eFab} depending on the block's grid position.`,
+    );
+    notes.push(
+      `Layout tip: before sewing Round 3, lay out your ${blocksAcross} × ${blocksDown} grid and mark each block as "even" (Fabric ${dFab}) or "odd" (Fabric ${eFab}) — the top-left block is "even" and it alternates in a checkerboard from there. Sew all "even" blocks with Fabric ${dFab} outer rings and all "odd" blocks with Fabric ${eFab} outer rings, then assemble the quilt to reveal the two-tone border effect.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "F") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Note: sashing separates the outer rings of neighboring blocks, so the checkerboard border effect is strongest when sashing is 0".`,
+      );
+    }
   }
 
 
