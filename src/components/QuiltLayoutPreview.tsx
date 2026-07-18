@@ -299,6 +299,8 @@ function MiniBlock({
   photos,
   irishPlain,
   swap,
+  row = 0,
+  col = 0,
 }: {
   pattern: PatternId;
   assignments: SectionAssignments;
@@ -308,6 +310,10 @@ function MiniBlock({
    *  corner accent. Shoofly: when true, swap Fabric A ↔ Fabric B for the
    *  alternate-blocks checkerboard. Used on alternating grid cells. */
   swap?: boolean;
+  /** Grid position of this block within the quilt. Currently only used by
+   *  "Cabin in the Cotton" to alternate the outer-ring fabric (D vs E). */
+  row?: number;
+  col?: number;
 }) {
   // Fallback resolves through the pattern definition (single source of truth
   // in src/lib/patterns.ts) before the literal — so a section's defaultFabric
