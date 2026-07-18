@@ -77,29 +77,6 @@ function PatternPickerInner() {
 
   return (
     <StepShell step={1} title="">
-      <div className="flex flex-col items-center gap-2 pt-2 sm:pt-4">
-        <span className="text-sm font-medium text-muted-foreground">
-          New to QuiltButler?
-        </span>
-        <a
-          href="https://youtu.be/gZHv2ECdYzs?is=MmFNW_h7rKztFM-B"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-full bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-        >
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-purple-600">
-            <svg
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="h-3 w-3"
-              aria-hidden="true"
-            >
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          </span>
-          WATCH TUTORIAL
-        </a>
-      </div>
       <div className="-mt-2 mb-4 flex justify-center sm:-mt-4">
         <img
           src={quiltButlerLogo}
