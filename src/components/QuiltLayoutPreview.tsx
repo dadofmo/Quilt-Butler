@@ -1067,6 +1067,16 @@ function MiniBlock({
       const d = get("innerD", "D");
       return <CheckerboardBlock size={200} a={a} b={b} c={c} d={d} />;
     }
+    case "cabin-in-the-cotton": {
+      // Outer ring alternates between Fabric D and Fabric E based on the
+      // block's position in the finished quilt — checkerboard by (row+col).
+      const center = get("center", "A");
+      const round1 = get("round1", "B");
+      const round2 = get("center", "A");
+      const even = (row + col) % 2 === 0;
+      const round3 = even ? get("round3Even", "D") : get("round3Odd", "E");
+      return <CabinInTheCottonBlock size={200} center={center} round1={round1} round2={round2} round3={round3} />;
+    }
   }
 }
 
