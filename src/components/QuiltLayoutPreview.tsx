@@ -4,7 +4,7 @@ import { fabricFill } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
-import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock } from "./PatternDiagram";
+import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock } from "./PatternDiagram";
 
 interface Props {
   pattern: PatternId;
@@ -223,6 +223,8 @@ export function QuiltLayoutPreview({
                         photos={photos}
                         irishPlain={irishPlain}
                         swap={swap}
+                        row={j}
+                        col={i}
                       />
                     )}
                   </svg>
@@ -297,6 +299,8 @@ function MiniBlock({
   photos,
   irishPlain,
   swap,
+  row = 0,
+  col = 0,
 }: {
   pattern: PatternId;
   assignments: SectionAssignments;
@@ -306,6 +310,10 @@ function MiniBlock({
    *  corner accent. Shoofly: when true, swap Fabric A ↔ Fabric B for the
    *  alternate-blocks checkerboard. Used on alternating grid cells. */
   swap?: boolean;
+  /** Grid position of this block within the quilt. Currently only used by
+   *  "Cabin in the Cotton" to alternate the outer-ring fabric (D vs E). */
+  row?: number;
+  col?: number;
 }) {
   // Fallback resolves through the pattern definition (single source of truth
   // in src/lib/patterns.ts) before the literal — so a section's defaultFabric
@@ -1058,6 +1066,16 @@ function MiniBlock({
       const c = get("innerC", "C");
       const d = get("innerD", "D");
       return <CheckerboardBlock size={200} a={a} b={b} c={c} d={d} />;
+    }
+    case "cabin-in-the-cotton": {
+      // Outer ring alternates between Fabric D and Fabric E based on the
+      // block's position in the finished quilt — checkerboard by (row+col).
+      const center = get("center", "A");
+      const round1 = get("round1", "B");
+      const round2 = get("center", "A");
+      const even = (row + col) % 2 === 0;
+      const round3 = even ? get("round3Even", "D") : get("round3Odd", "E");
+      return <CabinInTheCottonBlock size={200} center={center} round1={round1} round2={round2} round3={round3} />;
     }
   }
 }

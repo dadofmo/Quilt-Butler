@@ -1979,6 +1979,29 @@ console.log("\n=== Checkerboard: 50×65, 12\" block, 2\" sashing ===");
   check("CB(sash) E strip length", e.pieces[0].w, 12.5);
 }
 
+console.log("\n=== Cabin in the Cotton: 50×65, 15\" block, no sashing/border ===");
+{
+  const s = {
+    ...base(),
+    pattern: "cabin-in-the-cotton" as const,
+    blockSize: 15,
+  };
+  // 3×4 = 12 blocks. Even/odd: 6 each.
+  const r = calculateYardage(s);
+  const A = r.fabrics.find(f => f.fabric === "A")!;
+  const B = r.fabrics.find(f => f.fabric === "B")!;
+  const D = r.fabrics.find(f => f.fabric === "D")!;
+  const E = r.fabrics.find(f => f.fabric === "E")!;
+  // A: 12 centers + 24 R2 short + 24 R2 tall = 60 pieces
+  const aCount = A.pieces.reduce((n, p) => n + p.count, 0);
+  check("Cabin A total piece count", aCount, 60);
+  // B: 24 R1 short + 24 R1 tall = 48
+  check("Cabin B total piece count", B.pieces.reduce((n, p) => n + p.count, 0), 48);
+  // D and E: 12 short + 12 tall = 24 each (6 blocks × 4 strips)
+  check("Cabin D total piece count", D.pieces.reduce((n, p) => n + p.count, 0), 24);
+  check("Cabin E total piece count", E.pieces.reduce((n, p) => n + p.count, 0), 24);
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {

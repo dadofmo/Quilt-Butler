@@ -1059,6 +1059,14 @@ function renderInner(
       const d = get("innerD", "D");
       return <CheckerboardBlock size={200} a={a} b={b} c={c} d={d} />;
     }
+    case "cabin-in-the-cotton": {
+      // Single-block preview shows an "even" position block (outer ring = Fabric D).
+      const center = get("center", "A");
+      const round1 = get("round1", "B");
+      const round2 = get("center", "A"); // Round 2 uses Fabric A (same as center)
+      const round3 = get("round3Even", "D");
+      return <CabinInTheCottonBlock size={200} center={center} round1={round1} round2={round2} round3={round3} />;
+    }
   }
 }
 
@@ -1273,7 +1281,57 @@ function IdahoBeautyBlock({
   );
 }
 
-export { IdahoBeautyBlock, CheckerboardBlock };
+export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock };
+
+/**
+ * Shared renderer for "Cabin in the Cotton" — a Courthouse Steps log cabin.
+ * 300×300 drafting space. Center 60×60; three concentric rings, each strip
+ * 40 units wide, added in top+bottom then left+right pairs.
+ *   Round 1: `round1` fabric (usually B)
+ *   Round 2: `round2` fabric (usually same as center Fabric A)
+ *   Round 3: `round3` fabric — caller passes D or E based on block position
+ */
+function CabinInTheCottonBlock({
+  size,
+  center,
+  round1,
+  round2,
+  round3,
+}: {
+  size: number;
+  center: string;
+  round1: string;
+  round2: string;
+  round3: string;
+}) {
+  const S = size;
+  const u = S / 300;
+  // Helper: draw rect using 300-space coords.
+  const R = (x: number, y: number, w: number, h: number, fill: string, k: string) => (
+    <rect key={k} x={x * u} y={y * u} width={w * u} height={h * u} fill={fill} stroke="white" strokeWidth={0.75} />
+  );
+  return (
+    <>
+      {/* Center 60×60 at (120,120) */}
+      {R(120, 120, 60, 60, center, "c")}
+      {/* Round 1 — 40-wide strips: top+bottom (60 long), then left+right (140 long) */}
+      {R(120, 80, 60, 40, round1, "r1t")}
+      {R(120, 180, 60, 40, round1, "r1b")}
+      {R(80, 80, 40, 140, round1, "r1l")}
+      {R(180, 80, 40, 140, round1, "r1r")}
+      {/* Round 2 — top+bottom (140 long), then left+right (220 long) */}
+      {R(80, 40, 140, 40, round2, "r2t")}
+      {R(80, 220, 140, 40, round2, "r2b")}
+      {R(40, 40, 40, 220, round2, "r2l")}
+      {R(220, 40, 40, 220, round2, "r2r")}
+      {/* Round 3 — top+bottom (220 long), then left+right (300 long, full block edge) */}
+      {R(40, 0, 220, 40, round3, "r3t")}
+      {R(40, 260, 220, 40, round3, "r3b")}
+      {R(0, 0, 40, 300, round3, "r3l")}
+      {R(260, 0, 40, 300, round3, "r3r")}
+    </>
+  );
+}
 
 
 

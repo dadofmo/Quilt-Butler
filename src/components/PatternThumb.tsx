@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock, CheckerboardBlock } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock } from "./PatternDiagram";
 
 
 interface Props {
@@ -75,6 +75,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Idaho Beauty quilt block diagram showing a 5x5 grid with cream background corners, four teal on-point diamonds forming a plus around the center, five aqua solid squares in an X, and eight teal geese chevrons pointing inward from the edges toward the center",
   checkerboard:
     "Checkerboard quilt block diagram showing two overlapping hourglass shapes — a large orange and tan corner-to-corner hourglass with a smaller mint and cream diamond hourglass nested inside, rotated 45 degrees, all four fabrics meeting at the block center",
+  "cabin-in-the-cotton":
+    "Cabin in the Cotton quilt block diagram — a Courthouse Steps log cabin with a center square framed by three concentric rings, where the outermost ring alternates between two fabrics from block to block across the quilt for a two-tone checkerboard border effect",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -801,6 +803,29 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return (
         <svg {...common}>
           <CheckerboardBlock size={90} a={C.a} b={C.b} c={C.c} d={C.d} />
+        </svg>
+      );
+    }
+    case "cabin-in-the-cotton": {
+      // Thumb: show a 2×2 mini-quilt so the alternating outer-ring color
+      // (Fabric D vs E) is immediately visible.
+      const half = 45;
+      const D = "var(--fabric-d)";
+      const E = "var(--fabric-e)";
+      return (
+        <svg {...common}>
+          <svg x={0} y={0} width={half} height={half} viewBox="0 0 90 90" preserveAspectRatio="none">
+            <CabinInTheCottonBlock size={90} center={C.a} round1={C.b} round2={C.a} round3={D} />
+          </svg>
+          <svg x={half} y={0} width={half} height={half} viewBox="0 0 90 90" preserveAspectRatio="none">
+            <CabinInTheCottonBlock size={90} center={C.a} round1={C.b} round2={C.a} round3={E} />
+          </svg>
+          <svg x={0} y={half} width={half} height={half} viewBox="0 0 90 90" preserveAspectRatio="none">
+            <CabinInTheCottonBlock size={90} center={C.a} round1={C.b} round2={C.a} round3={E} />
+          </svg>
+          <svg x={half} y={half} width={half} height={half} viewBox="0 0 90 90" preserveAspectRatio="none">
+            <CabinInTheCottonBlock size={90} center={C.a} round1={C.b} round2={C.a} round3={D} />
+          </svg>
         </svg>
       );
     }

@@ -31,7 +31,8 @@ export type PatternId =
   | "twin-star"
   | "star-and-cross"
   | "idaho-beauty"
-  | "checkerboard";
+  | "checkerboard"
+  | "cabin-in-the-cotton";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
