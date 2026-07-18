@@ -223,6 +223,8 @@ export function QuiltLayoutPreview({
                         photos={photos}
                         irishPlain={irishPlain}
                         swap={swap}
+                        row={j}
+                        col={i}
                       />
                     )}
                   </svg>
