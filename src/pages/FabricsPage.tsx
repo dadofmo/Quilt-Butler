@@ -1,6 +1,7 @@
 import { useNavigate, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
+import { AffiliateShopCard } from "@/components/AffiliateShopCard";
 import { QuiltLayoutPreview } from "@/components/QuiltLayoutPreview";
 import { PatchworkPreview, PatchworkPreviewHint } from "@/components/PatchworkPreview";
 import {
@@ -138,6 +139,9 @@ function FabricsStepInner() {
           </p>
         )}
       </div>
+
+      <AffiliateShopCard />
+
 
       {/* PATCHWORK PREVIEW (Simple Squares) */}
       {isPatchwork && (
