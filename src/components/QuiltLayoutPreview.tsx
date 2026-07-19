@@ -147,8 +147,14 @@ export function QuiltLayoutPreview({
             ...(borderPhoto
               ? {
                   backgroundImage: `url(${borderPhoto})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
+                  // Tile the fabric photo at the SAME visual scale as inside
+                  // the blocks (FabricPatternDefs uses ~80 units per 200-unit
+                  // block = 40% of a block). Using "cover" stretched the whole
+                  // photo across the border rectangle, making prints look
+                  // gigantic. Repeat + fixed tile matches a real bolt.
+                  backgroundSize: `${Math.max(24, Math.round(cellW * 0.4))}px ${Math.max(24, Math.round(cellW * 0.4))}px`,
+                  backgroundRepeat: "repeat",
+                  backgroundPosition: "top left",
                 }
               : {}),
           }}
