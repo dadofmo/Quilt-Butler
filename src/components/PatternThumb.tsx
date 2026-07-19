@@ -831,6 +831,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "fancy-stripe": {
+      return (
+        <svg {...common}>
+          <FancyStripeBlock size={90} a={C.a} b={C.b} />
+        </svg>
+      );
+    }
   }
 }
 
