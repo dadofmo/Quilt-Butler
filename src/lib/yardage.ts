@@ -2438,7 +2438,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "star-and-cross" ||
     s.pattern === "idaho-beauty" ||
     s.pattern === "checkerboard" ||
-    s.pattern === "cabin-in-the-cotton";
+    s.pattern === "cabin-in-the-cotton" ||
+    s.pattern === "fancy-stripe";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
