@@ -2002,6 +2002,20 @@ console.log("\n=== Cabin in the Cotton: 50×65, 15\" block, no sashing/border ==
   check("Cabin E total piece count", E.pieces.reduce((n, p) => n + p.count, 0), 24);
 }
 
+console.log("\n=== Fancy Stripe: 50×65, 12\" block, no sashing/border ===");
+{
+  const s = { ...base(), pattern: "fancy-stripe" as const, blockSize: 12 };
+  // across=floor(50/12)=4, down=floor(65/12)=5 → 20 blocks.
+  // Each block = 16 HSTs → 8 A squares + 8 B squares.
+  const r = calculateYardage(s);
+  const A = r.fabrics.find(f => f.fabric === "A")!;
+  const B = r.fabrics.find(f => f.fabric === "B")!;
+  check("Fancy Stripe A square count", A.pieces.reduce((n, p) => n + p.count, 0), 160);
+  check("Fancy Stripe B square count", B.pieces.reduce((n, p) => n + p.count, 0), 160);
+  check("Fancy Stripe A cut size", A.pieces[0].w, 3 + 0.875);
+}
+
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {
