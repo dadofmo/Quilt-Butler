@@ -1083,6 +1083,11 @@ function MiniBlock({
       const round3 = even ? get("round3Even", "D") : get("round3Odd", "E");
       return <CabinInTheCottonBlock size={200} center={center} round1={round1} round2={round2} round3={round3} />;
     }
+    case "fancy-stripe": {
+      const a = get("fabA", "A");
+      const b = get("fabB", "B");
+      return <FancyStripeBlock size={200} a={a} b={b} />;
+    }
   }
 }
 
