@@ -2322,6 +2322,46 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Note: sashing separates the outer rings of neighboring blocks, so the checkerboard border effect is strongest when sashing is 0".`,
       );
     }
+  } else if (s.pattern === "fancy-stripe") {
+    // Fancy Stripe = 16 identical HST units per block arranged as a 4×4 HST
+    // grid. Each HST finishes at blockSize/4. Two fabrics share every HST,
+    // and each pair of squares (one A + one B) yields 2 finished HSTs — so
+    // per block we need 8 A squares + 8 B squares, all cut the same size.
+    const hstFinished = s.blockSize / 4;
+    const cut = hstFinished + HST_EXTRA;
+    const hstUnits = blockCount * 16;
+    const squaresA = 8 * blockCount;
+    const squaresB = 8 * blockCount;
+    const fA = (s.assignments["fabA"] ?? "A") as FabricKey;
+    const fB = (s.assignments["fabB"] ?? "B") as FabricKey;
+    addSquares(reqs[fA], "HST starting squares (Fabric A)", squaresA, cut, s.fabricWidth);
+    addSquares(reqs[fB], "HST starting squares (Fabric B)", squaresB, cut, s.fabricWidth);
+    notes.push(
+      `Each Fancy Stripe block = 16 Half Square Triangle units arranged as a 4×4 HST grid (four mirrored 2×2 quadrants). Across all ${blockCount} blocks: ${hstUnits} HST units total.`,
+    );
+    notes.push(
+      `Cut ${squaresA} squares of Fabric ${fA} and ${squaresB} squares of Fabric ${fB}, all at ${cut}" × ${cut}" (each HST finishes at ${hstFinished.toFixed(2)}" — one quarter of the ${s.blockSize}" block — plus 7/8" extra for the diagonal seam).`,
+    );
+    notes.push(
+      `To make the HST units: place one Fabric ${fA} square and one Fabric ${fB} square right sides together (RST). On the back of the top square, draw a diagonal from corner to corner. Sew a 1/4" seam on the LEFT of the line and another on the RIGHT, then cut along the drawn line. Each pair of squares yields 2 finished HST units — press seams toward the darker fabric and trim each to ${(hstFinished + SEAM).toFixed(2)}" square.`,
+    );
+    notes.push(
+      `Fancy Stripe assembly: lay 16 trimmed HSTs into a 4×4 grid. Rotate each HST so Fabric ${fA} forms the "V-bend" shape shown in the block preview — the top-left 2×2 quadrant is the reference, and the other three quadrants are its horizontal, vertical, and 180° mirrors. When placed correctly, Fabric ${fA} forms a continuous diagonal diamond lattice across the whole block. Sew the 4 rows of 4 HSTs, press row seams in alternating directions so they nest, then sew the 4 rows together.`,
+    );
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge. Note: the diamond lattice reads strongest with sashing set to 0" so neighboring blocks meet edge-to-edge.`,
+      );
+    }
   }
 
 
