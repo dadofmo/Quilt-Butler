@@ -77,6 +77,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Checkerboard quilt block diagram showing two overlapping hourglass shapes — a large orange and tan corner-to-corner hourglass with a smaller mint and cream diamond hourglass nested inside, rotated 45 degrees, all four fabrics meeting at the block center",
   "cabin-in-the-cotton":
     "Cabin in the Cotton quilt block diagram — a Courthouse Steps log cabin with a center square framed by three concentric rings, where the outermost ring alternates between two fabrics from block to block across the quilt for a two-tone checkerboard border effect",
+  "fancy-stripe":
+    "Fancy Stripe quilt block diagram — 16 half-square-triangle units arranged as 4 mirrored quadrants forming a continuous diagonal diamond lattice across the block",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
