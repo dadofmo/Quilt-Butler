@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock } from "./PatternDiagram";
 
 
 interface Props {
@@ -77,6 +77,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Checkerboard quilt block diagram showing two overlapping hourglass shapes — a large orange and tan corner-to-corner hourglass with a smaller mint and cream diamond hourglass nested inside, rotated 45 degrees, all four fabrics meeting at the block center",
   "cabin-in-the-cotton":
     "Cabin in the Cotton quilt block diagram — a Courthouse Steps log cabin with a center square framed by three concentric rings, where the outermost ring alternates between two fabrics from block to block across the quilt for a two-tone checkerboard border effect",
+  "fancy-stripe":
+    "Fancy Stripe quilt block diagram — 16 half-square-triangle units arranged as 4 mirrored quadrants forming a continuous diagonal diamond lattice across the block",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -826,6 +828,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
           <svg x={half} y={half} width={half} height={half} viewBox="0 0 90 90" preserveAspectRatio="none">
             <CabinInTheCottonBlock size={90} center={C.a} round1={C.b} round2={C.a} round3={D} />
           </svg>
+        </svg>
+      );
+    }
+    case "fancy-stripe": {
+      return (
+        <svg {...common}>
+          <FancyStripeBlock size={90} a={C.a} b={C.b} />
         </svg>
       );
     }

@@ -1067,6 +1067,11 @@ function renderInner(
       const round3 = get("round3Even", "D");
       return <CabinInTheCottonBlock size={200} center={center} round1={round1} round2={round2} round3={round3} />;
     }
+    case "fancy-stripe": {
+      const a = get("fabA", "A");
+      const b = get("fabB", "B");
+      return <FancyStripeBlock size={200} a={a} b={b} />;
+    }
   }
 }
 
@@ -1281,7 +1286,53 @@ function IdahoBeautyBlock({
   );
 }
 
-export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock };
+export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock };
+
+/**
+ * Shared renderer for "Fancy Stripe" — 16 identical HST units organized as
+ * four mirrored 2×2 quadrants. Reference quadrant (top-left) uses Fabric B
+ * (upper-right triangles in the top row of cells, lower-right in the bottom
+ * row) and Fabric A everywhere else, producing a V-bend of A. The other
+ * three quadrants are horizontal / vertical / 180° mirrors of the TL so
+ * Fabric A forms a continuous diagonal diamond lattice across the whole
+ * block AND across block boundaries when tiled.
+ */
+function FancyStripeBlock({ size, a, b }: { size: number; a: string; b: string }) {
+  const S = size;
+  const C = S / 4; // one HST cell side (block is 4×4 HST cells)
+  // TL quadrant (0..S/2 × 0..S/2) triangles in local coords.
+  const tris: Array<{ pts: string; fill: string }> = [
+    // Cell (0,0): diagonal (0,0)→(C,C). B = upper-right, A = lower-left.
+    { pts: `0,0 ${C},0 ${C},${C}`, fill: b },
+    { pts: `0,0 0,${C} ${C},${C}`, fill: a },
+    // Cell (1,0): diagonal (C,0)→(2C,C).
+    { pts: `${C},0 ${2 * C},0 ${2 * C},${C}`, fill: b },
+    { pts: `${C},0 ${C},${C} ${2 * C},${C}`, fill: a },
+    // Cell (0,1): diagonal (0,2C)→(C,C). A = upper-left, B = lower-right.
+    { pts: `0,${C} ${C},${C} 0,${2 * C}`, fill: a },
+    { pts: `${C},${C} ${C},${2 * C} 0,${2 * C}`, fill: b },
+    // Cell (1,1): diagonal (C,2C)→(2C,C).
+    { pts: `${C},${C} ${2 * C},${C} ${C},${2 * C}`, fill: a },
+    { pts: `${2 * C},${C} ${2 * C},${2 * C} ${C},${2 * C}`, fill: b },
+  ];
+  const transforms = [
+    "translate(0,0)",
+    `translate(${S},0) scale(-1,1)`,
+    `translate(0,${S}) scale(1,-1)`,
+    `translate(${S},${S}) scale(-1,-1)`,
+  ];
+  return (
+    <>
+      {transforms.map((t, i) => (
+        <g key={i} transform={t}>
+          {tris.map((tr, j) => (
+            <polygon key={j} points={tr.pts} fill={tr.fill} />
+          ))}
+        </g>
+      ))}
+    </>
+  );
+}
 
 /**
  * Shared renderer for "Cabin in the Cotton" — a Courthouse Steps log cabin.
