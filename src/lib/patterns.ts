@@ -959,6 +959,34 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "G" },
     ],
   },
+  {
+    id: "fancy-stripe",
+    name: "Fancy Stripe",
+    hasMath: true,
+    intro:
+      "Fancy Stripe is built entirely from Half Square Triangle units — 16 identical HSTs arranged as four mirrored 2×2 quadrants. Every triangle is one of just two fabrics, and the mirrored quadrants line up so Fabric A forms a continuous diagonal diamond lattice across the block. When blocks are tiled the lattice keeps running seamlessly across block boundaries, creating a large-scale allover pattern.",
+    sections: [
+      {
+        id: "fabA",
+        label: "Fabric A — diamond lattice",
+        defaultFabric: "A",
+        hint: "The fabric that forms the continuous diagonal diamond lattice — usually your accent/dominant color.",
+      },
+      {
+        id: "fabB",
+        label: "Fabric B — background",
+        defaultFabric: "B",
+        hint: "The other half of every HST — pick a strong contrast so the lattice reads clearly.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips of fabric that separate each block — set sashing to 0\" on the previous step for the seamless diamond-lattice look.",
+      },
+      { ...borderSection, defaultFabric: "D" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
