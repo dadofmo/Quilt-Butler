@@ -78,7 +78,7 @@ const PATTERN_ALT: Record<PatternId, string> = {
   "cabin-in-the-cotton":
     "Cabin in the Cotton quilt block diagram — a Courthouse Steps log cabin with a center square framed by three concentric rings, where the outermost ring alternates between two fabrics from block to block across the quilt for a two-tone checkerboard border effect",
   "fancy-stripe":
-    "Fancy Stripe quilt block diagram — 16 half-square-triangle units arranged as 4 mirrored quadrants forming a continuous diagonal diamond lattice across the block",
+    "Fancy Stripe quilt block diagram — 16 half-square-triangle units arranged as 4 mirrored 2x2 stripe quadrants with diagonal orange bands and gray background",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -834,7 +834,7 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     case "fancy-stripe": {
       return (
         <svg {...common}>
-          <FancyStripeBlock size={90} a={C.a} b={C.b} />
+          <FancyStripeBlock size={90} a={C.a} b={C.b} debug referenceColors />
         </svg>
       );
     }
