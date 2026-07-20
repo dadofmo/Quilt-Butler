@@ -1301,11 +1301,13 @@ function FancyStripeBlock({
   a,
   b,
   debug = false,
+  referenceColors = false,
 }: {
   size: number;
   a: string;
   b: string;
   debug?: boolean;
+  referenceColors?: boolean;
 }) {
   const S = size;
   const C = S / 4;
@@ -1324,7 +1326,12 @@ function FancyStripeBlock({
     // Row 4: vertical mirror of Row 1, then 180° mirror for BR.
     ["main", "B", "A"], ["main", "A", "B"], ["anti", "A", "B"], ["anti", "B", "A"],
   ];
-  const fill = (k: "A" | "B") => (k === "A" ? a : b);
+  const orange = "oklch(0.72 0.17 42)";
+  const gray = "oklch(0.78 0.01 35)";
+  const fill = (k: "A" | "B") => {
+    if (referenceColors) return k === "A" ? orange : gray;
+    return k === "A" ? a : b;
+  };
   const cells: ReactElement[] = [];
   for (let i = 0; i < 16; i++) {
     const r = Math.floor(i / 4);
