@@ -1071,7 +1071,7 @@ function renderInner(
     case "fancy-stripe": {
       const a = get("fabA", "A");
       const b = get("fabB", "B");
-      return <FancyStripeBlock size={200} a={a} b={b} />;
+      return <FancyStripeBlock size={200} a={a} b={b} debug />;
     }
   }
 }
