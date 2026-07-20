@@ -1323,14 +1323,14 @@ function FancyStripeBlock({ size, a, b }: { size: number; a: string; b: string }
     `translate(${S},${S}) scale(-1,-1)`,
   ];
   // DEBUG: 4×4 gridlines to visually confirm 16 individual HST cells.
-  const gridlines: React.ReactElement[] = [];
+  const gridlines: ReactElement[] = [];
   for (let i = 0; i <= 4; i++) {
     const p = (i * S) / 4;
     gridlines.push(<line key={`h${i}`} x1={0} y1={p} x2={S} y2={p} stroke="#000" strokeWidth={1.5} />);
     gridlines.push(<line key={`v${i}`} x1={p} y1={0} x2={p} y2={S} stroke="#000" strokeWidth={1.5} />);
   }
   // DEBUG: per-cell diagonal line so each of the 16 cells is visibly its own HST.
-  const diagonals: React.ReactElement[] = [];
+  const diagonals: ReactElement[] = [];
   for (let r = 0; r < 4; r++) {
     for (let c = 0; c < 4; c++) {
       const x = c * C;
