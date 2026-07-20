@@ -964,19 +964,19 @@ export const PATTERNS: PatternDef[] = [
     name: "Fancy Stripe",
     hasMath: true,
     intro:
-      "Fancy Stripe is built entirely from Half Square Triangle units — 16 identical HSTs arranged as four mirrored 2×2 quadrants. Every triangle is one of just two fabrics, and the mirrored quadrants line up so Fabric A forms a continuous diagonal diamond lattice across the block. When blocks are tiled the lattice keeps running seamlessly across block boundaries, creating a large-scale allover pattern.",
+      "Fancy Stripe is built entirely from Half Square Triangle units — 16 identical HSTs arranged as four 2×2 quadrants. Each quadrant creates a diagonal stripe band, and the quadrants mirror around the block so the stripe direction changes cleanly across the center seams. When blocks are tiled, the diagonal lattice continues across block boundaries.",
     sections: [
       {
         id: "fabA",
-        label: "Fabric A — diamond lattice",
+        label: "Fabric A — stripe accent",
         defaultFabric: "A",
-        hint: "The fabric that forms the continuous diagonal diamond lattice — usually your accent/dominant color.",
+        hint: "The accent fabric that forms the diagonal stripe bands — usually orange or your dominant color.",
       },
       {
         id: "fabB",
         label: "Fabric B — background",
         defaultFabric: "B",
-        hint: "The other half of every HST — pick a strong contrast so the lattice reads clearly.",
+        hint: "The other half of every HST — pick a strong contrast so the stripe bands read clearly.",
       },
       {
         id: "sashing",
