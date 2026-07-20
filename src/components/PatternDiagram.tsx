@@ -1290,13 +1290,11 @@ function IdahoBeautyBlock({
 export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock };
 
 /**
- * Shared renderer for "Fancy Stripe" — 16 identical HST units organized as
- * four mirrored 2×2 quadrants. Reference quadrant (top-left) uses Fabric B
- * (upper-right triangles in the top row of cells, lower-right in the bottom
- * row) and Fabric A everywhere else, producing a V-bend of A. The other
- * three quadrants are horizontal / vertical / 180° mirrors of the TL so
- * Fabric A forms a continuous diagonal diamond lattice across the whole
- * block AND across block boundaries when tiled.
+ * Shared renderer for "Fancy Stripe" — exactly 16 equal HST cells in a strict
+ * 4×4 grid. This follows the uploaded exploded block graphic literally: the
+ * top-left 2×2 quadrant uses only anti-diagonal HSTs, with Fabric A in the
+ * upper-left/lower-right pair and the remaining quadrants mirrored from that
+ * construction. No merged diamonds or resized pieces are drawn.
  */
 function FancyStripeBlock({
   size,
@@ -1311,19 +1309,20 @@ function FancyStripeBlock({
 }) {
   const S = size;
   const C = S / 4;
-  // Literal 16-cell table. Each entry: [diagonal, upperFabric, lowerFabric].
+  // Literal 16-cell table from the construction image. Each entry is one
+  // independent HST cell: [diagonal, first-side fabric, opposite-side fabric].
   // "main" diagonal = (0,0)→(C,C); upper = upper-right triangle, lower = lower-left.
   // "anti" diagonal = (C,0)→(0,C);  upper = upper-left triangle,  lower = lower-right.
   type Diag = "main" | "anti";
   const T: Array<[Diag, "A" | "B", "A" | "B"]> = [
-    // Row 1
-    ["main", "B", "A"], ["main", "B", "A"], ["anti", "B", "A"], ["anti", "B", "A"],
-    // Row 2
-    ["anti", "A", "B"], ["anti", "A", "B"], ["main", "A", "B"], ["main", "A", "B"],
-    // Row 3 (same as Row 1)
-    ["main", "B", "A"], ["main", "B", "A"], ["anti", "B", "A"], ["anti", "B", "A"],
-    // Row 4 (same as Row 2)
-    ["anti", "A", "B"], ["anti", "A", "B"], ["main", "A", "B"], ["main", "A", "B"],
+    // Row 1: TL quadrant cells, then its horizontal mirror.
+    ["anti", "A", "B"], ["anti", "B", "A"], ["main", "B", "A"], ["main", "A", "B"],
+    // Row 2: TL quadrant cells, then its horizontal mirror.
+    ["anti", "B", "A"], ["anti", "A", "B"], ["main", "A", "B"], ["main", "B", "A"],
+    // Row 3: vertical mirror of Row 2, then 180° mirror for BR.
+    ["main", "A", "B"], ["main", "B", "A"], ["anti", "B", "A"], ["anti", "A", "B"],
+    // Row 4: vertical mirror of Row 1, then 180° mirror for BR.
+    ["main", "B", "A"], ["main", "A", "B"], ["anti", "A", "B"], ["anti", "B", "A"],
   ];
   const fill = (k: "A" | "B") => (k === "A" ? a : b);
   const cells: ReactElement[] = [];
