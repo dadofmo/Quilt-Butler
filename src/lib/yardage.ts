@@ -2337,7 +2337,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     addSquares(reqs[fA], "HST starting squares (Fabric A)", squaresA, cut, s.fabricWidth);
     addSquares(reqs[fB], "HST starting squares (Fabric B)", squaresB, cut, s.fabricWidth);
     notes.push(
-      `Each Fancy Stripe block = 16 Half Square Triangle units arranged as a 4×4 HST grid (four mirrored 2×2 quadrants). Across all ${blockCount} blocks: ${hstUnits} HST units total.`,
+      `Each Fancy Stripe block = 16 Half Square Triangle units arranged as a strict 4×4 HST grid (four 2×2 stripe quadrants). Across all ${blockCount} blocks: ${hstUnits} HST units total.`,
     );
     notes.push(
       `Cut ${squaresA} squares of Fabric ${fA} and ${squaresB} squares of Fabric ${fB}, all at ${cut}" × ${cut}" (each HST finishes at ${hstFinished.toFixed(2)}" — one quarter of the ${s.blockSize}" block — plus 7/8" extra for the diagonal seam).`,
@@ -2346,7 +2346,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `To make the HST units: place one Fabric ${fA} square and one Fabric ${fB} square right sides together (RST). On the back of the top square, draw a diagonal from corner to corner. Sew a 1/4" seam on the LEFT of the line and another on the RIGHT, then cut along the drawn line. Each pair of squares yields 2 finished HST units — press seams toward the darker fabric and trim each to ${(hstFinished + SEAM).toFixed(2)}" square.`,
     );
     notes.push(
-      `Fancy Stripe assembly: lay 16 trimmed HSTs into a 4×4 grid. Rotate each HST so Fabric ${fA} forms the "V-bend" shape shown in the block preview — the top-left 2×2 quadrant is the reference, and the other three quadrants are its horizontal, vertical, and 180° mirrors. When placed correctly, Fabric ${fA} forms a continuous diagonal diamond lattice across the whole block. Sew the 4 rows of 4 HSTs, press row seams in alternating directions so they nest, then sew the 4 rows together.`,
+      `Fancy Stripe assembly: lay 16 trimmed HSTs into a 4×4 grid. The top-left 2×2 quadrant uses anti-diagonal HSTs in all four cells: Fabric ${fA} in the upper-left and lower-right cells, Fabric ${fB} in the other two. Mirror that quadrant horizontally for the top-right, vertically for the bottom-left, and both directions for the bottom-right so Fabric ${fA} forms the diagonal stripe bands shown in the block preview. Sew the 4 rows of 4 HSTs, press row seams in alternating directions so they nest, then sew the 4 rows together.`,
     );
     if (sashWidth > 0) {
       const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
