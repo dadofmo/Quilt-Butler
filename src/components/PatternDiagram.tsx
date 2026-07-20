@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import type { FabricKey, PatternId, SectionAssignments } from "@/lib/planner-store";
 import { fabricFill } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
