@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import type { FabricKey, PatternId, SectionAssignments } from "@/lib/planner-store";
 import { fabricFill } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
@@ -1321,6 +1322,29 @@ function FancyStripeBlock({ size, a, b }: { size: number; a: string; b: string }
     `translate(0,${S}) scale(1,-1)`,
     `translate(${S},${S}) scale(-1,-1)`,
   ];
+  // DEBUG: 4×4 gridlines to visually confirm 16 individual HST cells.
+  const gridlines: ReactElement[] = [];
+  for (let i = 0; i <= 4; i++) {
+    const p = (i * S) / 4;
+    gridlines.push(<line key={`h${i}`} x1={0} y1={p} x2={S} y2={p} stroke="#000" strokeWidth={1.5} />);
+    gridlines.push(<line key={`v${i}`} x1={p} y1={0} x2={p} y2={S} stroke="#000" strokeWidth={1.5} />);
+  }
+  // DEBUG: per-cell diagonal line so each of the 16 cells is visibly its own HST.
+  const diagonals: ReactElement[] = [];
+  for (let r = 0; r < 4; r++) {
+    for (let c = 0; c < 4; c++) {
+      const x = c * C;
+      const y = r * C;
+      // TL quadrant: top row "\" (0,0→C,C), bottom row "/" ((0,C)→(C,0)).
+      // Mirrored quadrants keep the same diagonal orientation per effective row.
+      const qr = r < 2 ? r : 3 - r;
+      const useSlash = qr === 1;
+      const d = useSlash
+        ? `M${x},${y + C} L${x + C},${y}`
+        : `M${x},${y} L${x + C},${y + C}`;
+      diagonals.push(<path key={`d${r}-${c}`} d={d} stroke="#000" strokeWidth={1} fill="none" />);
+    }
+  }
   return (
     <>
       {transforms.map((t, i) => (
@@ -1330,6 +1354,8 @@ function FancyStripeBlock({ size, a, b }: { size: number; a: string; b: string }
           ))}
         </g>
       ))}
+      {diagonals}
+      {gridlines}
     </>
   );
 }
