@@ -1071,7 +1071,7 @@ function renderInner(
     case "fancy-stripe": {
       const a = get("fabA", "A");
       const b = get("fabB", "B");
-      return <FancyStripeBlock size={200} a={a} b={b} />;
+      return <FancyStripeBlock size={200} a={a} b={b} debug />;
     }
   }
 }
@@ -1298,64 +1298,78 @@ export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripe
  * Fabric A forms a continuous diagonal diamond lattice across the whole
  * block AND across block boundaries when tiled.
  */
-function FancyStripeBlock({ size, a, b }: { size: number; a: string; b: string }) {
+function FancyStripeBlock({
+  size,
+  a,
+  b,
+  debug = false,
+}: {
+  size: number;
+  a: string;
+  b: string;
+  debug?: boolean;
+}) {
   const S = size;
-  const C = S / 4; // one HST cell side (block is 4×4 HST cells)
-  // TL quadrant (0..S/2 × 0..S/2) triangles in local coords.
-  const tris: Array<{ pts: string; fill: string }> = [
-    // Cell (0,0): diagonal (0,0)→(C,C). B = upper-right, A = lower-left.
-    { pts: `0,0 ${C},0 ${C},${C}`, fill: b },
-    { pts: `0,0 0,${C} ${C},${C}`, fill: a },
-    // Cell (1,0): diagonal (C,0)→(2C,C).
-    { pts: `${C},0 ${2 * C},0 ${2 * C},${C}`, fill: b },
-    { pts: `${C},0 ${C},${C} ${2 * C},${C}`, fill: a },
-    // Cell (0,1): diagonal (0,2C)→(C,C). A = upper-left, B = lower-right.
-    { pts: `0,${C} ${C},${C} 0,${2 * C}`, fill: a },
-    { pts: `${C},${C} ${C},${2 * C} 0,${2 * C}`, fill: b },
-    // Cell (1,1): diagonal (C,2C)→(2C,C).
-    { pts: `${C},${C} ${2 * C},${C} ${C},${2 * C}`, fill: a },
-    { pts: `${2 * C},${C} ${2 * C},${2 * C} ${C},${2 * C}`, fill: b },
+  const C = S / 4;
+  // Literal 16-cell table. Each entry: [diagonal, upperFabric, lowerFabric].
+  // "main" diagonal = (0,0)→(C,C); upper = upper-right triangle, lower = lower-left.
+  // "anti" diagonal = (C,0)→(0,C);  upper = upper-left triangle,  lower = lower-right.
+  type Diag = "main" | "anti";
+  const T: Array<[Diag, "A" | "B", "A" | "B"]> = [
+    // Row 1
+    ["main", "B", "A"], ["main", "B", "A"], ["anti", "B", "A"], ["anti", "B", "A"],
+    // Row 2
+    ["anti", "A", "B"], ["anti", "A", "B"], ["main", "A", "B"], ["main", "A", "B"],
+    // Row 3 (same as Row 1)
+    ["main", "B", "A"], ["main", "B", "A"], ["anti", "B", "A"], ["anti", "B", "A"],
+    // Row 4 (same as Row 2)
+    ["anti", "A", "B"], ["anti", "A", "B"], ["main", "A", "B"], ["main", "A", "B"],
   ];
-  const transforms = [
-    "translate(0,0)",
-    `translate(${S},0) scale(-1,1)`,
-    `translate(0,${S}) scale(1,-1)`,
-    `translate(${S},${S}) scale(-1,-1)`,
-  ];
-  // DEBUG: 4×4 gridlines to visually confirm 16 individual HST cells.
-  const gridlines: ReactElement[] = [];
-  for (let i = 0; i <= 4; i++) {
-    const p = (i * S) / 4;
-    gridlines.push(<line key={`h${i}`} x1={0} y1={p} x2={S} y2={p} stroke="#000" strokeWidth={1.5} />);
-    gridlines.push(<line key={`v${i}`} x1={p} y1={0} x2={p} y2={S} stroke="#000" strokeWidth={1.5} />);
+  const fill = (k: "A" | "B") => (k === "A" ? a : b);
+  const cells: ReactElement[] = [];
+  for (let i = 0; i < 16; i++) {
+    const r = Math.floor(i / 4);
+    const c = i % 4;
+    const x = c * C;
+    const y = r * C;
+    const [diag, up, lo] = T[i];
+    let upPts: string;
+    let loPts: string;
+    if (diag === "main") {
+      // upper-right triangle, lower-left triangle
+      upPts = `${x},${y} ${x + C},${y} ${x + C},${y + C}`;
+      loPts = `${x},${y} ${x},${y + C} ${x + C},${y + C}`;
+    } else {
+      // anti: upper-left triangle, lower-right triangle
+      upPts = `${x},${y} ${x + C},${y} ${x},${y + C}`;
+      loPts = `${x + C},${y} ${x + C},${y + C} ${x},${y + C}`;
+    }
+    cells.push(<polygon key={`u${i}`} points={upPts} fill={fill(up)} />);
+    cells.push(<polygon key={`l${i}`} points={loPts} fill={fill(lo)} />);
   }
-  // DEBUG: per-cell diagonal line so each of the 16 cells is visibly its own HST.
-  const diagonals: ReactElement[] = [];
-  for (let r = 0; r < 4; r++) {
-    for (let c = 0; c < 4; c++) {
+  const overlays: ReactElement[] = [];
+  if (debug) {
+    for (let i = 0; i <= 4; i++) {
+      const p = i * C;
+      overlays.push(<line key={`h${i}`} x1={0} y1={p} x2={S} y2={p} stroke="#000" strokeWidth={1.25} />);
+      overlays.push(<line key={`v${i}`} x1={p} y1={0} x2={p} y2={S} stroke="#000" strokeWidth={1.25} />);
+    }
+    for (let i = 0; i < 16; i++) {
+      const r = Math.floor(i / 4);
+      const c = i % 4;
       const x = c * C;
       const y = r * C;
-      // TL quadrant: top row "\" (0,0→C,C), bottom row "/" ((0,C)→(C,0)).
-      // Mirrored quadrants keep the same diagonal orientation per effective row.
-      const qr = r < 2 ? r : 3 - r;
-      const useSlash = qr === 1;
-      const d = useSlash
-        ? `M${x},${y + C} L${x + C},${y}`
-        : `M${x},${y} L${x + C},${y + C}`;
-      diagonals.push(<path key={`d${r}-${c}`} d={d} stroke="#000" strokeWidth={1} fill="none" />);
+      const [diag] = T[i];
+      const d = diag === "main"
+        ? `M${x},${y} L${x + C},${y + C}`
+        : `M${x + C},${y} L${x},${y + C}`;
+      overlays.push(<path key={`d${i}`} d={d} stroke="#000" strokeWidth={1} fill="none" />);
     }
   }
   return (
     <>
-      {transforms.map((t, i) => (
-        <g key={i} transform={t}>
-          {tris.map((tr, j) => (
-            <polygon key={j} points={tr.pts} fill={tr.fill} />
-          ))}
-        </g>
-      ))}
-      {diagonals}
-      {gridlines}
+      {cells}
+      {overlays}
     </>
   );
 }
