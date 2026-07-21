@@ -479,10 +479,6 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
           {/* Bottom-right quadrant */}
           <polygon points="45,45 90,45 90,90" fill={C.a} />
           <polygon points="45,45 45,90 90,90" fill={C.b} />
-          <g stroke="white" strokeWidth={1.5} opacity={0.9}>
-            <line x1={45} y1={0} x2={45} y2={90} />
-            <line x1={0} y1={45} x2={90} y2={45} />
-          </g>
         </svg>
       );
     }
