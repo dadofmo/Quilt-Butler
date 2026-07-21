@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock } from "./PatternDiagram";
 
 
 interface Props {
@@ -79,6 +79,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Cabin in the Cotton quilt block diagram — a Courthouse Steps log cabin with a center square framed by three concentric rings, where the outermost ring alternates between two fabrics from block to block across the quilt for a two-tone checkerboard border effect",
   "fancy-stripe":
     "Fancy Stripe quilt block diagram — 16 half-square-triangle units arranged as 4 mirrored 2x2 stripe quadrants with diagonal orange bands and gray background",
+  "maple-star":
+    "Maple Star quilt block diagram — a 3x3 macro-grid with a large center square framed by a plus of 4 rectangles, surrounded by 8 flying-geese star points and 4 corner squares",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -831,6 +833,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return (
         <svg {...common}>
           <FancyStripeBlock size={90} a={C.a} b={C.b} />
+        </svg>
+      );
+    }
+    case "maple-star": {
+      return (
+        <svg {...common}>
+          <MapleStarBlock size={90} bg={C.a} acc={C.b} points={C.c} center={C.d} />
         </svg>
       );
     }
