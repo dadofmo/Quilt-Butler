@@ -33,7 +33,8 @@ export type PatternId =
   | "idaho-beauty"
   | "checkerboard"
   | "cabin-in-the-cotton"
-  | "fancy-stripe";
+  | "fancy-stripe"
+  | "maple-star";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
