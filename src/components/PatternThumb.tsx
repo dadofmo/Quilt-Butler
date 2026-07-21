@@ -108,7 +108,7 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         <svg {...common}>
           {[0, 30, 60].flatMap((y, j) =>
             [0, 30, 60].map((x, i) => (
-              <rect key={`${i}-${j}`} x={x + 1} y={y + 1} width={28} height={28} fill={(i + j) % 2 === 0 ? C.a : C.b} />
+              <rect key={`${i}-${j}`} x={x} y={y} width={30.5} height={30.5} fill={(i + j) % 2 === 0 ? C.a : C.b} />
             )),
           )}
         </svg>
@@ -301,7 +301,7 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     case "bear-paw":
       return (
         <svg {...common}>
-          <BearPawBlockSvg pad={C.a} claw={C.b} bg={C.c} centerAccent={C.d} size={90} showGrid />
+          <BearPawBlockSvg pad={C.a} claw={C.b} bg={C.c} centerAccent={C.d} size={90} />
         </svg>
       );
     case "irish-chain": {
@@ -834,7 +834,7 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     case "fancy-stripe": {
       return (
         <svg {...common}>
-          <FancyStripeBlock size={90} a={C.a} b={C.b} debug referenceColors />
+          <FancyStripeBlock size={90} a={C.a} b={C.b} />
         </svg>
       );
     }

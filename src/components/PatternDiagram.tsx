@@ -94,10 +94,10 @@ function renderInner(
             [0, 1, 2].map((i) => (
               <rect
                 key={`${i}-${j}`}
-                x={i * 66 + 2}
-                y={j * 66 + 2}
-                width={62}
-                height={62}
+                x={(i * 200) / 3}
+                y={(j * 200) / 3}
+                width={200 / 3 + 0.5}
+                height={200 / 3 + 0.5}
                 fill={(i + j) % 2 === 0 ? center : outer}
               />
             )),
@@ -451,7 +451,7 @@ function renderInner(
       const claw = get("claws", "B");
       const bg = get("bg", "C");
       const centerAccent = get("center-accent", "D");
-      return <BearPawBlockSvg pad={pad} claw={claw} bg={bg} centerAccent={centerAccent} showGrid />;
+      return <BearPawBlockSvg pad={pad} claw={claw} bg={bg} centerAccent={centerAccent} />;
     }
     case "irish-chain": {
       // Single chain block: 3×3 with the contrasting (chain) fabric in the
@@ -632,10 +632,6 @@ function renderInner(
           {/* Bottom-right quadrant */}
           <polygon points="100,100 200,100 200,200" fill={stripe} />
           <polygon points="100,100 100,200 200,200" fill={bg} />
-          <g stroke="white" strokeWidth={2} opacity={0.9}>
-            <line x1={100} y1={0} x2={100} y2={200} />
-            <line x1={0} y1={100} x2={200} y2={100} />
-          </g>
         </>
       );
     }
@@ -1071,7 +1067,7 @@ function renderInner(
     case "fancy-stripe": {
       const a = get("fabA", "A");
       const b = get("fabB", "B");
-      return <FancyStripeBlock size={200} a={a} b={b} debug referenceColors />;
+      return <FancyStripeBlock size={200} a={a} b={b} />;
     }
   }
 }
@@ -1405,7 +1401,7 @@ function CabinInTheCottonBlock({
   const u = S / 300;
   // Helper: draw rect using 300-space coords.
   const R = (x: number, y: number, w: number, h: number, fill: string, k: string) => (
-    <rect key={k} x={x * u} y={y * u} width={w * u} height={h * u} fill={fill} stroke="white" strokeWidth={0.75} />
+    <rect key={k} x={x * u} y={y * u} width={w * u} height={h * u} fill={fill} />
   );
   return (
     <>
