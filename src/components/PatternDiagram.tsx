@@ -1069,6 +1069,13 @@ function renderInner(
       const b = get("fabB", "B");
       return <FancyStripeBlock size={200} a={a} b={b} />;
     }
+    case "maple-star": {
+      const bg = get("bg", "A");
+      const acc = get("accent", "B");
+      const points = get("points", "C");
+      const center = get("center", "D");
+      return <MapleStarBlock size={200} bg={bg} acc={acc} points={points} center={center} />;
+    }
   }
 }
 
@@ -1283,7 +1290,7 @@ function IdahoBeautyBlock({
   );
 }
 
-export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock };
+export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock };
 
 /**
  * Shared renderer for "Fancy Stripe" — exactly 16 equal HST cells in a strict
