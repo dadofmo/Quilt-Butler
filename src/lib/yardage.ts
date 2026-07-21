@@ -2362,6 +2362,87 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge. Note: the diamond lattice reads strongest with sashing set to 0" so neighboring blocks meet edge-to-edge.`,
       );
     }
+  } else if (s.pattern === "maple-star") {
+    // Maple Star: 3×3 macro grid on an unequal 6×6 unit sub-grid where the
+    // middle column and middle row are 2 units wide (C = 2s). All piecing is
+    // squares and rectangles — flying-geese star points are stitch-and-flip.
+    // Per block:
+    //   Fabric A (bg): 4 corner squares (s×s) + 8 goose bases (s×C rects, i.e.
+    //                  2s × s — the long side is 2s = C).
+    //   Fabric B (accent): 4 inner-ring squares (s×s) + 8 stitch-and-flip
+    //                      corners on the goose bases (2 flips × 8 geese = 16
+    //                      B corners = 16 B squares s×s).
+    //   Fabric C (frame): 4 rectangles (s×C) framing the center in a plus.
+    //   Fabric D (center): 1 large square C×C (2s × 2s).
+    const s6 = s.blockSize / 6;   // 1 sub-unit (finished)
+    const sCut = s6 + SEAM;        // small square / short side cut
+    const CCut = 2 * s6 + SEAM;    // large square / long side cut
+    const rectLong = 2 * s6 + SEAM;
+    const rectShort = s6 + SEAM;
+
+    const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
+    const accFab = (s.assignments["accent"] ?? "B") as FabricKey;
+    const framFab = (s.assignments["points"] ?? "C") as FabricKey;
+    const centFab = (s.assignments["center"] ?? "D") as FabricKey;
+
+    type Bucket = { sq_s: number; sq_C: number; rect: number };
+    const buckets: Partial<Record<FabricKey, Bucket>> = {};
+    const add = (fab: FabricKey, sq_s: number, sq_C: number, rect: number) => {
+      const b = (buckets[fab] ??= { sq_s: 0, sq_C: 0, rect: 0 });
+      b.sq_s += sq_s;
+      b.sq_C += sq_C;
+      b.rect += rect;
+    };
+    // 4 A corner sq + 8 A goose-base rects
+    add(bgFab, 4 * blockCount, 0, 8 * blockCount);
+    // 4 B inner squares + 16 B flip squares (2 per goose × 8 geese)
+    add(accFab, (4 + 16) * blockCount, 0, 0);
+    // 4 C frame rectangles
+    add(framFab, 0, 0, 4 * blockCount);
+    // 1 D center large square
+    add(centFab, 0, 1 * blockCount, 0);
+
+    for (const fab of ALL_FABRIC_KEYS) {
+      const b = buckets[fab];
+      if (!b) continue;
+      if (b.sq_s > 0) {
+        addSquares(reqs[fab], `Small squares (${s6.toFixed(2)}" finished)`, b.sq_s, sCut, s.fabricWidth);
+      }
+      if (b.sq_C > 0) {
+        addSquares(reqs[fab], `Large center square (${(2 * s6).toFixed(2)}" finished)`, b.sq_C, CCut, s.fabricWidth);
+      }
+      if (b.rect > 0) {
+        addRails(reqs[fab], `Rectangles (${(2 * s6).toFixed(2)}" × ${s6.toFixed(2)}" finished)`, b.rect, rectLong, rectShort, s.fabricWidth);
+      }
+    }
+
+    notes.push(
+      `Each Maple Star block is a 3×3 macro grid built on an unequal 6-unit sub-grid where 1 unit = ${s6.toFixed(2)}" finished. The middle column and middle row are 2 units wide (${(2 * s6).toFixed(2)}"). Per block cut: 4 Fabric ${bgFab} corner squares at ${sCut.toFixed(2)}" × ${sCut.toFixed(2)}"; 8 Fabric ${bgFab} goose-base rectangles at ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}"; 20 Fabric ${accFab} squares at ${sCut.toFixed(2)}" × ${sCut.toFixed(2)}" (4 fill the inner ring, 16 are stitch-and-flip corners for the star points); 4 Fabric ${framFab} frame rectangles at ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}"; 1 Fabric ${centFab} center square at ${CCut.toFixed(2)}" × ${CCut.toFixed(2)}".`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: Fabric ${bgFab} = ${4 * blockCount} squares + ${8 * blockCount} rectangles; Fabric ${accFab} = ${20 * blockCount} squares; Fabric ${framFab} = ${4 * blockCount} rectangles; Fabric ${centFab} = ${blockCount} large squares.`,
+    );
+    notes.push(
+      `Flying-geese star points (stitch-and-flip): each goose = 1 Fabric ${bgFab} rectangle + 2 Fabric ${accFab} small squares. Draw a diagonal on the back of each Fabric ${accFab} square, place it right-sides-together over one short end of the Fabric ${bgFab} rectangle so the drawn line runs from an outer corner into the rectangle, sew ON the line, trim the outer corner to a 1/4" seam, and press the small triangle open. Repeat on the opposite short end so the goose has 2 Fabric ${accFab} flip corners flanking a Fabric ${bgFab} triangle apex. All 8 geese point TOWARD the block center.`,
+    );
+    notes.push(
+      `Maple Star assembly: build the block as a 3×3 macro grid. Corner units (4 of them) are just a Fabric ${bgFab} corner square + 2 flip-goose star points meeting at the corner — actually the geese sit on the block EDGES between the corners, so corner units are single Fabric ${bgFab} squares. Edge units (4 of them, one per side) are 2 flying geese sewn end-to-end (top/bottom horizontal, left/right vertical). Middle column and middle row cells (excluding the center) hold the Fabric ${framFab} frame rectangles plus 4 Fabric ${accFab} inner-ring squares at the frame corners. The Fabric ${centFab} large square sits at the true center. Sew as 5 rows top-to-bottom, then join the rows with scant 1/4" seams. Keep every block in the same orientation across the quilt so the stars line up.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
@@ -2439,7 +2520,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "idaho-beauty" ||
     s.pattern === "checkerboard" ||
     s.pattern === "cabin-in-the-cotton" ||
-    s.pattern === "fancy-stripe";
+    s.pattern === "fancy-stripe" ||
+    s.pattern === "maple-star";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

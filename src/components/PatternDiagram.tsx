@@ -1069,6 +1069,13 @@ function renderInner(
       const b = get("fabB", "B");
       return <FancyStripeBlock size={200} a={a} b={b} />;
     }
+    case "maple-star": {
+      const bg = get("bg", "A");
+      const acc = get("accent", "B");
+      const points = get("points", "C");
+      const center = get("center", "D");
+      return <MapleStarBlock size={200} bg={bg} acc={acc} points={points} center={center} />;
+    }
   }
 }
 
@@ -1283,7 +1290,7 @@ function IdahoBeautyBlock({
   );
 }
 
-export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock };
+export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock };
 
 /**
  * Shared renderer for "Fancy Stripe" — exactly 16 equal HST cells in a strict
@@ -1425,6 +1432,128 @@ function CabinInTheCottonBlock({
     </>
   );
 }
+
+
+/**
+ * Shared renderer for "Maple Star" — a 3×3 macro-grid star with an unequal
+ * 6×6 unit sub-grid (columns 1,2,4,5 = width s; column 3 = width 2s = C).
+ * All piecing is squares and rectangles; the 8 star-point flying geese use
+ * Fabric B as stitch-and-flip corners on Fabric A rectangles.
+ *
+ * Pieces per block (matches spec):
+ *   - 1× D center square (C × C, i.e. 2s × 2s)
+ *   - 4× C rectangles (s × C) framing the center in a plus
+ *   - 8× A rectangles (s × C) as flying-geese bases (2 per side)
+ *   - 4× A squares (s × s) at the 4 block corners
+ *   - 12× B squares (s × s): 4 fill inner-ring corners; 8 are used as
+ *     stitch-and-flip corners on the 8 goose bases (each goose gets 2 flips
+ *     to shape the point). We render the flips as triangles directly on the
+ *     goose rectangle so the geometry reads correctly at preview scale.
+ */
+function MapleStarBlock({
+  size,
+  bg,
+  acc,
+  points,
+  center,
+  debug = false,
+}: {
+  size: number;
+  bg: string;
+  acc: string;
+  points: string;
+  center: string;
+  debug?: boolean;
+}) {
+  const S = size;
+  const u = S / 6; // 6 unit-columns / rows total (col 3 spans 2 units)
+  // Coordinates for the 6×6 unit grid.
+  const X = (c: number) => c * u;
+  const Y = (r: number) => r * u;
+
+  // Flying goose in a 2u × 1u horizontal rectangle at (x, y).
+  // Base fabric = bg, apex points TOWARD `dir` (u/d/l/r). Flip corners = acc.
+  const Goose = ({
+    x, y, w, h, dir, k,
+  }: { x: number; y: number; w: number; h: number; dir: "u" | "d" | "l" | "r"; k: string }) => {
+    // Base rectangle
+    // Apex is at the midpoint of the edge facing `dir`.
+    let apex: [number, number];
+    let cornerA: [number, number];
+    let cornerB: [number, number];
+    if (dir === "d") { apex = [x + w / 2, y + h]; cornerA = [x, y + h]; cornerB = [x + w, y + h]; }
+    else if (dir === "u") { apex = [x + w / 2, y]; cornerA = [x, y]; cornerB = [x + w, y]; }
+    else if (dir === "r") { apex = [x + w, y + h / 2]; cornerA = [x + w, y]; cornerB = [x + w, y + h]; }
+    else { apex = [x, y + h / 2]; cornerA = [x, y]; cornerB = [x, y + h]; }
+    // The A "goose" triangle spans from the two BACK corners (opposite `dir`)
+    // to the apex — this is what remains after flipping B triangles off the
+    // two front corners.
+    let backA: [number, number];
+    let backB: [number, number];
+    if (dir === "d") { backA = [x, y]; backB = [x + w, y]; }
+    else if (dir === "u") { backA = [x, y + h]; backB = [x + w, y + h]; }
+    else if (dir === "r") { backA = [x, y]; backB = [x, y + h]; }
+    else { backA = [x + w, y]; backB = [x + w, y + h]; }
+    return (
+      <g key={k}>
+        <rect x={x} y={y} width={w} height={h} fill={acc} />
+        <polygon
+          points={`${backA[0]},${backA[1]} ${backB[0]},${backB[1]} ${apex[0]},${apex[1]}`}
+          fill={bg}
+        />
+      </g>
+    );
+  };
+
+  return (
+    <>
+      {/* Row 0: 4 corners + top row of 2 horizontal geese pointing DOWN */}
+      <rect x={X(0)} y={Y(0)} width={u} height={u} fill={bg} />
+      <Goose k="g-top-l" x={X(1)} y={Y(0)} w={2 * u} h={u} dir="d" />
+      <Goose k="g-top-r" x={X(3)} y={Y(0)} w={2 * u} h={u} dir="d" />
+      <rect x={X(5)} y={Y(0)} width={u} height={u} fill={bg} />
+
+      {/* Row 5: bottom row — mirror, geese point UP */}
+      <rect x={X(0)} y={Y(5)} width={u} height={u} fill={bg} />
+      <Goose k="g-bot-l" x={X(1)} y={Y(5)} w={2 * u} h={u} dir="u" />
+      <Goose k="g-bot-r" x={X(3)} y={Y(5)} w={2 * u} h={u} dir="u" />
+      <rect x={X(5)} y={Y(5)} width={u} height={u} fill={bg} />
+
+      {/* Columns 0 and 5: 2 vertical geese per side, pointing toward center */}
+      <Goose k="g-left-t" x={X(0)} y={Y(1)} w={u} h={2 * u} dir="r" />
+      <Goose k="g-left-b" x={X(0)} y={Y(3)} w={u} h={2 * u} dir="r" />
+      <Goose k="g-right-t" x={X(5)} y={Y(1)} w={u} h={2 * u} dir="l" />
+      <Goose k="g-right-b" x={X(5)} y={Y(3)} w={u} h={2 * u} dir="l" />
+
+      {/* Inner ring: 4 B squares in the corners of the 4×4 inner area */}
+      <rect x={X(1)} y={Y(1)} width={u} height={u} fill={acc} />
+      <rect x={X(4)} y={Y(1)} width={u} height={u} fill={acc} />
+      <rect x={X(1)} y={Y(4)} width={u} height={u} fill={acc} />
+      <rect x={X(4)} y={Y(4)} width={u} height={u} fill={acc} />
+
+      {/* Cross frame — 4 Fabric C rectangles around the center */}
+      <rect x={X(2)} y={Y(1)} width={2 * u} height={u} fill={points} />
+      <rect x={X(2)} y={Y(4)} width={2 * u} height={u} fill={points} />
+      <rect x={X(1)} y={Y(2)} width={u} height={2 * u} fill={points} />
+      <rect x={X(4)} y={Y(2)} width={u} height={2 * u} fill={points} />
+
+      {/* Center 2u × 2u Fabric D square */}
+      <rect x={X(2)} y={Y(2)} width={2 * u} height={2 * u} fill={center} />
+
+      {debug && (
+        <g stroke="white" strokeWidth={0.5} opacity={0.35} fill="none">
+          {[1, 2, 3, 4, 5].map((k) => (
+            <g key={k}>
+              <line x1={k * u} y1={0} x2={k * u} y2={S} />
+              <line x1={0} y1={k * u} x2={S} y2={k * u} />
+            </g>
+          ))}
+        </g>
+      )}
+    </>
+  );
+}
+
 
 
 
