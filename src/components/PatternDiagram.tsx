@@ -1472,23 +1472,17 @@ function MapleStarBlock({
   const M = 2 * u; // macro-cell side
   const P = (i: number) => i * M; // macro-grid coordinate (i = 0..3)
 
-  // Canonical star-point unit: 1u wide × 2u tall rectangle with a tall,
-  // narrow accent apex triangle at the SHORT edge (top), flanked by two
-  // background triangles that fill the remainder. Apex points UP.
-  // (This is a Half-Rectangle-Triangle / HRT-style point — 1:2 aspect,
-  //  which is what the reference shows: 2 sharp peaks per side = 8 total.)
-  const StarPoint = ({ x, y, rot }: { x: number; y: number; rot: 0 | 90 | 180 | 270 }) => {
-    // Local frame: 1u wide × 2u tall, rotated about its own center.
-    const w = u;
-    const h = 2 * u;
-    return (
-      <g transform={`translate(${x} ${y}) rotate(${rot} ${w / 2} ${h / 2})`}>
-        <rect x={0} y={0} width={w} height={h} fill={bg} />
-        {/* Apex triangle: apex at top-mid, back corners at bottom L/R. */}
-        <polygon points={`${w / 2},0 ${w},${h} 0,${h}`} fill={acc} />
-      </g>
-    );
-  };
+  // 8 star-point apex triangles — 2 per side. Each triangle is tall & narrow
+  // (1u base × 2u height) so 2 fit within each 2u-wide edge macro-cell, with
+  // the apex pointing OUTWARD toward the block edge. Base of every triangle
+  // sits on the inner boundary of the corner (i.e. at the edge of the middle
+  // third of the block), matching the reference "two sharp peaks per side".
+  //
+  // Background (bg) is painted as a solid layer first via the edge-cell rects
+  // below; each apex triangle is then drawn on top in the accent (acc) fabric.
+  const apex = (pts: string, key: string) => (
+    <polygon key={key} points={pts} fill={acc} />
+  );
 
   return (
     <>
@@ -1498,28 +1492,29 @@ function MapleStarBlock({
       <rect x={P(0)} y={P(2)} width={M} height={M} fill={bg} />
       <rect x={P(2)} y={P(2)} width={M} height={M} fill={bg} />
 
-      {/* 8 edge star points — 2 per side, all apex-OUTWARD. Each unit is
-          1u × 2u; on top/bottom edges the 2 units sit side-by-side (each
-          spans y=0..2u); on left/right edges the 2 units are rotated 90° and
-          sit stacked vertically along the edge (each rotated unit occupies a
-          2u × 1u footprint). Layout is symmetric so all 4 sides look the
-          same, differing only by rotation. */}
-      {/* TOP edge — 2 apex-up points inside the top-middle 2u × 2u cell */}
-      <StarPoint x={P(1)} y={P(0)} rot={0} />
-      <StarPoint x={P(1) + u} y={P(0)} rot={0} />
-      {/* BOTTOM edge — 2 apex-down points inside the bottom-middle 2u × 2u cell */}
-      <StarPoint x={P(1)} y={P(2)} rot={180} />
-      <StarPoint x={P(1) + u} y={P(2)} rot={180} />
-      {/* LEFT edge — 2 apex-left points inside the left-middle 2u × 2u cell.
-          After 270° rotation the 1u×2u local frame occupies a 2u×1u screen
-          footprint, so the two points stack vertically. The rotation is
-          about the local center, so we offset by u/2 on each axis so the
-          rotated footprint lands where we want it. */}
-      <StarPoint x={P(0) + u / 2 - u / 2} y={P(1) + u / 2 - u} rot={270} />
-      <StarPoint x={P(0) + u / 2 - u / 2} y={P(1) + u + u / 2 - u} rot={270} />
-      {/* RIGHT edge — 2 apex-right points */}
-      <StarPoint x={P(2) + u / 2 + u / 2} y={P(1) + u / 2 - u} rot={90} />
-      <StarPoint x={P(2) + u / 2 + u / 2} y={P(1) + u + u / 2 - u} rot={90} />
+      {/* 4 edge macro-cells — filled with bg first so the flanks of each
+          apex triangle read as background. */}
+      <rect x={P(1)} y={P(0)} width={M} height={M} fill={bg} />
+      <rect x={P(1)} y={P(2)} width={M} height={M} fill={bg} />
+      <rect x={P(0)} y={P(1)} width={M} height={M} fill={bg} />
+      <rect x={P(2)} y={P(1)} width={M} height={M} fill={bg} />
+
+      {/* TOP edge: 2 apex triangles pointing UP (apex on top block edge). */}
+      {apex(`${P(1) + u / 2},${P(0)} ${P(1)},${P(1)} ${P(1) + u},${P(1)}`, "top-l")}
+      {apex(`${P(1) + u + u / 2},${P(0)} ${P(1) + u},${P(1)} ${P(2)},${P(1)}`, "top-r")}
+
+      {/* BOTTOM edge: 2 apex triangles pointing DOWN (apex on bottom edge). */}
+      {apex(`${P(1) + u / 2},${P(3)} ${P(1)},${P(2)} ${P(1) + u},${P(2)}`, "bot-l")}
+      {apex(`${P(1) + u + u / 2},${P(3)} ${P(1) + u},${P(2)} ${P(2)},${P(2)}`, "bot-r")}
+
+      {/* LEFT edge: 2 apex triangles pointing LEFT (apex on left block edge). */}
+      {apex(`${P(0)},${P(1) + u / 2} ${P(1)},${P(1)} ${P(1)},${P(1) + u}`, "lft-t")}
+      {apex(`${P(0)},${P(1) + u + u / 2} ${P(1)},${P(1) + u} ${P(1)},${P(2)}`, "lft-b")}
+
+      {/* RIGHT edge: 2 apex triangles pointing RIGHT (apex on right edge). */}
+      {apex(`${P(3)},${P(1) + u / 2} ${P(2)},${P(1)} ${P(2)},${P(1) + u}`, "rgt-t")}
+      {apex(`${P(3)},${P(1) + u + u / 2} ${P(2)},${P(1) + u} ${P(2)},${P(2)}`, "rgt-b")}
+
 
 
       {/* Inner 2u × 2u center macro-cell, subdivided into the frame + hearth.
