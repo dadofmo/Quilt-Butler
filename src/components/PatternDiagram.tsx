@@ -1466,86 +1466,76 @@ function MapleStarBlock({
   debug?: boolean;
 }) {
   const S = size;
-  const u = S / 6; // 6 unit-columns / rows total (col 3 spans 2 units)
-  // Coordinates for the 6×6 unit grid.
-  const X = (c: number) => c * u;
-  const Y = (r: number) => r * u;
+  // True 3×3 macro grid — each macro cell is 2u × 2u where u = S/6.
+  // Columns/rows at 0, 2u, 4u, 6u.
+  const u = S / 6;
+  const M = 2 * u; // macro-cell side
+  const P = (i: number) => i * M; // macro-grid coordinate (i = 0..3)
 
-  // Flying goose in a 2u × 1u horizontal rectangle at (x, y).
-  // Base fabric = bg, apex points TOWARD `dir` (u/d/l/r). Flip corners = acc.
-  const Goose = ({
-    x, y, w, h, dir, k,
-  }: { x: number; y: number; w: number; h: number; dir: "u" | "d" | "l" | "r"; k: string }) => {
-    // Base rectangle
-    // Apex is at the midpoint of the edge facing `dir`.
-    let apex: [number, number];
-    let cornerA: [number, number];
-    let cornerB: [number, number];
-    if (dir === "d") { apex = [x + w / 2, y + h]; cornerA = [x, y + h]; cornerB = [x + w, y + h]; }
-    else if (dir === "u") { apex = [x + w / 2, y]; cornerA = [x, y]; cornerB = [x + w, y]; }
-    else if (dir === "r") { apex = [x + w, y + h / 2]; cornerA = [x + w, y]; cornerB = [x + w, y + h]; }
-    else { apex = [x, y + h / 2]; cornerA = [x, y]; cornerB = [x, y + h]; }
-    // The A "goose" triangle spans from the two BACK corners (opposite `dir`)
-    // to the apex — this is what remains after flipping B triangles off the
-    // two front corners.
-    let backA: [number, number];
-    let backB: [number, number];
-    if (dir === "d") { backA = [x, y]; backB = [x + w, y]; }
-    else if (dir === "u") { backA = [x, y + h]; backB = [x + w, y + h]; }
-    else if (dir === "r") { backA = [x, y]; backB = [x, y + h]; }
-    else { backA = [x + w, y]; backB = [x + w, y + h]; }
+  // One canonical flying-goose star-point unit, drawn as a 2u × 2u (M × M)
+  // square with the apex pointing UP (out toward the top edge of the block).
+  // Base = bg (Fabric A background); apex triangle = acc (Fabric B accent).
+  // Apex vertex sits at the midpoint of the OUTER (top) edge; the two back
+  // corners of the accent triangle sit at the bottom-left and bottom-right
+  // corners of the unit — i.e. the flip corners of the goose are the two
+  // background triangles flanking the apex.
+  const StarPoint = ({ x, y, rot }: { x: number; y: number; rot: 0 | 90 | 180 | 270 }) => {
+    // Draw locally at (0,0)-(M,M), then translate + rotate around the unit center.
+    const cx = x + M / 2;
+    const cy = y + M / 2;
     return (
-      <g key={k}>
-        <rect x={x} y={y} width={w} height={h} fill={acc} />
+      <g transform={`translate(${x} ${y}) rotate(${rot} ${M / 2} ${M / 2})`}>
+        <rect x={0} y={0} width={M} height={M} fill={bg} />
+        {/* Apex triangle: apex at top-edge midpoint, back corners at bottom L/R. */}
         <polygon
-          points={`${backA[0]},${backA[1]} ${backB[0]},${backB[1]} ${apex[0]},${apex[1]}`}
-          fill={bg}
+          points={`${M / 2},0 ${M},${M} 0,${M}`}
+          fill={acc}
         />
+        {/* Suppress unused-var lint for cx/cy — kept for future debugging. */}
+        {debug && <circle cx={cx - x} cy={cy - y} r={0} fill="none" />}
       </g>
     );
   };
 
   return (
     <>
-      {/* Row 0: 4 corners + top row of 2 horizontal geese pointing DOWN */}
-      <rect x={X(0)} y={Y(0)} width={u} height={u} fill={bg} />
-      <Goose k="g-top-l" x={X(1)} y={Y(0)} w={2 * u} h={u} dir="d" />
-      <Goose k="g-top-r" x={X(3)} y={Y(0)} w={2 * u} h={u} dir="d" />
-      <rect x={X(5)} y={Y(0)} width={u} height={u} fill={bg} />
+      {/* 4 corners — pure Fabric A, 2u × 2u each. */}
+      <rect x={P(0)} y={P(0)} width={M} height={M} fill={bg} />
+      <rect x={P(2)} y={P(0)} width={M} height={M} fill={bg} />
+      <rect x={P(0)} y={P(2)} width={M} height={M} fill={bg} />
+      <rect x={P(2)} y={P(2)} width={M} height={M} fill={bg} />
 
-      {/* Row 5: bottom row — mirror, geese point UP */}
-      <rect x={X(0)} y={Y(5)} width={u} height={u} fill={bg} />
-      <Goose k="g-bot-l" x={X(1)} y={Y(5)} w={2 * u} h={u} dir="u" />
-      <Goose k="g-bot-r" x={X(3)} y={Y(5)} w={2 * u} h={u} dir="u" />
-      <rect x={X(5)} y={Y(5)} width={u} height={u} fill={bg} />
+      {/* 4 edge star points — same unit, rotated per side, apex OUTWARD. */}
+      <StarPoint x={P(1)} y={P(0)} rot={0} />   {/* top:    apex up */}
+      <StarPoint x={P(2)} y={P(1)} rot={90} />  {/* right:  apex right */}
+      <StarPoint x={P(1)} y={P(2)} rot={180} /> {/* bottom: apex down */}
+      <StarPoint x={P(0)} y={P(1)} rot={270} /> {/* left:   apex left */}
 
-      {/* Columns 0 and 5: 2 vertical geese per side, pointing toward center */}
-      <Goose k="g-left-t" x={X(0)} y={Y(1)} w={u} h={2 * u} dir="r" />
-      <Goose k="g-left-b" x={X(0)} y={Y(3)} w={u} h={2 * u} dir="r" />
-      <Goose k="g-right-t" x={X(5)} y={Y(1)} w={u} h={2 * u} dir="l" />
-      <Goose k="g-right-b" x={X(5)} y={Y(3)} w={u} h={2 * u} dir="l" />
+      {/* Inner 2u × 2u center macro-cell, subdivided into the frame + hearth.
+          Grid inside the center cell uses the same u = S/6 spacing so the
+          inner ring corners are s × s squares (u × u) and the plus-arms are
+          rectangles C × s (2u × u). */}
+      {/* 4 inner-ring accent squares (B) at the 4 corners of the center cell */}
+      <rect x={P(1)} y={P(1)} width={u} height={u} fill={acc} />
+      <rect x={P(2) + u} y={P(1)} width={u} height={u} fill={acc} />
+      <rect x={P(1)} y={P(2) + u} width={u} height={u} fill={acc} />
+      <rect x={P(2) + u} y={P(2) + u} width={u} height={u} fill={acc} />
 
-      {/* Inner ring: 4 B squares in the corners of the 4×4 inner area */}
-      <rect x={X(1)} y={Y(1)} width={u} height={u} fill={acc} />
-      <rect x={X(4)} y={Y(1)} width={u} height={u} fill={acc} />
-      <rect x={X(1)} y={Y(4)} width={u} height={u} fill={acc} />
-      <rect x={X(4)} y={Y(4)} width={u} height={u} fill={acc} />
+      {/* 4 frame rectangles (C) forming the plus around the hearth */}
+      <rect x={P(1) + u} y={P(1)} width={2 * u} height={u} fill={points} />
+      <rect x={P(1) + u} y={P(2) + u} width={2 * u} height={u} fill={points} />
+      <rect x={P(1)} y={P(1) + u} width={u} height={2 * u} fill={points} />
+      <rect x={P(2) + u} y={P(1) + u} width={u} height={2 * u} fill={points} />
 
-      {/* Cross frame — 4 Fabric C rectangles around the center */}
-      <rect x={X(2)} y={Y(1)} width={2 * u} height={u} fill={points} />
-      <rect x={X(2)} y={Y(4)} width={2 * u} height={u} fill={points} />
-      <rect x={X(1)} y={Y(2)} width={u} height={2 * u} fill={points} />
-      <rect x={X(4)} y={Y(2)} width={u} height={2 * u} fill={points} />
-
-      {/* Center 2u × 2u Fabric D square */}
-      <rect x={X(2)} y={Y(2)} width={2 * u} height={2 * u} fill={center} />
+      {/* Center 2u × 2u hearth (Fabric D) */}
+      <rect x={P(1) + u} y={P(1) + u} width={2 * u} height={2 * u} fill={center} />
 
       {debug && (
-        <g stroke="white" strokeWidth={0.5} opacity={0.35} fill="none">
-          {[1, 2, 3, 4, 5].map((k) => (
+        <g stroke="white" strokeWidth={0.75} opacity={0.5} fill="none">
+          {[1, 2].map((k) => (
             <g key={k}>
-              <line x1={k * u} y1={0} x2={k * u} y2={S} />
-              <line x1={0} y1={k * u} x2={S} y2={k * u} />
+              <line x1={P(k)} y1={0} x2={P(k)} y2={S} />
+              <line x1={0} y1={P(k)} x2={S} y2={P(k)} />
             </g>
           ))}
         </g>
@@ -1553,6 +1543,7 @@ function MapleStarBlock({
     </>
   );
 }
+
 
 
 

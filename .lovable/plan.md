@@ -1,63 +1,60 @@
 
-## Plan: Remove Woven Star, Add Card Trick
+## Goal
 
-### 1. Remove Woven Star completely
-- `src/lib/planner-store.ts` — remove `"woven-star"` from `PatternId` union.
-- `src/lib/patterns.ts` — remove the `woven-star` `PatternDef` entry and any pattern-list gates that reference it.
-- `src/lib/yardage.ts` — remove the `woven-star` branch and any references in shared gate lists.
-- `src/components/PatternDiagram.tsx`, `PatternThumb.tsx`, `QuiltLayoutPreview.tsx` — remove `case "woven-star"` rendering blocks and helpers used only by it (`triHst`/`triQst` variants specific to woven star).
-- `src/components/FabricRollIcon.tsx` — remove the `"woven-star": 5` entry in `PATTERN_DIFFICULTY`.
-- `scripts/audit-yardage.ts` — remove the two woven-star audit cases.
-- `src/components/__tests__/__snapshots__/pattern-renderers.test.tsx.snap` — regenerate (snapshot for woven-star will disappear automatically on re-run).
+Rebuild the Maple Star single-block renderer so it matches the reference image exactly:
 
-### 2. Add `card-trick` pattern
+1. Each of the 4 corner macro-cells is a **2u × 2u block of pure Fabric A** — no accent, no flip corner, no triangle intrudes.
+2. Each of the 4 edge macro-cells is a **2u × 2u flying-goose unit** where the **apex triangle is Fabric B (accent)** and the **two flanking triangles are Fabric A (background)** — the inverse of what ships today.
+3. All 4 star points are rotationally identical (one shared unit, rotated 0°/90°/180°/270°).
+4. Inner 3×3 macro area (center + frame + inner-ring squares) stays as-is.
 
-**Metadata**
-- `src/lib/planner-store.ts` — add `"card-trick"` to `PatternId`.
-- `src/lib/patterns.ts` — new `PatternDef`:
-  - `id: "card-trick"`, `name: "Card Trick"`, `hasMath: true`, `supportsSashing: true`, no `supportsAlternate`.
-  - Sections: Card A (default A), Card B (B), Card C (C), Card D (D), Background (E), Sashing (F), Border (G).
-  - Intro text noting the 3×3 grid, 4 on-point "cards" meeting at center, background visible only in corners.
-- `src/components/FabricRollIcon.tsx` — add `"card-trick": 4` (difficulty 4 — mixed HST + QST but well-scoped).
+## Files to change
 
-**Yardage math (`src/lib/yardage.ts`)**
-For a block with finished size `S`, unit `u = S/3`:
-- 4 corner HSTs (one per card A/B/C/D paired with background E): each HST unit uses one starting square of size `u + 0.875"`, cut once diagonally → 2 HSTs.
-  - Per block: 4 HST starter squares for Background (E), and 1 HST starter square for each of A/B/C/D.
-- 4 edge QST units (top-center, middle-right, bottom-center, middle-left): each edge cell is a 3-triangle unit = one full QST (u + 1.25" starter, cut twice diagonally = 4 quarter-triangles) contributes; per unit we need 1 background quarter + 1 quarter from each of two adjacent cards. Standard approach: 1 QST starter of Background + 1 QST starter each of the two neighbor cards, discarding excess (same as other QST patterns already in library).
-  - Per block edge QSTs total: 4 Background QST starters, and each card contributes to 2 edge units → 2 QST starters per card A/B/C/D (following the "one starter per quarter needed" convention already used in the codebase).
-- 1 center QST unit (4 quarters, one per card): 1 QST starter per card A/B/C/D (1 quarter kept from each, standard convention).
-- Total per block via `addSquares` helper:
-  - A: 1 HST starter (u+0.875) + 3 QST starters (u+1.25)
-  - B: same
-  - C: same
-  - D: same
-  - E: 4 HST starters + 4 QST starters
-- Route everything through `addSquares` / `addRails` per the memory rule. Wire sashing/border support identically to `nine-patch`.
-- Add `card-trick` to any shared "supports sashing/border" gate lists.
+### `src/components/PatternDiagram.tsx` — `MapleStarBlock`
 
-**Rendering**
-Use a 300×300 base viewBox, cells 100×100, exactly as user described. Add helpers only if needed (or reuse `triHst`/`triQst` primitives from PatternDiagram).
+Switch from a 6u grid with 1u corners + narrow geese to a **true unequal 3×3 grid** where the three columns/rows are `[2u, 2u, 2u]` (so the block is still 6u total, but the macro cells are 2u each). Then:
 
-- `PatternThumb.tsx` — case `"card-trick"`: mini version painting all 9 cells with the exact triangle vertices from spec.
-- `PatternDiagram.tsx` — case `"card-trick"`: full renderer using `assignments` for A/B/C/D/E. Draw the 9 cells:
-  - Corners (1,1)(1,3)(3,1)(3,3): HSTs with background + card diamond half.
-  - Edges (1,2)(2,1)(2,3)(3,2): 3-triangle QST units with 1 background point + 2 card halves.
-  - Center (2,2): 4 card triangles meeting at (150,150), using exact vertices from spec (A top, B right, C bottom, D left).
-  - Thin subtle grid lines to match other patterns.
-- `QuiltLayoutPreview.tsx` — case `"card-trick"`: tile the block without rotation across the grid; supports sashing + border like nine-patch.
+- **4 corners (2u × 2u):** single `<rect fill={bg}>`. No geese, no flips.
+- **4 edges (2u × 2u):** one shared `StarPoint` sub-component that renders a 2u × 2u square as:
+  - `<rect fill={bg}>` background,
+  - one `<polygon fill={acc}>` apex triangle from the two BACK corners (edge farthest from block center) meeting at the midpoint of the OUTER edge.
+  - Rendered with an SVG `transform="rotate(...)"` per side so top/right/bottom/left are literally the same unit rotated.
+- **Center 3×3 inner region** (columns/rows 2u..4u):
+  - 4 accent squares (B) at the inner-ring corners (unchanged fill, but repositioned to the new grid),
+  - 4 frame rectangles (C) as the plus arms (repositioned),
+  - 1 center square (D) at the true center (repositioned).
+- Debug gridline overlay stays gated on `debug` prop, drawing the 3×3 macro grid at 2u intervals so the corner boundary is obvious during verification.
 
-**Audit + tests**
-- `scripts/audit-yardage.ts` — add card-trick cases:
-  - Baseline (no sashing, no border): assert exact HST/QST starter counts per fabric per block × N blocks.
-  - With sashing: assert sashing yardage added correctly.
-- Snapshots refresh automatically via `bun run verify`.
+### `src/lib/yardage.ts` — Maple Star branch
 
-### 3. Verification
-- `bun run verify` (tests + `bun audit:math` + build).
-- Manual smoke via Playwright: pick Card Trick → Step 2 (size, block, border, sashing available) → Step 3 diagram matches reference (4 on-point diamonds, background only in 4 corners) → full-quilt preview tiles cleanly → assign photos to all 5 fabrics → shopping list shows correct per-fabric yardage split for A/B/C/D/E.
+Piece count per block stays the same shape but the semantics change slightly, so the cutting notes need to match the new geometry:
 
-### Technical notes
-- QST quarter-counting: existing patterns (Ohio Star, Sawtooth Star) already use the "1 starter square per needed quarter, discard excess" convention. Card Trick follows that convention — no new math primitive required.
-- Rotational symmetry: Card Trick has 4-fold rotational symmetry around block center but the card labels change under rotation, so no `supportsAlternate` — tile without rotation.
-- Sashing default width reuses global default (2"), same as nine-patch.
+- Fabric A: **4 corner squares at C × C (2u × 2u finished)** + **8 flip-corner squares at s × s (1u × 1u finished)** — the flip squares now belong to A (they become the background flanks of the goose), replacing the previous 8 goose-base rectangles.
+- Fabric B: **1 apex-flip square at s × s (1u × 1u finished) × … actually per-goose piece count is: 1 rectangle 2u × 1u (B) + 2 flip squares 1u × 1u (A).** So per block:
+  - Fabric B: 4 inner-ring squares (s × s) + 4 goose-base rectangles (2u × 1u, i.e. C × s).
+  - Fabric A: 4 corner squares (C × C) + 8 flip-corner squares (s × s).
+- Fabric C: 4 frame rectangles (C × s), unchanged.
+- Fabric D: 1 center square (C × C), unchanged.
+
+Update the two summary `notes.push(...)` sentences and the flying-geese instruction sentence to reflect: "each goose = 1 Fabric B rectangle + 2 Fabric A flip corners; apex points OUTWARD (toward the block edge), not toward the center."
+
+No changes to sashing/border logic.
+
+### No changes needed
+
+- `src/lib/patterns.ts` — section metadata and defaults stay the same.
+- `src/components/PatternThumb.tsx` and `src/components/QuiltLayoutPreview.tsx` — they call `MapleStarBlock`, so fixing it fixes them too.
+- Yardage totals per fabric letter don't shift in a way that affects the shopping list *count* of yards materially (piece counts change but same fabrics), but the cut sizes and notes must be corrected.
+
+## Verification sequence (before declaring done)
+
+1. Render `MapleStarBlock` with `debug` gridlines on and confirm each 2u×2u corner cell is 100% `bg`-filled — no other fabric color crosses the corner cell boundary.
+2. Render the clean single-block `PatternDiagram` at 280px next to image-155 and visually confirm: 4 sage corners, 4 orange apex triangles pointing outward, orange inner ring (4 B squares + 4 C rectangles), red center.
+3. Confirm all 4 star points are rotational copies of one unit (visual symmetry check).
+4. Render `QuiltLayoutPreview` at 3×4 to confirm the tiled quilt reads correctly and star points don't collide across neighboring blocks.
+5. Run `bun audit:math` per Core memory rule after touching `yardage.ts`.
+
+## Technical notes
+
+- The "true 3×3 macro grid at 2u each" is just a labeling change — the block is still 6u total, so no math elsewhere shifts. The `s6 = size/6` scale factor in yardage stays, and `sCut` (s + seam) and `CCut` (2s + seam) still describe the same finished dimensions. Only the *assignment* of which pieces belong to which fabric flips for the goose flanks.
+- Using SVG `<g transform="rotate(deg, cx, cy)">` around a single `StarPoint` component eliminates the risk of per-side geometry drift that caused the earlier "top/bottom correct but left/right inverted" bug class.
