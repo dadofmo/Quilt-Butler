@@ -1472,27 +1472,20 @@ function MapleStarBlock({
   const M = 2 * u; // macro-cell side
   const P = (i: number) => i * M; // macro-grid coordinate (i = 0..3)
 
-  // One canonical flying-goose star-point unit, drawn as a 2u × 2u (M × M)
-  // square with the apex pointing UP (out toward the top edge of the block).
-  // Base = bg (Fabric A background); apex triangle = acc (Fabric B accent).
-  // Apex vertex sits at the midpoint of the OUTER (top) edge; the two back
-  // corners of the accent triangle sit at the bottom-left and bottom-right
-  // corners of the unit — i.e. the flip corners of the goose are the two
-  // background triangles flanking the apex.
+  // Canonical star-point unit: 1u wide × 2u tall rectangle with a tall,
+  // narrow accent apex triangle at the SHORT edge (top), flanked by two
+  // background triangles that fill the remainder. Apex points UP.
+  // (This is a Half-Rectangle-Triangle / HRT-style point — 1:2 aspect,
+  //  which is what the reference shows: 2 sharp peaks per side = 8 total.)
   const StarPoint = ({ x, y, rot }: { x: number; y: number; rot: 0 | 90 | 180 | 270 }) => {
-    // Draw locally at (0,0)-(M,M), then translate + rotate around the unit center.
-    const cx = x + M / 2;
-    const cy = y + M / 2;
+    // Local frame: 1u wide × 2u tall, rotated about its own center.
+    const w = u;
+    const h = 2 * u;
     return (
-      <g transform={`translate(${x} ${y}) rotate(${rot} ${M / 2} ${M / 2})`}>
-        <rect x={0} y={0} width={M} height={M} fill={bg} />
-        {/* Apex triangle: apex at top-edge midpoint, back corners at bottom L/R. */}
-        <polygon
-          points={`${M / 2},0 ${M},${M} 0,${M}`}
-          fill={acc}
-        />
-        {/* Suppress unused-var lint for cx/cy — kept for future debugging. */}
-        {debug && <circle cx={cx - x} cy={cy - y} r={0} fill="none" />}
+      <g transform={`translate(${x} ${y}) rotate(${rot} ${w / 2} ${h / 2})`}>
+        <rect x={0} y={0} width={w} height={h} fill={bg} />
+        {/* Apex triangle: apex at top-mid, back corners at bottom L/R. */}
+        <polygon points={`${w / 2},0 ${w},${h} 0,${h}`} fill={acc} />
       </g>
     );
   };
@@ -1505,11 +1498,29 @@ function MapleStarBlock({
       <rect x={P(0)} y={P(2)} width={M} height={M} fill={bg} />
       <rect x={P(2)} y={P(2)} width={M} height={M} fill={bg} />
 
-      {/* 4 edge star points — same unit, rotated per side, apex OUTWARD. */}
-      <StarPoint x={P(1)} y={P(0)} rot={0} />   {/* top:    apex up */}
-      <StarPoint x={P(2)} y={P(1)} rot={90} />  {/* right:  apex right */}
-      <StarPoint x={P(1)} y={P(2)} rot={180} /> {/* bottom: apex down */}
-      <StarPoint x={P(0)} y={P(1)} rot={270} /> {/* left:   apex left */}
+      {/* 8 edge star points — 2 per side, all apex-OUTWARD. Each unit is
+          1u × 2u; on top/bottom edges the 2 units sit side-by-side (each
+          spans y=0..2u); on left/right edges the 2 units are rotated 90° and
+          sit stacked vertically along the edge (each rotated unit occupies a
+          2u × 1u footprint). Layout is symmetric so all 4 sides look the
+          same, differing only by rotation. */}
+      {/* TOP edge — 2 apex-up points inside the top-middle 2u × 2u cell */}
+      <StarPoint x={P(1)} y={P(0)} rot={0} />
+      <StarPoint x={P(1) + u} y={P(0)} rot={0} />
+      {/* BOTTOM edge — 2 apex-down points inside the bottom-middle 2u × 2u cell */}
+      <StarPoint x={P(1)} y={P(2)} rot={180} />
+      <StarPoint x={P(1) + u} y={P(2)} rot={180} />
+      {/* LEFT edge — 2 apex-left points inside the left-middle 2u × 2u cell.
+          After 270° rotation the 1u×2u local frame occupies a 2u×1u screen
+          footprint, so the two points stack vertically. The rotation is
+          about the local center, so we offset by u/2 on each axis so the
+          rotated footprint lands where we want it. */}
+      <StarPoint x={P(0) + u / 2 - u / 2} y={P(1) + u / 2 - u} rot={270} />
+      <StarPoint x={P(0) + u / 2 - u / 2} y={P(1) + u + u / 2 - u} rot={270} />
+      {/* RIGHT edge — 2 apex-right points */}
+      <StarPoint x={P(2) + u / 2 + u / 2} y={P(1) + u / 2 - u} rot={90} />
+      <StarPoint x={P(2) + u / 2 + u / 2} y={P(1) + u + u / 2 - u} rot={90} />
+
 
       {/* Inner 2u × 2u center macro-cell, subdivided into the frame + hearth.
           Grid inside the center cell uses the same u = S/6 spacing so the
