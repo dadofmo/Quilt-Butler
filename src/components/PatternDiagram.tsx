@@ -1472,30 +1472,17 @@ function MapleStarBlock({
   const M = 2 * u; // macro-cell side
   const P = (i: number) => i * M; // macro-grid coordinate (i = 0..3)
 
-  // One canonical flying-goose star-point unit, drawn as a 2u × 2u (M × M)
-  // square with the apex pointing UP (out toward the top edge of the block).
-  // Base = bg (Fabric A background); apex triangle = acc (Fabric B accent).
-  // Apex vertex sits at the midpoint of the OUTER (top) edge; the two back
-  // corners of the accent triangle sit at the bottom-left and bottom-right
-  // corners of the unit — i.e. the flip corners of the goose are the two
-  // background triangles flanking the apex.
-  const StarPoint = ({ x, y, rot }: { x: number; y: number; rot: 0 | 90 | 180 | 270 }) => {
-    // Draw locally at (0,0)-(M,M), then translate + rotate around the unit center.
-    const cx = x + M / 2;
-    const cy = y + M / 2;
-    return (
-      <g transform={`translate(${x} ${y}) rotate(${rot} ${M / 2} ${M / 2})`}>
-        <rect x={0} y={0} width={M} height={M} fill={bg} />
-        {/* Apex triangle: apex at top-edge midpoint, back corners at bottom L/R. */}
-        <polygon
-          points={`${M / 2},0 ${M},${M} 0,${M}`}
-          fill={acc}
-        />
-        {/* Suppress unused-var lint for cx/cy — kept for future debugging. */}
-        {debug && <circle cx={cx - x} cy={cy - y} r={0} fill="none" />}
-      </g>
-    );
-  };
+  // 8 star-point apex triangles — 2 per side. Each triangle is tall & narrow
+  // (1u base × 2u height) so 2 fit within each 2u-wide edge macro-cell, with
+  // the apex pointing OUTWARD toward the block edge. Base of every triangle
+  // sits on the inner boundary of the corner (i.e. at the edge of the middle
+  // third of the block), matching the reference "two sharp peaks per side".
+  //
+  // Background (bg) is painted as a solid layer first via the edge-cell rects
+  // below; each apex triangle is then drawn on top in the accent (acc) fabric.
+  const apex = (pts: string, key: string) => (
+    <polygon key={key} points={pts} fill={acc} />
+  );
 
   return (
     <>
@@ -1505,11 +1492,30 @@ function MapleStarBlock({
       <rect x={P(0)} y={P(2)} width={M} height={M} fill={bg} />
       <rect x={P(2)} y={P(2)} width={M} height={M} fill={bg} />
 
-      {/* 4 edge star points — same unit, rotated per side, apex OUTWARD. */}
-      <StarPoint x={P(1)} y={P(0)} rot={0} />   {/* top:    apex up */}
-      <StarPoint x={P(2)} y={P(1)} rot={90} />  {/* right:  apex right */}
-      <StarPoint x={P(1)} y={P(2)} rot={180} /> {/* bottom: apex down */}
-      <StarPoint x={P(0)} y={P(1)} rot={270} /> {/* left:   apex left */}
+      {/* 4 edge macro-cells — filled with bg first so the flanks of each
+          apex triangle read as background. */}
+      <rect x={P(1)} y={P(0)} width={M} height={M} fill={bg} />
+      <rect x={P(1)} y={P(2)} width={M} height={M} fill={bg} />
+      <rect x={P(0)} y={P(1)} width={M} height={M} fill={bg} />
+      <rect x={P(2)} y={P(1)} width={M} height={M} fill={bg} />
+
+      {/* TOP edge: 2 apex triangles pointing UP (apex on top block edge). */}
+      {apex(`${P(1) + u / 2},${P(0)} ${P(1)},${P(1)} ${P(1) + u},${P(1)}`, "top-l")}
+      {apex(`${P(1) + u + u / 2},${P(0)} ${P(1) + u},${P(1)} ${P(2)},${P(1)}`, "top-r")}
+
+      {/* BOTTOM edge: 2 apex triangles pointing DOWN (apex on bottom edge). */}
+      {apex(`${P(1) + u / 2},${P(3)} ${P(1)},${P(2)} ${P(1) + u},${P(2)}`, "bot-l")}
+      {apex(`${P(1) + u + u / 2},${P(3)} ${P(1) + u},${P(2)} ${P(2)},${P(2)}`, "bot-r")}
+
+      {/* LEFT edge: 2 apex triangles pointing LEFT (apex on left block edge). */}
+      {apex(`${P(0)},${P(1) + u / 2} ${P(1)},${P(1)} ${P(1)},${P(1) + u}`, "lft-t")}
+      {apex(`${P(0)},${P(1) + u + u / 2} ${P(1)},${P(1) + u} ${P(1)},${P(2)}`, "lft-b")}
+
+      {/* RIGHT edge: 2 apex triangles pointing RIGHT (apex on right edge). */}
+      {apex(`${P(3)},${P(1) + u / 2} ${P(2)},${P(1)} ${P(2)},${P(1) + u}`, "rgt-t")}
+      {apex(`${P(3)},${P(1) + u + u / 2} ${P(2)},${P(1) + u} ${P(2)},${P(2)}`, "rgt-b")}
+
+
 
       {/* Inner 2u × 2u center macro-cell, subdivided into the frame + hearth.
           Grid inside the center cell uses the same u = S/6 spacing so the
