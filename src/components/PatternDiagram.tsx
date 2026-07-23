@@ -1435,20 +1435,11 @@ function CabinInTheCottonBlock({
 
 
 /**
- * Shared renderer for "Maple Star" — a 3×3 macro-grid star with an unequal
- * 6×6 unit sub-grid (columns 1,2,4,5 = width s; column 3 = width 2s = C).
- * All piecing is squares and rectangles; the 8 star-point flying geese use
- * Fabric B as stitch-and-flip corners on Fabric A rectangles.
- *
- * Pieces per block (matches spec):
- *   - 1× D center square (C × C, i.e. 2s × 2s)
- *   - 4× C rectangles (s × C) framing the center in a plus
- *   - 8× A rectangles (s × C) as flying-geese bases (2 per side)
- *   - 4× A squares (s × s) at the 4 block corners
- *   - 12× B squares (s × s): 4 fill inner-ring corners; 8 are used as
- *     stitch-and-flip corners on the 8 goose bases (each goose gets 2 flips
- *     to shape the point). We render the flips as triangles directly on the
- *     goose rectangle so the geometry reads correctly at preview scale.
+ * Shared renderer for "Maple Star" — the reference uses an unequal 5×5 grid
+ * with track sizes [s, s, C, s, s], where C = 2s (6s total). Each side point is
+ * the same 2s × 2s unit: a top flying-geese cap (Fabric A rectangle with two
+ * Fabric B flip corners) plus a Fabric C shaft. The right, bottom, and left
+ * points are rotations of that single top-point unit around the true center.
  */
 function MapleStarBlock({
   size,
@@ -1466,82 +1457,59 @@ function MapleStarBlock({
   debug?: boolean;
 }) {
   const S = size;
-  // True 3×3 macro grid — each macro cell is 2u × 2u where u = S/6.
-  // Columns/rows at 0, 2u, 4u, 6u.
   const u = S / 6;
-  const M = 2 * u; // macro-cell side
-  const P = (i: number) => i * M; // macro-grid coordinate (i = 0..3)
+  const cx = 3 * u;
+  const cy = 3 * u;
+  const U = (n: number) => n * u;
+  const rect = (x: number, y: number, w: number, h: number, fill: string, key: string) => (
+    <rect key={key} x={U(x)} y={U(y)} width={U(w)} height={U(h)} fill={fill} />
+  );
 
-  // 8 star-point apex triangles — 2 per side. Each triangle is tall & narrow
-  // (1u base × 2u height) so 2 fit within each 2u-wide edge macro-cell, with
-  // the apex pointing OUTWARD toward the block edge. Base of every triangle
-  // sits on the inner boundary of the corner (i.e. at the edge of the middle
-  // third of the block), matching the reference "two sharp peaks per side".
-  //
-  // Background (bg) is painted as a solid layer first via the edge-cell rects
-  // below; each apex triangle is then drawn on top in the accent (acc) fabric.
-  const apex = (pts: string, key: string) => (
-    <polygon key={key} points={pts} fill={acc} />
+  const pointUnit = (rotation: number, key: string) => (
+    <g key={key} transform={`rotate(${rotation} ${cx} ${cy})`}>
+      {/* Flying-geese cap: Fabric A base with two Fabric B stitch-and-flip corners. */}
+      {rect(2, 0, 2, 1, bg, `${key}-cap`)}
+      <polygon points={`${U(2)},${U(0)} ${U(3)},${U(1)} ${U(2)},${U(1)}`} fill={acc} />
+      <polygon points={`${U(4)},${U(0)} ${U(4)},${U(1)} ${U(3)},${U(1)}`} fill={acc} />
+      {/* Fabric C shaft directly below the cap. */}
+      {rect(2, 1, 2, 1, points, `${key}-shaft`)}
+    </g>
   );
 
   return (
     <>
-      {/* 4 corners — pure Fabric A, 2u × 2u each. */}
-      <rect x={P(0)} y={P(0)} width={M} height={M} fill={bg} />
-      <rect x={P(2)} y={P(0)} width={M} height={M} fill={bg} />
-      <rect x={P(0)} y={P(2)} width={M} height={M} fill={bg} />
-      <rect x={P(2)} y={P(2)} width={M} height={M} fill={bg} />
+      {/* Fabric A foundation/background pieces. */}
+      <rect x={0} y={0} width={S} height={S} fill={bg} />
+      {rect(0, 0, 2, 1, bg, "bg-top-left")}
+      {rect(4, 0, 2, 1, bg, "bg-top-right")}
+      {rect(0, 1, 1, 1, bg, "bg-upper-left-square")}
+      {rect(5, 1, 1, 1, bg, "bg-upper-right-square")}
+      {rect(0, 4, 1, 1, bg, "bg-lower-left-square")}
+      {rect(5, 4, 1, 1, bg, "bg-lower-right-square")}
+      {rect(0, 5, 2, 1, bg, "bg-bottom-left")}
+      {rect(4, 5, 2, 1, bg, "bg-bottom-right")}
 
-      {/* 4 edge macro-cells — filled with bg first so the flanks of each
-          apex triangle read as background. */}
-      <rect x={P(1)} y={P(0)} width={M} height={M} fill={bg} />
-      <rect x={P(1)} y={P(2)} width={M} height={M} fill={bg} />
-      <rect x={P(0)} y={P(1)} width={M} height={M} fill={bg} />
-      <rect x={P(2)} y={P(1)} width={M} height={M} fill={bg} />
+      {/* 4 identical star-point units, derived from the top unit by rotation. */}
+      {pointUnit(0, "point-top")}
+      {pointUnit(90, "point-right")}
+      {pointUnit(180, "point-bottom")}
+      {pointUnit(270, "point-left")}
 
-      {/* TOP edge: 2 apex triangles pointing UP (apex on top block edge). */}
-      {apex(`${P(1) + u / 2},${P(0)} ${P(1)},${P(1)} ${P(1) + u},${P(1)}`, "top-l")}
-      {apex(`${P(1) + u + u / 2},${P(0)} ${P(1) + u},${P(1)} ${P(2)},${P(1)}`, "top-r")}
+      {/* Fabric B inner-ring squares. */}
+      {rect(1, 1, 1, 1, acc, "inner-tl")}
+      {rect(4, 1, 1, 1, acc, "inner-tr")}
+      {rect(1, 4, 1, 1, acc, "inner-bl")}
+      {rect(4, 4, 1, 1, acc, "inner-br")}
 
-      {/* BOTTOM edge: 2 apex triangles pointing DOWN (apex on bottom edge). */}
-      {apex(`${P(1) + u / 2},${P(3)} ${P(1)},${P(2)} ${P(1) + u},${P(2)}`, "bot-l")}
-      {apex(`${P(1) + u + u / 2},${P(3)} ${P(1) + u},${P(2)} ${P(2)},${P(2)}`, "bot-r")}
-
-      {/* LEFT edge: 2 apex triangles pointing LEFT (apex on left block edge). */}
-      {apex(`${P(0)},${P(1) + u / 2} ${P(1)},${P(1)} ${P(1)},${P(1) + u}`, "lft-t")}
-      {apex(`${P(0)},${P(1) + u + u / 2} ${P(1)},${P(1) + u} ${P(1)},${P(2)}`, "lft-b")}
-
-      {/* RIGHT edge: 2 apex triangles pointing RIGHT (apex on right edge). */}
-      {apex(`${P(3)},${P(1) + u / 2} ${P(2)},${P(1)} ${P(2)},${P(1) + u}`, "rgt-t")}
-      {apex(`${P(3)},${P(1) + u + u / 2} ${P(2)},${P(1) + u} ${P(2)},${P(2)}`, "rgt-b")}
-
-
-
-      {/* Inner 2u × 2u center macro-cell, subdivided into the frame + hearth.
-          Grid inside the center cell uses the same u = S/6 spacing so the
-          inner ring corners are s × s squares (u × u) and the plus-arms are
-          rectangles C × s (2u × u). */}
-      {/* 4 inner-ring accent squares (B) at the 4 corners of the center cell */}
-      <rect x={P(1)} y={P(1)} width={u} height={u} fill={acc} />
-      <rect x={P(2) + u} y={P(1)} width={u} height={u} fill={acc} />
-      <rect x={P(1)} y={P(2) + u} width={u} height={u} fill={acc} />
-      <rect x={P(2) + u} y={P(2) + u} width={u} height={u} fill={acc} />
-
-      {/* 4 frame rectangles (C) forming the plus around the hearth */}
-      <rect x={P(1) + u} y={P(1)} width={2 * u} height={u} fill={points} />
-      <rect x={P(1) + u} y={P(2) + u} width={2 * u} height={u} fill={points} />
-      <rect x={P(1)} y={P(1) + u} width={u} height={2 * u} fill={points} />
-      <rect x={P(2) + u} y={P(1) + u} width={u} height={2 * u} fill={points} />
-
-      {/* Center 2u × 2u hearth (Fabric D) */}
-      <rect x={P(1) + u} y={P(1) + u} width={2 * u} height={2 * u} fill={center} />
+      {/* Fabric D center hearth. */}
+      {rect(2, 2, 2, 2, center, "center")}
 
       {debug && (
-        <g stroke="white" strokeWidth={0.75} opacity={0.5} fill="none">
-          {[1, 2].map((k) => (
+        <g stroke="var(--foreground)" strokeWidth={0.75} opacity={0.45} fill="none">
+          {[1, 2, 4, 5].map((k) => (
             <g key={k}>
-              <line x1={P(k)} y1={0} x2={P(k)} y2={S} />
-              <line x1={0} y1={P(k)} x2={S} y2={P(k)} />
+              <line x1={U(k)} y1={0} x2={U(k)} y2={S} />
+              <line x1={0} y1={U(k)} x2={S} y2={U(k)} />
             </g>
           ))}
         </g>
