@@ -992,25 +992,25 @@ export const PATTERNS: PatternDef[] = [
     name: "Maple Star",
     hasMath: true,
     intro:
-      "Maple Star is a 3×3 macro-grid built from squares and rectangles — no pre-cut triangles for the star points, just stitch-and-flip corners. The block uses an unequal 5-column, 5-row grid where columns 1, 2, 4, 5 are narrow (width s) and column 3 is wider (width C); the same pattern applies to the row heights. A large Fabric D square sits at the center, four Fabric C rectangles frame it in a plus, eight Fabric A rectangles form the flying-geese star points with Fabric B flip-corners, and Fabric B squares fill the inner ring.",
+      "Maple Star is built from an unequal 5-column, 5-row grid where columns 1, 2, 4, and 5 are narrow (width s) and column 3 is wider (width C = 2s); the same pattern applies to the rows. A large Fabric D square sits at the center, four Fabric C rectangles form the shafts/frame, Fabric A fills the background rectangles and flying-geese cap bases, and Fabric B supplies the inner squares plus stitch-and-flip corners for the four side points.",
     sections: [
       {
         id: "bg",
         label: "Background (Fabric A)",
         defaultFabric: "A",
-        hint: "The dominant background fabric — used for the 4 corner squares and the 8 flying-geese bases that form the star points. Usually the calmest fabric so the star reads clearly.",
+        hint: "The dominant background fabric — used for 4 small squares, 4 outer rectangles, and 4 flying-geese cap bases. Usually the calmest fabric so the star reads clearly.",
       },
       {
         id: "accent",
         label: "Accent squares & flip corners (Fabric B)",
         defaultFabric: "B",
-        hint: "The 12 accent squares — 4 fill the inner-ring corners and 8 are used as stitch-and-flip corners on the goose bases to form the star points. Pick a strong contrast with Fabric A.",
+        hint: "The 12 accent squares — 4 fill the inner-ring corners and 8 are used as stitch-and-flip corners on the goose cap bases. Pick a strong contrast with Fabric A.",
       },
       {
         id: "points",
         label: "Cross frame rectangles (Fabric C)",
         defaultFabric: "C",
-        hint: "The 4 rectangles that frame the center square in a plus — top, bottom, left, right. Usually a mid-tone that ties the background and center together.",
+        hint: "The 4 rectangles that frame the center square and act as the shafts below each side point — top, bottom, left, right.",
       },
       {
         id: "center",

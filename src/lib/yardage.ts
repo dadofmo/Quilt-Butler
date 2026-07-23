@@ -2363,16 +2363,16 @@ export function calculateYardage(s: PlannerState): CalcResult {
       );
     }
   } else if (s.pattern === "maple-star") {
-    // Maple Star: 3×3 macro grid on an unequal 6×6 unit sub-grid where the
-    // middle column and middle row are 2 units wide (C = 2s). All piecing is
-    // squares and rectangles — flying-geese star points are stitch-and-flip.
+    // Maple Star: unequal 5×5 grid with track sizes [s, s, C, s, s], where
+    // C = 2s. All piecing is squares and rectangles — the 4 side flying-geese
+    // caps are made with stitch-and-flip corners, not pre-cut triangles.
     // Per block:
-    //   Fabric A (bg): 4 corner squares (s×s) + 8 goose bases (s×C rects, i.e.
-    //                  2s × s — the long side is 2s = C).
-    //   Fabric B (accent): 4 inner-ring squares (s×s) + 8 stitch-and-flip
-    //                      corners on the goose bases (2 flips × 8 geese = 16
-    //                      B corners = 16 B squares s×s).
-    //   Fabric C (frame): 4 rectangles (s×C) framing the center in a plus.
+    //   Fabric A (bg): 4 small squares (s×s) + 8 rectangles (s×C). Four of
+    //                  those rectangles are outer background pieces; four are
+    //                  flying-geese cap bases.
+    //   Fabric B (accent): 12 small squares (s×s). Four are inner-ring squares;
+    //                      eight are stitch-and-flip corners for the 4 caps.
+    //   Fabric C (frame): 4 rectangles (s×C) forming the shafts/frame.
     //   Fabric D (center): 1 large square C×C (2s × 2s).
     const s6 = s.blockSize / 6;   // 1 sub-unit (finished)
     const sCut = s6 + SEAM;        // small square / short side cut
@@ -2393,15 +2393,14 @@ export function calculateYardage(s: PlannerState): CalcResult {
       b.sq_C += sq_C;
       b.rect += rect;
     };
-    // Per block (8 star points — 2 per side):
-    //   A: 4 corner squares (C × C) + 16 flip-corner squares (s × s) — 2
-    //      background flanks per star point × 8 points.
-    //   B: 4 inner-ring squares (s × s) + 8 goose-base rectangles (2u × 1u,
-    //      i.e. C × s) — one per star point.
-    //   C: 4 frame rectangles (C × s).
+    // Per block:
+    //   A: 4 small squares (s × s) + 8 rectangles (C × s): 4 outer background
+    //      rectangles and 4 flying-geese cap bases.
+    //   B: 12 small squares (s × s): 4 inner-ring squares + 8 cap flip corners.
+    //   C: 4 frame/shaft rectangles (C × s).
     //   D: 1 center large square (C × C).
-    add(bgFab, 16 * blockCount, 4 * blockCount, 0);
-    add(accFab, 4 * blockCount, 0, 8 * blockCount);
+    add(bgFab, 4 * blockCount, 0, 8 * blockCount);
+    add(accFab, 12 * blockCount, 0, 0);
     add(framFab, 0, 0, 4 * blockCount);
     add(centFab, 0, 1 * blockCount, 0);
 
@@ -2420,16 +2419,16 @@ export function calculateYardage(s: PlannerState): CalcResult {
     }
 
     notes.push(
-      `Each Maple Star block is a 3×3 macro grid (each macro cell ${(2 * s6).toFixed(2)}" × ${(2 * s6).toFixed(2)}" finished). The 4 corner cells are pure Fabric ${bgFab}. Each of the 4 edge cells contains 2 tall, narrow flying-goose star points (8 total around the block) whose apex triangle (Fabric ${accFab}) points OUTWARD toward the block edge and is flanked by 2 Fabric ${bgFab} background triangles. The center cell holds a 4-square Fabric ${accFab} inner ring, a plus of 4 Fabric ${framFab} frame rectangles, and a Fabric ${centFab} hearth. Per block cut: 4 Fabric ${bgFab} corner squares at ${CCut.toFixed(2)}" × ${CCut.toFixed(2)}"; 16 Fabric ${bgFab} flip-corner squares at ${sCut.toFixed(2)}" × ${sCut.toFixed(2)}"; 4 Fabric ${accFab} inner-ring squares at ${sCut.toFixed(2)}" × ${sCut.toFixed(2)}"; 8 Fabric ${accFab} goose-base rectangles at ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}"; 4 Fabric ${framFab} frame rectangles at ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}"; 1 Fabric ${centFab} hearth at ${CCut.toFixed(2)}" × ${CCut.toFixed(2)}".`,
+      `Each Maple Star block uses an unequal 5×5 grid with track sizes s, s, C, s, s (C = 2s). The side points are 4 identical units rotated around the center: each unit has 1 Fabric ${bgFab} rectangle cap, 2 Fabric ${accFab} stitch-and-flip corner squares, and 1 Fabric ${framFab} shaft rectangle. Per block cut: 4 Fabric ${bgFab} small squares at ${sCut.toFixed(2)}" × ${sCut.toFixed(2)}"; 8 Fabric ${bgFab} rectangles at ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}" (4 outer background rectangles + 4 goose cap bases); 12 Fabric ${accFab} small squares at ${sCut.toFixed(2)}" × ${sCut.toFixed(2)}" (4 inner squares + 8 flip corners); 4 Fabric ${framFab} frame/shaft rectangles at ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}"; 1 Fabric ${centFab} hearth at ${CCut.toFixed(2)}" × ${CCut.toFixed(2)}".`,
     );
     notes.push(
-      `Across all ${blockCount} blocks: Fabric ${bgFab} = ${4 * blockCount} large squares + ${16 * blockCount} small squares; Fabric ${accFab} = ${4 * blockCount} small squares + ${8 * blockCount} rectangles; Fabric ${framFab} = ${4 * blockCount} rectangles; Fabric ${centFab} = ${blockCount} large squares.`,
+      `Across all ${blockCount} blocks: Fabric ${bgFab} = ${4 * blockCount} small squares + ${8 * blockCount} rectangles; Fabric ${accFab} = ${12 * blockCount} small squares; Fabric ${framFab} = ${4 * blockCount} rectangles; Fabric ${centFab} = ${blockCount} large square.`,
     );
     notes.push(
-      `Flying-geese star points (stitch-and-flip): each of the 8 points per block = 1 Fabric ${accFab} rectangle + 2 Fabric ${bgFab} small squares. Draw a diagonal on the back of each Fabric ${bgFab} square, place it right-sides-together over one short end of the Fabric ${accFab} rectangle so the drawn line runs from an outer corner into the rectangle, sew ON the line, trim the outer corner to a 1/4" seam, and press the small background triangle open. Repeat on the opposite short end so the goose has 2 Fabric ${bgFab} flip corners flanking a Fabric ${accFab} apex triangle. All 8 geese point OUTWARD (apex toward the block edge). Note: the finished star point is oriented with its 2u dimension pointing outward and its 1u dimension along the edge — 2 points sit side-by-side along each side of the block.`,
+      `Flying-geese caps (stitch-and-flip): each of the 4 caps per block = 1 Fabric ${bgFab} rectangle + 2 Fabric ${accFab} small squares. Draw a diagonal on the back of each Fabric ${accFab} square, place one square right-sides-together over each end of the Fabric ${bgFab} rectangle, sew ON the marked lines so the two seams meet at the middle of the inner edge, trim the outer corners to 1/4" seams, and press the Fabric ${accFab} triangles open. The top cap has a Fabric ${bgFab} triangle pointing down between two Fabric ${accFab} triangles; rotate that same cap for the right, bottom, and left sides.`,
     );
     notes.push(
-      `Maple Star assembly: build as a 3×3 macro grid. The 4 corner units are single Fabric ${bgFab} squares (${CCut.toFixed(2)}"). Each of the 4 edge units is a 2u × 2u square containing 2 flying-geese star points sewn side-by-side (or end-to-end for the vertical sides), apexes pointing outward. The center unit is a 3×3 mini-grid of the 4 inner-ring Fabric ${accFab} squares (corners), 4 Fabric ${framFab} frame rectangles (edges of the mini-grid), and the Fabric ${centFab} hearth (middle). Sew as 3 macro-rows top-to-bottom, then join the rows with scant 1/4" seams. Keep every block in the same orientation across the quilt so the stars line up.`,
+      `Maple Star assembly: arrange the pieces in 5 rows: row 1 = Fabric ${bgFab} rectangle, top flying-geese cap, Fabric ${bgFab} rectangle; row 2 = Fabric ${bgFab} square, Fabric ${accFab} square, Fabric ${framFab} rectangle, Fabric ${accFab} square, Fabric ${bgFab} square; row 3 = left rotated cap, Fabric ${framFab} rectangle, Fabric ${centFab} square, Fabric ${framFab} rectangle, right rotated cap; row 4 repeats row 2; row 5 = Fabric ${bgFab} rectangle, bottom rotated cap, Fabric ${bgFab} rectangle. Sew each row, then join the 5 rows together.`,
     );
 
 
