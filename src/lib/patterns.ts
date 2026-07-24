@@ -1027,6 +1027,40 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "F" },
     ],
   },
+  {
+    id: "love-in-a-mist",
+    name: "Love in a Mist",
+    hasMath: true,
+    intro:
+      "Love in a Mist is a classic 3×3 nine-patch. The center cell and the four edge-middle cells are each square-in-a-square units — a Fabric C diamond sits on point with four Fabric A background corner triangles pieced by stitch-and-flip. The four corner cells are small 2×2 four-patches: two plain Fabric A squares in the outer/inner corners and two Fabric A + Fabric B half-square-triangle (HST) units whose accent halves meet at the sub-cell center, forming a small on-point diamond in each corner unit.",
+    sections: [
+      {
+        id: "bg",
+        label: "Background (Fabric A)",
+        defaultFabric: "A",
+        hint: "The dominant background fabric — used for the flip corners on all five square-in-a-square units, the plain squares in the corner four-patches, and the background half of every corner HST.",
+      },
+      {
+        id: "corner",
+        label: "Corner accent (Fabric B)",
+        defaultFabric: "B",
+        hint: "The small accent fabric that forms the two HST triangles inside each of the four corner four-patches — appears as four little on-point diamonds around the block, one in each corner.",
+      },
+      {
+        id: "diamond",
+        label: "Center & edge diamonds (Fabric C)",
+        defaultFabric: "C",
+        hint: "The star / diamond fabric — used for all five on-point squares (the center diamond plus the four edge-middle diamonds).",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "D",
+        hint: "Optional strips of fabric that separate each Love in a Mist block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
