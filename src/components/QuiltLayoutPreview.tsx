@@ -4,7 +4,7 @@ import { fabricFill } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
-import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock } from "./PatternDiagram";
+import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock } from "./PatternDiagram";
 
 interface Props {
   pattern: PatternId;
@@ -1094,6 +1094,12 @@ function MiniBlock({
       const points = get("points", "C");
       const center = get("center", "D");
       return <MapleStarBlock size={200} bg={bg} acc={acc} points={points} center={center} />;
+    }
+    case "love-in-a-mist": {
+      const bg = get("bg", "A");
+      const corner = get("corner", "B");
+      const diamond = get("diamond", "C");
+      return <LoveInAMistBlock size={200} bg={bg} corner={corner} diamond={diamond} />;
     }
   }
 }
