@@ -1525,6 +1525,124 @@ function MapleStarBlock({
 }
 
 
+/**
+ * Shared renderer for "Love in a Mist" — classic 3×3 nine-patch. Uses a 6-unit
+ * drafting grid (u = size/6), so each macro cell is 2u × 2u.
+ *
+ *   - Center cell + 4 edge-middle cells: square-in-a-square. A Fabric C on-point
+ *     square (its 4 corners at the cell's edge midpoints) with 4 Fabric A
+ *     stitch-and-flip corner triangles filling the outer corners.
+ *   - 4 corner cells: 2×2 four-patch, each sub-cell = u × u.
+ *       - Outer-outer sub-cell (touching the block corner): plain Fabric A.
+ *       - Inner-inner sub-cell (touching the block center): plain Fabric A.
+ *       - The two remaining sub-cells: HSTs (Fabric A + Fabric B). The Fabric B
+ *         triangles meet at the 4-patch center, forming a small on-point
+ *         Fabric B diamond inside each corner cell.
+ *
+ * All 4 corner cells are drawn from a single top-left `cornerUnit` rotated
+ * around the block center to guarantee identical geometry.
+ */
+function LoveInAMistBlock({
+  size,
+  bg,
+  corner,
+  diamond,
+  debug = false,
+}: {
+  size: number;
+  bg: string;
+  corner: string;
+  diamond: string;
+  debug?: boolean;
+}) {
+  const S = size;
+  const u = S / 6;
+  const U = (n: number) => n * u;
+  const cx = 3 * u;
+  const cy = 3 * u;
+
+  /** One square-in-a-square unit at (x0,y0) with cell size 2u × 2u. */
+  const sisUnit = (x0: number, y0: number, key: string) => {
+    const cellSize = 2 * u;
+    const midT = { x: x0 + u, y: y0 };
+    const midR = { x: x0 + cellSize, y: y0 + u };
+    const midB = { x: x0 + u, y: y0 + cellSize };
+    const midL = { x: x0, y: y0 + u };
+    return (
+      <g key={key}>
+        <rect x={x0} y={y0} width={cellSize} height={cellSize} fill={bg} />
+        <polygon
+          points={`${midT.x},${midT.y} ${midR.x},${midR.y} ${midB.x},${midB.y} ${midL.x},${midL.y}`}
+          fill={diamond}
+        />
+      </g>
+    );
+  };
+
+  /**
+   * Top-left corner 4-patch, occupying (0,0)-(2u,2u).
+   *  - TL sub-cell (0,0)-(u,u): plain bg (outer).
+   *  - TR sub-cell (u,0)-(2u,u): HST, main diagonal from (u,0)→(2u,u); accent
+   *    fills the lower-left triangle so it touches the shared (u,u) corner.
+   *  - BL sub-cell (0,u)-(u,2u): HST, main diagonal from (0,u)→(u,2u); accent
+   *    fills the upper-right triangle so it touches the shared (u,u) corner.
+   *  - BR sub-cell (u,u)-(2u,2u): plain bg (inner).
+   * The two accent triangles meet at (u,u) forming a small on-point Fabric B
+   * diamond centered inside the corner cell.
+   */
+  const cornerUnitTL = (
+    <>
+      <rect x={0} y={0} width={u} height={u} fill={bg} />
+      <rect x={U(1)} y={0} width={u} height={u} fill={bg} />
+      <polygon points={`${U(1)},${0} ${U(2)},${U(1)} ${U(1)},${U(1)}`} fill={corner} />
+      <rect x={0} y={U(1)} width={u} height={u} fill={bg} />
+      <polygon points={`${0},${U(1)} ${U(1)},${U(1)} ${U(1)},${U(2)}`} fill={corner} />
+      <rect x={U(1)} y={U(1)} width={u} height={u} fill={bg} />
+    </>
+  );
+
+  const cornerAt = (rotation: number, key: string) => (
+    <g key={key} transform={`rotate(${rotation} ${cx} ${cy})`}>
+      {cornerUnitTL}
+    </g>
+  );
+
+  return (
+    <>
+      {/* Full background wash so any thin geometry rounding never shows through. */}
+      <rect x={0} y={0} width={S} height={S} fill={bg} />
+
+      {/* 4 corner 4-patches — top-left drawn directly, others rotated. */}
+      {cornerAt(0, "corner-tl")}
+      {cornerAt(90, "corner-tr")}
+      {cornerAt(180, "corner-br")}
+      {cornerAt(270, "corner-bl")}
+
+      {/* 4 edge-middle square-in-a-square units. */}
+      {sisUnit(U(2), 0, "sis-top")}
+      {sisUnit(U(4), U(2), "sis-right")}
+      {sisUnit(U(2), U(4), "sis-bottom")}
+      {sisUnit(0, U(2), "sis-left")}
+
+      {/* Center square-in-a-square. */}
+      {sisUnit(U(2), U(2), "sis-center")}
+
+      {debug && (
+        <g stroke="var(--foreground)" strokeWidth={0.75} opacity={0.45} fill="none">
+          {[1, 2, 3, 4, 5].map((k) => (
+            <g key={k}>
+              <line x1={U(k)} y1={0} x2={U(k)} y2={S} />
+              <line x1={0} y1={U(k)} x2={S} y2={U(k)} />
+            </g>
+          ))}
+        </g>
+      )}
+    </>
+  );
+}
+
+
+
 
 
 
