@@ -1529,15 +1529,15 @@ function MapleStarBlock({
  * Shared renderer for "Love in a Mist" — classic 3×3 nine-patch. Uses a 6-unit
  * drafting grid (u = size/6), so each macro cell is 2u × 2u.
  *
- *   - Center cell + 4 edge-middle cells: square-in-a-square. A Fabric C on-point
- *     square (its 4 corners at the cell's edge midpoints) with 4 Fabric A
- *     stitch-and-flip corner triangles filling the outer corners.
+ *   - 4 edge-middle cells: square-in-a-square. A Fabric C on-point square
+ *     touches the midpoints of that cell's 4 edges, with Fabric A corner
+ *     triangles filling the outer corners.
+ *   - Center cell: one plain Fabric A square.
  *   - 4 corner cells: 2×2 four-patch, each sub-cell = u × u.
  *       - Outer-outer sub-cell (touching the block corner): plain Fabric A.
- *       - Inner-inner sub-cell (touching the block center): plain Fabric A.
- *       - The two remaining sub-cells: HSTs (Fabric A + Fabric B). The Fabric B
- *         triangles meet at the 4-patch center, forming a small on-point
- *         Fabric B diamond inside each corner cell.
+ *       - Inner-inner sub-cell (touching the block center): plain Fabric B.
+ *       - The two remaining sub-cells: HSTs (Fabric A + Fabric B), with the
+ *         Fabric B triangles pointing toward the 4-patch center.
  *
  * All 4 corner cells are drawn from a single top-left `cornerUnit` rotated
  * around the block center to guarantee identical geometry.
@@ -1561,22 +1561,18 @@ function LoveInAMistBlock({
   const cx = 3 * u;
   const cy = 3 * u;
 
-  /**
-   * One square-in-a-square unit at (x0,y0) with cell size 2u × 2u.
-   * Diamond is inset from the cell's edge midpoints so it sits fully
-   * within the cell with a visible background gap on all 4 sides
-   * (never touching the neighboring cell's diamond).
-   */
+  /** One square-in-a-square unit at (x0,y0) with cell size 2u × 2u. */
   const sisUnit = (x0: number, y0: number, key: string) => {
     const cellSize = 2 * u;
-    const cxC = x0 + u;
-    const cyC = y0 + u;
-    const r = u * 0.82; // <u so diamond stays inside the cell with a gap
+    const midT = { x: x0 + u, y: y0 };
+    const midR = { x: x0 + cellSize, y: y0 + u };
+    const midB = { x: x0 + u, y: y0 + cellSize };
+    const midL = { x: x0, y: y0 + u };
     return (
       <g key={key}>
         <rect x={x0} y={y0} width={cellSize} height={cellSize} fill={bg} />
         <polygon
-          points={`${cxC},${cyC - r} ${cxC + r},${cyC} ${cxC},${cyC + r} ${cxC - r},${cyC}`}
+          points={`${midT.x},${midT.y} ${midR.x},${midR.y} ${midB.x},${midB.y} ${midL.x},${midL.y}`}
           fill={diamond}
         />
       </g>
@@ -1584,16 +1580,14 @@ function LoveInAMistBlock({
   };
 
   /**
-   * Top-left corner 4-patch, occupying (0,0)-(2u,2u). 2 plain Fabric B
-   * squares on the outer/inner diagonal (TL + BR subcells) and 2 HSTs
-   * on the anti-diagonal (TR + BL subcells) whose Fabric B halves point
-   * toward the block center, forming a small B diamond that connects
-   * the two plain B squares.
+   * Top-left corner 4-patch, occupying (0,0)-(2u,2u):
+   * TL = plain background, BR = plain corner accent, and the TR/BL HSTs
+   * place their accent triangles toward the 4-patch center.
    */
   const cornerUnitTL = (
     <>
-      {/* TL subcell — plain Fabric B */}
-      <rect x={0} y={0} width={u} height={u} fill={corner} />
+      {/* TL subcell — plain Fabric A/background */}
+      <rect x={0} y={0} width={u} height={u} fill={bg} />
       {/* TR subcell — HST: bg outer (TR half), B inner (BL half toward center) */}
       <rect x={U(1)} y={0} width={u} height={u} fill={bg} />
       <polygon points={`${U(1)},${0} ${U(2)},${U(1)} ${U(1)},${U(1)}`} fill={corner} />
@@ -1628,8 +1622,8 @@ function LoveInAMistBlock({
       {sisUnit(U(2), U(4), "sis-bottom")}
       {sisUnit(0, U(2), "sis-left")}
 
-      {/* Center square-in-a-square. */}
-      {sisUnit(U(2), U(2), "sis-center")}
+      {/* Center cell — plain background square, matching the construction reference. */}
+      <rect x={U(2)} y={U(2)} width={U(2)} height={U(2)} fill={bg} />
 
       {debug && (
         <g stroke="var(--foreground)" strokeWidth={0.75} opacity={0.45} fill="none">
