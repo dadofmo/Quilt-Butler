@@ -1032,25 +1032,25 @@ export const PATTERNS: PatternDef[] = [
     name: "Love in a Mist",
     hasMath: true,
     intro:
-      "Love in a Mist is a classic 3×3 nine-patch. The center cell and the four edge-middle cells are each square-in-a-square units — a Fabric C diamond sits on point with four Fabric A background corner triangles pieced by stitch-and-flip. The four corner cells are small 2×2 four-patches: two plain Fabric A squares in the outer/inner corners and two Fabric A + Fabric B half-square-triangle (HST) units whose accent halves meet at the sub-cell center, forming a small on-point diamond in each corner unit.",
+      "Love in a Mist is a classic 3×3 nine-patch. The four edge-middle cells are square-in-a-square units — a Fabric C diamond sits on point with four Fabric A background corner triangles pieced by stitch-and-flip — while the center cell is one plain Fabric A background square. The four corner cells are small 2×2 four-patches: one plain Fabric A outer-corner square, one plain Fabric B inner-corner square, and two Fabric A + Fabric B half-square-triangle (HST) units whose accent halves point toward the four-patch center.",
     sections: [
       {
         id: "bg",
         label: "Background (Fabric A)",
         defaultFabric: "A",
-        hint: "The dominant background fabric — used for the flip corners on all five square-in-a-square units, the plain squares in the corner four-patches, and the background half of every corner HST.",
+        hint: "The dominant background fabric — used for the center square, the flip corners on all four edge square-in-a-square units, the outer plain square in each corner four-patch, and the background half of every corner HST.",
       },
       {
         id: "corner",
         label: "Corner accent (Fabric B)",
         defaultFabric: "B",
-        hint: "The small accent fabric that forms the two HST triangles inside each of the four corner four-patches — appears as four little on-point diamonds around the block, one in each corner.",
+        hint: "The small accent fabric used in each corner four-patch: one plain inner square plus the accent half of the two HST units.",
       },
       {
         id: "diamond",
-        label: "Center & edge diamonds (Fabric C)",
+        label: "Edge diamonds (Fabric C)",
         defaultFabric: "C",
-        hint: "The star / diamond fabric — used for all five on-point squares (the center diamond plus the four edge-middle diamonds).",
+        hint: "The star / diamond fabric — used for the four on-point squares in the edge-middle cells.",
       },
       {
         id: "sashing",
