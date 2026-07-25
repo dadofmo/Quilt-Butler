@@ -1561,18 +1561,22 @@ function LoveInAMistBlock({
   const cx = 3 * u;
   const cy = 3 * u;
 
-  /** One square-in-a-square unit at (x0,y0) with cell size 2u × 2u. */
+  /**
+   * One square-in-a-square unit at (x0,y0) with cell size 2u × 2u.
+   * Diamond is inset from the cell's edge midpoints so it sits fully
+   * within the cell with a visible background gap on all 4 sides
+   * (never touching the neighboring cell's diamond).
+   */
   const sisUnit = (x0: number, y0: number, key: string) => {
     const cellSize = 2 * u;
-    const midT = { x: x0 + u, y: y0 };
-    const midR = { x: x0 + cellSize, y: y0 + u };
-    const midB = { x: x0 + u, y: y0 + cellSize };
-    const midL = { x: x0, y: y0 + u };
+    const cxC = x0 + u;
+    const cyC = y0 + u;
+    const r = u * 0.82; // <u so diamond stays inside the cell with a gap
     return (
       <g key={key}>
         <rect x={x0} y={y0} width={cellSize} height={cellSize} fill={bg} />
         <polygon
-          points={`${midT.x},${midT.y} ${midR.x},${midR.y} ${midB.x},${midB.y} ${midL.x},${midL.y}`}
+          points={`${cxC},${cyC - r} ${cxC + r},${cyC} ${cxC},${cyC + r} ${cxC - r},${cyC}`}
           fill={diamond}
         />
       </g>
@@ -1580,24 +1584,24 @@ function LoveInAMistBlock({
   };
 
   /**
-   * Top-left corner 4-patch, occupying (0,0)-(2u,2u).
-   *  - TL sub-cell (0,0)-(u,u): plain bg (outer).
-   *  - TR sub-cell (u,0)-(2u,u): HST, main diagonal from (u,0)→(2u,u); accent
-   *    fills the lower-left triangle so it touches the shared (u,u) corner.
-   *  - BL sub-cell (0,u)-(u,2u): HST, main diagonal from (0,u)→(u,2u); accent
-   *    fills the upper-right triangle so it touches the shared (u,u) corner.
-   *  - BR sub-cell (u,u)-(2u,2u): plain bg (inner).
-   * The two accent triangles meet at (u,u) forming a small on-point Fabric B
-   * diamond centered inside the corner cell.
+   * Top-left corner 4-patch, occupying (0,0)-(2u,2u). 2 plain Fabric B
+   * squares on the outer/inner diagonal (TL + BR subcells) and 2 HSTs
+   * on the anti-diagonal (TR + BL subcells) whose Fabric B halves point
+   * toward the block center, forming a small B diamond that connects
+   * the two plain B squares.
    */
   const cornerUnitTL = (
     <>
-      <rect x={0} y={0} width={u} height={u} fill={bg} />
+      {/* TL subcell — plain Fabric B */}
+      <rect x={0} y={0} width={u} height={u} fill={corner} />
+      {/* TR subcell — HST: bg outer (TR half), B inner (BL half toward center) */}
       <rect x={U(1)} y={0} width={u} height={u} fill={bg} />
       <polygon points={`${U(1)},${0} ${U(2)},${U(1)} ${U(1)},${U(1)}`} fill={corner} />
+      {/* BL subcell — HST: bg outer (BL half), B inner (TR half toward center) */}
       <rect x={0} y={U(1)} width={u} height={u} fill={bg} />
       <polygon points={`${0},${U(1)} ${U(1)},${U(1)} ${U(1)},${U(2)}`} fill={corner} />
-      <rect x={U(1)} y={U(1)} width={u} height={u} fill={bg} />
+      {/* BR subcell — plain Fabric B (inner-inner, adjacent to block center) */}
+      <rect x={U(1)} y={U(1)} width={u} height={u} fill={corner} />
     </>
   );
 
