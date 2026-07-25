@@ -1048,7 +1048,7 @@ export const PATTERNS: PatternDef[] = [
       },
       {
         id: "diamond",
-        label: "Center & edge diamonds (Fabric C)",
+        label: "Edge diamonds (Fabric C)",
         defaultFabric: "C",
         hint: "The star / diamond fabric — used for the four on-point squares in the edge-middle cells.",
       },
