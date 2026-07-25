@@ -2452,20 +2452,24 @@ export function calculateYardage(s: PlannerState): CalcResult {
     // Each macro cell = 2u × 2u; corner cells subdivide into 2×2 sub-cells of u × u.
     //
     // Per block:
-    //   Center s-i-s (1) + edge s-i-s (4) = 5 units. Each unit:
+    //   Edge-middle s-i-s units (4). Each unit:
     //     - 1 Fabric C center square, 2u × 2u finished
     //     - 4 Fabric A stitch-and-flip corner squares, u × u finished
+    //   Center cell:
+    //     - 1 plain Fabric A square, 2u × 2u finished
     //   Corner 4-patches (4). Each unit:
-    //     - 2 plain Fabric B squares, u × u finished (outer + inner sub-cells)
+    //     - 1 plain Fabric A square, u × u finished (outer corner)
+    //     - 1 plain Fabric B square, u × u finished (inner corner)
     //     - 2 HST units (Fabric A + Fabric B). 1 A-start + 1 B-start square
     //       yield exactly 2 HSTs. Each starting square is (u + 7/8)".
     //
     // Totals per block:
-    //   Fabric A: 20 flip corners (5 diamond units × 4) at (u + 1/2)"
+    //   Fabric A: 16 flip corners (4 diamond units × 4) + 4 plain corner squares at (u + 1/2)"
     //             + 4 HST starting squares at (u + 7/8)".
-    //   Fabric B: 8 plain small squares (4 corners × 2) at (u + 1/2)"
+    //             + 1 plain center square at (2u + 1/2)".
+    //   Fabric B: 4 plain small squares (4 corners × 1) at (u + 1/2)"
     //             + 4 HST starting squares at (u + 7/8)".
-    //   Fabric C: 5 large squares at (2u + 1/2)".
+    //   Fabric C: 4 large squares at (2u + 1/2)".
     const u = s.blockSize / 6;
     const smallCut = u + SEAM;
     const largeCut = 2 * u + SEAM;
@@ -2475,23 +2479,24 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const cornerFab = (s.assignments["corner"] ?? "B") as FabricKey;
     const diamondFab = (s.assignments["diamond"] ?? "C") as FabricKey;
 
-    addSquares(reqs[bgFab], `Small background flip-corner squares (${u.toFixed(2)}" finished) — 5 diamond units × 4`, 20 * blockCount, smallCut, s.fabricWidth);
+    addSquares(reqs[bgFab], `Small background squares (${u.toFixed(2)}" finished) — 16 flip corners + 4 corner squares`, 20 * blockCount, smallCut, s.fabricWidth);
     addSquares(reqs[bgFab], `HST starting squares (background half) — ${u.toFixed(2)}" finished`, 4 * blockCount, hstCut, s.fabricWidth);
-    addSquares(reqs[cornerFab], `Plain accent squares (${u.toFixed(2)}" finished) — 4 corners × 2`, 8 * blockCount, smallCut, s.fabricWidth);
+    addSquares(reqs[bgFab], `Plain center squares (${(2 * u).toFixed(2)}" finished)`, blockCount, largeCut, s.fabricWidth);
+    addSquares(reqs[cornerFab], `Plain accent squares (${u.toFixed(2)}" finished) — 4 corners × 1`, 4 * blockCount, smallCut, s.fabricWidth);
     addSquares(reqs[cornerFab], `HST starting squares (accent half) — ${u.toFixed(2)}" finished`, 4 * blockCount, hstCut, s.fabricWidth);
-    addSquares(reqs[diamondFab], `Diamond squares (${(2 * u).toFixed(2)}" finished) — 1 center + 4 edge`, 5 * blockCount, largeCut, s.fabricWidth);
+    addSquares(reqs[diamondFab], `Diamond squares (${(2 * u).toFixed(2)}" finished) — 4 edge units`, 4 * blockCount, largeCut, s.fabricWidth);
 
     notes.push(
-      `Each Love in a Mist block is a 3×3 nine-patch on a 6-unit drafting grid (u = ${u.toFixed(2)}"). Cut per block: 20 Fabric ${bgFab} small stitch-and-flip corner squares at ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}"; 8 Fabric ${cornerFab} plain small squares at ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}"; 4 Fabric ${bgFab} + 4 Fabric ${cornerFab} HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}"; and 5 Fabric ${diamondFab} large squares at ${largeCut.toFixed(2)}" × ${largeCut.toFixed(2)}" (1 center diamond + 4 edge diamonds).`,
+      `Each Love in a Mist block is a 3×3 nine-patch on a 6-unit drafting grid (u = ${u.toFixed(2)}"). Cut per block: 20 Fabric ${bgFab} small squares at ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}" (16 stitch-and-flip corner squares + 4 plain corner squares); 1 Fabric ${bgFab} center square at ${largeCut.toFixed(2)}" × ${largeCut.toFixed(2)}"; 4 Fabric ${cornerFab} plain small squares at ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}"; 4 Fabric ${bgFab} + 4 Fabric ${cornerFab} HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}"; and 4 Fabric ${diamondFab} edge-diamond squares at ${largeCut.toFixed(2)}" × ${largeCut.toFixed(2)}".`,
     );
     notes.push(
-      `Square-in-a-square units (5 per block — 1 center + 4 edge-middle): take one Fabric ${diamondFab} ${largeCut.toFixed(2)}" square. Draw a diagonal on the back of each of 4 Fabric ${bgFab} ${smallCut.toFixed(2)}" squares. Place one Fabric ${bgFab} square right-sides-together on each corner of the Fabric ${diamondFab} square, sew ON the marked line, trim the outer corner to a 1/4" seam allowance, and press the Fabric ${bgFab} triangles open. The finished unit reads as a Fabric ${diamondFab} diamond on point framed by Fabric ${bgFab} background.`,
+      `Square-in-a-square units (4 per block — edge-middle cells only): take one Fabric ${diamondFab} ${largeCut.toFixed(2)}" square. Draw a diagonal on the back of each of 4 Fabric ${bgFab} ${smallCut.toFixed(2)}" squares. Place one Fabric ${bgFab} square right-sides-together on each corner of the Fabric ${diamondFab} square, sew ON the marked line, trim the outer corner to a 1/4" seam allowance, and press the Fabric ${bgFab} triangles open. The finished unit reads as a Fabric ${diamondFab} diamond on point framed by Fabric ${bgFab} background. The center cell is one plain Fabric ${bgFab} square, not a diamond.`,
     );
     notes.push(
-      `Corner four-patches (4 per block): pair one Fabric ${bgFab} HST starting square with one Fabric ${cornerFab} HST starting square right sides together, draw the diagonal on the lighter square, sew a scant 1/4" on each side, cut on the line, press open, and trim each HST to ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}". One pair yields exactly the 2 HSTs needed for one corner. Arrange each corner four-patch as: outer-outer sub-cell (touching the block corner) = plain Fabric ${cornerFab} square; inner-inner sub-cell (touching the block center) = plain Fabric ${cornerFab} square; the two remaining sub-cells = HSTs oriented so the Fabric ${cornerFab} triangles point toward the 4-patch center — they visually connect the two plain Fabric ${cornerFab} squares through an on-point Fabric ${cornerFab} diamond. Rotate the same unit 90°/180°/270° for the other three corners.`,
+      `Corner four-patches (4 per block): pair one Fabric ${bgFab} HST starting square with one Fabric ${cornerFab} HST starting square right sides together, draw the diagonal on the lighter square, sew a scant 1/4" on each side, cut on the line, press open, and trim each HST to ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}". One pair yields exactly the 2 HSTs needed for one corner. Arrange each corner four-patch as: outer-outer sub-cell (touching the block corner) = plain Fabric ${bgFab} square; inner-inner sub-cell (touching the block center) = plain Fabric ${cornerFab} square; the two remaining sub-cells = HSTs oriented so the Fabric ${cornerFab} triangles point toward the 4-patch center. Rotate the same unit 90°/180°/270° for the other three corners.`,
     );
     notes.push(
-      `Love in a Mist Assembly Tip: lay the 9 finished units out in a 3×3 grid (corner 4-patches at the 4 corners, square-in-a-square units at the 4 edge middles and the center). Sew each row of 3 units, then join the 3 rows. Across all ${blockCount} blocks: Fabric ${bgFab} = ${20 * blockCount} small flip-corner squares + ${4 * blockCount} HST starting squares; Fabric ${cornerFab} = ${8 * blockCount} plain small squares + ${4 * blockCount} HST starting squares; Fabric ${diamondFab} = ${5 * blockCount} large squares.`,
+      `Love in a Mist Assembly Tip: lay the 9 finished units out in a 3×3 grid (corner 4-patches at the 4 corners, square-in-a-square units at the 4 edge middles, and a plain background square in the center). Sew each row of 3 units, then join the 3 rows. Across all ${blockCount} blocks: Fabric ${bgFab} = ${20 * blockCount} small squares + ${4 * blockCount} HST starting squares + ${blockCount} center squares; Fabric ${cornerFab} = ${4 * blockCount} plain small squares + ${4 * blockCount} HST starting squares; Fabric ${diamondFab} = ${4 * blockCount} large squares.`,
     );
 
     if (sashWidth > 0) {
