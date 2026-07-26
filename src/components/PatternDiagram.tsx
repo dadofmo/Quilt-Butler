@@ -1078,10 +1078,11 @@ function renderInner(
     }
     case "love-in-a-mist": {
       const bg = get("bg", "A");
-      const corner = get("corner", "B");
-      const diamond = get("diamond", "C");
-      return <LoveInAMistBlock size={200} bg={bg} corner={corner} diamond={diamond} />;
+      const accent = get("accent", "B");
+      const outer = get("outer", "C");
+      return <LoveInAMistBlock size={200} bg={bg} accent={accent} outer={outer} />;
     }
+
   }
 }
 
