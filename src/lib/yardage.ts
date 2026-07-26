@@ -2456,7 +2456,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     // Per block:
     //   Edge-middle s-i-s units (4). Each unit:
     //     - 1 Fabric B diamond square, 2u × 2u finished
-    //     - 4 Fabric A stitch-and-flip corner squares, u × u finished
+    //     - 2 Fabric C stitch-and-flip corners on the block's OUTER edge
+    //     - 2 Fabric A stitch-and-flip corners on the inward side
     //   Center cell:
     //     - 1 plain Fabric A square, 2u × 2u finished
     //   Corner 4-patches (4). Each unit:
@@ -2466,11 +2467,11 @@ export function calculateYardage(s: PlannerState): CalcResult {
     //       yield exactly 2 HSTs. Each starting square is (u + 7/8)".
     //
     // Totals per block:
-    //   Fabric A: 16 flip corners at (u + 1/2)" + 1 center square at (2u + 1/2)".
+    //   Fabric A: 8 flip corners at (u + 1/2)" + 1 center square at (2u + 1/2)".
     //   Fabric B: 4 diamond squares at (2u + 1/2)" + 4 plain small squares
     //             at (u + 1/2)" + 4 HST starting squares at (u + 7/8)".
-    //   Fabric C: 4 plain small squares at (u + 1/2)" + 4 HST starting squares
-    //             at (u + 7/8)".
+    //   Fabric C: 8 flip corners at (u + 1/2)" + 4 plain small squares at
+    //             (u + 1/2)" + 4 HST starting squares at (u + 7/8)".
     const u = s.blockSize / 6;
     const smallCut = u + SEAM;
     const largeCut = 2 * u + SEAM;
@@ -2480,26 +2481,28 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const accentFab = (s.assignments["accent"] ?? "B") as FabricKey;
     const outerFab = (s.assignments["outer"] ?? "C") as FabricKey;
 
-    addSquares(reqs[bgFab], `Stitch-and-flip corner squares (${u.toFixed(2)}" finished) — 4 edge diamond units × 4`, 16 * blockCount, smallCut, s.fabricWidth);
+    addSquares(reqs[bgFab], `Stitch-and-flip corner squares (${u.toFixed(2)}" finished) — inward corners of the 4 edge diamond units`, 8 * blockCount, smallCut, s.fabricWidth);
     addSquares(reqs[bgFab], `Plain center squares (${(2 * u).toFixed(2)}" finished)`, blockCount, largeCut, s.fabricWidth);
     addSquares(reqs[accentFab], `Diamond squares (${(2 * u).toFixed(2)}" finished) — 4 edge units`, 4 * blockCount, largeCut, s.fabricWidth);
     addSquares(reqs[accentFab], `Plain accent squares (${u.toFixed(2)}" finished) — inner corner of each four-patch`, 4 * blockCount, smallCut, s.fabricWidth);
     addSquares(reqs[accentFab], `HST starting squares (accent half) — ${u.toFixed(2)}" finished`, 4 * blockCount, hstCut, s.fabricWidth);
+    addSquares(reqs[outerFab], `Stitch-and-flip corner squares (${u.toFixed(2)}" finished) — outer corners of the 4 edge diamond units`, 8 * blockCount, smallCut, s.fabricWidth);
     addSquares(reqs[outerFab], `Plain outer corner squares (${u.toFixed(2)}" finished) — 4 block corners`, 4 * blockCount, smallCut, s.fabricWidth);
     addSquares(reqs[outerFab], `HST starting squares (outer half) — ${u.toFixed(2)}" finished`, 4 * blockCount, hstCut, s.fabricWidth);
 
     notes.push(
-      `Each Love in a Mist block is a 3×3 nine-patch on a 6-unit drafting grid (u = ${u.toFixed(2)}"). Cut per block: 16 Fabric ${bgFab} stitch-and-flip squares at ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}"; 1 Fabric ${bgFab} center square at ${largeCut.toFixed(2)}" × ${largeCut.toFixed(2)}"; 4 Fabric ${accentFab} diamond squares at ${largeCut.toFixed(2)}" × ${largeCut.toFixed(2)}"; 4 Fabric ${accentFab} plain small squares at ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}"; 4 Fabric ${outerFab} plain small squares at ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}"; and 4 Fabric ${accentFab} + 4 Fabric ${outerFab} HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}".`,
+      `Each Love in a Mist block is a 3×3 nine-patch on a 6-unit drafting grid (u = ${u.toFixed(2)}"). Cut per block: 8 Fabric ${bgFab} stitch-and-flip squares at ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}"; 1 Fabric ${bgFab} center square at ${largeCut.toFixed(2)}" × ${largeCut.toFixed(2)}"; 4 Fabric ${accentFab} diamond squares at ${largeCut.toFixed(2)}" × ${largeCut.toFixed(2)}"; 4 Fabric ${accentFab} plain small squares at ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}"; 8 Fabric ${outerFab} stitch-and-flip squares at ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}"; 4 Fabric ${outerFab} plain small squares at ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}"; and 4 Fabric ${accentFab} + 4 Fabric ${outerFab} HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}".`,
     );
     notes.push(
-      `Square-in-a-square units (4 per block — edge-middle cells only): take one Fabric ${accentFab} ${largeCut.toFixed(2)}" square. Draw a diagonal on the back of each of 4 Fabric ${bgFab} ${smallCut.toFixed(2)}" squares. Place one Fabric ${bgFab} square right-sides-together on each corner of the Fabric ${accentFab} square, sew ON the marked line, trim the outer corner to a 1/4" seam allowance, and press the Fabric ${bgFab} triangles open. The finished unit reads as a Fabric ${accentFab} diamond on point framed by Fabric ${bgFab} background points. The center cell is one plain Fabric ${bgFab} square, not a diamond.`,
+      `Square-in-a-square units (4 per block — edge-middle cells only): take one Fabric ${accentFab} ${largeCut.toFixed(2)}" square. Draw a diagonal on the back of 2 Fabric ${outerFab} and 2 Fabric ${bgFab} ${smallCut.toFixed(2)}" squares. Place the 2 Fabric ${outerFab} squares on the two corners that will face the OUTSIDE edge of the block, and the 2 Fabric ${bgFab} squares on the two corners facing the block center. Sew ON each marked line, trim the outer corner to a 1/4" seam allowance, and press the triangles open. The finished unit reads as a Fabric ${accentFab} diamond on point with Fabric ${outerFab} points on the outside of the block and Fabric ${bgFab} points toward the center. The center cell is one plain Fabric ${bgFab} square, not a diamond.`,
     );
     notes.push(
       `Corner four-patches (4 per block): pair one Fabric ${outerFab} HST starting square with one Fabric ${accentFab} HST starting square right sides together, draw the diagonal on the lighter square, sew a scant 1/4" on each side, cut on the line, press open, and trim each HST to ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}". One pair yields exactly the 2 HSTs needed for one corner. Arrange each corner four-patch as: outer-outer sub-cell (touching the block corner) = plain Fabric ${outerFab} square; inner-inner sub-cell (touching the block center) = plain Fabric ${accentFab} square; the two remaining sub-cells (the outside edges of the block) = HSTs with the Fabric ${outerFab} half on the outer edge and the Fabric ${accentFab} triangle pointing toward the 4-patch center. Rotate the same unit 90°/180°/270° for the other three corners.`,
     );
     notes.push(
-      `Love in a Mist Assembly Tip: lay the 9 finished units out in a 3×3 grid (corner 4-patches at the 4 corners, square-in-a-square units at the 4 edge middles, and a plain background square in the center). Sew each row of 3 units, then join the 3 rows. Across all ${blockCount} blocks: Fabric ${bgFab} = ${16 * blockCount} flip squares + ${blockCount} center squares; Fabric ${accentFab} = ${4 * blockCount} diamond squares + ${4 * blockCount} plain small squares + ${4 * blockCount} HST starting squares; Fabric ${outerFab} = ${4 * blockCount} plain small squares + ${4 * blockCount} HST starting squares.`,
+      `Love in a Mist Assembly Tip: lay the 9 finished units out in a 3×3 grid (corner 4-patches at the 4 corners, square-in-a-square units at the 4 edge middles, and a plain background square in the center). Sew each row of 3 units, then join the 3 rows. Across all ${blockCount} blocks: Fabric ${bgFab} = ${8 * blockCount} flip squares + ${blockCount} center squares; Fabric ${accentFab} = ${4 * blockCount} diamond squares + ${4 * blockCount} plain small squares + ${4 * blockCount} HST starting squares; Fabric ${outerFab} = ${8 * blockCount} flip squares + ${4 * blockCount} plain small squares + ${4 * blockCount} HST starting squares.`,
     );
+
 
 
     if (sashWidth > 0) {
