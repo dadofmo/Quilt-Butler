@@ -162,6 +162,11 @@ function PatternPickerInner() {
         <p className="text-xs leading-relaxed text-muted-foreground/70 sm:text-sm">
           QuiltButler is an online quilt planning tool built for quilters of every skill level. Start free with the beginner-friendly Nine Patch, then unlock the full pattern library — Half Square Triangles, Snowball, Friendship Star, Bear Paw and more — with a single one-time purchase. Enter your quilt size and fabric choices to instantly receive exact yardage requirements, visual cutting diagrams, and a printable shopping list. Use the Quilt Visualizer to see how your fabric choices will look before you buy a single yard, estimate your total project cost with the built-in cost calculator, and get helpful quilting tips along the way. No login required — just open QuiltButler and get your complete quilt plan. Happy Quilting!
         </p>
+        <p className="mt-6 text-xs leading-relaxed text-muted-foreground/70 sm:text-sm">
+          Whatever you do, work at it with all of your heart
+          <br />
+          Colossians 3:23
+        </p>
       </section>
       <UnlockModal
         open={pendingPattern !== null}
