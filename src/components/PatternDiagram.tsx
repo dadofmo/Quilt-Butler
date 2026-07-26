@@ -1632,10 +1632,10 @@ function LoveInAMistBlock({
       {cornerAt(270, "corner-bl")}
 
       {/* 4 edge-middle square-in-a-square units. */}
-      {sisUnit(U(2), 0, "sis-top")}
-      {sisUnit(U(4), U(2), "sis-right")}
-      {sisUnit(U(2), U(4), "sis-bottom")}
-      {sisUnit(0, U(2), "sis-left")}
+      {sisAt(0, "sis-top")}
+      {sisAt(90, "sis-right")}
+      {sisAt(180, "sis-bottom")}
+      {sisAt(270, "sis-left")}
 
       {/* Center cell — plain background square, matching the construction reference. */}
       <rect x={U(2)} y={U(2)} width={U(2)} height={U(2)} fill={bg} />
