@@ -1565,23 +1565,33 @@ function LoveInAMistBlock({
   const cx = 3 * u;
   const cy = 3 * u;
 
-  /** One square-in-a-square unit at (x0,y0) with cell size 2u × 2u. */
-  const sisUnit = (x0: number, y0: number, key: string) => {
-    const cellSize = 2 * u;
-    const midT = { x: x0 + u, y: y0 };
-    const midR = { x: x0 + cellSize, y: y0 + u };
-    const midB = { x: x0 + u, y: y0 + cellSize };
-    const midL = { x: x0, y: y0 + u };
-    return (
-      <g key={key}>
-        <rect x={x0} y={y0} width={cellSize} height={cellSize} fill={bg} />
-        <polygon
-          points={`${midT.x},${midT.y} ${midR.x},${midR.y} ${midB.x},${midB.y} ${midL.x},${midL.y}`}
-          fill={accent}
-        />
-      </g>
-    );
-  };
+  /**
+   * One square-in-a-square unit for the TOP edge cell, occupying
+   * (2u,0)-(4u,2u). The two flip-corner triangles that sit on the block's
+   * OUTER edge are Fabric C (outer) so every diamond has the outer fabric
+   * on its outside; the two inward-facing triangles stay Fabric A.
+   * The other three edge units are this same unit rotated about the center.
+   */
+  const sisUnitTop = (
+    <>
+      <rect x={U(2)} y={0} width={U(2)} height={U(2)} fill={bg} />
+      {/* Outer (top) flip corners — Fabric C */}
+      <polygon points={`${U(2)},${0} ${U(3)},${0} ${U(2)},${U(1)}`} fill={outer} />
+      <polygon points={`${U(3)},${0} ${U(4)},${0} ${U(4)},${U(1)}`} fill={outer} />
+      {/* Diamond — Fabric B */}
+      <polygon
+        points={`${U(3)},${0} ${U(4)},${U(1)} ${U(3)},${U(2)} ${U(2)},${U(1)}`}
+        fill={accent}
+      />
+    </>
+  );
+
+  const sisAt = (rotation: number, key: string) => (
+    <g key={key} transform={`rotate(${rotation} ${cx} ${cy})`}>
+      {sisUnitTop}
+    </g>
+  );
+
 
   /**
    * Top-left corner 4-patch, occupying (0,0)-(2u,2u):
