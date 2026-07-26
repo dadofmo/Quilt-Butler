@@ -848,7 +848,7 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     case "love-in-a-mist": {
       return (
         <svg {...common}>
-          <LoveInAMistBlock size={90} bg={C.a} corner={C.b} diamond={C.c} />
+          <LoveInAMistBlock size={90} bg={C.a} accent={C.b} outer={C.c} />
         </svg>
       );
     }

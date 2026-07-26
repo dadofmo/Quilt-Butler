@@ -1078,10 +1078,11 @@ function renderInner(
     }
     case "love-in-a-mist": {
       const bg = get("bg", "A");
-      const corner = get("corner", "B");
-      const diamond = get("diamond", "C");
-      return <LoveInAMistBlock size={200} bg={bg} corner={corner} diamond={diamond} />;
+      const accent = get("accent", "B");
+      const outer = get("outer", "C");
+      return <LoveInAMistBlock size={200} bg={bg} accent={accent} outer={outer} />;
     }
+
   }
 }
 
@@ -1545,14 +1546,17 @@ function MapleStarBlock({
 function LoveInAMistBlock({
   size,
   bg,
-  corner,
-  diamond,
+  accent,
+  outer,
   debug = false,
 }: {
   size: number;
+  /** Fabric A — center square + the background "points" around each edge diamond. */
   bg: string;
-  corner: string;
-  diamond: string;
+  /** Fabric B — the 4 edge diamonds AND the corner four-patch accents. */
+  accent: string;
+  /** Fabric C — the outer corner squares + the outer halves of the corner HSTs. */
+  outer: string;
   debug?: boolean;
 }) {
   const S = size;
@@ -1573,7 +1577,7 @@ function LoveInAMistBlock({
         <rect x={x0} y={y0} width={cellSize} height={cellSize} fill={bg} />
         <polygon
           points={`${midT.x},${midT.y} ${midR.x},${midR.y} ${midB.x},${midB.y} ${midL.x},${midL.y}`}
-          fill={diamond}
+          fill={accent}
         />
       </g>
     );
@@ -1581,21 +1585,22 @@ function LoveInAMistBlock({
 
   /**
    * Top-left corner 4-patch, occupying (0,0)-(2u,2u):
-   * TL = plain background, BR = plain corner accent, and the TR/BL HSTs
-   * place their accent triangles toward the 4-patch center.
+   * TL = plain Fabric C (outer corner), BR = plain Fabric B accent, and the
+   * TR/BL HSTs pair Fabric C on the outer edge with Fabric B pointing toward
+   * the 4-patch center.
    */
   const cornerUnitTL = (
     <>
-      {/* TL subcell — plain Fabric A/background */}
-      <rect x={0} y={0} width={u} height={u} fill={bg} />
-      {/* TR subcell — HST: bg outer (TR half), B inner (BL half toward center) */}
-      <rect x={U(1)} y={0} width={u} height={u} fill={bg} />
-      <polygon points={`${U(1)},${0} ${U(2)},${U(1)} ${U(1)},${U(1)}`} fill={corner} />
-      {/* BL subcell — HST: bg outer (BL half), B inner (TR half toward center) */}
-      <rect x={0} y={U(1)} width={u} height={u} fill={bg} />
-      <polygon points={`${0},${U(1)} ${U(1)},${U(1)} ${U(1)},${U(2)}`} fill={corner} />
+      {/* TL subcell — plain Fabric C outer corner square */}
+      <rect x={0} y={0} width={u} height={u} fill={outer} />
+      {/* TR subcell — HST: C outer (TR half), B inner (BL half toward center) */}
+      <rect x={U(1)} y={0} width={u} height={u} fill={outer} />
+      <polygon points={`${U(1)},${0} ${U(2)},${U(1)} ${U(1)},${U(1)}`} fill={accent} />
+      {/* BL subcell — HST: C outer (BL half), B inner (TR half toward center) */}
+      <rect x={0} y={U(1)} width={u} height={u} fill={outer} />
+      <polygon points={`${0},${U(1)} ${U(1)},${U(1)} ${U(1)},${U(2)}`} fill={accent} />
       {/* BR subcell — plain Fabric B (inner-inner, adjacent to block center) */}
-      <rect x={U(1)} y={U(1)} width={u} height={u} fill={corner} />
+      <rect x={U(1)} y={U(1)} width={u} height={u} fill={accent} />
     </>
   );
 
@@ -1624,6 +1629,7 @@ function LoveInAMistBlock({
 
       {/* Center cell — plain background square, matching the construction reference. */}
       <rect x={U(2)} y={U(2)} width={U(2)} height={U(2)} fill={bg} />
+
 
       {debug && (
         <g stroke="var(--foreground)" strokeWidth={0.75} opacity={0.45} fill="none">
