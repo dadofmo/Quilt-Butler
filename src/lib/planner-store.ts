@@ -35,7 +35,8 @@ export type PatternId =
   | "cabin-in-the-cotton"
   | "fancy-stripe"
   | "maple-star"
-  | "love-in-a-mist";
+  | "love-in-a-mist"
+  | "four-x-star";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
