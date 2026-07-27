@@ -1297,7 +1297,93 @@ function IdahoBeautyBlock({
   );
 }
 
-export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock };
+export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock };
+
+/**
+ * Shared renderer for "Four X Star" — a strict 5×5 grid of 25 equal cells.
+ *
+ * Cell map (read straight off the reference construction graphic):
+ *
+ *   A  ⧅  D  ⧅  A          ⧅ = half-square-triangle unit; the letter in the
+ *   ⧅  C  A  C  ⧅              table below records WHICH corner of the cell
+ *   D  A  D  A  D              holds the Fabric B (accent) right angle.
+ *   ⧅  C  A  C  ⧅
+ *   A  ⧅  D  ⧅  A
+ *
+ * The eight accent triangles pair up around each Fabric C square, meeting
+ * point-to-point at its outer corner to form the four "X" arms of the star.
+ * The whole layout has 90° rotational symmetry.
+ */
+type FourXCorner = "tl" | "tr" | "bl" | "br";
+type FourXCell =
+  | { k: "bg" }
+  | { k: "sq" }
+  | { k: "dark" }
+  | { k: "hst"; corner: FourXCorner };
+
+const FOUR_X_STAR_GRID: FourXCell[][] = [
+  [{ k: "bg" }, { k: "hst", corner: "bl" }, { k: "dark" }, { k: "hst", corner: "br" }, { k: "bg" }],
+  [{ k: "hst", corner: "tr" }, { k: "sq" }, { k: "bg" }, { k: "sq" }, { k: "hst", corner: "tl" }],
+  [{ k: "dark" }, { k: "bg" }, { k: "dark" }, { k: "bg" }, { k: "dark" }],
+  [{ k: "hst", corner: "br" }, { k: "sq" }, { k: "bg" }, { k: "sq" }, { k: "hst", corner: "bl" }],
+  [{ k: "bg" }, { k: "hst", corner: "tl" }, { k: "dark" }, { k: "hst", corner: "tr" }, { k: "bg" }],
+];
+
+function fourXHstPoints(x: number, y: number, u: number, corner: FourXCorner) {
+  const tl = `${x},${y}`;
+  const tr = `${x + u},${y}`;
+  const bl = `${x},${y + u}`;
+  const br = `${x + u},${y + u}`;
+  switch (corner) {
+    case "tl":
+      return { acc: `${tl} ${tr} ${bl}`, bg: `${tr} ${br} ${bl}` };
+    case "tr":
+      return { acc: `${tl} ${tr} ${br}`, bg: `${tl} ${br} ${bl}` };
+    case "bl":
+      return { acc: `${tl} ${bl} ${br}`, bg: `${tl} ${tr} ${br}` };
+    case "br":
+      return { acc: `${tr} ${br} ${bl}`, bg: `${tl} ${tr} ${bl}` };
+  }
+}
+
+function FourXStarBlock({
+  size,
+  bg,
+  acc,
+  sq,
+  dark,
+}: {
+  size: number;
+  bg: string;
+  acc: string;
+  sq: string;
+  dark: string;
+}) {
+  const u = size / 5;
+  return (
+    <>
+      <rect x={0} y={0} width={size} height={size} fill={bg} />
+      {FOUR_X_STAR_GRID.map((row, r) =>
+        row.map((cell, c) => {
+          const x = c * u;
+          const y = r * u;
+          const key = `fx-${r}-${c}`;
+          if (cell.k === "hst") {
+            const pts = fourXHstPoints(x, y, u, cell.corner);
+            return (
+              <g key={key}>
+                <polygon points={pts.bg} fill={bg} />
+                <polygon points={pts.acc} fill={acc} />
+              </g>
+            );
+          }
+          const fill = cell.k === "sq" ? sq : cell.k === "dark" ? dark : bg;
+          return <rect key={key} x={x} y={y} width={u} height={u} fill={fill} />;
+        }),
+      )}
+    </>
+  );
+}
 
 /**
  * Shared renderer for "Fancy Stripe" — exactly 16 equal HST cells in a strict
