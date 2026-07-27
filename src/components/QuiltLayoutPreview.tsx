@@ -4,7 +4,7 @@ import { fabricFill } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
-import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock } from "./PatternDiagram";
+import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock } from "./PatternDiagram";
 
 interface Props {
   pattern: PatternId;
@@ -1071,6 +1071,13 @@ function MiniBlock({
       const accent = get("accent", "B");
       const outer = get("outer", "C");
       return <LoveInAMistBlock size={200} bg={bg} accent={accent} outer={outer} />;
+    }
+    case "four-x-star": {
+      const bg = get("bg", "A");
+      const acc = get("accent", "B");
+      const sq = get("squares", "C");
+      const dark = get("dark", "D");
+      return <FourXStarBlock size={200} bg={bg} acc={acc} sq={sq} dark={dark} />;
     }
 
   }

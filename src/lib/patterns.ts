@@ -1062,6 +1062,46 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "E" },
     ],
   },
+  {
+    id: "four-x-star",
+    name: "Four X Star",
+    hasMath: true,
+    intro:
+      "Four X Star is a 5×5 grid block built from 25 equal squares — 17 plain squares and 8 half-square-triangle (HST) units. Five Fabric D squares form a big X through the block (four block-edge midpoints plus the center), four Fabric C squares sit diagonally around the center, and eight Fabric B accent triangles pair up point-to-point at the outer corner of each Fabric C square to create the four X-shaped star arms. Fabric A is the background that fills everything else.",
+    sections: [
+      {
+        id: "bg",
+        label: "Background (Fabric A)",
+        defaultFabric: "A",
+        hint: "The 8 plain background squares (4 block corners + the 4 squares around the center) plus the background half of all 8 half-square-triangle units. Usually the calmest fabric so the star arms read clearly.",
+      },
+      {
+        id: "accent",
+        label: "Star point triangles (Fabric B)",
+        defaultFabric: "B",
+        hint: "The accent half of each of the 8 half-square-triangle units. These triangles meet in pairs at the outer corner of each Fabric C square to form the four X arms — pick a strong contrast with Fabric A.",
+      },
+      {
+        id: "squares",
+        label: "Inner accent squares (Fabric C)",
+        defaultFabric: "C",
+        hint: "The 4 plain squares set diagonally around the center of the block — each one is the anchor that the two accent triangles point at.",
+      },
+      {
+        id: "dark",
+        label: "X squares (Fabric D)",
+        defaultFabric: "D",
+        hint: "The 5 plain squares that form the big X: the center square plus the middle square on each of the four block edges. Usually your darkest / boldest fabric.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "E",
+        hint: "Optional strips of fabric that separate each Four X Star block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

@@ -176,9 +176,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isFancyStripe = s.pattern === "fancy-stripe";
   const isMapleStar = s.pattern === "maple-star";
   const isLoveInAMist = s.pattern === "love-in-a-mist";
+  const isFourXStar = s.pattern === "four-x-star";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -2519,7 +2520,68 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "four-x-star") {
+    // Four X Star: strict 5×5 grid of 25 equal cells (u = blockSize / 5).
+    //
+    // Per block:
+    //   Fabric A (bg)     : 8 plain squares (4 block corners + 4 around center)
+    //                       + the background half of all 8 HST units
+    //   Fabric B (accent) : the accent half of all 8 HST units
+    //   Fabric C (squares): 4 plain squares set diagonally around the center
+    //   Fabric D (dark)   : 5 plain squares forming the X (center + 4 edge middles)
+    //
+    // HSTs are made two-at-a-time: 1 Fabric A start square + 1 Fabric B start
+    // square = 2 finished HSTs, so 8 HSTs need 4 + 4 starting squares.
+    const u = s.blockSize / 5;
+    const sqCut = u + SEAM;
+    const hstCut = u + HST_EXTRA;
+
+    const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
+    const accFab = (s.assignments["accent"] ?? "B") as FabricKey;
+    const sqFab = (s.assignments["squares"] ?? "C") as FabricKey;
+    const darkFab = (s.assignments["dark"] ?? "D") as FabricKey;
+
+    addSquares(reqs[bgFab], `Plain background squares (${u.toFixed(2)}" finished) — 4 block corners + 4 around the center`, 8 * blockCount, sqCut, s.fabricWidth);
+    addSquares(reqs[bgFab], `HST starting squares (background half) — ${u.toFixed(2)}" finished`, 4 * blockCount, hstCut, s.fabricWidth);
+    addSquares(reqs[accFab], `HST starting squares (star-point half) — ${u.toFixed(2)}" finished`, 4 * blockCount, hstCut, s.fabricWidth);
+    addSquares(reqs[sqFab], `Inner accent squares (${u.toFixed(2)}" finished) — 4 per block`, 4 * blockCount, sqCut, s.fabricWidth);
+    addSquares(reqs[darkFab], `X squares (${u.toFixed(2)}" finished) — center + 4 edge middles`, 5 * blockCount, sqCut, s.fabricWidth);
+
+    notes.push(
+      `Each Four X Star block is a 5×5 grid of 25 equal cells (each ${u.toFixed(2)}" finished). Cut per block: 8 Fabric ${bgFab} squares at ${sqCut.toFixed(2)}" × ${sqCut.toFixed(2)}"; 4 Fabric ${sqFab} squares at ${sqCut.toFixed(2)}" × ${sqCut.toFixed(2)}"; 5 Fabric ${darkFab} squares at ${sqCut.toFixed(2)}" × ${sqCut.toFixed(2)}"; and 4 Fabric ${bgFab} + 4 Fabric ${accFab} HST starting squares at ${hstCut.toFixed(3)}" × ${hstCut.toFixed(3)}".`,
+    );
+    notes.push(
+      `Half-square triangles (8 per block): pair one Fabric ${bgFab} and one Fabric ${accFab} ${hstCut.toFixed(3)}" square right sides together, draw a diagonal on the back of the lighter square, sew a scant 1/4" on both sides of the line, cut on the line, press open, and trim each unit to ${sqCut.toFixed(2)}" × ${sqCut.toFixed(2)}". Each pair yields 2 HSTs, so 4 pairs give the 8 units one block needs.`,
+    );
+    notes.push(
+      `Four X Star layout — build it row by row (positions are column 1–5, left to right):\n` +
+        `Row 1: Fabric ${bgFab} square · HST (Fabric ${accFab} triangle in the BOTTOM-LEFT corner) · Fabric ${darkFab} square · HST (Fabric ${accFab} in the BOTTOM-RIGHT) · Fabric ${bgFab} square.\n` +
+        `Row 2: HST (Fabric ${accFab} in the TOP-RIGHT) · Fabric ${sqFab} square · Fabric ${bgFab} square · Fabric ${sqFab} square · HST (Fabric ${accFab} in the TOP-LEFT).\n` +
+        `Row 3: Fabric ${darkFab} · Fabric ${bgFab} · Fabric ${darkFab} · Fabric ${bgFab} · Fabric ${darkFab}.\n` +
+        `Row 4: HST (Fabric ${accFab} in the BOTTOM-RIGHT) · Fabric ${sqFab} · Fabric ${bgFab} · Fabric ${sqFab} · HST (Fabric ${accFab} in the BOTTOM-LEFT).\n` +
+        `Row 5: Fabric ${bgFab} square · HST (Fabric ${accFab} in the TOP-LEFT) · Fabric ${darkFab} square · HST (Fabric ${accFab} in the TOP-RIGHT) · Fabric ${bgFab} square.\n` +
+        `Check as you go: the two accent triangles nearest each Fabric ${sqFab} square should point at that square's OUTER corner, forming one arm of the X. The whole block has 90° rotational symmetry — rotate it a quarter turn and it looks identical.`,
+    );
+    notes.push(
+      `Four X Star Assembly Tip: sew each row of 5 units together pressing seams in alternating directions row to row, then join the 5 rows and press. Across all ${blockCount} blocks: Fabric ${bgFab} = ${8 * blockCount} plain squares + ${4 * blockCount} HST starting squares; Fabric ${accFab} = ${4 * blockCount} HST starting squares; Fabric ${sqFab} = ${4 * blockCount} squares; Fabric ${darkFab} = ${5 * blockCount} squares.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
+
 
 
 
@@ -2598,7 +2660,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "cabin-in-the-cotton" ||
     s.pattern === "fancy-stripe" ||
     s.pattern === "maple-star" ||
-    s.pattern === "love-in-a-mist";
+    s.pattern === "love-in-a-mist" ||
+    s.pattern === "four-x-star";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
