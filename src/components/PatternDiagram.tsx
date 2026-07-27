@@ -1082,6 +1082,14 @@ function renderInner(
       const outer = get("outer", "C");
       return <LoveInAMistBlock size={200} bg={bg} accent={accent} outer={outer} />;
     }
+    case "four-x-star": {
+      const bg = get("bg", "A");
+      const acc = get("accent", "B");
+      const sq = get("squares", "C");
+      const dark = get("dark", "D");
+      return <FourXStarBlock size={200} bg={bg} acc={acc} sq={sq} dark={dark} />;
+    }
+
 
   }
 }
