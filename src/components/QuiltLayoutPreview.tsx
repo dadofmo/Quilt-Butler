@@ -256,38 +256,9 @@ export function QuiltLayoutPreview({
                   );
                 }),
               )}
-            {/* Hairline grid (only when there's no sashing — sashing already
-                provides visible separation between blocks). Skipped for
-                Irish Chain so the diagonal chain reads as continuous
-                across block boundaries. */}
-            {sashingWidth === 0 && pattern !== "irish-chain" && (
-              <>
-                {Array.from({ length: blocksAcross + 1 }).map((_, i) => (
-                  <line
-                    key={`v-${i}`}
-                    x1={i * cellW}
-                    y1={0}
-                    x2={i * cellW}
-                    y2={innerH}
-                    stroke="white"
-                    strokeWidth={2}
-                    vectorEffect="non-scaling-stroke"
-                  />
-                ))}
-                {Array.from({ length: blocksDown + 1 }).map((_, j) => (
-                  <line
-                    key={`h-${j}`}
-                    x1={0}
-                    y1={j * cellH}
-                    x2={innerW}
-                    y2={j * cellH}
-                    stroke="white"
-                    strokeWidth={2}
-                    vectorEffect="non-scaling-stroke"
-                  />
-                ))}
-              </>
-            )}
+            {/* No hairline grid: blocks butt up flush. Separation between
+                blocks comes from sashing only (never a white stroke). */}
+
           </svg>
         </div>
         <p className="text-muted-foreground max-w-[220px] text-center text-[11px]">
