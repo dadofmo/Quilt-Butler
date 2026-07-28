@@ -81,8 +81,8 @@ function PatternPickerInner() {
         <img
           src={quiltButlerLogo}
           alt="QuiltButler quilt planner and fabric calculator logo"
-          width={512}
-          height={512}
+          width={384}
+          height={384}
           fetchPriority="high"
           loading="eager"
           decoding="async"
