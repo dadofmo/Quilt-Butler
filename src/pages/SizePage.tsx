@@ -792,7 +792,7 @@ function SizeStepInner() {
                                                       ? "Sashing separates each Streak of Lightning block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 to keep the continuous zigzag effect (recommended)."
                                                       : isShoofly
                                                         ? "Sashing separates each Shoofly block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for the classic edge-to-edge look (recommended)."
-                                                        : "Sashing separates each Bear Paw block — common widths are 1.5\", 2\", 2.5\", or 3\". Use 0 for no sashing."}
+                                                        : `Sashing separates each ${getPattern(planner.pattern)?.name ?? "quilt"} block — common widths are 1.5", 2", 2.5", or 3". Use 0 for no sashing.`}
             </p>
             {!sashingValid && (
               <p className="text-destructive mt-2 text-sm font-medium">

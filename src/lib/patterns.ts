@@ -1102,6 +1102,52 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "F" },
     ],
   },
+  {
+    id: "antique-tile",
+    name: "Antique Tile",
+    hasMath: true,
+    intro:
+      "Antique Tile is a straight-seam block with no triangles at all — every piece is a square or a rectangle. It is drafted on a 6-unit grid where the rows and columns measure 1-1-2-1-1, so the middle row and middle column are twice as wide as the others. A big Fabric E square sits in the middle, framed by four Fabric D rectangles, with four small Fabric C squares tucked into the diagonal corners of that frame. Four Fabric B rectangles fill the middle of each outer edge, and Fabric A forms the four bold corner L-shapes (one long rectangle plus one small square each).",
+    sections: [
+      {
+        id: "corner",
+        label: "Corner blocks (Fabric A)",
+        defaultFabric: "A",
+        hint: "The four bold corner L-shapes — each is one long rectangle across the top/bottom plus one small square beside it. Usually the darkest fabric so the tile reads as framed.",
+      },
+      {
+        id: "edge",
+        label: "Outer edge rectangles (Fabric B)",
+        defaultFabric: "B",
+        hint: "The four wide rectangles centred on each outer edge of the block (top, bottom, left and right). A medium tone works nicely here.",
+      },
+      {
+        id: "accent",
+        label: "Small accent squares (Fabric C)",
+        defaultFabric: "C",
+        hint: "The four small squares that sit diagonally out from the corners of the centre frame. This is the little pop of colour in the block.",
+      },
+      {
+        id: "frame",
+        label: "Centre frame rectangles (Fabric D)",
+        defaultFabric: "D",
+        hint: "The four rectangles that box in the big centre square — one above, one below, one each side.",
+      },
+      {
+        id: "center",
+        label: "Centre square (Fabric E)",
+        defaultFabric: "E",
+        hint: "The single large square in the middle of the block. A great spot for a feature print or your lightest fabric.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "F",
+        hint: "Optional strips of fabric that separate each Antique Tile block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "G" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

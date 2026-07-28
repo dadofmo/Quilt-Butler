@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock } from "./PatternDiagram";
 
 
 interface Props {
@@ -13,6 +13,7 @@ const C = {
   b: "var(--fabric-b)",
   c: "var(--fabric-c)",
   d: "var(--fabric-d)",
+  e: "var(--fabric-e)",
 };
 
 
@@ -85,6 +86,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Love in a Mist quilt block diagram — a 3x3 nine-patch with a plain center square, four on-point diamonds on each edge, and four small four-patch corner units with accent HSTs",
   "four-x-star":
     "Four X Star quilt block diagram — a 5x5 grid with five dark squares in an X through the block, four accent squares around the center, and eight half-square-triangle units whose accent triangles meet in pairs to form four X-shaped star arms",
+  "antique-tile":
+    "Antique Tile quilt block diagram — an all-rectangle block on a 1-1-2-1-1 grid with a large centre square, four framing rectangles, four small accent squares and dark corner L-shapes",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -858,6 +861,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return (
         <svg {...common}>
           <FourXStarBlock size={90} bg={C.a} acc={C.b} sq={C.c} dark={C.d} />
+        </svg>
+      );
+    }
+    case "antique-tile": {
+      return (
+        <svg {...common}>
+          <AntiqueTileBlock size={90} corner={C.a} edge={C.b} accent={C.c} frame={C.d} center={C.e} />
         </svg>
       );
     }
