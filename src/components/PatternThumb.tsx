@@ -13,6 +13,7 @@ const C = {
   b: "var(--fabric-b)",
   c: "var(--fabric-c)",
   d: "var(--fabric-d)",
+  e: "var(--fabric-e)",
 };
 
 
