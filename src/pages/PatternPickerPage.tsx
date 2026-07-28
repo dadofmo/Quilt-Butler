@@ -10,8 +10,8 @@ import { isUnlocked } from "@/lib/license";
 import { Lock } from "lucide-react";
 
 import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
-import jellyRollBadge from "@/assets/jelly-roll-badge.png";
-import fatQuarterBadge from "@/assets/fat-quarter-badge.png";
+import jellyRollBadge from "@/assets/jelly-roll-badge.webp";
+import fatQuarterBadge from "@/assets/fat-quarter-badge.webp";
 
 const THUMB_PX = 110;
 const BADGE_PX = 70; // 50% bigger than the prior ~46px badge
@@ -81,8 +81,8 @@ function PatternPickerInner() {
         <img
           src={quiltButlerLogo}
           alt="QuiltButler quilt planner and fabric calculator logo"
-          width={512}
-          height={512}
+          width={384}
+          height={384}
           fetchPriority="high"
           loading="eager"
           decoding="async"
@@ -120,6 +120,10 @@ function PatternPickerInner() {
                     <img
                       src={p.id === "rail-fence" ? jellyRollBadge : fatQuarterBadge}
                       alt={p.id === "rail-fence" ? "Jelly Roll Friendly" : "Fat Quarter Friendly"}
+                      width={BADGE_PX}
+                      height={BADGE_PX}
+                      loading="lazy"
+                      decoding="async"
                       className="pointer-events-none absolute -translate-x-1/2 translate-y-1/2"
                       style={{
                         width: BADGE_PX,
