@@ -1316,7 +1316,72 @@ function IdahoBeautyBlock({
   );
 }
 
-export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock };
+export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock };
+
+/**
+ * Shared renderer for "Antique Tile" — a straight-seam block with no
+ * triangles. Drafted on a 6-unit grid with 1-1-2-1-1 row/column tracks:
+ *
+ *   ┌──── A ────┬─ B ─┬──── A ────┐   row 1 (1u tall)
+ *   │ A │  C  │   D   │  C  │ A   │   row 2 (1u tall)
+ *   │ B │  D  │   E   │  D  │ B   │   row 3 (2u tall)
+ *   │ A │  C  │   D   │  C  │ A   │   row 4 (1u tall)
+ *   └──── A ────┴─ B ─┴──── A ────┘   row 5 (1u tall)
+ *
+ * Column tracks are 1u, 1u, 2u, 1u, 1u (6u total), matching the rows, so the
+ * block has full 90° rotational symmetry.
+ */
+function AntiqueTileBlock({
+  size,
+  corner,
+  edge,
+  accent,
+  frame,
+  center,
+}: {
+  size: number;
+  corner: string;
+  edge: string;
+  accent: string;
+  frame: string;
+  center: string;
+}) {
+  const u = size / 6;
+  const R = (x: number, y: number, w: number, h: number, fill: string, key: string) => (
+    <rect key={key} x={x * u} y={y * u} width={w * u} height={h * u} fill={fill} />
+  );
+  return (
+    <>
+      <rect x={0} y={0} width={size} height={size} fill={corner} />
+      {/* Row 1 — corner rectangles either side of the top edge rectangle */}
+      {R(0, 0, 2, 1, corner, "at-r1c1")}
+      {R(2, 0, 2, 1, edge, "at-r1c3")}
+      {R(4, 0, 2, 1, corner, "at-r1c5")}
+      {/* Row 2 */}
+      {R(0, 1, 1, 1, corner, "at-r2c1")}
+      {R(1, 1, 1, 1, accent, "at-r2c2")}
+      {R(2, 1, 2, 1, frame, "at-r2c3")}
+      {R(4, 1, 1, 1, accent, "at-r2c4")}
+      {R(5, 1, 1, 1, corner, "at-r2c5")}
+      {/* Row 3 — the tall middle row */}
+      {R(0, 2, 1, 2, edge, "at-r3c1")}
+      {R(1, 2, 1, 2, frame, "at-r3c2")}
+      {R(2, 2, 2, 2, center, "at-r3c3")}
+      {R(4, 2, 1, 2, frame, "at-r3c4")}
+      {R(5, 2, 1, 2, edge, "at-r3c5")}
+      {/* Row 4 — mirror of row 2 */}
+      {R(0, 4, 1, 1, corner, "at-r4c1")}
+      {R(1, 4, 1, 1, accent, "at-r4c2")}
+      {R(2, 4, 2, 1, frame, "at-r4c3")}
+      {R(4, 4, 1, 1, accent, "at-r4c4")}
+      {R(5, 4, 1, 1, corner, "at-r4c5")}
+      {/* Row 5 — mirror of row 1 */}
+      {R(0, 5, 2, 1, corner, "at-r5c1")}
+      {R(2, 5, 2, 1, edge, "at-r5c3")}
+      {R(4, 5, 2, 1, corner, "at-r5c5")}
+    </>
+  );
+}
 
 /**
  * Shared renderer for "Four X Star" — a strict 5×5 grid of 25 equal cells.
