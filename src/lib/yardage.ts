@@ -177,9 +177,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isMapleStar = s.pattern === "maple-star";
   const isLoveInAMist = s.pattern === "love-in-a-mist";
   const isFourXStar = s.pattern === "four-x-star";
+  const isAntiqueTile = s.pattern === "antique-tile";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -2761,7 +2762,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "fancy-stripe" ||
     s.pattern === "maple-star" ||
     s.pattern === "love-in-a-mist" ||
-    s.pattern === "four-x-star";
+    s.pattern === "four-x-star" ||
+    s.pattern === "antique-tile";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
