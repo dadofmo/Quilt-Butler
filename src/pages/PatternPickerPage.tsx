@@ -120,6 +120,10 @@ function PatternPickerInner() {
                     <img
                       src={p.id === "rail-fence" ? jellyRollBadge : fatQuarterBadge}
                       alt={p.id === "rail-fence" ? "Jelly Roll Friendly" : "Fat Quarter Friendly"}
+                      width={BADGE_PX}
+                      height={BADGE_PX}
+                      loading="lazy"
+                      decoding="async"
                       className="pointer-events-none absolute -translate-x-1/2 translate-y-1/2"
                       style={{
                         width: BADGE_PX,
