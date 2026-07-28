@@ -2580,6 +2580,106 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "antique-tile") {
+    // Antique Tile: straight seams only — no triangles anywhere.
+    // 6-unit drafting grid with 1-1-2-1-1 row/column tracks (u = blockSize / 6).
+    //
+    // Per block:
+    //   Fabric A (corner): 4 rectangles 2u × 1u + 4 squares 1u × 1u
+    //   Fabric B (edge)  : 4 rectangles 2u × 1u (outer edge middles)
+    //   Fabric C (accent): 4 squares 1u × 1u
+    //   Fabric D (frame) : 4 rectangles 2u × 1u (around the centre square)
+    //   Fabric E (center): 1 square 2u × 2u
+    const u = s.blockSize / 6;
+    const smallCut = u + SEAM;
+    const longCut = 2 * u + SEAM;
+    const centerCut = 2 * u + SEAM;
+
+    const cornerFab = (s.assignments["corner"] ?? "A") as FabricKey;
+    const edgeFab = (s.assignments["edge"] ?? "B") as FabricKey;
+    const accentFab = (s.assignments["accent"] ?? "C") as FabricKey;
+    const frameFab = (s.assignments["frame"] ?? "D") as FabricKey;
+    const centerFab = (s.assignments["center"] ?? "E") as FabricKey;
+
+    addRails(
+      reqs[cornerFab],
+      `Corner rectangles (${(2 * u).toFixed(2)}" × ${u.toFixed(2)}" finished) — 4 per block`,
+      4 * blockCount,
+      longCut,
+      smallCut,
+      s.fabricWidth,
+    );
+    addSquares(
+      reqs[cornerFab],
+      `Corner squares (${u.toFixed(2)}" finished) — 4 per block`,
+      4 * blockCount,
+      smallCut,
+      s.fabricWidth,
+    );
+    addRails(
+      reqs[edgeFab],
+      `Outer edge rectangles (${(2 * u).toFixed(2)}" × ${u.toFixed(2)}" finished) — 4 per block`,
+      4 * blockCount,
+      longCut,
+      smallCut,
+      s.fabricWidth,
+    );
+    addSquares(
+      reqs[accentFab],
+      `Small accent squares (${u.toFixed(2)}" finished) — 4 per block`,
+      4 * blockCount,
+      smallCut,
+      s.fabricWidth,
+    );
+    addRails(
+      reqs[frameFab],
+      `Centre frame rectangles (${(2 * u).toFixed(2)}" × ${u.toFixed(2)}" finished) — 4 per block`,
+      4 * blockCount,
+      longCut,
+      smallCut,
+      s.fabricWidth,
+    );
+    addSquares(
+      reqs[centerFab],
+      `Centre squares (${(2 * u).toFixed(2)}" finished) — 1 per block`,
+      1 * blockCount,
+      centerCut,
+      s.fabricWidth,
+    );
+
+    notes.push(
+      `Each Antique Tile block is drafted on a 6-unit grid (u = ${u.toFixed(2)}" finished) with row and column tracks of 1-1-2-1-1, so the middle row and middle column are ${(2 * u).toFixed(2)}" while the others are ${u.toFixed(2)}". Every piece is a square or a rectangle — there are no triangles and no diagonal cuts in this block.`,
+    );
+    notes.push(
+      `Cut per block (all measurements include the 1/4" seam allowance): Fabric ${cornerFab} — 4 rectangles ${longCut.toFixed(2)}" × ${smallCut.toFixed(2)}" and 4 squares ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}"; Fabric ${edgeFab} — 4 rectangles ${longCut.toFixed(2)}" × ${smallCut.toFixed(2)}"; Fabric ${accentFab} — 4 squares ${smallCut.toFixed(2)}" × ${smallCut.toFixed(2)}"; Fabric ${frameFab} — 4 rectangles ${longCut.toFixed(2)}" × ${smallCut.toFixed(2)}"; Fabric ${centerFab} — 1 square ${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}".`,
+    );
+    notes.push(
+      `Antique Tile layout — build it in 5 rows (left to right). Rows 1, 2, 4 and 5 finish ${u.toFixed(2)}" tall; row 3 finishes ${(2 * u).toFixed(2)}" tall.\n` +
+        `Row 1: Fabric ${cornerFab} rectangle (laid horizontally) · Fabric ${edgeFab} rectangle (horizontal) · Fabric ${cornerFab} rectangle (horizontal).\n` +
+        `Row 2: Fabric ${cornerFab} square · Fabric ${accentFab} square · Fabric ${frameFab} rectangle (horizontal) · Fabric ${accentFab} square · Fabric ${cornerFab} square.\n` +
+        `Row 3: Fabric ${edgeFab} rectangle (turned VERTICALLY) · Fabric ${frameFab} rectangle (vertical) · Fabric ${centerFab} centre square · Fabric ${frameFab} rectangle (vertical) · Fabric ${edgeFab} rectangle (vertical).\n` +
+        `Row 4: same as row 2.\n` +
+        `Row 5: same as row 1.\n` +
+        `Check as you go: the block has 90° rotational symmetry — turn it a quarter turn and it should look identical.`,
+    );
+    notes.push(
+      `Antique Tile Assembly Tip: press the seams in each row in alternating directions so the joins nest when you sew the rows together, then press the row seams away from the tall middle row. Across all ${blockCount} blocks: Fabric ${cornerFab} = ${4 * blockCount} rectangles + ${4 * blockCount} squares; Fabric ${edgeFab} = ${4 * blockCount} rectangles; Fabric ${accentFab} = ${4 * blockCount} squares; Fabric ${frameFab} = ${4 * blockCount} rectangles; Fabric ${centerFab} = ${blockCount} centre squares.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "F") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
