@@ -10,8 +10,8 @@ import { isUnlocked } from "@/lib/license";
 import { Lock } from "lucide-react";
 
 import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
-import jellyRollBadge from "@/assets/jelly-roll-badge.png";
-import fatQuarterBadge from "@/assets/fat-quarter-badge.png";
+import jellyRollBadge from "@/assets/jelly-roll-badge.webp";
+import fatQuarterBadge from "@/assets/fat-quarter-badge.webp";
 
 const THUMB_PX = 110;
 const BADGE_PX = 70; // 50% bigger than the prior ~46px badge
