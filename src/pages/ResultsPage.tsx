@@ -175,7 +175,7 @@ function ResultsStepInner() {
                         </div>
                       </td>
                       <td className="text-muted-foreground px-4 py-3 text-sm">
-                        {f.pieces.map((p) => p.label).join(", ")}
+                        {f.pieces.map((p) => p.label.replace("||", " — then ")).join(", ")}
                       </td>
                       <td className="px-4 py-3 text-right font-semibold">{f.yards} yd</td>
                     </tr>
