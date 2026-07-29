@@ -88,6 +88,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Four X Star quilt block diagram — a 5x5 grid with five dark squares in an X through the block, four accent squares around the center, and eight half-square-triangle units whose accent triangles meet in pairs to form four X-shaped star arms",
   "antique-tile":
     "Antique Tile quilt block diagram — an all-rectangle block on a 1-1-2-1-1 grid with a large centre square, four framing rectangles, four small accent squares and dark corner L-shapes",
+  "economy-block":
+    "Economy Block quilt block diagram — a double square-in-a-square with a straight centre square, four first-round triangles setting it on point, and four large outer corner triangles",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -868,6 +870,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return (
         <svg {...common}>
           <AntiqueTileBlock size={90} corner={C.a} edge={C.b} accent={C.c} frame={C.d} center={C.e} />
+        </svg>
+      );
+    }
+    case "economy-block": {
+      return (
+        <svg {...common}>
+          <EconomyBlock size={90} center={C.a} round1={C.b} round2={C.c} />
         </svg>
       );
     }
