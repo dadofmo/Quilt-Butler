@@ -178,9 +178,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isLoveInAMist = s.pattern === "love-in-a-mist";
   const isFourXStar = s.pattern === "four-x-star";
   const isAntiqueTile = s.pattern === "antique-tile";
+  const isEconomyBlock = s.pattern === "economy-block";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -2837,7 +2838,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "maple-star" ||
     s.pattern === "love-in-a-mist" ||
     s.pattern === "four-x-star" ||
-    s.pattern === "antique-tile";
+    s.pattern === "antique-tile" ||
+    s.pattern === "economy-block";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
