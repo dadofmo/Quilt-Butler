@@ -178,9 +178,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isLoveInAMist = s.pattern === "love-in-a-mist";
   const isFourXStar = s.pattern === "four-x-star";
   const isAntiqueTile = s.pattern === "antique-tile";
+  const isEconomyBlock = s.pattern === "economy-block";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -2681,6 +2682,80 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "economy-block") {
+    // Economy Block (double square-in-a-square).
+    //
+    // Geometry, working outward from the middle:
+    //   Round 2 (outer corner triangles) frame an on-point square whose
+    //   points touch the midpoints of the block edges → that unit's finished
+    //   side = blockSize / √2.
+    //   Round 1 (first triangles) frame the centre square the same way inside
+    //   that unit → centre finished side = (blockSize / √2) / √2 = blockSize / 2.
+    //   Two 45° rotations = 90°, so the centre square ends up straight (not
+    //   on point), exactly as in the reference diagram.
+    //
+    // Cutting per block:
+    //   Centre square: (blockSize / 2) + 1/2" seam allowance.
+    //   Round 1: 2 squares at (finished side of the round-1 unit) / 2 + 7/8",
+    //            i.e. (blockSize / √2) / 2 + 7/8", each cut once on the
+    //            diagonal → 4 triangles.
+    //   Round 2: 2 squares at (blockSize / 2) + 7/8", each cut once on the
+    //            diagonal → 4 triangles.
+    const SQRT2 = Math.SQRT2;
+    const centerFinished = s.blockSize / 2;
+    const round1UnitFinished = s.blockSize / SQRT2;
+    const centerCut = centerFinished + SEAM;
+    const round1Cut = round1UnitFinished / 2 + HST_EXTRA;
+    const round2Cut = s.blockSize / 2 + HST_EXTRA;
+
+    const centerFab = (s.assignments["center"] ?? "A") as FabricKey;
+    const r1Fab = (s.assignments["round1"] ?? "B") as FabricKey;
+    const r2Fab = (s.assignments["round2"] ?? "C") as FabricKey;
+
+    const centerCount = blockCount;
+    const r1SqCount = 2 * blockCount;
+    const r2SqCount = 2 * blockCount;
+
+    addSquares(reqs[centerFab], "Centre squares", centerCount, centerCut, s.fabricWidth);
+    addSquares(reqs[r1Fab], "Round 1 triangle squares (cut once on the diagonal)", r1SqCount, round1Cut, s.fabricWidth);
+    addSquares(reqs[r2Fab], "Round 2 corner triangle squares (cut once on the diagonal)", r2SqCount, round2Cut, s.fabricWidth);
+
+    notes.push(
+      `Each Economy Block = 1 centre square + 4 round-1 triangles + 4 outer corner triangles. Finished sizes inside a ${s.blockSize}" block: centre square ${centerFinished.toFixed(2)}" (it sits STRAIGHT, not on point), round-1 unit ${round1UnitFinished.toFixed(2)}" measured on point.`,
+    );
+    notes.push(
+      `Cutting per block — Fabric ${centerFab}: 1 square at ${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}". Fabric ${r1Fab}: 2 squares at ${round1Cut.toFixed(2)}", each cut ONCE corner-to-corner on the diagonal → 4 triangles. Fabric ${r2Fab}: 2 squares at ${round2Cut.toFixed(2)}", each cut ONCE on the diagonal → 4 triangles. The +7/8" on the triangle squares is the standard half-square-triangle allowance, because two edges of every triangle land on the bias.`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${centerCount} centre squares (Fabric ${centerFab}), ${r1SqCount} round-1 squares (Fabric ${r1Fab}, yielding ${4 * blockCount} triangles) and ${r2SqCount} corner squares (Fabric ${r2Fab}, yielding ${4 * blockCount} triangles).`,
+    );
+    notes.push(
+      `How to sew ONE block — ROUND 1. Fold each round-1 triangle in half along its long (bias) edge and finger-press to mark its centre; fold the centre square in half both ways and crease the midpoints too. Place one triangle on the TOP edge of the centre square right sides together, long edge along the square's edge, creases matched — the triangle's tips will hang past each corner by about 3/8". Sew a 1/4" seam, unfold, press toward the triangle. Repeat on the BOTTOM edge, then the LEFT, then the RIGHT (opposite sides first keeps the unit square).`,
+    );
+    notes.push(
+      `ROUND 1 TRIM. You now have a square with the centre sitting on point. Trim it to ${(round1UnitFinished + SEAM).toFixed(2)}" square, keeping exactly 1/4" of fabric beyond each point of the centre square on all four sides — that 1/4" is the seam allowance that stops the points getting chopped off later. Do not skip this trim.`,
+    );
+    notes.push(
+      `ROUND 2. Repeat the exact same process with the 4 Fabric ${r2Fab} triangles: crease-mark centres, add the triangles to opposite sides first (top, bottom, then left, right), press outward each time. Trim the finished block to ${(s.blockSize + SEAM).toFixed(2)}" square with 1/4" beyond the points of the round-1 square on every side. Finished size in the quilt: ${s.blockSize}".`,
+    );
+    notes.push(
+      `Economy Block tips: (1) The triangle squares are cut generously on purpose — trimming twice is what keeps every point crisp. (2) Press seams toward the triangles after each round so the bulk falls away from the points. (3) Handle the long bias edges gently and avoid tugging while sewing, or the block will bow. (4) Starch or spray-size the triangle fabric before cutting to tame the bias. (5) Chain-piece all your "top and bottom" triangles across every block first, then all the sides — it's much faster and more consistent.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
@@ -2763,7 +2838,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "maple-star" ||
     s.pattern === "love-in-a-mist" ||
     s.pattern === "four-x-star" ||
-    s.pattern === "antique-tile";
+    s.pattern === "antique-tile" ||
+    s.pattern === "economy-block";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

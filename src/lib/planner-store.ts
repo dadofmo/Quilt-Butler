@@ -37,7 +37,8 @@ export type PatternId =
   | "maple-star"
   | "love-in-a-mist"
   | "four-x-star"
-  | "antique-tile";
+  | "antique-tile"
+  | "economy-block";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"

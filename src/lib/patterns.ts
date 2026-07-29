@@ -1148,6 +1148,40 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "G" },
     ],
   },
+  {
+    id: "economy-block",
+    name: "Economy Block",
+    hasMath: true,
+    intro:
+      "The Economy Block (also called a double square-in-a-square) is a centre square framed by two rounds of corner triangles. Round 1 sets the centre square on point inside a smaller square; round 2 sets THAT unit on point again inside the finished block. Three fabrics: the centre square, the first ring of triangles, and the outer corner triangles. It's beginner-friendly — only two shapes to cut, and every seam is straight.",
+    sections: [
+      {
+        id: "center",
+        label: "Centre square (1 per block)",
+        defaultFabric: "A",
+        hint: "The square in the very middle of the block. A great spot for a feature print or fussy-cut motif since it sits straight, not on point.",
+      },
+      {
+        id: "round1",
+        label: "First round of triangles (4 per block)",
+        defaultFabric: "B",
+        hint: "The 4 triangles that frame the centre square and turn it on point. Choose a medium tone so it separates the centre from the outer corners.",
+      },
+      {
+        id: "round2",
+        label: "Outer corner triangles (4 per block)",
+        defaultFabric: "C",
+        hint: "The 4 big triangles in the corners of the finished block. Usually the background or darkest fabric so the two rings read clearly.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "D",
+        hint: "Optional strips of fabric that separate each Economy Block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
