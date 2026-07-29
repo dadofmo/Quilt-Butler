@@ -1084,16 +1084,21 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                 {(() => {
                   const inStripW = usedW - 30; // px to the right of the badge in the colored region
                   const fullAvailW = usedW + leftoverW - 30; // can borrow leftover space
-                  const tag = r.groupLabel ? `${r.groupLabel} — ` : "";
+                  // A groupLabel may carry a trailing instruction after "||"
+                  // (e.g. "cut on the diagonal") that must read AFTER the
+                  // sub-cut step, not before it.
+                  const [gLabel, gSuffix] = (r.groupLabel ?? "").split("||");
+                  const tag = gLabel ? `${gLabel} — ` : "";
+                  const suf = gSuffix ? `, ${gSuffix}` : "";
                   const fullLabel = r.isBorder
                     ? `Border strip — ${fabricWidth}" wide (full fabric width), no sub-cuts`
-                    : `${tag}sub-cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${r.subCutWidth?.toFixed(2)}" → finished piece ${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}"`;
+                    : `${tag}sub-cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${r.subCutWidth?.toFixed(2)}" → finished piece ${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}"${suf}`;
                   const midLabel = r.isBorder
                     ? `Border — full ${fabricWidth}" width`
-                    : `${tag}sub-cut ${r.subCutCount} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`;
+                    : `${tag}sub-cut ${r.subCutCount} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")${suf}`;
                   const shortLabel = r.isBorder
                     ? `Border (full width)`
-                    : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
+                    : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"${suf}`;
                   const CHAR_W = 5; // ~5px per char at 10px font
                   // Prefer in-strip fit at 10px; otherwise allow overflow.
                   let label = shortLabel;
