@@ -175,7 +175,7 @@ function ResultsStepInner() {
                         </div>
                       </td>
                       <td className="text-muted-foreground px-4 py-3 text-sm">
-                        {f.pieces.map((p) => p.label).join(", ")}
+                        {f.pieces.map((p) => p.label.replace("||", " — then ")).join(", ")}
                       </td>
                       <td className="px-4 py-3 text-right font-semibold">{f.yards} yd</td>
                     </tr>
@@ -976,10 +976,11 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                     this region to remain legible (see label block below). */}
                 {leftoverW > 1 && (() => {
                   // Re-derive whether the label will overflow into leftover.
-                  const tag = r.groupLabel ? `${r.groupLabel} — ` : "";
+                  const [gLabel0, gSuffix0] = (r.groupLabel ?? "").split("||");
+                  const tag = gLabel0 ? `${gLabel0} — ` : "";
                   const shortLabel = r.isBorder
                     ? `Border (full width)`
-                    : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
+                    : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"${gSuffix0 ? `, ${gSuffix0}` : ""}`;
                   const labelOverflows = shortLabel.length * 5 > usedW - 30;
                   return (
                     <>
@@ -1084,16 +1085,21 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                 {(() => {
                   const inStripW = usedW - 30; // px to the right of the badge in the colored region
                   const fullAvailW = usedW + leftoverW - 30; // can borrow leftover space
-                  const tag = r.groupLabel ? `${r.groupLabel} — ` : "";
+                  // A groupLabel may carry a trailing instruction after "||"
+                  // (e.g. "cut on the diagonal") that must read AFTER the
+                  // sub-cut step, not before it.
+                  const [gLabel, gSuffix] = (r.groupLabel ?? "").split("||");
+                  const tag = gLabel ? `${gLabel} — ` : "";
+                  const suf = gSuffix ? `, ${gSuffix}` : "";
                   const fullLabel = r.isBorder
                     ? `Border strip — ${fabricWidth}" wide (full fabric width), no sub-cuts`
-                    : `${tag}sub-cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${r.subCutWidth?.toFixed(2)}" → finished piece ${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}"`;
+                    : `${tag}sub-cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${r.subCutWidth?.toFixed(2)}" → finished piece ${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}"${suf}`;
                   const midLabel = r.isBorder
                     ? `Border — full ${fabricWidth}" width`
-                    : `${tag}sub-cut ${r.subCutCount} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")`;
+                    : `${tag}sub-cut ${r.subCutCount} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")${suf}`;
                   const shortLabel = r.isBorder
                     ? `Border (full width)`
-                    : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
+                    : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"${suf}`;
                   const CHAR_W = 5; // ~5px per char at 10px font
                   // Prefer in-strip fit at 10px; otherwise allow overflow.
                   let label = shortLabel;
