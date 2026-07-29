@@ -1099,6 +1099,12 @@ function renderInner(
         <AntiqueTileBlock size={200} corner={corner} edge={edge} accent={accent} frame={frame} center={center} />
       );
     }
+    case "economy-block": {
+      const center = get("center", "A");
+      const round1 = get("round1", "B");
+      const round2 = get("round2", "C");
+      return <EconomyBlock size={200} center={center} round1={round1} round2={round2} />;
+    }
 
 
 
@@ -1316,7 +1322,41 @@ function IdahoBeautyBlock({
   );
 }
 
-export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock };
+export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock };
+
+/**
+ * Shared renderer for the "Economy Block" (double square-in-a-square).
+ *
+ *   - Outer corners (round 2) fill the whole block.
+ *   - Round 1 is an on-point square whose points touch the midpoints of the
+ *     block edges → finished side = S/√2.
+ *   - The centre square sits straight (rotated twice by 45° = 90°) with
+ *     finished side = S/2, centred in the block.
+ *
+ * Geometry matches the yardage math in yardage.ts exactly.
+ */
+function EconomyBlock({
+  size,
+  center,
+  round1,
+  round2,
+}: {
+  size: number;
+  center: string;
+  round1: string;
+  round2: string;
+}) {
+  const S = size;
+  const h = S / 2;
+  const q = S / 4;
+  return (
+    <>
+      <rect x={0} y={0} width={S} height={S} fill={round2} />
+      <polygon points={`${h},0 ${S},${h} ${h},${S} 0,${h}`} fill={round1} />
+      <rect x={q} y={q} width={h} height={h} fill={center} />
+    </>
+  );
+}
 
 /**
  * Shared renderer for "Antique Tile" — a straight-seam block with no
