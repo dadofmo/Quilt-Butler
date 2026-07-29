@@ -976,10 +976,11 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                     this region to remain legible (see label block below). */}
                 {leftoverW > 1 && (() => {
                   // Re-derive whether the label will overflow into leftover.
-                  const tag = r.groupLabel ? `${r.groupLabel} — ` : "";
+                  const [gLabel0, gSuffix0] = (r.groupLabel ?? "").split("||");
+                  const tag = gLabel0 ? `${gLabel0} — ` : "";
                   const shortLabel = r.isBorder
                     ? `Border (full width)`
-                    : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"`;
+                    : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"${gSuffix0 ? `, ${gSuffix0}` : ""}`;
                   const labelOverflows = shortLabel.length * 5 > usedW - 30;
                   return (
                     <>
