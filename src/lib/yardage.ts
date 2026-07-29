@@ -2717,8 +2717,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const r2SqCount = 2 * blockCount;
 
     addSquares(reqs[centerFab], "Centre squares", centerCount, centerCut, s.fabricWidth);
-    addSquares(reqs[r1Fab], "Round 1 triangle squares (cut once on the diagonal)", r1SqCount, round1Cut, s.fabricWidth);
-    addSquares(reqs[r2Fab], "Round 2 corner triangle squares (cut once on the diagonal)", r2SqCount, round2Cut, s.fabricWidth);
+    addSquares(reqs[r1Fab], "Round 1 triangle squares — then cut each square on the diagonal", r1SqCount, round1Cut, s.fabricWidth);
+    addSquares(reqs[r2Fab], "Round 2 corner triangle squares — then cut each square on the diagonal", r2SqCount, round2Cut, s.fabricWidth);
 
     notes.push(
       `Each Economy Block = 1 centre square + 4 round-1 triangles + 4 outer corner triangles. Finished sizes inside a ${s.blockSize}" block: centre square ${centerFinished.toFixed(2)}" (it sits STRAIGHT, not on point), round-1 unit ${round1UnitFinished.toFixed(2)}" measured on point.`,
