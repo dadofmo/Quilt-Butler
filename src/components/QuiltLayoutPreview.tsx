@@ -1089,6 +1089,12 @@ function MiniBlock({
         <AntiqueTileBlock size={200} corner={corner} edge={edge} accent={accent} frame={frame} center={center} />
       );
     }
+    case "economy-block": {
+      const center = get("center", "A");
+      const round1 = get("round1", "B");
+      const round2 = get("round2", "C");
+      return <EconomyBlock size={200} center={center} round1={round1} round2={round2} />;
+    }
 
   }
 }
