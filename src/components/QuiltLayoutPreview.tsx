@@ -134,141 +134,252 @@ export function QuiltLayoutPreview({
       </div>
 
       <div className="flex flex-col items-center gap-2">
-        <div className="text-foreground text-xs font-semibold uppercase tracking-wide">
-          Your full quilt
-        </div>
-        <div
-          className="rounded-md shadow-sm overflow-hidden"
-          style={{
-            width: thumbW,
-            height: thumbH,
-            background: borderColor,
-            padding: `${borderPxY}px ${borderPxX}px`,
-            ...(borderPhoto
-              ? {
-                  backgroundImage: `url(${borderPhoto})`,
-                  // Tile the fabric photo at the SAME visual scale as inside
-                  // the blocks (FabricPatternDefs uses ~80 units per 200-unit
-                  // block = 40% of a block). Using "cover" stretched the whole
-                  // photo across the border rectangle, making prints look
-                  // gigantic. Repeat + fixed tile matches a real bolt.
-                  backgroundSize: `${Math.max(24, Math.round(cellW * 0.4))}px ${Math.max(24, Math.round(cellW * 0.4))}px`,
-                  backgroundRepeat: "repeat",
-                  backgroundPosition: "top left",
-                }
-              : {}),
-          }}
-        >
-          <svg
-            width={innerW}
-            height={innerH}
-            viewBox={`0 0 ${innerW} ${innerH}`}
-            className="block"
-            role="img"
-            aria-label="QuiltButler quilt visualizer showing fabric color preview of finished quilt layout"
+        <div className="flex flex-col items-center gap-1">
+          <div className="text-foreground text-xs font-semibold uppercase tracking-wide">
+            Your full quilt
+          </div>
+          <button
+            type="button"
+            onClick={() => setFullOpen(true)}
+            className="text-primary no-print text-[11px] font-medium underline underline-offset-2 hover:opacity-80"
           >
-            {/* No tileSize: each shape independently shows the fabric photo
-                scaled to its bounds — the same way a quilter cuts each strip
-                from the bolt. Every block looks identical and matches the
-                "1 block" preview. */}
-            <FabricPatternDefs photos={photos} />
-            {/* Sashing background fills the inner rectangle so all gaps
-                between blocks (and around the inside edge) show the sashing
-                fabric color. The block tiles draw on top, leaving sashing
-                visible only in the gaps. */}
-            {sashingWidth > 0 && (
-              <rect x={0} y={0} width={innerW} height={innerH} fill={sashingFill} />
-            )}
-            {Array.from({ length: blocksDown }).map((_, j) =>
-              Array.from({ length: blocksAcross }).map((_, i) => {
-                // Rail Fence: rotate every other block 90° for the woven look.
-                // Jacob's Ladder: always rotate every other block 90° so the
-                // ladder diagonals from neighboring blocks meet up to form the
-                // classic on-point diamond secondary pattern — this is
-                // intrinsic to the pattern, not user-toggleable.
-                const railRotate = pattern === "rail-fence" && (i + j) % 2 === 1;
-                const jlRotate =
-                  pattern === "jacobs-ladder" && (i + j) % 2 === 1;
-                const rotate = railRotate || jlRotate;
-                const bx = i * (cellW + sashPxX);
-                const by = j * (cellH + sashPxY);
-                // Irish Chain alternates a chain block with a plain background
-                // block in a checkerboard — corner cell (0,0) is a chain block.
-                const irishPlain = pattern === "irish-chain" && (i + j) % 2 === 1;
-                // Snowball Block: fabrics A and B swap roles on every other
-                // cell — this is what creates the diamond pattern at the seams.
-                const snowballSwap = pattern === "snowball-block" && (i + j) % 2 === 1;
-                // Shoofly (and any future pattern) supports an opt-in
-                // "alternate blocks" toggle that swaps A ↔ B on every other
-                // block for a checkerboard look. Driven by the alternateBlocks
-                // prop set by Step 2.
-                const shooflySwap = pattern === "shoofly" && alternateBlocks && (i + j) % 2 === 1;
-                const swap = snowballSwap || shooflySwap;
-                return (
-                  <svg
-                    key={`${i}-${j}`}
-                    x={bx}
-                    y={by}
-                    width={cellW}
-                    height={cellH}
-                    viewBox="0 0 200 200"
-                    preserveAspectRatio="none"
-                  >
-                    {rotate ? (
-                      <g transform="rotate(90 100 100)">
-                        <MiniBlock
-                          pattern={pattern}
-                          assignments={assignments}
-                          photos={photos}
-                        />
-                      </g>
-                    ) : (
-                      <MiniBlock
-                        pattern={pattern}
-                        assignments={assignments}
-                        photos={photos}
-                        irishPlain={irishPlain}
-                        swap={swap}
-                        row={j}
-                        col={i}
-                      />
-                    )}
-                  </svg>
-                );
-              }),
-            )}
-            {/* Cornerstone squares at interior sashing intersections only
-                (no outer perimeter cornerstones). */}
-            {sashingWidth > 0 && cornerFill &&
-              Array.from({ length: sashCols }).map((_, ci) =>
-                Array.from({ length: sashRows }).map((_, cj) => {
-                  const cx = (ci + 1) * cellW + ci * sashPxX;
-                  const cy = (cj + 1) * cellH + cj * sashPxY;
-                  return (
-                    <rect
-                      key={`cs-${ci}-${cj}`}
-                      x={cx}
-                      y={cy}
-                      width={sashPxX}
-                      height={sashPxY}
-                      fill={cornerFill}
-                    />
-                  );
-                }),
-              )}
-            {/* No hairline grid: blocks butt up flush. Separation between
-                blocks comes from sashing only (never a white stroke). */}
-
-          </svg>
+            See quilt full screen
+          </button>
         </div>
+        <QuiltCanvas {...canvasProps} maxSize={220} />
         <p className="text-muted-foreground max-w-[220px] text-center text-[11px]">
           {blocksAcross} × {blocksDown} blocks
           {hasBorder && <> + border</>}
         </p>
       </div>
+
+      <Dialog open={fullOpen} onOpenChange={setFullOpen}>
+        <DialogContent className="max-w-[96vw] sm:max-w-[96vw] p-4">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-semibold uppercase tracking-wide">
+              Your full quilt
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center">
+            <QuiltCanvas {...canvasProps} maxSize={fullMax} />
+          </div>
+          <p className="text-muted-foreground text-center text-xs">
+            {blocksAcross} × {blocksDown} blocks
+            {hasBorder && <> + border</>}
+          </p>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
+/** Largest square box (px) that comfortably fits the current viewport. */
+function useViewportMax() {
+  const [max, setMax] = useState(320);
+  useEffect(() => {
+    const update = () =>
+      setMax(
+        Math.max(
+          240,
+          Math.floor(Math.min(window.innerWidth * 0.86, window.innerHeight * 0.72)),
+        ),
+      );
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
+  return max;
+}
+
+interface CanvasProps {
+  pattern: PatternId;
+  assignments: SectionAssignments;
+  hasBorder: boolean;
+  borderFabric: FabricKey;
+  blocksAcross: number;
+  blocksDown: number;
+  quiltWidth: number;
+  quiltHeight: number;
+  borderWidth: number;
+  sashingWidth: number;
+  sashingFabric: FabricKey;
+  cornerstoneFabric?: FabricKey;
+  photos?: Partial<Record<FabricKey, string>>;
+  alternateBlocks: boolean;
+}
+
+/**
+ * Renders the finished quilt (border + tiled blocks + sashing) inside a box
+ * whose longest side is `maxSize` px. All internal geometry is proportional
+ * to `maxSize`, so the same code drives the small thumbnail and the
+ * full-screen view.
+ */
+function QuiltCanvas({
+  pattern,
+  assignments,
+  hasBorder,
+  borderFabric,
+  blocksAcross,
+  blocksDown,
+  quiltWidth,
+  quiltHeight,
+  borderWidth,
+  sashingWidth,
+  sashingFabric,
+  cornerstoneFabric,
+  photos,
+  alternateBlocks,
+  maxSize,
+}: CanvasProps & { maxSize: number }) {
+  const MAX = maxSize;
+  const aspect = quiltWidth / quiltHeight;
+  const thumbW = aspect >= 1 ? MAX : Math.round(MAX * aspect);
+  const thumbH = aspect >= 1 ? Math.round(MAX / aspect) : MAX;
+
+  const borderPxX = hasBorder ? (borderWidth / quiltWidth) * thumbW : 0;
+  const borderPxY = hasBorder ? (borderWidth / quiltHeight) * thumbH : 0;
+  const innerW = thumbW - borderPxX * 2;
+  const innerH = thumbH - borderPxY * 2;
+  const sashPxX = sashingWidth > 0 ? (sashingWidth / quiltWidth) * thumbW : 0;
+  const sashPxY = sashingWidth > 0 ? (sashingWidth / quiltHeight) * thumbH : 0;
+  const sashCols = Math.max(0, blocksAcross - 1);
+  const sashRows = Math.max(0, blocksDown - 1);
+  const cellW = (innerW - sashCols * sashPxX) / Math.max(1, blocksAcross);
+  const cellH = (innerH - sashRows * sashPxY) / Math.max(1, blocksDown);
+
+  const sashingFill = fabricFill(sashingFabric, photos);
+  const cornerFill = cornerstoneFabric ? fabricFill(cornerstoneFabric, photos) : null;
+
+  const borderPhoto = hasBorder ? photos?.[borderFabric] : undefined;
+  const borderColor = hasBorder ? FABRIC_COLORS[borderFabric] : "transparent";
+
+  return (
+    <div
+      className="rounded-md shadow-sm overflow-hidden"
+      style={{
+        width: thumbW,
+        height: thumbH,
+        background: borderColor,
+        padding: `${borderPxY}px ${borderPxX}px`,
+        ...(borderPhoto
+          ? {
+              backgroundImage: `url(${borderPhoto})`,
+              // Tile the fabric photo at the SAME visual scale as inside
+              // the blocks (FabricPatternDefs uses ~80 units per 200-unit
+              // block = 40% of a block). Using "cover" stretched the whole
+              // photo across the border rectangle, making prints look
+              // gigantic. Repeat + fixed tile matches a real bolt.
+              backgroundSize: `${Math.max(24, Math.round(cellW * 0.4))}px ${Math.max(24, Math.round(cellW * 0.4))}px`,
+              backgroundRepeat: "repeat",
+              backgroundPosition: "top left",
+            }
+          : {}),
+      }}
+    >
+      <svg
+        width={innerW}
+        height={innerH}
+        viewBox={`0 0 ${innerW} ${innerH}`}
+        className="block"
+        role="img"
+        aria-label="QuiltButler quilt visualizer showing fabric color preview of finished quilt layout"
+      >
+        {/* No tileSize: each shape independently shows the fabric photo
+            scaled to its bounds — the same way a quilter cuts each strip
+            from the bolt. Every block looks identical and matches the
+            "1 block" preview. */}
+        <FabricPatternDefs photos={photos} />
+        {/* Sashing background fills the inner rectangle so all gaps
+            between blocks (and around the inside edge) show the sashing
+            fabric color. The block tiles draw on top, leaving sashing
+            visible only in the gaps. */}
+        {sashingWidth > 0 && (
+          <rect x={0} y={0} width={innerW} height={innerH} fill={sashingFill} />
+        )}
+        {Array.from({ length: blocksDown }).map((_, j) =>
+          Array.from({ length: blocksAcross }).map((_, i) => {
+            // Rail Fence: rotate every other block 90° for the woven look.
+            // Jacob's Ladder: always rotate every other block 90° so the
+            // ladder diagonals from neighboring blocks meet up to form the
+            // classic on-point diamond secondary pattern — this is
+            // intrinsic to the pattern, not user-toggleable.
+            const railRotate = pattern === "rail-fence" && (i + j) % 2 === 1;
+            const jlRotate =
+              pattern === "jacobs-ladder" && (i + j) % 2 === 1;
+            const rotate = railRotate || jlRotate;
+            const bx = i * (cellW + sashPxX);
+            const by = j * (cellH + sashPxY);
+            // Irish Chain alternates a chain block with a plain background
+            // block in a checkerboard — corner cell (0,0) is a chain block.
+            const irishPlain = pattern === "irish-chain" && (i + j) % 2 === 1;
+            // Snowball Block: fabrics A and B swap roles on every other
+            // cell — this is what creates the diamond pattern at the seams.
+            const snowballSwap = pattern === "snowball-block" && (i + j) % 2 === 1;
+            // Shoofly (and any future pattern) supports an opt-in
+            // "alternate blocks" toggle that swaps A ↔ B on every other
+            // block for a checkerboard look. Driven by the alternateBlocks
+            // prop set by Step 2.
+            const shooflySwap = pattern === "shoofly" && alternateBlocks && (i + j) % 2 === 1;
+            const swap = snowballSwap || shooflySwap;
+            return (
+              <svg
+                key={`${i}-${j}`}
+                x={bx}
+                y={by}
+                width={cellW}
+                height={cellH}
+                viewBox="0 0 200 200"
+                preserveAspectRatio="none"
+              >
+                {rotate ? (
+                  <g transform="rotate(90 100 100)">
+                    <MiniBlock
+                      pattern={pattern}
+                      assignments={assignments}
+                      photos={photos}
+                    />
+                  </g>
+                ) : (
+                  <MiniBlock
+                    pattern={pattern}
+                    assignments={assignments}
+                    photos={photos}
+                    irishPlain={irishPlain}
+                    swap={swap}
+                    row={j}
+                    col={i}
+                  />
+                )}
+              </svg>
+            );
+          }),
+        )}
+        {/* Cornerstone squares at interior sashing intersections only
+            (no outer perimeter cornerstones). */}
+        {sashingWidth > 0 && cornerFill &&
+          Array.from({ length: sashCols }).map((_, ci) =>
+            Array.from({ length: sashRows }).map((_, cj) => {
+              const cx = (ci + 1) * cellW + ci * sashPxX;
+              const cy = (cj + 1) * cellH + cj * sashPxY;
+              return (
+                <rect
+                  key={`cs-${ci}-${cj}`}
+                  x={cx}
+                  y={cy}
+                  width={sashPxX}
+                  height={sashPxY}
+                  fill={cornerFill}
+                />
+              );
+            }),
+          )}
+        {/* No hairline grid: blocks butt up flush. Separation between
+            blocks comes from sashing only (never a white stroke). */}
+      </svg>
+    </div>
+  );
+}
+
 
 function MiniBlock({
   pattern,
