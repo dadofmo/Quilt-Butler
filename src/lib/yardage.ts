@@ -179,9 +179,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isFourXStar = s.pattern === "four-x-star";
   const isAntiqueTile = s.pattern === "antique-tile";
   const isEconomyBlock = s.pattern === "economy-block";
+  const isCaliforniaQuilt = s.pattern === "california-quilt";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -2756,6 +2757,86 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "california-quilt") {
+    // California Quilt — a nine-patch drafted on a 6-unit grid (u = blockSize / 6),
+    // so every macro cell finishes 2u × 2u.
+    //
+    // Per block:
+    //   Fabric A (bg)    : 8 rectangles 2u × 1u — two stacked in each corner
+    //                      cell; the inner one of each pair gets a 1u accent
+    //                      stitch-and-flip corner.
+    //   Fabric B (geese) : 4 outer edge rectangles 2u × 1u + 4 goose
+    //                      rectangles 2u × 1u (same cut size = 8 total).
+    //   Fabric C (accent): 12 stitch-and-flip squares 1u (4 corner tips +
+    //                      8 goose sides) + 2 squares cut once on the diagonal
+    //                      → the 4 triangles framing the centre diamond.
+    //   Fabric D (center): 1 square set on point, finished side 2u / √2.
+    const u = s.blockSize / 6;
+    const rectCutW = 2 * u + SEAM;
+    const rectCutH = u + SEAM;
+    const flipCut = u + SEAM;
+    const centerCut = (2 * u) / Math.SQRT2 + SEAM;
+    const centerTriCut = u + HST_EXTRA;
+
+    const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
+    const geeseFab = (s.assignments["geese"] ?? "B") as FabricKey;
+    const accentFab = (s.assignments["accent"] ?? "C") as FabricKey;
+    const centerFab = (s.assignments["center"] ?? "D") as FabricKey;
+
+    const bgRects = 8 * blockCount;
+    const geeseRects = 8 * blockCount;
+    const flipSquares = 12 * blockCount;
+    const centerTriSquares = 2 * blockCount;
+    const centerSquares = blockCount;
+
+    addRails(reqs[bgFab], "Background rectangles (corner units)", bgRects, rectCutW, rectCutH, s.fabricWidth);
+    addRails(reqs[geeseFab], "Edge & goose rectangles", geeseRects, rectCutW, rectCutH, s.fabricWidth);
+    addSquares(reqs[accentFab], "Accent stitch-and-flip squares", flipSquares, flipCut, s.fabricWidth);
+    addSquares(
+      reqs[accentFab],
+      "Centre frame triangle squares||then cut each square ONCE corner-to-corner on the diagonal",
+      centerTriSquares,
+      centerTriCut,
+      s.fabricWidth,
+    );
+    addSquares(reqs[centerFab], "Centre diamond squares", centerSquares, centerCut, s.fabricWidth);
+
+    notes.push(
+      `Each California Quilt block is a 3×3 nine-patch drafted on a 6-unit grid (u = ${u.toFixed(2)}" finished), so each of the nine cells finishes ${(2 * u).toFixed(2)}" square: 4 plain background corners tipped with an accent triangle, 4 flying-geese edge units pointing in at the middle, and a square-in-a-square centre.`,
+    );
+    notes.push(
+      `Cut per block (all sizes include the 1/4" seam allowance): Fabric ${bgFab} — 8 rectangles ${rectCutH.toFixed(2)}" × ${rectCutW.toFixed(2)}". Fabric ${geeseFab} — 8 rectangles ${rectCutH.toFixed(2)}" × ${rectCutW.toFixed(2)}". Fabric ${accentFab} — 12 squares ${flipCut.toFixed(2)}" × ${flipCut.toFixed(2)}" plus 2 squares ${centerTriCut.toFixed(2)}" × ${centerTriCut.toFixed(2)}" cut ONCE corner-to-corner on the diagonal (4 triangles). Fabric ${centerFab} — 1 square ${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}".`,
+    );
+    notes.push(
+      `Corner units (make 4). Draw a diagonal line corner to corner on the back of 4 of the Fabric ${accentFab} ${flipCut.toFixed(2)}" squares. Place one on ONE END of a Fabric ${bgFab} rectangle, right sides together, corners matched; sew ON the drawn line, trim the outer corner away leaving 1/4", and press the little accent triangle open. Sew that unit UNDER a plain Fabric ${bgFab} rectangle so the accent tip ends up at the inner corner of the 2u square — the tip must point at the middle of the block.`,
+    );
+    notes.push(
+      `Flying-geese units (make 4). Take a Fabric ${geeseFab} rectangle and two marked Fabric ${accentFab} ${flipCut.toFixed(2)}" squares. Sew one square on the LEFT end on the drawn line, trim, press open; repeat on the RIGHT end. You get a ${geeseFab} triangle pointing to one long edge with an accent triangle either side. Sew a plain Fabric ${geeseFab} rectangle to the FLAT side so the goose points inward. The unit finishes ${(2 * u).toFixed(2)}" square.`,
+    );
+    notes.push(
+      `Centre unit (make 1). Crease the midpoints of the Fabric ${centerFab} square and the long edge of each Fabric ${accentFab} triangle. Add a triangle to the top and bottom edges first, press outward, then the left and right — opposite sides first keeps it square. Trim the finished unit to ${(2 * u + SEAM).toFixed(2)}" square, leaving exactly 1/4" beyond each point of the centre diamond.`,
+    );
+    notes.push(
+      `Block assembly — sew in 3 rows: Row 1 = corner unit · geese unit (goose pointing DOWN) · corner unit. Row 2 = geese unit (goose pointing RIGHT) · centre unit · geese unit (goose pointing LEFT). Row 3 = corner unit · geese unit (goose pointing UP) · corner unit. Rotate each corner unit so its accent tip faces the centre. Press row seams in alternating directions so they nest, then join the rows. The block has 90° rotational symmetry — give it a quarter turn to check.`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: Fabric ${bgFab} = ${bgRects} rectangles; Fabric ${geeseFab} = ${geeseRects} rectangles; Fabric ${accentFab} = ${flipSquares} flip squares + ${centerTriSquares} triangle squares (${4 * blockCount} triangles); Fabric ${centerFab} = ${centerSquares} centre squares. Tip: chain-piece all the stitch-and-flip corners in one pass, and save the trimmed-off corners — sewn a second time 1/2" from the line they become bonus half-square triangles.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
@@ -2839,7 +2920,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "love-in-a-mist" ||
     s.pattern === "four-x-star" ||
     s.pattern === "antique-tile" ||
-    s.pattern === "economy-block";
+    s.pattern === "economy-block" ||
+    s.pattern === "california-quilt";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

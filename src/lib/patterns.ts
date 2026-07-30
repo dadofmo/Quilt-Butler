@@ -1182,6 +1182,46 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "E" },
     ],
   },
+  {
+    id: "california-quilt",
+    name: "California Quilt",
+    hasMath: true,
+    intro:
+      "California Quilt is a nine-patch drafted on a 6-unit grid: four plain background corners, four flying-geese edge units pointing in at the middle, and a square-in-a-square centre. A small accent triangle tucks into the inner corner of every background square, so the accent fabric rings the whole middle of the block like a faceted frame around the centre diamond. Four fabrics, only straight seams plus simple stitch-and-flip corners.",
+    sections: [
+      {
+        id: "bg",
+        label: "Background corners (Fabric A)",
+        defaultFabric: "A",
+        hint: "The four large plain squares in the corners of the block — usually your lightest fabric so the middle ring pops.",
+      },
+      {
+        id: "geese",
+        label: "Edge rectangles & geese (Fabric B)",
+        defaultFabric: "B",
+        hint: "The four rectangles on the outer edges plus the four big triangles that point in toward the centre. A medium tone works best here.",
+      },
+      {
+        id: "accent",
+        label: "Accent triangles (Fabric C)",
+        defaultFabric: "C",
+        hint: "All the small triangles: the corner-square tips, the geese sides, and the four triangles framing the centre diamond. This fabric draws the ring around the middle.",
+      },
+      {
+        id: "center",
+        label: "Centre diamond (Fabric D)",
+        defaultFabric: "D",
+        hint: "The single square set on point in the very middle of the block. Usually your darkest / boldest fabric.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "E",
+        hint: "Optional strips of fabric that separate each California Quilt block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

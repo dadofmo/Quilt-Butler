@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock } from "./PatternDiagram";
 
 
 interface Props {
@@ -90,6 +90,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Antique Tile quilt block diagram — an all-rectangle block on a 1-1-2-1-1 grid with a large centre square, four framing rectangles, four small accent squares and dark corner L-shapes",
   "economy-block":
     "Economy Block quilt block diagram — a double square-in-a-square with a straight centre square, four first-round triangles setting it on point, and four large outer corner triangles",
+  "california-quilt":
+    "California Quilt block diagram — a nine-patch with plain background corners tipped with accent triangles, four flying-geese edge units pointing inward, and a square-in-a-square centre diamond",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -877,6 +879,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return (
         <svg {...common}>
           <EconomyBlock size={90} center={C.a} round1={C.b} round2={C.c} />
+        </svg>
+      );
+    }
+    case "california-quilt": {
+      return (
+        <svg {...common}>
+          <CaliforniaQuiltBlock size={90} bg={C.a} geese={C.b} accent={C.c} center={C.d} />
         </svg>
       );
     }
