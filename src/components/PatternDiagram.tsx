@@ -1322,7 +1322,127 @@ function IdahoBeautyBlock({
   );
 }
 
-export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock };
+export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock };
+
+/**
+ * Shared renderer for "California Quilt".
+ *
+ * Drafted on a 6-unit grid (u = size / 6) as a 3×3 nine-patch of 2u cells:
+ *
+ *   - Corners: plain Fabric A squares (2u) with a 1u accent (C) triangle
+ *     tucked into the inner corner, hypotenuse facing outward.
+ *   - Edges: outer half is a plain Fabric B rectangle (2u × 1u); inner half
+ *     is a flying-geese unit — a B goose pointing in at the centre with two
+ *     C side triangles.
+ *   - Centre: a 2u square-in-a-square — C background with the Fabric D
+ *     square set on point, its points touching the cell's edge midpoints.
+ *
+ * Geometry matches the yardage math in yardage.ts exactly.
+ */
+function CaliforniaQuiltBlock({
+  size,
+  bg,
+  geese,
+  accent,
+  center,
+}: {
+  size: number;
+  bg: string;
+  geese: string;
+  accent: string;
+  center: string;
+}) {
+  const u = size / 6;
+  // Rotate a point (in grid units) about the block centre (3,3) by k × 90°.
+  const rot = ([x, y]: [number, number], k: number): [number, number] => {
+    let p: [number, number] = [x, y];
+    for (let i = 0; i < k; i++) p = [6 - p[1], p[0]];
+    return p;
+  };
+  const poly = (pts: [number, number][], k: number, fill: string, key: string) => (
+    <polygon
+      key={key}
+      points={pts
+        .map((p) => rot(p, k))
+        .map(([x, y]) => `${x * u},${y * u}`)
+        .join(" ")}
+      fill={fill}
+    />
+  );
+
+  const quarters = [0, 1, 2, 3];
+  return (
+    <>
+      {/* Background fills the whole block; everything else overlays it. */}
+      <rect x={0} y={0} width={size} height={size} fill={bg} />
+      {quarters.map((k) => (
+        <g key={`cq-${k}`}>
+          {/* Outer edge rectangle (2u × 1u) */}
+          {poly(
+            [
+              [2, 0],
+              [4, 0],
+              [4, 1],
+              [2, 1],
+            ],
+            k,
+            geese,
+            `cq-rect-${k}`,
+          )}
+          {/* Flying goose pointing in toward the centre */}
+          {poly(
+            [
+              [2, 1],
+              [4, 1],
+              [3, 2],
+            ],
+            k,
+            geese,
+            `cq-goose-${k}`,
+          )}
+          {/* Two accent side triangles of the geese unit */}
+          {poly(
+            [
+              [2, 1],
+              [3, 2],
+              [2, 2],
+            ],
+            k,
+            accent,
+            `cq-gl-${k}`,
+          )}
+          {poly(
+            [
+              [4, 1],
+              [4, 2],
+              [3, 2],
+            ],
+            k,
+            accent,
+            `cq-gr-${k}`,
+          )}
+          {/* Accent triangle in the inner corner of the background square */}
+          {poly(
+            [
+              [2, 1],
+              [2, 2],
+              [1, 2],
+            ],
+            k,
+            accent,
+            `cq-corner-${k}`,
+          )}
+        </g>
+      ))}
+      {/* Centre square-in-a-square */}
+      <rect x={2 * u} y={2 * u} width={2 * u} height={2 * u} fill={accent} />
+      <polygon
+        points={`${3 * u},${2 * u} ${4 * u},${3 * u} ${3 * u},${4 * u} ${2 * u},${3 * u}`}
+        fill={center}
+      />
+    </>
+  );
+}
 
 /**
  * Shared renderer for the "Economy Block" (double square-in-a-square).
