@@ -1,7 +1,14 @@
+import { useEffect, useState } from "react";
 import type { PatternId, SectionAssignments, FabricKey } from "@/lib/planner-store";
 import { FABRIC_COLORS } from "@/lib/planner-store";
 import { fabricFill } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
 import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock } from "./PatternDiagram";
