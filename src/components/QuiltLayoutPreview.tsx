@@ -54,30 +54,25 @@ export function QuiltLayoutPreview({
   alternateBlocks = false,
 }: Props) {
   const blockCount = blocksAcross * blocksDown;
+  const [fullOpen, setFullOpen] = useState(false);
+  const fullMax = useViewportMax();
 
-  const MAX = 220;
-  const aspect = quiltWidth / quiltHeight;
-  const thumbW = aspect >= 1 ? MAX : Math.round(MAX * aspect);
-  const thumbH = aspect >= 1 ? Math.round(MAX / aspect) : MAX;
-
-  const borderPxX = hasBorder ? (borderWidth / quiltWidth) * thumbW : 0;
-  const borderPxY = hasBorder ? (borderWidth / quiltHeight) * thumbH : 0;
-  const innerW = thumbW - borderPxX * 2;
-  const innerH = thumbH - borderPxY * 2;
-  const sashPxX = sashingWidth > 0 ? (sashingWidth / quiltWidth) * thumbW : 0;
-  const sashPxY = sashingWidth > 0 ? (sashingWidth / quiltHeight) * thumbH : 0;
-  // Between-blocks sashing only (no outer perimeter sashing): N blocks have
-  // (N-1) sashing strips between them.
-  const sashCols = Math.max(0, blocksAcross - 1);
-  const sashRows = Math.max(0, blocksDown - 1);
-  const cellW = (innerW - sashCols * sashPxX) / Math.max(1, blocksAcross);
-  const cellH = (innerH - sashRows * sashPxY) / Math.max(1, blocksDown);
-
-  const sashingFill = fabricFill(sashingFabric, photos);
-  const cornerFill = cornerstoneFabric ? fabricFill(cornerstoneFabric, photos) : null;
-
-  const borderPhoto = hasBorder ? photos?.[borderFabric] : undefined;
-  const borderColor = hasBorder ? FABRIC_COLORS[borderFabric] : "transparent";
+  const canvasProps: CanvasProps = {
+    pattern,
+    assignments,
+    hasBorder,
+    borderFabric,
+    blocksAcross,
+    blocksDown,
+    quiltWidth,
+    quiltHeight,
+    borderWidth,
+    sashingWidth,
+    sashingFabric,
+    cornerstoneFabric,
+    photos,
+    alternateBlocks,
+  };
 
   return (
     <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
