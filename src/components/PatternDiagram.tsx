@@ -1105,6 +1105,13 @@ function renderInner(
       const round2 = get("round2", "C");
       return <EconomyBlock size={200} center={center} round1={round1} round2={round2} />;
     }
+    case "california-quilt": {
+      const bg = get("bg", "A");
+      const geese = get("geese", "B");
+      const accent = get("accent", "C");
+      const center = get("center", "D");
+      return <CaliforniaQuiltBlock size={200} bg={bg} geese={geese} accent={accent} center={center} />;
+    }
 
 
 
