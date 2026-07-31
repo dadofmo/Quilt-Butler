@@ -1250,6 +1250,34 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "D" },
     ],
   },
+  {
+    id: "corner-beam",
+    name: "Corner Beam",
+    hasMath: true,
+    intro:
+      "Corner Beam is built from four identical quadrant units, each a square with a wide wedge of accent fabric radiating out of one corner. Rotate the four units so every beam springs from an outer corner of the block and they meet in the middle — the result is a bold four-pointed star with softly pinched sides, and when the blocks are set side by side the background wedges join up into secondary diamonds between the stars. Only two fabrics and two shapes: a square and a rectangle, joined with easy stitch-and-flip corners — no triangle templates.",
+    sections: [
+      {
+        id: "beam",
+        label: "Beam / star fabric (Fabric A)",
+        defaultFabric: "A",
+        hint: "The bold wedge that forms the star points — this is the fabric your eye lands on first.",
+      },
+      {
+        id: "bg",
+        label: "Background fabric (Fabric B)",
+        defaultFabric: "B",
+        hint: "Fills the rest of each quadrant. Where four blocks meet, these pieces form the diamonds between the stars, so keep good contrast with the beam fabric.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips of fabric that separate each Corner Beam block — set sashing to 0\" on the previous step if you want the stars to interlock edge to edge.",
+      },
+      { ...borderSection, defaultFabric: "D" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

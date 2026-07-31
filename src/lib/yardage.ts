@@ -181,9 +181,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isEconomyBlock = s.pattern === "economy-block";
   const isCaliforniaQuilt = s.pattern === "california-quilt";
   const isClownsChoice = s.pattern === "clowns-choice";
+  const isCornerBeam = s.pattern === "corner-beam";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -2877,6 +2878,62 @@ export function calculateYardage(s: PlannerState): CalcResult {
     );
     notes.push(
       `Clown's Choice tips: (1) The QST squares are cut 1 1/4" oversized on purpose — trimming after piecing is what keeps the four-triangle centres sharp. (2) Starch the fabric before cutting; the hourglass units are all bias on the outer edges and stretch easily. (3) Keep every block in the same orientation across the quilt so the bowties line up row to row.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
+  } else if (s.pattern === "corner-beam") {
+    // Corner Beam — four identical quadrant units per block (u = blockSize / 2).
+    // Each quadrant = one beam square with two background stitch-and-flip
+    // rectangles sewn across two adjacent corners, which trims the beam back
+    // into a wedge springing from the quadrant's outer corner.
+    const u = s.blockSize / 2;
+    const beamCut = u + SEAM;
+    const flipLong = u + SEAM;
+    const flipShort = u / 2 + SEAM;
+
+    const beamFab = (s.assignments["beam"] ?? "A") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
+
+    const beamSquares = 4 * blockCount;
+    const flipRects = 8 * blockCount;
+
+    addSquares(reqs[beamFab], "Quadrant beam squares", beamSquares, beamCut, s.fabricWidth);
+    addRails(
+      reqs[bgFab],
+      "Background stitch-and-flip rectangles",
+      flipRects,
+      flipLong,
+      flipShort,
+      s.fabricWidth,
+    );
+
+    notes.push(
+      `Each Corner Beam block is made from 4 identical quadrant units, each ${u.toFixed(2)}" finished square. A quadrant is a Fabric ${beamFab} square with two Fabric ${bgFab} rectangles stitched and flipped across two adjacent corners, leaving a wide beam of Fabric ${beamFab} radiating out of the remaining corner.`,
+    );
+    notes.push(
+      `Cut per block (sizes include the 1/4" seam allowance): 4 Fabric ${beamFab} squares at ${beamCut.toFixed(2)}" and 8 Fabric ${bgFab} rectangles at ${flipShort.toFixed(2)}" × ${flipLong.toFixed(2)}". Across all ${blockCount} blocks that's ${beamSquares} beam squares and ${flipRects} background rectangles.`,
+    );
+    notes.push(
+      `Make one quadrant: lay a Fabric ${bgFab} rectangle right sides together (RST) on the beam square with its ${flipLong.toFixed(2)}" edge along the TOP edge of the square, so it covers the top ${flipShort.toFixed(2)}". Sew corner to corner across that rectangle — from the square's top-left corner down to the rectangle's lower-right corner. Trim 1/4" outside the stitching, flip the rectangle open and press. Repeat with the second rectangle on the LEFT edge, this time sewing from the same top-left corner down to the rectangle's lower-right corner on that side. Both diagonals start at the same corner, and the beam fabric left showing is the wedge. Trim the unit back to ${beamCut.toFixed(2)}" square.`,
+    );
+    notes.push(
+      `Assemble the block: make 4 identical quadrants, then rotate them so each beam's narrow point sits at an OUTER corner of the block and all four beams widen toward the centre — the top-left quadrant as sewn, the top-right rotated 90° clockwise, the bottom-right 180°, the bottom-left 270°. Sew the top pair together, sew the bottom pair together, press the two seams in opposite directions so they nest, then join the halves matching the centre point. The finished block should measure ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+    notes.push(
+      `Corner Beam tips: (1) Draw the sewing line on the wrong side of each background rectangle first — the diagonal is not 45°, so eyeballing it drifts. (2) Don't trim the excess until you've pressed and checked the flipped corner lines up with the square's edges. (3) Set the blocks edge to edge with no sashing if you want the background wedges from neighbouring blocks to join into the secondary diamonds between the stars.`,
     );
 
     if (sashWidth > 0) {
