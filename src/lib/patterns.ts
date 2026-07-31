@@ -1222,6 +1222,34 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "F" },
     ],
   },
+  {
+    id: "clowns-choice",
+    name: "Clown's Choice",
+    hasMath: true,
+    intro:
+      "Clown's Choice is a friendly two-fabric nine-patch: five hourglass (quarter-square-triangle) units — one in each corner and one in the middle — with four plain accent squares filling the edge cells. The hourglasses all face the same way, background on top and bottom, accent left and right, which reads as a bold ring of pinched bowties around a matching centre. Only two shapes to cut and two fabrics to buy, so it's a great first block for practising crisp centre points.",
+    sections: [
+      {
+        id: "accent",
+        label: "Accent / main fabric (Fabric A)",
+        defaultFabric: "A",
+        hint: "The dominant fabric — the four plain edge squares plus the left and right triangles of every hourglass unit. Choose your strongest colour or print.",
+      },
+      {
+        id: "bg",
+        label: "Background fabric (Fabric B)",
+        defaultFabric: "B",
+        hint: "The lighter fabric that forms the top and bottom triangles of the five hourglass units. Good contrast here is what makes the bowties pop.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips of fabric that separate each Clown's Choice block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "D" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
