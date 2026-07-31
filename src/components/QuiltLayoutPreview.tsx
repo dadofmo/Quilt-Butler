@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
-import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock } from "./PatternDiagram";
+import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock } from "./PatternDiagram";
 
 interface Props {
   pattern: PatternId;
@@ -1219,6 +1219,11 @@ function MiniBlock({
       const accent = get("accent", "A");
       const bg = get("bg", "B");
       return <ClownsChoiceBlock size={200} accent={accent} bg={bg} />;
+    }
+    case "corner-beam": {
+      const beam = get("beam", "A");
+      const bg = get("bg", "B");
+      return <CornerBeamBlock size={200} beam={beam} bg={bg} />;
     }
 
   }

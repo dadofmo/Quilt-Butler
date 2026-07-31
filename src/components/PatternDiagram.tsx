@@ -1117,6 +1117,11 @@ function renderInner(
       const bg = get("bg", "B");
       return <ClownsChoiceBlock size={200} accent={accent} bg={bg} />;
     }
+    case "corner-beam": {
+      const beam = get("beam", "A");
+      const bg = get("bg", "B");
+      return <CornerBeamBlock size={200} beam={beam} bg={bg} />;
+    }
 
 
 
@@ -1334,7 +1339,46 @@ function IdahoBeautyBlock({
   );
 }
 
-export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock };
+export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock };
+
+/** Shared renderer for Corner Beam — four identical quadrant units, each a
+ *  half-block square carrying a wedge of beam fabric that springs from the
+ *  quadrant's OUTER corner and widens toward the block centre. In local
+ *  quadrant coordinates (apex at 0,0, quadrant side h) the beam is the
+ *  quad (0,0) → (h, h/2) → (h, h) → (h/2, h); the two leftover background
+ *  pieces are half-rectangle triangles along the outer edges. The four
+ *  quadrants are mirrored into place so all four apexes sit on the block
+ *  corners and the beams meet at the block centre, forming the star. */
+function CornerBeamBlock({
+  size,
+  beam,
+  bg,
+}: {
+  size: number;
+  beam: string;
+  bg: string;
+}) {
+  const h = size / 2;
+  // Map a point from quadrant-local space (apex at origin) into block space.
+  const P = (fx: boolean, fy: boolean, x: number, y: number) =>
+    `${fx ? size - x : x},${fy ? size - y : y}`;
+  const wedge = (fx: boolean, fy: boolean) =>
+    [
+      P(fx, fy, 0, 0),
+      P(fx, fy, h, h / 2),
+      P(fx, fy, h, h),
+      P(fx, fy, h / 2, h),
+    ].join(" ");
+  return (
+    <>
+      <rect x={0} y={0} width={size} height={size} fill={bg} />
+      <polygon points={wedge(false, false)} fill={beam} />
+      <polygon points={wedge(true, false)} fill={beam} />
+      <polygon points={wedge(false, true)} fill={beam} />
+      <polygon points={wedge(true, true)} fill={beam} />
+    </>
+  );
+}
 
 /** Shared renderer for Clown's Choice — a 3×3 grid of thirds.
  *  Corners + centre are hourglass (quarter-square-triangle) units with the
