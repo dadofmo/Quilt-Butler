@@ -1112,6 +1112,11 @@ function renderInner(
       const center = get("center", "D");
       return <CaliforniaQuiltBlock size={200} bg={bg} geese={geese} accent={accent} center={center} />;
     }
+    case "clowns-choice": {
+      const accent = get("accent", "A");
+      const bg = get("bg", "B");
+      return <ClownsChoiceBlock size={200} accent={accent} bg={bg} />;
+    }
 
 
 
@@ -1329,7 +1334,53 @@ function IdahoBeautyBlock({
   );
 }
 
-export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock };
+export { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock };
+
+/** Shared renderer for Clown's Choice — a 3×3 grid of thirds.
+ *  Corners + centre are hourglass (quarter-square-triangle) units with the
+ *  background fabric in the TOP and BOTTOM quarters and the accent fabric in
+ *  the LEFT and RIGHT quarters. The four edge cells are plain accent squares. */
+function ClownsChoiceBlock({
+  size,
+  accent,
+  bg,
+}: {
+  size: number;
+  accent: string;
+  bg: string;
+}) {
+  const u = size / 3;
+  const hourglass = (r: number, c: number) => {
+    const x = c * u;
+    const y = r * u;
+    const cx = x + u / 2;
+    const cy = y + u / 2;
+    return (
+      <g key={`hg-${r}-${c}`}>
+        <polygon points={`${x},${y} ${x + u},${y} ${cx},${cy}`} fill={bg} />
+        <polygon points={`${x},${y + u} ${x + u},${y + u} ${cx},${cy}`} fill={bg} />
+        <polygon points={`${x},${y} ${x},${y + u} ${cx},${cy}`} fill={accent} />
+        <polygon points={`${x + u},${y} ${x + u},${y + u} ${cx},${cy}`} fill={accent} />
+      </g>
+    );
+  };
+  const plain = (r: number, c: number) => (
+    <rect key={`sq-${r}-${c}`} x={c * u} y={r * u} width={u} height={u} fill={accent} />
+  );
+  return (
+    <>
+      {hourglass(0, 0)}
+      {plain(0, 1)}
+      {hourglass(0, 2)}
+      {plain(1, 0)}
+      {hourglass(1, 1)}
+      {plain(1, 2)}
+      {hourglass(2, 0)}
+      {plain(2, 1)}
+      {hourglass(2, 2)}
+    </>
+  );
+}
 
 /**
  * Shared renderer for "California Quilt".

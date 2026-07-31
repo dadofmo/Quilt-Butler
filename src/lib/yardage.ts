@@ -180,9 +180,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAntiqueTile = s.pattern === "antique-tile";
   const isEconomyBlock = s.pattern === "economy-block";
   const isCaliforniaQuilt = s.pattern === "california-quilt";
+  const isClownsChoice = s.pattern === "clowns-choice";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -2837,6 +2838,61 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "clowns-choice") {
+    // Clown's Choice — 3×3 grid of thirds (u = blockSize / 3).
+    // Per block:
+    //   5 hourglass (QST) units — 4 corners + centre. Each unit = 2 accent
+    //     quarter-triangles (left + right) + 2 background quarters (top +
+    //     bottom).
+    //   4 plain accent squares — the edge cells.
+    // QST construction: one accent square + one background square, both cut
+    // at u + 1.25", yield TWO finished hourglass units. So the accent and
+    // background QST starting squares are each ceil(units / 2).
+    const u = s.blockSize / 3;
+    const qstCut = u + 1.25;
+    const plainCut = u + SEAM;
+
+    const accentFab = (s.assignments["accent"] ?? "A") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
+
+    const hourglassUnits = 5 * blockCount;
+    const qstPairs = Math.ceil(hourglassUnits / 2);
+    const plainSquares = 4 * blockCount;
+
+    addSquares(reqs[accentFab], "QST starting squares (hourglass units)", qstPairs, qstCut, s.fabricWidth);
+    addSquares(reqs[accentFab], "Plain edge squares", plainSquares, plainCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "QST starting squares (hourglass units)", qstPairs, qstCut, s.fabricWidth);
+
+    notes.push(
+      `Each Clown's Choice block is a 3×3 grid of ${u.toFixed(2)}" finished cells: hourglass (quarter-square-triangle) units in the four corners and the centre, and plain Fabric ${accentFab} squares in the four edge cells. Every hourglass faces the same way — background triangles top and bottom, accent triangles left and right.`,
+    );
+    notes.push(
+      `Cut per block (sizes include the 1/4" seam allowance where noted): 4 Fabric ${accentFab} squares at ${plainCut.toFixed(2)}" (the edge cells). For the 5 hourglass units you need 3 Fabric ${accentFab} squares and 3 Fabric ${bgFab} squares at ${qstCut.toFixed(2)}" — each accent/background pair yields 2 finished hourglasses, so 3 pairs give 6 and you'll have one spare per block (bank the extras for a scrappy backing). Across all ${blockCount} blocks that's ${qstPairs} accent and ${qstPairs} background QST starting squares plus ${plainSquares} plain accent squares.`,
+    );
+    notes.push(
+      `How to make the hourglass units: pair one accent and one background ${qstCut.toFixed(2)}" square right sides together (RST). Draw a diagonal line corner to corner on the back of the lighter square, sew a 1/4" seam down each side of the line, then cut on the line — that's 2 half-square-triangle (HST) units. Press seams toward the accent. Stack 2 HSTs RST with opposite fabrics facing each other and the centre seams nested, draw a NEW diagonal line perpendicular to the existing seam, sew 1/4" each side, cut on the line and press. You now have 2 hourglass units, each with 4 triangles meeting dead centre. Trim every unit to ${(u + SEAM).toFixed(2)}" square, keeping the centre point exactly on the diagonal.`,
+    );
+    notes.push(
+      `Assemble the block: Row 1 = hourglass, plain accent square, hourglass. Row 2 = plain accent square, hourglass, plain accent square. Row 3 = hourglass, plain accent square, hourglass. Rotate every hourglass so the BACKGROUND triangles sit at the top and bottom and the ACCENT triangles at the left and right — all five units match. Sew each row across, press row seams in alternating directions so they nest, then join the three rows. The finished block should measure ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+    notes.push(
+      `Clown's Choice tips: (1) The QST squares are cut 1 1/4" oversized on purpose — trimming after piecing is what keeps the four-triangle centres sharp. (2) Starch the fabric before cutting; the hourglass units are all bias on the outer edges and stretch easily. (3) Keep every block in the same orientation across the quilt so the bowties line up row to row.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
@@ -2921,7 +2977,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "four-x-star" ||
     s.pattern === "antique-tile" ||
     s.pattern === "economy-block" ||
-    s.pattern === "california-quilt";
+    s.pattern === "california-quilt" ||
+    s.pattern === "clowns-choice";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
