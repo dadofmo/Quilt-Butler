@@ -10,10 +10,10 @@ In the step-1 header, show two pills side by side, centered as a group between t
 QuiltButler        [Tutorial]   [The Butler Blog]        Step 1 of 4
 ```
 
-- Same size, shape, and sage-green styling as the current Tutorial pill.
-- Gap between them at least the width of one pill (min-width driven, so it holds on small screens too).
-- The "New to Quiltbutler?" caption stays above the Tutorial pill; the blog pill gets its own short caption ("Quilting tips") so the two align.
-- Blog pill links internally to `/blog` (real `<Link>`, crawlable).
+- Both pills use the same size, shape, and sage-green styling as the current Tutorial pill.
+- Gap between them is at least the width of one pill (so the two read as separate actions even on small screens).
+- The "New to Quiltbutler?" caption stays above the Tutorial pill only; the blog pill displays just "The Butler Blog" as its text and needs no extra caption.
+- The blog pill links internally to `/blog` (real `<Link>`, crawlable).
 
 ## 2. Blog structure
 
