@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import PatternPickerPage from "./pages/PatternPickerPage";
@@ -42,6 +42,17 @@ function NotFound() {
       </div>
     </div>
   );
+}
+
+function HelmetCleanup() {
+  useEffect(() => {
+    // React 19 + react-helmet-async 3 doesn't remove pre-rendered static tags
+    // from index.html, so they duplicate Helmet-managed tags after hydration.
+    // Remove the static tags marked with data-rh so each route owns exactly
+    // one set of title/description/Open Graph tags.
+    document.querySelectorAll('head [data-rh="true"]').forEach((tag) => tag.remove());
+  }, []);
+  return null;
 }
 
 export default function App() {
