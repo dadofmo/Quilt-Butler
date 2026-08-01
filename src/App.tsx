@@ -7,6 +7,8 @@ const FabricsPage = lazy(() => import("./pages/FabricsPage"));
 const ResultsPage = lazy(() => import("./pages/ResultsPage"));
 const TermsPage = lazy(() => import("./pages/TermsPage"));
 const PrivacyPage = lazy(() => import("./pages/PrivacyPage"));
+const BlogIndexPage = lazy(() => import("./pages/BlogIndexPage"));
+const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
 import { ScrollToTop } from "./components/ScrollToTop";
 import { TestModeBanner } from "./components/TestModeBanner";
 import { SiteFooter } from "./components/SiteFooter";
@@ -56,6 +58,8 @@ export default function App() {
             <Route path="/results" element={<ResultsPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/blog" element={<BlogIndexPage />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

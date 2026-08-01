@@ -6,6 +6,10 @@ export function SiteFooter() {
     <footer className="mt-auto border-t border-border bg-background">
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-4 py-6 text-sm text-muted-foreground sm:flex-row sm:justify-between">
         <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+          <Link to="/blog" className="hover:text-foreground hover:underline">
+            Blog
+          </Link>
+          <span aria-hidden>·</span>
           <Link to="/terms" className="hover:text-foreground hover:underline">
             Terms
           </Link>
