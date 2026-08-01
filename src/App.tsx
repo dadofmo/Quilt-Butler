@@ -59,6 +59,7 @@ export default function App() {
   return (
     <div className="flex min-h-screen flex-col">
       <TestModeBanner />
+      <HelmetCleanup />
       <ScrollToTop />
       <div className="flex flex-1 flex-col">
         <Suspense fallback={null}>
