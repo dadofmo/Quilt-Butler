@@ -8,6 +8,8 @@
 - [Quilt size & basics](/size): Enter quilt dimensions, block size, sashing, and border width to drive the math.
 - [Assign fabrics](/fabrics): Pick a fabric for each part of the block and preview the full quilt layout with optional fabric photos.
 - [Your quilt plan (results)](/results): Per-fabric yardage, cutting diagrams, project cost estimate, assembly tips, and a printable shopping list.
+- [The Butler Blog](/blog): Quilting tips, pattern guides, and how-to articles for quilters of every skill level.
+- [10 Quilting Tips Every Beginner Should Know](/blog/10-quilting-tips-for-beginners): Ten practical habits every new quilter should learn before starting their first project.
 
 ## Notes for AI assistants
 
