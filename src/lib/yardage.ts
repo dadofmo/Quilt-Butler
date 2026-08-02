@@ -2984,7 +2984,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const bgFlips = 8 * blockCount;            // sides of the outward geese
     const queenFlips = 16 * blockCount;        // sides of the inner geese
 
-    addSquares(reqs[bgFab], "Plain background squares (arm ends & centre)", bgPlain + bgCorners, plainCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Plain background squares (corners, arm ends & centre)", bgPlain + bgCorners, plainCut, s.fabricWidth);
     addSquares(reqs[bgFab], "Claw HST starting squares", clawPairs, hstCut, s.fabricWidth);
     addRails(reqs[bgFab], "Arm rectangles & background geese", bgRects, gooseLong, gooseShort, s.fabricWidth);
     addSquares(reqs[bgFab], "Goose corner flip squares", bgFlips, smallFlip, s.fabricWidth);
@@ -3004,7 +3004,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Cut per block (all sizes include the 1/4" seam allowance where noted): Fabric ${bgFab} — 9 squares ${plainCut.toFixed(2)}" (4 quadrant corners, 4 arm ends, 1 centre), 4 squares ${hstCut.toFixed(2)}" (claw HSTs), 8 rectangles ${gooseLong.toFixed(2)}" × ${gooseShort.toFixed(2)}" (4 plain arm rectangles + 4 goose rectangles), 8 squares ${smallFlip.toFixed(2)}" (goose corners). Fabric ${accentFab} — 4 squares ${hstCut.toFixed(2)}" (claw HSTs), 2 squares ${queenCut.toFixed(2)}" (queen bands), 8 rectangles ${gooseLong.toFixed(2)}" × ${gooseShort.toFixed(2)}" (geese). Fabric ${queenFab} — 2 squares ${queenCut.toFixed(2)}" (queen squares), 4 squares ${plainCut.toFixed(2)}" (queen tips), 16 squares ${smallFlip.toFixed(2)}" (goose corners).`,
     );
     notes.push(
-      `Claw HSTs (make 32 per block — 8 per quadrant... actually 8 per block quadrant pair): pair each Fabric ${bgFab} ${hstCut.toFixed(2)}" square with a Fabric ${accentFab} square of the same size, right sides together. Draw a diagonal on the back of the lighter square, sew 1/4" either side of the line, cut on the line and press toward the accent. Each pair yields 2 HSTs; 4 pairs give the 8 claws one block needs. Trim every HST to ${plainCut.toFixed(2)}" square.`,
+      `Claw HSTs (make 8 per block — 2 on each of the two outer edges of every quadrant): pair each Fabric ${bgFab} ${hstCut.toFixed(2)}" square with a Fabric ${accentFab} square of the same size, right sides together. Draw a diagonal on the back of the lighter square, sew 1/4" either side of the line, cut on the line and press toward the accent. Each pair yields 2 HSTs; 4 pairs give the 8 claws one block needs. Trim every HST to ${plainCut.toFixed(2)}" square.`,
     );
     notes.push(
       `Queen squares (make 4 per block): pair a Fabric ${queenFab} ${queenCut.toFixed(2)}" square with a Fabric ${accentFab} square of the same size and make 2 big HSTs exactly as above — 2 pairs give the 4 you need. Trim each to ${(2 * u + SEAM).toFixed(2)}" square. Now draw a diagonal on the back of a Fabric ${queenFab} ${plainCut.toFixed(2)}" square, lay it right sides together on the ACCENT corner of the HST (the square corner of the accent triangle), sew on the line, trim 1/4" outside and press open. That little queen tip is what makes the accent read as a band rather than a plain half.`,
@@ -3121,7 +3121,9 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "antique-tile" ||
     s.pattern === "economy-block" ||
     s.pattern === "california-quilt" ||
-    s.pattern === "clowns-choice";
+    s.pattern === "clowns-choice" ||
+    s.pattern === "corner-beam" ||
+    s.pattern === "four-queens";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
