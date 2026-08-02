@@ -1122,6 +1122,12 @@ function renderInner(
       const bg = get("bg", "B");
       return <CornerBeamBlock size={200} beam={beam} bg={bg} />;
     }
+    case "four-queens": {
+      const bg = get("bg", "A");
+      const accent = get("accent", "B");
+      const queen = get("queen", "C");
+      return <FourQueensBlock size={200} bg={bg} accent={accent} queen={queen} />;
+    }
 
 
 
