@@ -41,7 +41,8 @@ export type PatternId =
   | "economy-block"
   | "california-quilt"
   | "clowns-choice"
-  | "corner-beam";
+  | "corner-beam"
+  | "four-queens";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"

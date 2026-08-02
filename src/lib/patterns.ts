@@ -1278,6 +1278,40 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "D" },
     ],
   },
+  {
+    id: "four-queens",
+    name: "Four Queens",
+    hasMath: true,
+    intro:
+      "Four Queens is a showstopper drafted on a 7×7 unit grid: four large \"queen\" squares — each a big triangle of accent fabric banded across the corner, with a small tip of background-side colour — sit in the corners of the block, each ringed with paw-style claw triangles along the two outer edges. Between them, four narrow arms carry a small accent diamond pointing outward and a ring of triangles that frames a large background diamond dead centre. Every shape is one you've already met: plain squares, half-square triangles, flying geese and stitch-and-flip corners.",
+    sections: [
+      {
+        id: "bg",
+        label: "Background fabric (Fabric A)",
+        defaultFabric: "A",
+        hint: "The light fabric: the corner squares, the claw backgrounds, the arms, and the big diamond in the middle of the block.",
+      },
+      {
+        id: "accent",
+        label: "Accent / claws & bands (Fabric B)",
+        defaultFabric: "B",
+        hint: "Your strongest colour: the eight claw triangles around each queen, the wide band across every queen square, and the four small diamonds on the arms.",
+      },
+      {
+        id: "queen",
+        label: "Queen squares (Fabric C)",
+        defaultFabric: "C",
+        hint: "The four big squares that read as the 'queens', plus the ring of small triangles framing the centre diamond. A medium tone between your background and accent works beautifully.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "D",
+        hint: "Optional strips of fabric that separate each Four Queens block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

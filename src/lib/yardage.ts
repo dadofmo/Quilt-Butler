@@ -182,9 +182,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isCaliforniaQuilt = s.pattern === "california-quilt";
   const isClownsChoice = s.pattern === "clowns-choice";
   const isCornerBeam = s.pattern === "corner-beam";
+  const isFourQueens = s.pattern === "four-queens";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -2950,6 +2951,91 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "four-queens") {
+    // Four Queens — 7×7 unit grid (u = blockSize / 7).
+    // Per block:
+    //   4 corner quadrants, each = 1 plain bg square (u) + 4 claw HSTs (u)
+    //     + one 2u "queen" square (big queen/accent HST with a queen
+    //     stitch-and-flip tip on the accent corner).
+    //   4 arms, each = 1 plain bg square (u) + an outward accent goose
+    //     (u × u/2, bg sides) sewn under a plain bg rectangle (u × u/2),
+    //     plus an inward accent goose (queen sides) and a bg goose
+    //     (queen sides) that make the centre diamond point.
+    //   1 plain bg centre square (u).
+    const u = s.blockSize / 7;
+    const plainCut = u + SEAM;                 // 1u squares
+    const hstCut = u + HST_EXTRA;              // claw HST starting squares
+    const queenCut = 2 * u + HST_EXTRA;        // queen-square HST starting squares
+    const gooseLong = u + SEAM;                // goose / arm rectangle length
+    const gooseShort = u / 2 + SEAM;           // goose / arm rectangle height
+    const smallFlip = u / 2 + SEAM;            // goose corner flip squares
+
+    const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
+    const accentFab = (s.assignments["accent"] ?? "B") as FabricKey;
+    const queenFab = (s.assignments["queen"] ?? "C") as FabricKey;
+
+    const bgPlain = 5 * blockCount;            // 4 arm-end squares + 1 centre
+    const bgCorners = 4 * blockCount;          // quadrant outer corners
+    const clawPairs = 4 * blockCount;          // per fabric: 4 squares → 8 HSTs
+    const queenPairs = 2 * blockCount;         // per fabric: 2 squares → 4 HSTs
+    const queenTips = 4 * blockCount;          // 1u stitch-and-flip tips
+    const bgRects = 8 * blockCount;            // 4 plain arm rects + 4 bg geese
+    const accentGeese = 8 * blockCount;        // 4 outward + 4 inward geese
+    const bgFlips = 8 * blockCount;            // sides of the outward geese
+    const queenFlips = 16 * blockCount;        // sides of the inner geese
+
+    addSquares(reqs[bgFab], "Plain background squares (corners, arm ends & centre)", bgPlain + bgCorners, plainCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Claw HST starting squares", clawPairs, hstCut, s.fabricWidth);
+    addRails(reqs[bgFab], "Arm rectangles & background geese", bgRects, gooseLong, gooseShort, s.fabricWidth);
+    addSquares(reqs[bgFab], "Goose corner flip squares", bgFlips, smallFlip, s.fabricWidth);
+
+    addSquares(reqs[accentFab], "Claw HST starting squares", clawPairs, hstCut, s.fabricWidth);
+    addSquares(reqs[accentFab], "Queen-square HST starting squares", queenPairs, queenCut, s.fabricWidth);
+    addRails(reqs[accentFab], "Accent goose rectangles", accentGeese, gooseLong, gooseShort, s.fabricWidth);
+
+    addSquares(reqs[queenFab], "Queen-square HST starting squares", queenPairs, queenCut, s.fabricWidth);
+    addSquares(reqs[queenFab], "Queen tip flip squares", queenTips, plainCut, s.fabricWidth);
+    addSquares(reqs[queenFab], "Goose corner flip squares", queenFlips, smallFlip, s.fabricWidth);
+
+    notes.push(
+      `Each Four Queens block is drafted on a 7×7 unit grid (u = ${u.toFixed(2)}" finished). The four corners hold a 3u × 3u "queen" quadrant — a ${(2 * u).toFixed(2)}" queen square banded with accent, ringed by four claw HSTs along the two outer edges, with a plain background square in the very corner. Between the quadrants run four 1u-wide arms, and a plain background square sits dead centre.`,
+    );
+    notes.push(
+      `Cut per block (all sizes include the 1/4" seam allowance where noted): Fabric ${bgFab} — 9 squares ${plainCut.toFixed(2)}" (4 quadrant corners, 4 arm ends, 1 centre), 4 squares ${hstCut.toFixed(2)}" (claw HSTs), 8 rectangles ${gooseLong.toFixed(2)}" × ${gooseShort.toFixed(2)}" (4 plain arm rectangles + 4 goose rectangles), 8 squares ${smallFlip.toFixed(2)}" (goose corners). Fabric ${accentFab} — 4 squares ${hstCut.toFixed(2)}" (claw HSTs), 2 squares ${queenCut.toFixed(2)}" (queen bands), 8 rectangles ${gooseLong.toFixed(2)}" × ${gooseShort.toFixed(2)}" (geese). Fabric ${queenFab} — 2 squares ${queenCut.toFixed(2)}" (queen squares), 4 squares ${plainCut.toFixed(2)}" (queen tips), 16 squares ${smallFlip.toFixed(2)}" (goose corners).`,
+    );
+    notes.push(
+      `Claw HSTs (make 8 per block — 2 on each of the two outer edges of every quadrant): pair each Fabric ${bgFab} ${hstCut.toFixed(2)}" square with a Fabric ${accentFab} square of the same size, right sides together. Draw a diagonal on the back of the lighter square, sew 1/4" either side of the line, cut on the line and press toward the accent. Each pair yields 2 HSTs; 4 pairs give the 8 claws one block needs. Trim every HST to ${plainCut.toFixed(2)}" square.`,
+    );
+    notes.push(
+      `Queen squares (make 4 per block): pair a Fabric ${queenFab} ${queenCut.toFixed(2)}" square with a Fabric ${accentFab} square of the same size and make 2 big HSTs exactly as above — 2 pairs give the 4 you need. Trim each to ${(2 * u + SEAM).toFixed(2)}" square. Now draw a diagonal on the back of a Fabric ${queenFab} ${plainCut.toFixed(2)}" square, lay it right sides together on the ACCENT corner of the HST (the square corner of the accent triangle), sew on the line, trim 1/4" outside and press open. That little queen tip is what makes the accent read as a band rather than a plain half.`,
+    );
+    notes.push(
+      `Arm units (make 4 per block): each arm is a 1u × 3u strip. (1) Outer end: one plain Fabric ${bgFab} ${plainCut.toFixed(2)}" square. (2) Outward goose: take a Fabric ${accentFab} ${gooseLong.toFixed(2)}" × ${gooseShort.toFixed(2)}" rectangle and stitch-and-flip a Fabric ${bgFab} ${smallFlip.toFixed(2)}" square on each end — sew on the drawn diagonal, trim, press. Sew a plain Fabric ${bgFab} rectangle above it so the accent point faces OUT toward the block edge. (3) Inward goose: another Fabric ${accentFab} rectangle with two Fabric ${queenFab} ${smallFlip.toFixed(2)}" flip squares, this one pointing IN. (4) Centre-diamond goose: a Fabric ${bgFab} rectangle with two Fabric ${queenFab} flip squares, pointing OUT. Sew (3) and (4) point to point so the accent diamond sits between the two queen triangles, then join to (2) and (1).`,
+    );
+    notes.push(
+      `Block assembly — sew in 3 rows: Row 1 = top-left quadrant · top arm · top-right quadrant. Row 2 = left arm · plain Fabric ${bgFab} centre square · right arm. Row 3 = bottom-left quadrant · bottom arm · bottom-right quadrant. Rotate each quadrant so its plain background square is at the OUTER corner, the claws run along the two outer edges and the accent band of the queen square faces the middle. Rotate each arm so the accent diamond points outward and the background goose points at the centre — the four background geese plus the centre square form the big diamond in the middle. Press row seams in alternating directions so they nest.`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: Fabric ${bgFab} = ${bgPlain + bgCorners} plain squares + ${clawPairs} claw squares + ${bgRects} rectangles + ${bgFlips} flip squares; Fabric ${accentFab} = ${clawPairs} claw squares + ${queenPairs} queen squares + ${accentGeese} goose rectangles; Fabric ${queenFab} = ${queenPairs} queen squares + ${queenTips} tip squares + ${queenFlips} flip squares.`,
+    );
+    notes.push(
+      `Four Queens tips: (1) Starch everything — the HSTs and geese are all bias-edged and this block has a lot of them. (2) Chain-piece by unit type (all claws, then all geese) and keep them in labelled piles; each block needs 8 claws, 4 queen squares and 12 geese. (3) Check the block is square after every row: with a 7-unit grid, a scant seam that drifts shows up fast at the arms.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
@@ -3035,7 +3121,9 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "antique-tile" ||
     s.pattern === "economy-block" ||
     s.pattern === "california-quilt" ||
-    s.pattern === "clowns-choice";
+    s.pattern === "clowns-choice" ||
+    s.pattern === "corner-beam" ||
+    s.pattern === "four-queens";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
