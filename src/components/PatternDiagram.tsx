@@ -2099,3 +2099,85 @@ function LoveInAMistBlock({
 
 
 
+
+/** Shared renderer for Four Queens — drafted on a 7×7 unit grid (u = size/7).
+ *
+ *  One "unit" of the design covers a 3×3 corner quadrant plus the 1×3 arm to
+ *  its right; rotating that unit 0/90/180/270° about the block centre draws
+ *  the whole block, with a plain background square in the very middle.
+ *
+ *  Quadrant (units 0–3):
+ *    - plain background square in the outer corner
+ *    - 4 claw HSTs: two along the top edge, two down the left edge, all with
+ *      their accent triangles touching the queen square
+ *    - the 2u "queen" square: queen fabric with a wide accent band running
+ *      corner to corner (the half nearest the block centre) and a small queen
+ *      triangle tipping the inner corner
+ *  Arm (units 3–4 across, 0–3 down):
+ *    - plain background square at the outer end
+ *    - an accent diamond straddling the y = 2u line (two flying geese pointing
+ *      away from / toward the centre) with queen triangles either side of the
+ *      inner goose, and the background goose that forms the centre diamond.
+ */
+export function FourQueensBlock({
+  size,
+  bg,
+  accent,
+  queen,
+}: {
+  size: number;
+  bg: string;
+  accent: string;
+  queen: string;
+}) {
+  const S = size;
+  const u = S / 7;
+  const U = (n: number) => n * u;
+
+  const unit = (
+    <>
+      {/* Outer corner square */}
+      <rect x={0} y={0} width={U(1)} height={U(1)} fill={bg} />
+
+      {/* Claw HSTs — top edge */}
+      <rect x={U(1)} y={0} width={U(2)} height={U(1)} fill={bg} />
+      <polygon points={`${U(1)},0 ${U(1)},${U(1)} ${U(2)},${U(1)}`} fill={accent} />
+      <polygon points={`${U(3)},0 ${U(3)},${U(1)} ${U(2)},${U(1)}`} fill={accent} />
+
+      {/* Claw HSTs — left edge */}
+      <rect x={0} y={U(1)} width={U(1)} height={U(2)} fill={bg} />
+      <polygon points={`${U(1)},${U(1)} ${U(1)},${U(2)} 0,${U(1)}`} fill={accent} />
+      <polygon points={`${U(1)},${U(2)} ${U(1)},${U(3)} 0,${U(3)}`} fill={accent} />
+
+      {/* Queen square — queen ground, accent band, queen inner tip */}
+      <rect x={U(1)} y={U(1)} width={U(2)} height={U(2)} fill={queen} />
+      <polygon
+        points={`${U(3)},${U(1)} ${U(3)},${U(2)} ${U(2)},${U(3)} ${U(1)},${U(3)}`}
+        fill={accent}
+      />
+
+      {/* Arm */}
+      <rect x={U(3)} y={0} width={U(1)} height={U(3)} fill={bg} />
+      {/* Outward-pointing accent goose */}
+      <polygon points={`${U(3)},${U(2)} ${U(3.5)},${U(1.5)} ${U(4)},${U(2)}`} fill={accent} />
+      {/* Inward-pointing accent goose with queen sides */}
+      <polygon points={`${U(3)},${U(2)} ${U(4)},${U(2)} ${U(3.5)},${U(2.5)}`} fill={accent} />
+      <polygon points={`${U(3)},${U(2)} ${U(3)},${U(3)} ${U(3.5)},${U(2.5)}`} fill={queen} />
+      <polygon points={`${U(4)},${U(2)} ${U(4)},${U(3)} ${U(3.5)},${U(2.5)}`} fill={queen} />
+      {/* Background goose — the point of the centre diamond */}
+      <polygon points={`${U(3)},${U(3)} ${U(4)},${U(3)} ${U(3.5)},${U(2.5)}`} fill={bg} />
+    </>
+  );
+
+  return (
+    <>
+      {[0, 1, 2, 3].map((k) => (
+        <g key={k} transform={`rotate(${k * 90} ${S / 2} ${S / 2})`}>
+          {unit}
+        </g>
+      ))}
+      {/* Centre square — the heart of the big background diamond */}
+      <rect x={U(3)} y={U(3)} width={U(1)} height={U(1)} fill={bg} />
+    </>
+  );
+}
