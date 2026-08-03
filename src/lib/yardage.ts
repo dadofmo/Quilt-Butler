@@ -3036,6 +3036,89 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "four-xs") {
+    // Four X's — an ON-POINT block of plain squares.
+    // Four steps of the on-point grid reach each block corner, so the
+    // finished square size is blockSize / (4 * sqrt(2)).
+    //
+    // Per block:
+    //   4 coloured X's × 5 squares          = 20 squares (5 per fabric)
+    //   1 background X in the centre        =  5 squares
+    //   12 side setting triangles           =  3 QST squares (4 triangles each)
+    //   4 corner triangles                  =  2 HST squares (2 triangles each)
+    // Rows: 1, 3, 5, 7, 5, 3, 1 squares on the diagonal = 25 squares. ✓
+    const sq = s.blockSize / (4 * Math.SQRT2);
+    const sqCut = sq + SEAM;
+    const sideTriCut = sq * Math.SQRT2 + 1.25; // quarter-square setting triangles
+    const cornerTriCut = sq / Math.SQRT2 + 0.875; // half-square corner triangles
+
+    const x1Fab = (s.assignments["x1"] ?? "A") as FabricKey;
+    const x2Fab = (s.assignments["x2"] ?? "B") as FabricKey;
+    const x3Fab = (s.assignments["x3"] ?? "C") as FabricKey;
+    const x4Fab = (s.assignments["x4"] ?? "D") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "E") as FabricKey;
+
+    const perX = 5 * blockCount;
+    const bgSquares = 5 * blockCount;
+    const sideTriSquares = 3 * blockCount;
+    const cornerTriSquares = 2 * blockCount;
+
+    addSquares(reqs[x1Fab], "X squares (top-left X)", perX, sqCut, s.fabricWidth);
+    addSquares(reqs[x2Fab], "X squares (top-right X)", perX, sqCut, s.fabricWidth);
+    addSquares(reqs[x3Fab], "X squares (bottom-left X)", perX, sqCut, s.fabricWidth);
+    addSquares(reqs[x4Fab], "X squares (bottom-right X)", perX, sqCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Background squares (centre X)", bgSquares, sqCut, s.fabricWidth);
+    addSquares(
+      reqs[bgFab],
+      "Side setting triangle squares||then cut each square TWICE corner-to-corner on both diagonals",
+      sideTriSquares,
+      sideTriCut,
+      s.fabricWidth,
+    );
+    addSquares(
+      reqs[bgFab],
+      "Corner triangle squares||then cut each square ONCE corner-to-corner on the diagonal",
+      cornerTriSquares,
+      cornerTriCut,
+      s.fabricWidth,
+    );
+
+    notes.push(
+      `Four X's is set ON POINT: every patch is a plain square turned 45° to the block edges. For a ${s.blockSize}" finished block each little square finishes at ${sq.toFixed(2)}" (cut ${sqCut.toFixed(2)}"). One X = 5 squares — a centre square plus one on each of its four sides — and the block has four coloured X's (one per quadrant) around a fifth X made from the background fabric.`,
+    );
+    notes.push(
+      `Cut per block (sizes include the 1/4" seam allowance): 5 squares at ${sqCut.toFixed(2)}" from EACH of Fabric ${x1Fab}, ${x2Fab}, ${x3Fab} and ${x4Fab}; 5 squares at ${sqCut.toFixed(2)}" from Fabric ${bgFab}; 3 Fabric ${bgFab} squares at ${sideTriCut.toFixed(2)}" cut TWICE on both diagonals (12 side setting triangles); and 2 Fabric ${bgFab} squares at ${cornerTriCut.toFixed(2)}" cut ONCE on the diagonal (4 corner triangles). Across all ${blockCount} blocks: ${perX} squares per X fabric, ${bgSquares} background squares, ${sideTriSquares} setting-triangle squares and ${cornerTriSquares} corner-triangle squares.`,
+    );
+    notes.push(
+      `Why two different triangle squares: the side setting triangles are cut on BOTH diagonals so the long edge that lands on the outside of the block is on the straight grain (that's the +1 1/4" formula). The corner triangles are cut on ONE diagonal so their two short edges are on grain (the +7/8" formula). Mixing them up leaves stretchy bias all around the block.`,
+    );
+    notes.push(
+      `Assemble one block in diagonal rows. Lay the block out on point first: 7 rows running corner to corner with 1, 3, 5, 7, 5, 3 and 1 squares. Sew a side setting triangle to each end of the six shorter rows (12 in total), press the seams in alternating directions row to row so they nest, then join the rows. Add the four corner triangles last — one to each corner — and trim the block to ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished, keeping 1/4" of background beyond every X point.`,
+    );
+    notes.push(
+      `Placement inside the block: the four X centres sit in the middle of each quadrant, and the fifth (background) X sits dead centre. Nothing crosses a quadrant line, so no X is ever cut in half by a block seam.`,
+    );
+    notes.push(
+      `THE ROTATION VARIATION: because each X lives entirely inside its own quadrant, turning a block 90° simply moves the four colours around the block. Piece every block identically, then play with rotation on your design wall. Two layouts to try: (1) All blocks the same way up — the colours stack into vertical columns. (2) Rotate every other block 90° (and every other row 180°) — the same four fabrics fall into long diagonal ribbons of colour running across the whole quilt, exactly like a two-colour row alternating with the other two. Take a photo of the layout before you sew: once the blocks are joined the rotation is locked in.`,
+    );
+    notes.push(
+      `Four X's tips: (1) Starch and handle the setting triangles gently — their cut edges are bias until they're sewn in. (2) Because the squares are on point, a scant 1/4" seam matters: check one finished row against the ${(s.blockSize * Math.SQRT2).toFixed(2)}" block diagonal before piecing all of them. (3) Chain-piece the rows in colour order and pin the seam intersections so the X points stay sharp.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "F") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge. Leave sashing at 0" if you want the rotation variation to read as unbroken diagonal ribbons.`,
+      );
+    }
   }
 
 
