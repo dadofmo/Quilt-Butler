@@ -918,6 +918,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "four-xs": {
+      return (
+        <svg {...common}>
+          <FourXsBlock size={90} bg={C.e} x1={C.a} x2={C.b} x3={C.c} x4={C.d} />
+        </svg>
+      );
+    }
   }
 }
 
