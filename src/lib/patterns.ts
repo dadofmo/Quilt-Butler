@@ -1312,6 +1312,52 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "E" },
     ],
   },
+  {
+    id: "four-xs",
+    name: "Four X's",
+    hasMath: true,
+    intro:
+      "Four X's is a set-on-point block: every piece is a plain square (or a triangle at the edges), turned 45° so the squares read as diamonds. Five squares — a centre plus its four neighbours — make one X, and the block holds four of them, one per quadrant, in four different fabrics, with a fifth X of background fabric right in the middle. Nothing but straight seams and diagonal rows. Because each X sits wholly inside its own quadrant, rotating blocks as you lay out the quilt shuffles which colour lands where — turn alternate blocks and the four colours line up into long diagonal ribbons across the quilt top.",
+    sections: [
+      {
+        id: "x1",
+        label: "X in the top-left quadrant (Fabric A)",
+        defaultFabric: "A",
+        hint: "Five squares make this X. Rotate the block when you set the quilt together and this colour moves to a different corner.",
+      },
+      {
+        id: "x2",
+        label: "X in the top-right quadrant (Fabric B)",
+        defaultFabric: "B",
+        hint: "Five squares. Pick something that contrasts with the fabric next to it.",
+      },
+      {
+        id: "x3",
+        label: "X in the bottom-left quadrant (Fabric C)",
+        defaultFabric: "C",
+        hint: "Five squares. In the classic colouring this is the warm/bright one.",
+      },
+      {
+        id: "x4",
+        label: "X in the bottom-right quadrant (Fabric D)",
+        defaultFabric: "D",
+        hint: "Five squares. The darkest of the four reads as an anchor in the layout.",
+      },
+      {
+        id: "bg",
+        label: "Background (Fabric E)",
+        defaultFabric: "E",
+        hint: "The light fabric behind everything: the centre X, the side setting triangles and the four corner triangles.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "F",
+        hint: "Optional strips of fabric that separate each Four X's block — set sashing to 0\" on the previous step if you don't want any. Leave it at 0\" if you want the X's to march edge to edge.",
+      },
+      { ...borderSection, defaultFabric: "G" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

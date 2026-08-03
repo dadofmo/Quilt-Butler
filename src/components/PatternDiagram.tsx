@@ -1128,6 +1128,14 @@ function renderInner(
       const queen = get("queen", "C");
       return <FourQueensBlock size={200} bg={bg} accent={accent} queen={queen} />;
     }
+    case "four-xs": {
+      const x1 = get("x1", "A");
+      const x2 = get("x2", "B");
+      const x3 = get("x3", "C");
+      const x4 = get("x4", "D");
+      const bg = get("bg", "E");
+      return <FourXsBlock size={200} bg={bg} x1={x1} x2={x2} x3={x3} x4={x4} />;
+    }
 
 
 
@@ -2178,6 +2186,81 @@ export function FourQueensBlock({
       ))}
       {/* Centre square — the heart of the big background diamond */}
       <rect x={U(3)} y={U(3)} width={U(1)} height={U(1)} fill={bg} />
+    </>
+  );
+}
+
+/**
+ * Shared renderer for Four X's — an ON-POINT block.
+ *
+ * The block is drafted on a grid of small squares set on point (turned 45°
+ * to the block edges). Four steps of that grid reach each block corner, so
+ * one square's on-point half-diagonal is exactly size/8.
+ *
+ * Lattice coordinates (u, v) run along the two on-point axes, measured from
+ * the block centre. A cell's centre in block space is:
+ *     x = size/2 + (u - v) * size/8
+ *     y = size/2 + (u + v) * size/8
+ *
+ * Each fabric contributes one plus-pentomino of five squares (a centre plus
+ * its four neighbours), which reads as an X once the grid is on point. The
+ * four X centres sit at (-2,0), (0,-2), (0,2) and (2,0) — one per quadrant —
+ * and a fifth, background-coloured X sits dead centre of the block. The
+ * remaining background (setting and corner triangles) fills the edges.
+ */
+export function FourXsBlock({
+  size,
+  bg,
+  x1,
+  x2,
+  x3,
+  x4,
+}: {
+  size: number;
+  bg: string;
+  x1: string;
+  x2: string;
+  x3: string;
+  x4: string;
+}) {
+  const S = size;
+  const h = S / 8; // half-diagonal of one on-point square
+  const diamond = (u: number, v: number, fill: string, key: string) => {
+    const cx = S / 2 + (u - v) * h;
+    const cy = S / 2 + (u + v) * h;
+    return (
+      <polygon
+        key={key}
+        points={`${cx},${cy - h} ${cx + h},${cy} ${cx},${cy + h} ${cx - h},${cy}`}
+        fill={fill}
+      />
+    );
+  };
+  // One X = centre cell + its four on-point neighbours.
+  const xCells = (cu: number, cv: number): Array<[number, number]> => [
+    [cu, cv],
+    [cu + 1, cv],
+    [cu - 1, cv],
+    [cu, cv + 1],
+    [cu, cv - 1],
+  ];
+  const groups: Array<{ centre: [number, number]; fill: string }> = [
+    { centre: [-2, 0], fill: x1 }, // top-left quadrant
+    { centre: [0, -2], fill: x2 }, // top-right quadrant
+    { centre: [0, 2], fill: x3 }, // bottom-left quadrant
+    { centre: [2, 0], fill: x4 }, // bottom-right quadrant
+  ];
+
+  return (
+    <>
+      {/* Background: plain squares, side setting triangles and corner
+          triangles all read as one field of background fabric. */}
+      <rect x={0} y={0} width={S} height={S} fill={bg} />
+      {groups.map((g, gi) =>
+        xCells(g.centre[0], g.centre[1]).map(([u, v], i) =>
+          diamond(u, v, g.fill, `x-${gi}-${i}`),
+        ),
+      )}
     </>
   );
 }
