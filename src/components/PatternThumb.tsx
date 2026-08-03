@@ -98,6 +98,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Corner Beam quilt block diagram — four mirrored quadrant units, each with a wedge of accent fabric radiating from an outer corner, meeting in the middle to form a four-pointed star",
   "four-queens":
     "Four Queens quilt block diagram — a 7x7 grid with four large banded queen squares ringed by claw triangles in the corners, four arms carrying small accent diamonds, and a large background diamond in the centre",
+  "four-xs":
+    "Four X's quilt block diagram — squares set on point with four coloured X shapes, one in each quadrant, around a background X in the centre",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {

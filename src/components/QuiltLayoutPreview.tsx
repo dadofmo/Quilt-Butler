@@ -1231,6 +1231,14 @@ function MiniBlock({
       const queen = get("queen", "C");
       return <FourQueensBlock size={200} bg={bg} accent={accent} queen={queen} />;
     }
+    case "four-xs": {
+      const x1 = get("x1", "A");
+      const x2 = get("x2", "B");
+      const x3 = get("x3", "C");
+      const x4 = get("x4", "D");
+      const bg = get("bg", "E");
+      return <FourXsBlock size={200} bg={bg} x1={x1} x2={x2} x3={x3} x4={x4} />;
+    }
 
   }
 }
