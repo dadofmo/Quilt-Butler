@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
-import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock } from "./PatternDiagram";
+import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock } from "./PatternDiagram";
 
 interface Props {
   pattern: PatternId;
@@ -308,7 +308,13 @@ function QuiltCanvas({
             const railRotate = pattern === "rail-fence" && (i + j) % 2 === 1;
             const jlRotate =
               pattern === "jacobs-ladder" && (i + j) % 2 === 1;
-            const rotate = railRotate || jlRotate;
+            // Broken Dishes: alternate blocks get a quarter turn — this is
+            // what joins the triangles of neighbouring blocks into the
+            // on-point diamonds and four-pointed bursts. Intrinsic to the
+            // pattern, not user-toggleable.
+            const bdRotate =
+              pattern === "broken-dishes" && (i + j) % 2 === 1;
+            const rotate = railRotate || jlRotate || bdRotate;
             const bx = i * (cellW + sashPxX);
             const by = j * (cellH + sashPxY);
             // Irish Chain alternates a chain block with a plain background
@@ -1238,6 +1244,12 @@ function MiniBlock({
       const x4 = get("x4", "D");
       const bg = get("bg", "E");
       return <FourXsBlock size={200} bg={bg} x1={x1} x2={x2} x3={x3} x4={x4} />;
+    }
+    case "broken-dishes": {
+      const accent1 = get("accent1", "A");
+      const accent2 = get("accent2", "B");
+      const bg = get("bg", "C");
+      return <BrokenDishesBlock size={200} accent1={accent1} accent2={accent2} bg={bg} />;
     }
 
   }

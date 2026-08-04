@@ -184,9 +184,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isCornerBeam = s.pattern === "corner-beam";
   const isFourQueens = s.pattern === "four-queens";
   const isFourXs = s.pattern === "four-xs";
+  const isBrokenDishes = s.pattern === "broken-dishes";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -3120,6 +3121,61 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge. Leave sashing at 0" if you want the rotation variation to read as unbroken diagonal ribbons.`,
       );
     }
+  } else if (s.pattern === "broken-dishes") {
+    // Broken Dishes — a 2×2 grid of half-square-triangle units.
+    // Each HST finishes at blockSize / 2. Per block: 2 accent1/background
+    // HSTs (inner corners, on the TL–BR diagonal) and 2 accent2/background
+    // HSTs (outer corners, on the TR–BL diagonal).
+    // One accent square + one background square = 2 finished HSTs, so each
+    // block needs exactly 1 accent1 pair and 1 accent2 pair.
+    const half = s.blockSize / 2;
+    const cut = half + HST_EXTRA;
+
+    const a1 = (s.assignments["accent1"] ?? "A") as FabricKey;
+    const a2 = (s.assignments["accent2"] ?? "B") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "C") as FabricKey;
+
+    const a1Squares = blockCount; // 1 pair per block → 2 HSTs
+    const a2Squares = blockCount;
+    const bgSquares = 2 * blockCount;
+
+    addSquares(reqs[a1], "HST starting squares (inner triangles)", a1Squares, cut, s.fabricWidth);
+    addSquares(reqs[a2], "HST starting squares (outer triangles)", a2Squares, cut, s.fabricWidth);
+    addSquares(reqs[bgFab], "HST starting squares (background)", bgSquares, cut, s.fabricWidth);
+
+    notes.push(
+      `Each Broken Dishes block is a 2×2 grid of half-square-triangle (HST) units, every one finishing at ${half.toFixed(2)}". Two units pair Fabric ${a1} with the background and two pair Fabric ${a2} with the background — ${4 * blockCount} HST units across all ${blockCount} blocks.`,
+    );
+    notes.push(
+      `Cut ${a1Squares} squares of Fabric ${a1}, ${a2Squares} squares of Fabric ${a2}, and ${bgSquares} squares of Fabric ${bgFab}, all at ${cut.toFixed(2)}" × ${cut.toFixed(2)}" (the ${half.toFixed(2)}" finished HST plus 7/8" for the diagonal seam). That's 1 Fabric ${a1} square, 1 Fabric ${a2} square and 2 background squares per block — no leftovers.`,
+    );
+    notes.push(
+      `Make the HST units: place one accent square and one background square right sides together (RST). On the back of the lighter square draw a straight diagonal line corner to corner. Sew a 1/4" seam down the LEFT side of the line, then a second 1/4" seam down the RIGHT side. Cut along the drawn line (the line itself, not the stitches) and press each half open toward the accent — one pair of squares yields 2 finished HSTs. Trim every unit to ${(half + SEAM).toFixed(2)}" square so it finishes at ${half.toFixed(2)}".`,
+    );
+    notes.push(
+      `Assemble the block: lay the four units in a 2×2 grid. TOP-LEFT — Fabric ${a1} HST turned so its accent triangle points IN toward the block centre (accent fills the lower-right half). TOP-RIGHT — Fabric ${a2} HST turned so its accent triangle sits on the OUTER top-right corner. BOTTOM-LEFT — Fabric ${a2} HST with its accent on the OUTER bottom-left corner. BOTTOM-RIGHT — Fabric ${a1} HST with its accent pointing IN (accent fills the upper-left half). The two Fabric ${a1} triangles should touch tip to tip at the block centre and the two Fabric ${a2} triangles sit on opposite corners. Sew the top pair, sew the bottom pair, press the seams in opposite directions so they nest, then join the two rows. Finished block: ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+    notes.push(
+      `Setting the quilt — this is where Broken Dishes earns its name: give EVERY OTHER block a quarter turn (90°) as you lay out the ${blocksAcross} × ${blocksDown} grid, like a checkerboard — block (1,1) unturned, its neighbours turned, and so on. Where four blocks meet, the Fabric ${a2} triangles join into a large on-point diamond and the Fabric ${a1} triangles join into a four-pointed burst, with background diamonds floating between them. Lay the whole top out on the floor and check the alternation before you sew a single row — a block turned the wrong way is the one mistake that shows.`,
+    );
+    notes.push(
+      `Broken Dishes tips: (1) The long edge of every HST is bias — starch before cutting and handle the trimmed units gently. (2) Trim all ${4 * blockCount} units to the same size in one session; consistent HSTs are the whole game in a block this simple. (3) Press the four centre seams open so the point where all four units meet lies flat. (4) Keep two labelled stacks (Fabric ${a1} units and Fabric ${a2} units) so you never grab the wrong one at the machine.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge. Leave sashing at 0" if you want the diamonds and bursts to form across neighbouring blocks.`,
+      );
+    }
   }
 
 
@@ -3208,7 +3264,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "clowns-choice" ||
     s.pattern === "corner-beam" ||
     s.pattern === "four-queens" ||
-    s.pattern === "four-xs";
+    s.pattern === "four-xs" ||
+    s.pattern === "broken-dishes";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

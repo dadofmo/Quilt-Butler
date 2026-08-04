@@ -43,7 +43,8 @@ export type PatternId =
   | "clowns-choice"
   | "corner-beam"
   | "four-queens"
-  | "four-xs";
+  | "four-xs"
+  | "broken-dishes";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"

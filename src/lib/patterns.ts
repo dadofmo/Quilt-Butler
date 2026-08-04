@@ -1358,6 +1358,40 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "G" },
     ],
   },
+  {
+    id: "broken-dishes",
+    name: "Broken Dishes",
+    hasMath: true,
+    intro:
+      "Broken Dishes is four half-square triangles and nothing else. Two of them use your first accent and point their triangles in at the middle of the block; the other two use your second accent and sit their triangles out on opposite corners. On its own it's a quick, quiet block — but give every other block in the layout a quarter turn and the triangles from neighbouring blocks join up into big on-point diamonds of the second accent and bold four-pointed bursts of the first. Two shapes to cut, one seam per unit: the easiest way to get a quilt that looks far harder than it was.",
+    sections: [
+      {
+        id: "accent1",
+        label: "First accent — inner triangles (Fabric A)",
+        defaultFabric: "A",
+        hint: "The two triangles that point in toward the centre of the block. Across the quilt these merge into the four-pointed bursts, so pick your boldest colour.",
+      },
+      {
+        id: "accent2",
+        label: "Second accent — outer triangles (Fabric B)",
+        defaultFabric: "B",
+        hint: "The two triangles sitting on opposite outer corners. Four of these from neighbouring blocks meet to make the big on-point diamonds.",
+      },
+      {
+        id: "bg",
+        label: "Background fabric (Fabric C)",
+        defaultFabric: "C",
+        hint: "The light fabric filling the other half of all four half-square-triangle units. Keep strong contrast with both accents so the secondary pattern reads clearly.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "D",
+        hint: "Optional strips of fabric that separate each Broken Dishes block — leave sashing at 0\" on the previous step if you want the diamonds and bursts to form across the blocks.",
+      },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

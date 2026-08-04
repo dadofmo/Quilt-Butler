@@ -1136,6 +1136,12 @@ function renderInner(
       const bg = get("bg", "E");
       return <FourXsBlock size={200} bg={bg} x1={x1} x2={x2} x3={x3} x4={x4} />;
     }
+    case "broken-dishes": {
+      const accent1 = get("accent1", "A");
+      const accent2 = get("accent2", "B");
+      const bg = get("bg", "C");
+      return <BrokenDishesBlock size={200} accent1={accent1} accent2={accent2} bg={bg} />;
+    }
 
 
 
@@ -2261,6 +2267,43 @@ export function FourXsBlock({
           diamond(u, v, g.fill, `x-${gi}-${i}`),
         ),
       )}
+    </>
+  );
+}
+
+/**
+ * Shared renderer for "Broken Dishes" — four half-square-triangle units in a
+ * 2×2 grid (u = size / 2). The two accent1 triangles sit on the INNER corners
+ * of the top-left and bottom-right units (their right angles meet at the
+ * block centre); the two accent2 triangles sit on the OUTER corners of the
+ * top-right and bottom-left units. Background fills the other half of every
+ * unit. Rotating alternate blocks 90° in the layout is what joins these
+ * triangles into the on-point diamonds and four-pointed bursts.
+ */
+export function BrokenDishesBlock({
+  size,
+  accent1,
+  accent2,
+  bg,
+}: {
+  size: number;
+  accent1: string;
+  accent2: string;
+  bg: string;
+}) {
+  const u = size / 2;
+  const S = size;
+  return (
+    <>
+      <rect x={0} y={0} width={S} height={S} fill={bg} />
+      {/* Top-left unit — accent1 triangle on the inner (SE) corner */}
+      <polygon points={`0,${u} ${u},0 ${u},${u}`} fill={accent1} />
+      {/* Bottom-right unit — accent1 triangle on the inner (NW) corner */}
+      <polygon points={`${u},${u} ${S},${u} ${u},${S}`} fill={accent1} />
+      {/* Top-right unit — accent2 triangle on the outer (NE) corner */}
+      <polygon points={`${u},0 ${S},0 ${S},${u}`} fill={accent2} />
+      {/* Bottom-left unit — accent2 triangle on the outer (SW) corner */}
+      <polygon points={`0,${u} 0,${S} ${u},${S}`} fill={accent2} />
     </>
   );
 }
