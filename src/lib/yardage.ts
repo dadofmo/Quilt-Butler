@@ -3264,7 +3264,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "clowns-choice" ||
     s.pattern === "corner-beam" ||
     s.pattern === "four-queens" ||
-    s.pattern === "four-xs";
+    s.pattern === "four-xs" ||
+    s.pattern === "broken-dishes";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
