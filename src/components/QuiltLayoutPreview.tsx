@@ -1245,6 +1245,12 @@ function MiniBlock({
       const bg = get("bg", "E");
       return <FourXsBlock size={200} bg={bg} x1={x1} x2={x2} x3={x3} x4={x4} />;
     }
+    case "broken-dishes": {
+      const accent1 = get("accent1", "A");
+      const accent2 = get("accent2", "B");
+      const bg = get("bg", "C");
+      return <BrokenDishesBlock size={200} accent1={accent1} accent2={accent2} bg={bg} />;
+    }
 
   }
 }
