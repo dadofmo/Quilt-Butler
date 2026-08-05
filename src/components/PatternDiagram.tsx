@@ -1142,6 +1142,12 @@ function renderInner(
       const bg = get("bg", "C");
       return <BrokenDishesBlock size={200} accent1={accent1} accent2={accent2} bg={bg} />;
     }
+    case "rolling-stone": {
+      const accent1 = get("accent1", "A");
+      const accent2 = get("accent2", "B");
+      const bg = get("bg", "C");
+      return <RollingStoneBlock size={200} accent1={accent1} accent2={accent2} bg={bg} />;
+    }
 
 
 
