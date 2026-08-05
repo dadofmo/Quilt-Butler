@@ -1142,6 +1142,12 @@ function renderInner(
       const bg = get("bg", "C");
       return <BrokenDishesBlock size={200} accent1={accent1} accent2={accent2} bg={bg} />;
     }
+    case "rolling-stone": {
+      const accent1 = get("accent1", "A");
+      const accent2 = get("accent2", "B");
+      const bg = get("bg", "C");
+      return <RollingStoneBlock size={200} accent1={accent1} accent2={accent2} bg={bg} />;
+    }
 
 
 
@@ -2304,6 +2310,66 @@ export function BrokenDishesBlock({
       <polygon points={`${u},0 ${S},0 ${S},${u}`} fill={accent2} />
       {/* Bottom-left unit — accent2 triangle on the outer (SW) corner */}
       <polygon points={`0,${u} 0,${S} ${u},${S}`} fill={accent2} />
+    </>
+  );
+}
+
+/**
+ * Shared renderer for "The Rolling Stone" — a 3×3 grid (u = size / 3).
+ * Corners are square-in-a-square units (accent1 on point inside four
+ * background triangles); the four edge units are split in half into two
+ * rectangles with accent1 on the OUTER half and accent2 on the inner half;
+ * the centre is a plain accent1 square.
+ */
+export function RollingStoneBlock({
+  size,
+  accent1,
+  accent2,
+  bg,
+}: {
+  size: number;
+  accent1: string;
+  accent2: string;
+  bg: string;
+}) {
+  const u = size / 3;
+  const h = u / 2;
+  // One square-in-a-square corner unit at (ox, oy).
+  const corner = (ox: number, oy: number, key: string) => (
+    <g key={key}>
+      <rect x={ox} y={oy} width={u} height={u} fill={bg} />
+      <polygon
+        points={`${ox + h},${oy} ${ox + u},${oy + h} ${ox + h},${oy + u} ${ox},${oy + h}`}
+        fill={accent1}
+      />
+    </g>
+  );
+  return (
+    <>
+      <rect x={0} y={0} width={size} height={size} fill={bg} />
+      {corner(0, 0, "tl")}
+      {corner(2 * u, 0, "tr")}
+      {corner(0, 2 * u, "bl")}
+      {corner(2 * u, 2 * u, "br")}
+
+      {/* Top edge unit — accent1 outer (top) half */}
+      <rect x={u} y={0} width={u} height={h} fill={accent1} />
+      <rect x={u} y={h} width={u} height={h} fill={accent2} />
+
+      {/* Bottom edge unit — accent1 outer (bottom) half */}
+      <rect x={u} y={2 * u} width={u} height={h} fill={accent2} />
+      <rect x={u} y={2 * u + h} width={u} height={h} fill={accent1} />
+
+      {/* Left edge unit — accent1 outer (left) half */}
+      <rect x={0} y={u} width={h} height={u} fill={accent1} />
+      <rect x={h} y={u} width={h} height={u} fill={accent2} />
+
+      {/* Right edge unit — accent1 outer (right) half */}
+      <rect x={2 * u} y={u} width={h} height={u} fill={accent2} />
+      <rect x={2 * u + h} y={u} width={h} height={u} fill={accent1} />
+
+      {/* Centre square */}
+      <rect x={u} y={u} width={u} height={u} fill={accent1} />
     </>
   );
 }

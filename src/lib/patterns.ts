@@ -1392,6 +1392,41 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "E" },
     ],
   },
+  {
+    id: "rolling-stone",
+    name: "The Rolling Stone",
+    hasMath: true,
+    intro:
+      "The Rolling Stone is a classic three-by-three block that looks far more complicated than it is. Four square-in-a-square units sit in the corners, their on-point diamonds pointing out at the edges; four two-piece rectangle units fill the sides, and a plain square anchors the middle. Because every edge unit puts the darker accent on the outside and the lighter accent on the inside, a soft light ring appears to roll around the centre square — that's the block's name. Nothing here but squares, rectangles and four straight triangle seams per corner, so it's a great step up from a nine-patch without ever needing a template.",
+    sections: [
+      {
+        id: "accent1",
+        label: "Main accent — diamonds, centre and outer rectangles (Fabric A)",
+        defaultFabric: "A",
+        hint: "The colour that does most of the work: the four on-point corner diamonds, the block centre and the outer half of every edge unit. Pick your strongest medium here.",
+      },
+      {
+        id: "accent2",
+        label: "Second accent — inner rectangle halves (Fabric B)",
+        defaultFabric: "B",
+        hint: "The lighter accent forming the ring that rolls around the centre square. A softer tint of the main accent reads beautifully.",
+      },
+      {
+        id: "bg",
+        label: "Background fabric (Fabric C)",
+        defaultFabric: "C",
+        hint: "The four triangles around each corner diamond. Keep good contrast so the diamonds stay sharp at the block corners.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "D",
+        hint: "Optional strips of fabric that separate each Rolling Stone block — set sashing to 0\" on the previous step if you want the corner diamonds of neighbouring blocks to meet.",
+      },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

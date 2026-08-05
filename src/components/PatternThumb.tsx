@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock } from "./PatternDiagram";
 
 
 interface Props {
@@ -100,6 +100,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Four Queens quilt block diagram — a 7x7 grid with four large banded queen squares ringed by claw triangles in the corners, four arms carrying small accent diamonds, and a large background diamond in the centre",
   "four-xs":
     "Four X's quilt block diagram — squares set on point with four coloured X shapes, one in each quadrant, around a background X in the centre",
+  "rolling-stone":
+    "The Rolling Stone quilt block diagram — a 3x3 grid with square-in-a-square corner units, two-rectangle edge units and a plain accent centre square",
   "broken-dishes":
     "Broken Dishes quilt block diagram — four half-square-triangle units in a 2x2 grid, two accent triangles pointing in at the block centre and two on opposite outer corners",
 };
@@ -931,6 +933,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return (
         <svg {...common}>
           <BrokenDishesBlock size={90} accent1={C.a} accent2={C.b} bg={C.c} />
+        </svg>
+      );
+    }
+    case "rolling-stone": {
+      return (
+        <svg {...common}>
+          <RollingStoneBlock size={90} accent1={C.a} accent2={C.b} bg={C.c} />
         </svg>
       );
     }

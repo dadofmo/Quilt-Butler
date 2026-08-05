@@ -44,7 +44,8 @@ export type PatternId =
   | "corner-beam"
   | "four-queens"
   | "four-xs"
-  | "broken-dishes";
+  | "broken-dishes"
+  | "rolling-stone";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
