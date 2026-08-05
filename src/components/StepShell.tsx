@@ -31,7 +31,7 @@ export function StepShell({ step, title, subtitle, backTo, children }: Props) {
           </div>
 
           {step === 1 && (
-            <div className="flex items-center justify-center gap-8 sm:gap-12 md:gap-16">
+            <div className="flex items-start justify-center gap-8 sm:gap-12 md:gap-16">
               <div className="flex flex-col items-center justify-center gap-0.5">
                 <span className="text-[10px] font-medium leading-none text-muted-foreground">
                   New to Quiltbutler?
@@ -48,13 +48,18 @@ export function StepShell({ step, title, subtitle, backTo, children }: Props) {
                 </a>
               </div>
 
-              <Link
-                to="/blog"
-                className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold leading-tight text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
-                aria-label="Read The Butler Blog"
-              >
-                The Butler Blog
-              </Link>
+              <div className="flex flex-col items-center justify-center gap-0.5">
+                <span className="text-[10px] font-medium leading-none text-muted-foreground">
+                  Want to learn more?
+                </span>
+                <Link
+                  to="/blog"
+                  className="inline-flex items-center gap-1 rounded-full bg-primary px-2 py-0.5 text-[11px] font-semibold leading-tight text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1"
+                  aria-label="Read The Butler Blog"
+                >
+                  The Butler Blog
+                </Link>
+              </div>
             </div>
           )}
 
