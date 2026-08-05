@@ -3176,6 +3176,73 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge. Leave sashing at 0" if you want the diamonds and bursts to form across neighbouring blocks.`,
       );
     }
+  } else if (s.pattern === "rolling-stone") {
+    // The Rolling Stone — a 3×3 grid (u = blockSize / 3).
+    //  • 4 corner cells: square-in-a-square (accent1 on-point centre inside
+    //    4 background corner triangles).
+    //  • 4 edge cells: split in half into two rectangles, accent1 on the
+    //    OUTER half, accent2 on the INNER half.
+    //  • 1 centre cell: a plain accent1 square.
+    const u = s.blockSize / 3;
+    const a1 = (s.assignments["accent1"] ?? "A") as FabricKey;
+    const a2 = (s.assignments["accent2"] ?? "B") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "C") as FabricKey;
+
+    const centreCut = u + SEAM;                   // plain centre square
+    const diamondCut = u / Math.SQRT2 + SEAM;     // on-point square in a square
+    const cornerTriCut = u / 2 + HST_EXTRA;       // 2 per corner unit → 4 triangles
+    const rectLong = u + SEAM;                    // rectangle length
+    const rectShort = u / 2 + SEAM;               // rectangle height
+
+    const diamondCount = 4 * blockCount;
+    const cornerTriSquares = 8 * blockCount;      // 2 per corner unit × 4 corners
+    const rectCount = 4 * blockCount;             // per fabric
+
+    addSquares(reqs[a1], "Corner square-in-a-square centres (on point)", diamondCount, diamondCut, s.fabricWidth);
+    addSquares(reqs[a1], "Block centre squares", blockCount, centreCut, s.fabricWidth);
+    addRails(reqs[a1], "Edge-unit rectangles (outer halves)", rectCount, rectLong, rectShort, s.fabricWidth);
+    addRails(reqs[a2], "Edge-unit rectangles (inner halves)", rectCount, rectLong, rectShort, s.fabricWidth);
+    addSquares(
+      reqs[bgFab],
+      "Corner triangle squares||then cut each square ONCE corner-to-corner on the diagonal",
+      cornerTriSquares,
+      cornerTriCut,
+      s.fabricWidth,
+    );
+
+    notes.push(
+      `Each Rolling Stone block is a 3×3 grid of units, every unit finishing at ${u.toFixed(2)}" square. The four CORNERS are square-in-a-square units (a Fabric ${a1} square set on point inside four Fabric ${bgFab} triangles). The four EDGE units are each two rectangles — Fabric ${a1} on the outer half, Fabric ${a2} on the inner half. The CENTRE is one plain Fabric ${a1} square.`,
+    );
+    notes.push(
+      `Cut per block (all sizes include the 1/4" seam allowance): Fabric ${a1} — 4 squares at ${diamondCut.toFixed(2)}" (the on-point corner centres), 1 square at ${centreCut.toFixed(2)}" (block centre), and 4 rectangles ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}". Fabric ${a2} — 4 rectangles ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}". Fabric ${bgFab} — 8 squares at ${cornerTriCut.toFixed(2)}", each cut ONCE corner-to-corner on the diagonal for 16 corner triangles (4 per corner unit). Across all ${blockCount} blocks: ${diamondCount} on-point squares, ${blockCount} centre squares, ${rectCount} rectangles per accent and ${cornerTriSquares} background triangle squares.`,
+    );
+    notes.push(
+      `Make the 4 corner units (square-in-a-square): lay one Fabric ${a1} ${diamondCut.toFixed(2)}" square in front of you as a normal square. Centre a background triangle on the LEFT edge with its long (bias) edge along the square, right sides together (RST) — fold both pieces to find the middles and match them. Sew a 1/4" seam and press the triangle open. Repeat on the RIGHT edge, then the TOP, then the BOTTOM. The square is now on point with a triangle on each side. Trim the unit to ${(u + SEAM).toFixed(2)}" square, leaving a 1/4" of background beyond every point of the diamond so the points survive the block seams.`,
+    );
+    notes.push(
+      `Make the 4 edge units: sew one Fabric ${a1} rectangle to one Fabric ${a2} rectangle along their long ${rectLong.toFixed(2)}" edges, RST. Press toward Fabric ${a1}. Each unit should measure ${(u + SEAM).toFixed(2)}" square. Make 4 identical units per block — the ORIENTATION is what matters, not the piecing.`,
+    );
+    notes.push(
+      `Assemble the block in 3 rows. ROW 1 — corner unit, edge unit turned so the Fabric ${a1} half is at the TOP (Fabric ${a2} facing in toward the centre), corner unit. ROW 2 — edge unit turned so Fabric ${a1} is on the LEFT, the plain Fabric ${a1} centre square, edge unit turned so Fabric ${a1} is on the RIGHT. ROW 3 — corner unit, edge unit turned so Fabric ${a1} is at the BOTTOM, corner unit. In every edge unit the darker Fabric ${a1} half sits on the OUTSIDE of the block and the lighter Fabric ${a2} half rings the centre — that light ring is the "rolling" halo the block is named for. Sew each row, press row seams in alternating directions so they nest, then join the three rows. Finished block: ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+    notes.push(
+      `Rolling Stone tips: (1) The corner-unit triangles are cut on the bias along their long edge — starch the background before cutting and don't tug the units while pressing. (2) Chain-piece all ${cornerTriSquares / 2 * 1} corner units in one sitting and trim them all to the same size before you touch the rows. (3) Pin where the diamond points meet the seam line so you keep a crisp point rather than a chopped tip. (4) Set blocks edge to edge (no sashing) and the Fabric ${a1} diamonds of four neighbouring blocks meet to make a secondary square at every block intersection.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
