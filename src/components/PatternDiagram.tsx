@@ -1148,6 +1148,13 @@ function renderInner(
       const bg = get("bg", "C");
       return <RollingStoneBlock size={200} accent1={accent1} accent2={accent2} bg={bg} />;
     }
+    case "summer-winds": {
+      const bg = get("bg", "A");
+      const accent = get("accent", "B");
+      const dark = get("dark", "C");
+      const geese = get("geese", "D");
+      return <SummerWindsBlock size={200} bg={bg} accent={accent} dark={dark} geese={geese} />;
+    }
 
 
 
