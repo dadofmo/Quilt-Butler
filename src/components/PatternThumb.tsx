@@ -102,6 +102,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Four X's quilt block diagram — squares set on point with four coloured X shapes, one in each quadrant, around a background X in the centre",
   "rolling-stone":
     "The Rolling Stone quilt block diagram — a 3x3 grid with square-in-a-square corner units, two-rectangle edge units and a plain accent centre square",
+  "summer-winds":
+    "Summer Winds quilt block diagram — a nine-patch with three half-square triangles and a dark square in each corner unit, four flying-geese edge units pointing outward, and a plain accent centre square",
   "broken-dishes":
     "Broken Dishes quilt block diagram — four half-square-triangle units in a 2x2 grid, two accent triangles pointing in at the block centre and two on opposite outer corners",
 };
