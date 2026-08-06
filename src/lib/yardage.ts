@@ -3244,8 +3244,85 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
-  }
+  } else if (s.pattern === "summer-winds") {
+    // Summer Winds — a nine-patch drafted on a 6-unit grid (u = blockSize / 6),
+    // so every macro cell finishes 2u x 2u.
+    //
+    // Per block:
+    //   12 half-square triangles (1u finished) — 3 in each corner unit, their
+    //      accent halves facing the inner corner.
+    //    4 plain dark squares (1u) — the inner corner of each corner unit.
+    //    4 flying-geese units (2u x 1u finished) pointing OUTWARD, made
+    //      stitch-and-flip from a goose rectangle + 2 background squares.
+    //    4 plain background rectangles (2u x 1u) — the outer half of each
+    //      edge cell.
+    //    1 plain accent centre square (2u).
+    const u = s.blockSize / 6;
+    const hstCut = u + HST_EXTRA;
+    const darkCut = u + SEAM;
+    const flipCut = u + SEAM;
+    const rectLong = 2 * u + SEAM;
+    const rectShort = u + SEAM;
+    const centreCut = 2 * u + SEAM;
 
+    const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
+    const accentFab = (s.assignments["accent"] ?? "B") as FabricKey;
+    const darkFab = (s.assignments["dark"] ?? "C") as FabricKey;
+    const geeseFab = (s.assignments["geese"] ?? "D") as FabricKey;
+
+    // 12 HSTs per block; each pair of squares (1 bg + 1 accent) yields 2 HSTs.
+    const hstPairs = 6 * blockCount;
+    const darkSquares = 4 * blockCount;
+    const flipSquares = 8 * blockCount;
+    const bgRects = 4 * blockCount;
+    const geeseRects = 4 * blockCount;
+    const centreSquares = blockCount;
+
+    addSquares(reqs[bgFab], "HST squares (pair with the accent squares)", hstPairs, hstCut, s.fabricWidth);
+    addSquares(reqs[accentFab], "HST squares (pair with the background squares)", hstPairs, hstCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Goose stitch-and-flip squares", flipSquares, flipCut, s.fabricWidth);
+    addRails(reqs[bgFab], "Plain outer edge rectangles", bgRects, rectLong, rectShort, s.fabricWidth);
+    addRails(reqs[geeseFab], "Flying-geese rectangles", geeseRects, rectLong, rectShort, s.fabricWidth);
+    addSquares(reqs[darkFab], "Corner-unit squares", darkSquares, darkCut, s.fabricWidth);
+    addSquares(reqs[accentFab], "Block centre squares", centreSquares, centreCut, s.fabricWidth);
+
+    notes.push(
+      `Each Summer Winds block is a 3x3 nine-patch drafted on a 6-unit grid (u = ${u.toFixed(2)}" finished), so each of the nine cells finishes ${(2 * u).toFixed(2)}" square: 4 corner units (three half-square triangles plus one solid square), 4 flying-geese edge units pointing OUT toward the block edges, and a plain centre square.`,
+    );
+    notes.push(
+      `Cut per block (all sizes include the 1/4" seam allowance): Fabric ${bgFab} — 6 squares ${hstCut.toFixed(2)}" (for the HSTs), 8 squares ${flipCut.toFixed(2)}" (goose corners) and 4 rectangles ${rectShort.toFixed(2)}" x ${rectLong.toFixed(2)}". Fabric ${accentFab} — 6 squares ${hstCut.toFixed(2)}" (for the HSTs) and 1 square ${centreCut.toFixed(2)}" (block centre). Fabric ${darkFab} — 4 squares ${darkCut.toFixed(2)}". Fabric ${geeseFab} — 4 rectangles ${rectShort.toFixed(2)}" x ${rectLong.toFixed(2)}".`,
+    );
+    notes.push(
+      `Half-square triangles (make 12 per block). Draw a diagonal line corner to corner on the back of each Fabric ${accentFab} ${hstCut.toFixed(2)}" square. Pair it right sides together with a Fabric ${bgFab} square of the same size, sew a 1/4" seam on BOTH sides of the drawn line, then cut apart ON the line. Press toward the accent and trim each unit to ${(u + SEAM).toFixed(2)}" square. Every pair of squares makes 2 HSTs, so 6 pairs give the 12 you need.`,
+    );
+    notes.push(
+      `Corner units (make 4 per block). Each is a little four-patch: put the plain Fabric ${darkFab} square in ONE corner and three HSTs in the other three cells, every accent triangle touching that same corner — the three accent triangles and the dark square read as one solid wedge. Sew the top two units together, the bottom two together, press in opposite directions and join. Each corner unit finishes ${(2 * u).toFixed(2)}" square. When you set the block together, rotate each corner unit so the dark square points at the MIDDLE of the block.`,
+    );
+    notes.push(
+      `Flying-geese edge units (make 4 per block). Draw a diagonal on the back of the Fabric ${bgFab} ${flipCut.toFixed(2)}" squares. Lay one on the LEFT end of a Fabric ${geeseFab} rectangle, right sides together, sew ON the line, trim 1/4" beyond the seam and press open; repeat on the RIGHT end. You now have a ${geeseFab} triangle with a background triangle either side. Sew a plain Fabric ${bgFab} rectangle to the goose's BASE (flat) edge so the point aims AWAY from it — in the finished block that point faces the outer edge of the block and the plain rectangle sits on the outside. The unit finishes ${(2 * u).toFixed(2)}" square.`,
+    );
+    notes.push(
+      `Block assembly — sew in 3 rows. Row 1 = corner unit (dark square bottom-right) - edge unit with the goose pointing UP - corner unit (dark square bottom-left). Row 2 = edge unit with the goose pointing LEFT - the plain Fabric ${accentFab} centre square - edge unit with the goose pointing RIGHT. Row 3 = corner unit (dark square top-right) - edge unit with the goose pointing DOWN - corner unit (dark square top-left). Press row seams in alternating directions so they nest, then join the rows. The block has 90-degree rotational symmetry — give it a quarter turn to double-check before you sew.`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${hstPairs} HST square pairs (${12 * blockCount} finished HSTs), ${darkSquares} dark corner squares, ${geeseRects} goose rectangles with ${flipSquares} flip squares, ${bgRects} plain background rectangles and ${centreSquares} centre squares. Tips: (1) Chain-piece all the HSTs in one pass and trim them all before building any corner units — consistent HSTs are what keep the block square. (2) Save the corners trimmed off the geese; sewn a second time 1/2" from the line they become bonus little HSTs. (3) Starch the background before cutting so the bias edges behave. (4) Set the blocks edge to edge and the goose points of neighbouring blocks meet nose to nose across the quilt.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" x ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} x ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} x ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
+  }
 
 
 
@@ -3334,7 +3411,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "four-queens" ||
     s.pattern === "four-xs" ||
     s.pattern === "broken-dishes" ||
-    s.pattern === "rolling-stone";
+    s.pattern === "rolling-stone" ||
+    s.pattern === "summer-winds";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

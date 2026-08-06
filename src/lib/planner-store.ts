@@ -45,7 +45,8 @@ export type PatternId =
   | "four-queens"
   | "four-xs"
   | "broken-dishes"
-  | "rolling-stone";
+  | "rolling-stone"
+  | "summer-winds";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"

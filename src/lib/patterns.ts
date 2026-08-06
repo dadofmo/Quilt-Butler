@@ -1426,6 +1426,46 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "E" },
     ],
   },
+  {
+    id: "summer-winds",
+    name: "Summer Winds",
+    hasMath: true,
+    intro:
+      "Summer Winds is a breezy nine-patch drafted on a 6-unit grid. Each corner is a little four-patch of three half-square triangles plus one solid square that sits at the inner corner, so the accent triangles look like gusts spiralling toward the middle. Four flying-geese units fill the sides with their points aimed OUT at the block edges, and a plain square anchors the centre. Four fabrics, no curves, no templates — just half-square triangles, stitch-and-flip geese and squares.",
+    sections: [
+      {
+        id: "bg",
+        label: "Background fabric (Fabric A)",
+        defaultFabric: "A",
+        hint: "The light fabric behind everything: the light halves of every half-square triangle, the plain outer rectangles on each side and the two side triangles of every goose.",
+      },
+      {
+        id: "accent",
+        label: "Accent triangles & centre square (Fabric B)",
+        defaultFabric: "B",
+        hint: "The medium tone that makes the swirl: the coloured halves of the twelve half-square triangles plus the big plain square in the middle of the block.",
+      },
+      {
+        id: "dark",
+        label: "Corner squares (Fabric C)",
+        defaultFabric: "C",
+        hint: "The four solid squares tucked into the inner corner of each corner unit. A deeper shade of the accent gives the block its shadowed pinwheel look.",
+      },
+      {
+        id: "geese",
+        label: "Flying-geese points (Fabric D)",
+        defaultFabric: "D",
+        hint: "The four big triangles pointing out at the middle of each side. Pick your boldest contrast — these are the block's exclamation marks.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "E",
+        hint: "Optional strips of fabric that separate each Summer Winds block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
 
 ];
 
