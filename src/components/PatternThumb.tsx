@@ -945,6 +945,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "summer-winds": {
+      return (
+        <svg {...common}>
+          <SummerWindsBlock size={90} bg={C.a} accent={C.b} dark={C.c} geese={C.d} />
+        </svg>
+      );
+    }
   }
 }
 
