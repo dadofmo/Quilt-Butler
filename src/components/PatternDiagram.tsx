@@ -2380,3 +2380,106 @@ export function RollingStoneBlock({
     </>
   );
 }
+
+/**
+ * Shared renderer for "Summer Winds" — a nine-patch drafted on a 6-unit grid
+ * (u = size / 6), so every macro cell finishes 2u × 2u.
+ *
+ *   - Corners: a 2×2 set of 1u units — three half-square triangles whose
+ *     accent (Fabric B) halves face the inner corner, plus one plain dark
+ *     (Fabric C) square in the inner corner itself. Each corner is the
+ *     top-left unit rotated by 90° so the dark square always points at the
+ *     middle of the block.
+ *   - Edges: the outer half is a plain background rectangle (2u × 1u); the
+ *     inner half is a flying-geese unit whose Fabric D goose points OUTWARD,
+ *     its base sitting against the centre square, with background side
+ *     triangles.
+ *   - Centre: a plain 2u × 2u Fabric B square.
+ *
+ * Geometry matches the yardage math in yardage.ts exactly.
+ */
+export function SummerWindsBlock({
+  size,
+  bg,
+  accent,
+  dark,
+  geese,
+}: {
+  size: number;
+  bg: string;
+  accent: string;
+  dark: string;
+  geese: string;
+}) {
+  const u = size / 6;
+  // Rotate a point (in grid units) about the block centre (3,3) by k × 90°.
+  const rot = ([x, y]: [number, number], k: number): [number, number] => {
+    let p: [number, number] = [x, y];
+    for (let i = 0; i < k; i++) p = [6 - p[1], p[0]];
+    return p;
+  };
+  const poly = (pts: [number, number][], k: number, fill: string, key: string) => (
+    <polygon
+      key={key}
+      points={pts
+        .map((p) => rot(p, k))
+        .map(([x, y]) => `${x * u},${y * u}`)
+        .join(" ")}
+      fill={fill}
+    />
+  );
+  // The accent half of an HST at cell (cx, cy) — the triangle touching the
+  // cell's bottom-right corner (i.e. the corner nearest the block centre for
+  // the top-left corner unit).
+  const hst = (cx: number, cy: number, k: number, key: string) =>
+    poly(
+      [
+        [cx + 1, cy],
+        [cx + 1, cy + 1],
+        [cx, cy + 1],
+      ],
+      k,
+      accent,
+      key,
+    );
+
+  const quarters = [0, 1, 2, 3];
+  return (
+    <>
+      {/* Background fills the whole block; everything else overlays it. */}
+      <rect x={0} y={0} width={size} height={size} fill={bg} />
+      {quarters.map((k) => (
+        <g key={`sw-${k}`}>
+          {/* Corner unit — 3 HSTs + 1 dark square in the inner corner */}
+          {hst(0, 0, k, `sw-hst-a-${k}`)}
+          {hst(1, 0, k, `sw-hst-b-${k}`)}
+          {hst(0, 1, k, `sw-hst-c-${k}`)}
+          {poly(
+            [
+              [1, 1],
+              [2, 1],
+              [2, 2],
+              [1, 2],
+            ],
+            k,
+            dark,
+            `sw-dark-${k}`,
+          )}
+          {/* Edge flying goose — base against the centre, apex pointing out */}
+          {poly(
+            [
+              [2, 2],
+              [4, 2],
+              [3, 1],
+            ],
+            k,
+            geese,
+            `sw-goose-${k}`,
+          )}
+        </g>
+      ))}
+      {/* Centre square */}
+      <rect x={2 * u} y={2 * u} width={2 * u} height={2 * u} fill={accent} />
+    </>
+  );
+}
