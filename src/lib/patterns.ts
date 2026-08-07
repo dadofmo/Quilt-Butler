@@ -1466,6 +1466,41 @@ export const PATTERNS: PatternDef[] = [
       { ...borderSection, defaultFabric: "F" },
     ],
   },
+  {
+    id: "swing-in-the-center",
+    name: "Swing in the Center",
+    hasMath: true,
+    intro:
+      "Swing in the Center is a classic three-fabric block drafted on a 6-unit grid with a wide middle row and column. Solid squares and half-square triangles build a dark arrowhead in each corner, four double flying-geese units swing their points in toward the middle, and a square-in-a-square diamond anchors the centre. No curves, no templates — squares, half-square triangles and stitch-and-flip geese.",
+    sections: [
+      {
+        id: "bg",
+        label: "Background fabric (Fabric A)",
+        defaultFabric: "A",
+        hint: "The light fabric behind everything: the light halves of the half-square triangles, the outer goose in each edge unit and the four triangles ringing the centre diamond.",
+      },
+      {
+        id: "dark",
+        label: "Corner arrowheads & centre diamond (Fabric B)",
+        defaultFabric: "B",
+        hint: "Your darkest fabric — the plain corner squares, the dark halves of the twelve half-square triangles and the on-point square in the middle of the block.",
+      },
+      {
+        id: "geese",
+        label: "Flying-geese points (Fabric C)",
+        defaultFabric: "C",
+        hint: "The bright fabric that swings toward the centre: the inner goose of each edge unit and the two side triangles of the outer goose. Pick your boldest contrast here.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "D",
+        hint: "Optional strips of fabric that separate each Swing in the Center block — set sashing to 0\" on the previous step if you want the corner arrowheads of neighbouring blocks to meet.",
+      },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+
 
 ];
 
