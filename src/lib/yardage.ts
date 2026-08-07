@@ -3322,6 +3322,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
       notes.push(
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" x ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} x ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} x ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
+    }
   } else if (s.pattern === "swing-in-the-center") {
     // Swing in the Center — drafted on a 6-unit grid with 1-1-2-1-1 tracks
     // (u = blockSize / 6), read as a 5×5 block whose middle row/column is
