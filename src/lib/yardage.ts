@@ -186,9 +186,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isFourXs = s.pattern === "four-xs";
   const isBrokenDishes = s.pattern === "broken-dishes";
   const isRollingStone = s.pattern === "rolling-stone";
+  const isSwingInTheCenter = s.pattern === "swing-in-the-center";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -3322,6 +3323,97 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" x ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} x ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} x ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "swing-in-the-center") {
+    // Swing in the Center — drafted on a 6-unit grid with 1-1-2-1-1 tracks
+    // (u = blockSize / 6), read as a 5×5 block whose middle row/column is
+    // double width.
+    //
+    // Per block:
+    //   4 corner units (2u square) = 1 plain dark square (1u) at the OUTER
+    //     corner + 3 half-square triangles (1u) whose dark halves all lean
+    //     toward that corner, so the four pieces read as one dark arrowhead.
+    //   4 double flying-geese edge units (2u × 2u), each two stacked geese
+    //     (2u × 1u finished) pointing IN at the centre: the outer goose is
+    //     background on an accent field, the inner goose is accent on a
+    //     background field.
+    //   1 square-in-a-square centre (2u) — a dark square set on point inside
+    //     four background triangles.
+    const u = s.blockSize / 6;
+    const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
+    const darkFab = (s.assignments["dark"] ?? "B") as FabricKey;
+    const geeseFab = (s.assignments["geese"] ?? "C") as FabricKey;
+
+    const hstCut = u + HST_EXTRA;
+    const darkCut = u + SEAM;
+    const flipCut = u + SEAM;
+    const rectLong = 2 * u + SEAM;
+    const rectShort = u + SEAM;
+    const diamondCut = (2 * u) / Math.SQRT2 + SEAM;
+    const centreTriCut = u + HST_EXTRA; // 2 squares → 4 corner triangles
+
+    const hstPairs = 6 * blockCount;          // 6 pairs → 12 HSTs per block
+    const cornerSquares = 4 * blockCount;
+    const geeseRects = 4 * blockCount;        // accent geese (inner)
+    const bgRects = 4 * blockCount;           // background geese (outer)
+    const bgFlips = 8 * blockCount;           // corners of the accent geese
+    const accentFlips = 8 * blockCount;       // corners of the background geese
+    const centreTriSquares = 2 * blockCount;
+
+    addSquares(reqs[bgFab], "HST squares (pair with the dark squares)", hstPairs, hstCut, s.fabricWidth);
+    addSquares(reqs[darkFab], "HST squares (pair with the background squares)", hstPairs, hstCut, s.fabricWidth);
+    addSquares(reqs[darkFab], "Corner-unit squares", cornerSquares, darkCut, s.fabricWidth);
+    addRails(reqs[geeseFab], "Inner flying-geese rectangles", geeseRects, rectLong, rectShort, s.fabricWidth);
+    addRails(reqs[bgFab], "Outer flying-geese rectangles", bgRects, rectLong, rectShort, s.fabricWidth);
+    addSquares(reqs[bgFab], "Stitch-and-flip squares (inner geese corners)", bgFlips, flipCut, s.fabricWidth);
+    addSquares(reqs[geeseFab], "Stitch-and-flip squares (outer geese corners)", accentFlips, flipCut, s.fabricWidth);
+    addSquares(reqs[darkFab], "Centre square-in-a-square (on point)", blockCount, diamondCut, s.fabricWidth);
+    addSquares(
+      reqs[bgFab],
+      "Centre corner triangle squares||then cut each square ONCE corner-to-corner on the diagonal",
+      centreTriSquares,
+      centreTriCut,
+      s.fabricWidth,
+    );
+
+    notes.push(
+      `Each Swing in the Center block is drafted on a 6-unit grid (u = ${u.toFixed(2)}" finished) laid out 1-1-2-1-1 across and down: four ${(2 * u).toFixed(2)}" corner units, four ${(2 * u).toFixed(2)}" double flying-geese edge units pointing IN at the middle, and a ${(2 * u).toFixed(2)}" square-in-a-square centre.`,
+    );
+    notes.push(
+      `Cut per block (all sizes include the 1/4" seam allowance): Fabric ${bgFab} — 6 squares at ${hstCut.toFixed(2)}" (HSTs), 4 rectangles ${rectShort.toFixed(2)}" × ${rectLong.toFixed(2)}" (outer geese), 8 squares at ${flipCut.toFixed(2)}" (inner-geese corners) and 2 squares at ${centreTriCut.toFixed(2)}" cut ONCE on the diagonal (centre triangles). Fabric ${darkFab} — 6 squares at ${hstCut.toFixed(2)}" (HSTs), 4 squares at ${darkCut.toFixed(2)}" (corner squares) and 1 square at ${diamondCut.toFixed(2)}" (centre diamond). Fabric ${geeseFab} — 4 rectangles ${rectShort.toFixed(2)}" × ${rectLong.toFixed(2)}" (inner geese) and 8 squares at ${flipCut.toFixed(2)}" (outer-geese corners).`,
+    );
+    notes.push(
+      `Half-square triangles (make 12 per block). Draw a diagonal corner to corner on the back of each Fabric ${bgFab} ${hstCut.toFixed(2)}" square, pair it right sides together (RST) with a Fabric ${darkFab} square the same size, sew 1/4" on BOTH sides of the line and cut apart ON the line. Press toward the dark and trim each unit to ${(u + SEAM).toFixed(2)}" square. Six pairs give you the 12 HSTs a block needs.`,
+    );
+    notes.push(
+      `Corner units (make 4 per block). Each is a little four-patch ${(2 * u).toFixed(2)}" finished: the plain Fabric ${darkFab} square goes in the OUTER corner of the block, and the three HSTs fill the other three cells with every dark triangle touching that same outer corner. Sew the top pair together, the bottom pair together, press in opposite directions so the seams nest, then join. The four pieces read as one solid dark arrowhead aiming at the block centre.`,
+    );
+    notes.push(
+      `Double flying-geese edge units (make 4 per block). Each is two geese stacked, both points aiming at the block CENTRE. Inner goose: draw a diagonal on the back of two Fabric ${bgFab} ${flipCut.toFixed(2)}" squares, lay one on the LEFT end of a Fabric ${geeseFab} rectangle RST, sew ON the line, trim 1/4" beyond the seam and press open; repeat on the RIGHT end. Outer goose: the same steps but reversed — Fabric ${geeseFab} squares on the ends of a Fabric ${bgFab} rectangle. Sew the OUTER goose above the INNER goose (both points down toward the centre) to make a ${(2 * u).toFixed(2)}" square unit. Rotate a copy for each side of the block.`,
+    );
+    notes.push(
+      `Centre square-in-a-square. Lay the Fabric ${darkFab} ${diamondCut.toFixed(2)}" square flat as a normal square. Centre a background triangle on the LEFT edge, long bias edge against the square, RST — fold both to find the midpoints and match them. Sew 1/4" and press the triangle open. Repeat RIGHT, then TOP, then BOTTOM. Trim to ${(2 * u + SEAM).toFixed(2)}" square, keeping a full 1/4" of background beyond every point of the diamond so the points survive the block seams.`,
+    );
+    notes.push(
+      `Block assembly — sew in 3 rows. ROW 1 = corner unit (dark square at the top-left) - top double-geese unit (points aiming DOWN) - corner unit (dark square top-right). ROW 2 = left double-geese unit (points aiming RIGHT) - the square-in-a-square centre - right double-geese unit (points aiming LEFT). ROW 3 = corner unit (dark square bottom-left) - bottom double-geese unit (points aiming UP) - corner unit (dark square bottom-right). Press row seams in alternating directions and join. The block has 90-degree rotational symmetry, so give it a quarter turn to proof-read it before the final seams. Finished block: ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+    notes.push(
+      `Across all ${blockCount} blocks: ${hstPairs} HST square pairs (${12 * blockCount} finished HSTs), ${cornerSquares} plain dark corner squares, ${geeseRects + bgRects} goose rectangles with ${bgFlips + accentFlips} flip squares, ${blockCount} centre diamonds and ${centreTriSquares} background triangle squares. Tips: (1) Chain-piece and trim every HST before you build a single corner unit — even HSTs are what keep the block flat. (2) Save the triangles trimmed off the geese; sew them a second time 1/2" from the drawn line and they become bonus little HSTs. (3) Starch the background so the bias edges on the centre triangles behave. (4) Set the blocks edge to edge and the dark arrowheads of four neighbouring blocks meet to form a secondary square at every intersection.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
@@ -3412,7 +3504,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "four-xs" ||
     s.pattern === "broken-dishes" ||
     s.pattern === "rolling-stone" ||
-    s.pattern === "summer-winds";
+    s.pattern === "summer-winds" ||
+    s.pattern === "swing-in-the-center";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
