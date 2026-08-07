@@ -1155,6 +1155,12 @@ function renderInner(
       const geese = get("geese", "D");
       return <SummerWindsBlock size={200} bg={bg} accent={accent} dark={dark} geese={geese} />;
     }
+    case "swing-in-the-center": {
+      const bg = get("bg", "A");
+      const dark = get("dark", "B");
+      const geese = get("geese", "C");
+      return <SwingInTheCenterBlock size={200} bg={bg} dark={dark} geese={geese} />;
+    }
 
 
 
