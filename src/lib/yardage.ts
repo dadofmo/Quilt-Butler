@@ -3415,7 +3415,6 @@ export function calculateYardage(s: PlannerState): CalcResult {
       );
     }
   }
-  }
 
 
 
