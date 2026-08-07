@@ -2489,3 +2489,69 @@ export function SummerWindsBlock({
     </>
   );
 }
+
+/** Shared renderer for Swing in the Center — drafted on a 6-unit grid whose
+ *  tracks run 1-1-2-1-1, so it reads as a 5×5 block with a double-width
+ *  middle row and column.
+ *
+ *  Each corner is a 2u four-patch: a plain dark square at the OUTER corner
+ *  plus three HSTs whose dark halves lean toward that same corner, forming a
+ *  solid arrowhead. Each side is a double flying-geese unit (outer goose in
+ *  background on an accent field, inner goose in accent on background), both
+ *  points aimed at the middle. The centre is a dark square set on point.
+ */
+export function SwingInTheCenterBlock({
+  size,
+  bg,
+  dark,
+  geese,
+}: {
+  size: number;
+  bg: string;
+  dark: string;
+  geese: string;
+}) {
+  const u = size / 6;
+  const rot = ([x, y]: [number, number], k: number): [number, number] => {
+    let p: [number, number] = [x, y];
+    for (let i = 0; i < k; i++) p = [6 - p[1], p[0]];
+    return p;
+  };
+  const poly = (pts: [number, number][], k: number, fill: string, key: string) => (
+    <polygon
+      key={key}
+      points={pts
+        .map((p) => rot(p, k))
+        .map(([x, y]) => `${x * u},${y * u}`)
+        .join(" ")}
+      fill={fill}
+    />
+  );
+
+  const quarters = [0, 1, 2, 3];
+  return (
+    <>
+      {/* Background fills the whole block; everything else overlays it. */}
+      <rect x={0} y={0} width={size} height={size} fill={bg} />
+      {quarters.map((k) => (
+        <g key={`sitc-${k}`}>
+          {/* Corner unit — plain dark square at the outer corner + 3 HSTs */}
+          {poly([[0, 0], [1, 0], [1, 1], [0, 1]], k, dark, `sitc-sq-${k}`)}
+          {poly([[1, 0], [1, 1], [2, 1]], k, dark, `sitc-hst-a-${k}`)}
+          {poly([[0, 1], [1, 1], [1, 2]], k, dark, `sitc-hst-b-${k}`)}
+          {poly([[1, 1], [2, 1], [1, 2]], k, dark, `sitc-hst-c-${k}`)}
+          {/* Outer goose — background point aiming in, accent side triangles */}
+          {poly([[2, 0], [3, 1], [2, 1]], k, geese, `sitc-out-l-${k}`)}
+          {poly([[4, 0], [4, 1], [3, 1]], k, geese, `sitc-out-r-${k}`)}
+          {/* Inner goose — accent point aiming in on a background field */}
+          {poly([[2, 1], [4, 1], [3, 2]], k, geese, `sitc-in-${k}`)}
+        </g>
+      ))}
+      {/* Centre square-in-a-square: dark square on point */}
+      <polygon
+        points={`${3 * u},${2 * u} ${4 * u},${3 * u} ${3 * u},${4 * u} ${2 * u},${3 * u}`}
+        fill={dark}
+      />
+    </>
+  );
+}
