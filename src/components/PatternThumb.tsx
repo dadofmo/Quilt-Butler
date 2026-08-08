@@ -963,6 +963,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "tippecanoe-and-tyler-too": {
+      return (
+        <svg {...common}>
+          <TippecanoeBlock size={90} bg={C.a} mid={C.b} dark={C.c} centre={C.d} />
+        </svg>
+      );
+    }
   }
 }
 
