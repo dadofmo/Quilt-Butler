@@ -187,9 +187,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isBrokenDishes = s.pattern === "broken-dishes";
   const isRollingStone = s.pattern === "rolling-stone";
   const isSwingInTheCenter = s.pattern === "swing-in-the-center";
+  const isTippecanoe = s.pattern === "tippecanoe-and-tyler-too";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -3565,7 +3566,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "broken-dishes" ||
     s.pattern === "rolling-stone" ||
     s.pattern === "summer-winds" ||
-    s.pattern === "swing-in-the-center";
+    s.pattern === "swing-in-the-center" ||
+    s.pattern === "tippecanoe-and-tyler-too";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
