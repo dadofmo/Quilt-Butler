@@ -1161,6 +1161,13 @@ function renderInner(
       const geese = get("geese", "C");
       return <SwingInTheCenterBlock size={200} bg={bg} dark={dark} geese={geese} />;
     }
+    case "tippecanoe-and-tyler-too": {
+      const bg = get("bg", "A");
+      const mid = get("mid", "B");
+      const dark = get("dark", "C");
+      const centre = get("centre", "D");
+      return <TippecanoeBlock size={200} bg={bg} mid={mid} dark={dark} centre={centre} />;
+    }
 
 
 
@@ -2552,6 +2559,72 @@ export function SwingInTheCenterBlock({
         points={`${3 * u},${2 * u} ${4 * u},${3 * u} ${3 * u},${4 * u} ${2 * u},${3 * u}`}
         fill={dark}
       />
+    </>
+  );
+}
+
+/**
+ * Shared renderer for "Tippecanoe and Tyler Too" — a 4x4 grid of sixteen
+ * half-square triangles (u = size / 4). Reading the grid:
+ *   • the four block corners are mid/background HSTs whose mid triangles
+ *     point out at the corners of the block,
+ *   • the eight remaining edge units are dark/background HSTs that swing
+ *     around the block like a pinwheel,
+ *   • the four centre units are mid/centre HSTs whose centre-fabric
+ *     triangles meet in a pinwheel at the middle of the block.
+ * Every cell is one HST, so the whole block is one shape repeated sixteen
+ * times — only the orientation and the fabric pairing change.
+ */
+export function TippecanoeBlock({
+  size,
+  bg,
+  mid,
+  dark,
+  centre,
+}: {
+  size: number;
+  bg: string;
+  mid: string;
+  dark: string;
+  centre: string;
+}) {
+  const u = size / 4;
+  // Each cell: [diagonal, upper-half fill, lower-half fill].
+  //   "/"  -> diagonal runs bottom-left to top-right: upper-LEFT triangle
+  //           takes the first fill, lower-RIGHT triangle the second.
+  //   "\\" -> diagonal runs top-left to bottom-right: upper-RIGHT triangle
+  //           takes the first fill, lower-LEFT triangle the second.
+  type Cell = ["/" | "\\", string, string];
+  const grid: Cell[][] = [
+    [["/", bg, mid], ["\\", bg, dark], ["/", bg, dark], ["\\", bg, mid]],
+    [["\\", dark, bg], ["/", mid, centre], ["\\", mid, centre], ["/", dark, bg]],
+    [["/", bg, dark], ["\\", centre, mid], ["/", centre, mid], ["\\", bg, dark]],
+    [["\\", mid, bg], ["/", dark, bg], ["\\", dark, bg], ["/", mid, bg]],
+  ];
+  return (
+    <>
+      <rect x={0} y={0} width={size} height={size} fill={bg} />
+      {grid.map((row, r) =>
+        row.map((cell, c) => {
+          const [diag, first, second] = cell;
+          const x = c * u;
+          const y = r * u;
+          const firstPts =
+            diag === "/"
+              ? `${x},${y} ${x + u},${y} ${x},${y + u}`
+              : `${x},${y} ${x + u},${y} ${x + u},${y + u}`;
+          const secondPts =
+            diag === "/"
+              ? `${x + u},${y} ${x + u},${y + u} ${x},${y + u}`
+              : `${x},${y} ${x},${y + u} ${x + u},${y + u}`;
+          return (
+            <g key={`tip-${r}-${c}`}>
+              <polygon points={firstPts} fill={first} />
+              <polygon points={secondPts} fill={second} />
+            </g>
+          );
+        }),
+      )}
     </>
   );
 }

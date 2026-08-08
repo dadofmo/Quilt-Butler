@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
-import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock } from "./PatternDiagram";
+import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock } from "./PatternDiagram";
 
 interface Props {
   pattern: PatternId;
@@ -1269,6 +1269,13 @@ function MiniBlock({
       const dark = get("dark", "B");
       const geese = get("geese", "C");
       return <SwingInTheCenterBlock size={200} bg={bg} dark={dark} geese={geese} />;
+    }
+    case "tippecanoe-and-tyler-too": {
+      const bg = get("bg", "A");
+      const mid = get("mid", "B");
+      const dark = get("dark", "C");
+      const centre = get("centre", "D");
+      return <TippecanoeBlock size={200} bg={bg} mid={mid} dark={dark} centre={centre} />;
     }
 
   }
