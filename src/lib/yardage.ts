@@ -3414,6 +3414,66 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "tippecanoe-and-tyler-too") {
+    // Tippecanoe and Tyler Too — a 4x4 grid of sixteen half-square triangles,
+    // each finishing at blockSize / 4.
+    //   4 corner units  = medium + background
+    //   8 edge units    = dark   + background
+    //   4 centre units  = medium + centre fabric
+    // Two starting squares yield two finished HSTs, so per block that is
+    // 2 medium/background pairs, 4 dark/background pairs and 2 medium/centre
+    // pairs — 8 pairs, 16 units, no leftovers.
+    const u = s.blockSize / 4;
+    const cut = u + HST_EXTRA;
+
+    const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
+    const midFab = (s.assignments["mid"] ?? "B") as FabricKey;
+    const darkFab = (s.assignments["dark"] ?? "C") as FabricKey;
+    const centreFab = (s.assignments["centre"] ?? "D") as FabricKey;
+
+    const bgSquares = 6 * blockCount; // 2 with medium + 4 with dark
+    const midSquares = 4 * blockCount; // 2 with background + 2 with centre
+    const darkSquares = 4 * blockCount;
+    const centreSquares = 2 * blockCount;
+
+    addSquares(reqs[bgFab], "HST starting squares (background)", bgSquares, cut, s.fabricWidth);
+    addSquares(reqs[midFab], "HST starting squares (medium)", midSquares, cut, s.fabricWidth);
+    addSquares(reqs[darkFab], "HST starting squares (dark pinwheel arms)", darkSquares, cut, s.fabricWidth);
+    addSquares(reqs[centreFab], "HST starting squares (centre pinwheel)", centreSquares, cut, s.fabricWidth);
+
+    notes.push(
+      `Each Tippecanoe and Tyler Too block is a 4x4 grid of sixteen half-square-triangle (HST) units, every one finishing at ${u.toFixed(2)}". Four units pair Fabric ${midFab} with the background at the block corners, eight pair Fabric ${darkFab} with the background around the outside, and four pair Fabric ${midFab} with Fabric ${centreFab} in the middle — ${16 * blockCount} HST units across all ${blockCount} blocks.`,
+    );
+    notes.push(
+      `Cut per block (all sizes include the 1/4" seam allowance): Fabric ${bgFab} — 6 squares at ${cut.toFixed(2)}"; Fabric ${midFab} — 4 squares at ${cut.toFixed(2)}"; Fabric ${darkFab} — 4 squares at ${cut.toFixed(2)}"; Fabric ${centreFab} — 2 squares at ${cut.toFixed(2)}". Across the whole quilt: ${bgSquares} background, ${midSquares} medium, ${darkSquares} dark and ${centreSquares} centre squares, all at ${cut.toFixed(2)}" x ${cut.toFixed(2)}" (the ${u.toFixed(2)}" finished HST plus 7/8" for the diagonal seam).`,
+    );
+    notes.push(
+      `Make the HST units. Pair the squares right sides together (RST) in three stacks: 2 Fabric ${midFab} + 2 Fabric ${bgFab} pairs, 4 Fabric ${darkFab} + 4 Fabric ${bgFab} pairs, and 2 Fabric ${midFab} + 2 Fabric ${centreFab} pairs per block. Draw a diagonal corner to corner on the back of the lighter square, sew a 1/4" seam down BOTH sides of the line, cut apart ON the drawn line and press toward the darker fabric. Each pair gives 2 finished HSTs; trim every unit to ${(u + SEAM).toFixed(2)}" square so it finishes at ${u.toFixed(2)}".`,
+    );
+    notes.push(
+      `Block layout — four rows of four, described left to right. ROW 1: medium HST with the medium triangle in the BOTTOM-RIGHT corner; dark HST with the dark triangle in the BOTTOM-LEFT corner; dark HST with the dark triangle in the BOTTOM-RIGHT corner; medium HST with the medium triangle in the BOTTOM-LEFT corner. ROW 2: dark HST with the dark triangle TOP-RIGHT; centre HST with the Fabric ${centreFab} triangle BOTTOM-RIGHT; centre HST with the Fabric ${centreFab} triangle BOTTOM-LEFT; dark HST with the dark triangle TOP-LEFT. ROW 3: dark HST with the dark triangle BOTTOM-RIGHT; centre HST with the Fabric ${centreFab} triangle TOP-RIGHT; centre HST with the Fabric ${centreFab} triangle TOP-LEFT; dark HST with the dark triangle BOTTOM-LEFT. ROW 4: medium HST with the medium triangle TOP-RIGHT; dark HST with the dark triangle TOP-LEFT; dark HST with the dark triangle TOP-RIGHT; medium HST with the medium triangle TOP-LEFT. Every unit that is not a centre unit has Fabric ${bgFab} in its other half; in the four centre units the other half is Fabric ${midFab}, so the medium forms a square ring around the small Fabric ${centreFab} pinwheel.`,
+    );
+    notes.push(
+      `Sew the block: join the four units in each row, pressing the seams in rows 1 and 3 to the left and the seams in rows 2 and 4 to the right so everything nests. Then join the four rows, pinning at each seam intersection. Press the long row seams open to keep the block flat. The block has 180-degree rotational symmetry — give it a half turn before the final seams and it should look identical. Finished block: ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+    notes.push(
+      `Tippecanoe tips: (1) The long edge of every HST is bias — starch your fabric before cutting, and press rather than iron. (2) Trim all ${16 * blockCount} units to exactly the same size in one sitting; with sixteen HSTs meeting in one block a scant 1/16" error compounds fast. (3) Keep four labelled stacks (corner medium, dark arms, centre pinwheel, background) so you never sew a unit in facing the wrong way. (4) Set the blocks edge to edge and the dark arms of neighbouring blocks join into long diagonal chains across the quilt.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
