@@ -1501,6 +1501,46 @@ export const PATTERNS: PatternDef[] = [
     ],
   },
 
+  {
+    id: "tippecanoe-and-tyler-too",
+    name: "Tippecanoe and Tyler Too",
+    hasMath: true,
+    intro:
+      "Named for the 1840 campaign slogan, Tippecanoe and Tyler Too is sixteen half-square triangles in a four-by-four grid — one shape, one seam, sixteen times. The four corner units point their medium triangles out at the corners of the block, eight dark units swing around the outside like a pinwheel, and four units in the middle pair the medium with a fourth fabric so a small pinwheel spins at the centre. Because everything is an HST, it is a wonderful block for practising accurate points, and it looks far more intricate than the cutting list suggests.",
+    sections: [
+      {
+        id: "bg",
+        label: "Background fabric (Fabric A)",
+        defaultFabric: "A",
+        hint: "The light fabric filling the other half of the twelve outer half-square triangles. Keep strong contrast with both the medium and the dark so the pinwheel arms stay crisp.",
+      },
+      {
+        id: "mid",
+        label: "Medium fabric — corners & centre ring (Fabric B)",
+        defaultFabric: "B",
+        hint: "The medium tone: the four triangles that point out at the block corners plus the light half of the four centre units. It links the outside of the block to the middle.",
+      },
+      {
+        id: "dark",
+        label: "Dark fabric — pinwheel arms (Fabric C)",
+        defaultFabric: "C",
+        hint: "Your darkest fabric — the eight edge triangles that swing around the block. This is what gives Tippecanoe its motion.",
+      },
+      {
+        id: "centre",
+        label: "Centre pinwheel fabric (Fabric D)",
+        defaultFabric: "D",
+        hint: "The fourth fabric forming the small pinwheel at the very middle of the block. A medium-dark blue or teal reads beautifully against the medium.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "E",
+        hint: "Optional strips of fabric that separate each Tippecanoe block — leave sashing at 0\" on the previous step if you want the dark arms of neighbouring blocks to meet.",
+      },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
 
 ];
 
