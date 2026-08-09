@@ -3475,6 +3475,70 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "tulip-lady-fingers") {
+    // Tulip Lady Fingers — drafted on an 8x8 unit grid (u = blockSize / 8):
+    //   • a 4u x 4u centre square (Fabric C),
+    //   • four 4u x 2u background rectangles on the edges,
+    //   • four 2u x 2u corner units, each built from one 1u background square,
+    //     two 1u accent/background HSTs and one plain 1u accent square.
+    // Per block that is 4 plain accent squares, 4 background corner squares,
+    // 8 HST units (= 4 accent + 4 background starting squares) and 1 centre.
+    const u = s.blockSize / 8;
+    const hstCut = u + HST_EXTRA;
+    const sqCut = u + SEAM;
+    const centreCut = 4 * u + SEAM;
+    const rectLong = 4 * u + SEAM;
+    const rectShort = 2 * u + SEAM;
+
+    const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
+    const tulipFab = (s.assignments["tulip"] ?? "B") as FabricKey;
+    const centreFab = (s.assignments["centre"] ?? "C") as FabricKey;
+
+    const cornerBgSquares = 4 * blockCount;
+    const tulipSquares = 4 * blockCount;
+    const hstSquares = 4 * blockCount; // per fabric — each yields 2 HSTs
+    const edgeRects = 4 * blockCount;
+
+    addSquares(reqs[bgFab], "Corner background squares", cornerBgSquares, sqCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "HST starting squares (background)", hstSquares, hstCut, s.fabricWidth);
+    addRails(reqs[bgFab], "Background edge rectangles", edgeRects, rectLong, rectShort, s.fabricWidth);
+    addSquares(reqs[tulipFab], "Plain tulip squares", tulipSquares, sqCut, s.fabricWidth);
+    addSquares(reqs[tulipFab], "HST starting squares (tulip)", hstSquares, hstCut, s.fabricWidth);
+    addSquares(reqs[centreFab], "Centre squares", blockCount, centreCut, s.fabricWidth);
+
+    notes.push(
+      `Each Tulip Lady Fingers block is drafted on an eight-unit grid, so one unit finishes at ${u.toFixed(2)}". The middle of the block is a single 4-unit square (${(4 * u).toFixed(2)}" finished), the four sides are plain background rectangles ${(4 * u).toFixed(2)}" × ${(2 * u).toFixed(2)}" finished, and each of the four corners is a 2 × 2 arrangement of one-unit patches that forms one tulip.`,
+    );
+    notes.push(
+      `Cutting for all ${blockCount} blocks — Fabric ${bgFab} (background): ${cornerBgSquares} squares at ${sqCut.toFixed(2)}", ${hstSquares} squares at ${hstCut.toFixed(2)}" for the HSTs, and ${edgeRects} rectangles at ${rectShort.toFixed(2)}" × ${rectLong.toFixed(2)}". Fabric ${tulipFab} (tulips): ${tulipSquares} squares at ${sqCut.toFixed(2)}" and ${hstSquares} squares at ${hstCut.toFixed(2)}" for the HSTs. Fabric ${centreFab} (centre): ${blockCount} squares at ${centreCut.toFixed(2)}".`,
+    );
+    notes.push(
+      `Half-square triangles: pair one ${hstCut.toFixed(2)}" Fabric ${bgFab} square with one ${hstCut.toFixed(2)}" Fabric ${tulipFab} square right sides together, draw the diagonal, sew 1/4" either side, cut apart on the line and press. Each pair gives two HSTs — you need ${8 * blockCount} HSTs in total, so ${4 * blockCount} pairs. Trim every unit to exactly ${sqCut.toFixed(2)}" square.`,
+    );
+    notes.push(
+      `Building one tulip corner (top-left corner shown; the other three are mirror images so all four tulips point in toward the centre of the block): TOP ROW — a plain Fabric ${bgFab} square on the outside, then an HST with its Fabric ${tulipFab} triangle in the BOTTOM-LEFT. BOTTOM ROW — an HST with its Fabric ${tulipFab} triangle in the TOP-RIGHT, then a plain Fabric ${tulipFab} square in the inner corner. Sew each row, press in opposite directions, then join the two rows. The three tulip patches meet to make one continuous petal shape with two little "lady finger" points reaching out along the block edges.`,
+    );
+    notes.push(
+      `Assembling the block: make four tulip corners (rotate the unit a quarter turn for each corner so every tulip aims at the middle). ROW 1 — top-left tulip, top background rectangle (${rectShort.toFixed(2)}" tall), top-right tulip. ROW 2 — left background rectangle, the ${centreCut.toFixed(2)}" centre square, right background rectangle. ROW 3 — bottom-left tulip, bottom background rectangle, bottom-right tulip. Join the three rows, pressing the long seams open. Finished block: ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+    notes.push(
+      `Tulip Lady Fingers tips: (1) The big open centre square is the perfect place for a feature print, a fussy-cut motif, or some show-off quilting — pick it first and choose the tulip fabric to suit. (2) The HST diagonals are bias; starch before cutting and press, never iron. (3) Keep the four corner units in a labelled pinwheel arrangement on your design wall before sewing — the tulips are easy to rotate the wrong way. (4) Set the blocks edge to edge with no sashing and the tulips of four neighbouring blocks meet at the intersections to form a secondary star.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
