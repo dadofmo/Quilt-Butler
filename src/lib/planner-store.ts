@@ -48,7 +48,8 @@ export type PatternId =
   | "rolling-stone"
   | "summer-winds"
   | "swing-in-the-center"
-  | "tippecanoe-and-tyler-too";
+  | "tippecanoe-and-tyler-too"
+  | "tulip-lady-fingers";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
