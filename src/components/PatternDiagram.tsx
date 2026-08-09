@@ -1168,6 +1168,12 @@ function renderInner(
       const centre = get("centre", "D");
       return <TippecanoeBlock size={200} bg={bg} mid={mid} dark={dark} centre={centre} />;
     }
+    case "tulip-lady-fingers": {
+      const bg = get("bg", "A");
+      const tulip = get("tulip", "B");
+      const centre = get("centre", "C");
+      return <TulipLadyFingersBlock size={200} bg={bg} tulip={tulip} centre={centre} />;
+    }
 
 
 
@@ -2625,6 +2631,64 @@ export function TippecanoeBlock({
           );
         }),
       )}
+    </>
+  );
+}
+
+/**
+ * Shared renderer for "Tulip Lady Fingers" — drafted on an 8x8 unit grid
+ * (u = size / 8):
+ *   • a 4u x 4u centre square of the feature fabric,
+ *   • plain background rectangles filling the four edges,
+ *   • a 2u x 2u tulip in each corner made of four 1u patches: a plain
+ *     background square on the outside, two tulip/background HSTs, and a
+ *     plain tulip square in the inner corner. The corners are mirrored so
+ *     every tulip points in toward the middle of the block.
+ */
+export function TulipLadyFingersBlock({
+  size,
+  bg,
+  tulip,
+  centre,
+}: {
+  size: number;
+  bg: string;
+  tulip: string;
+  centre: string;
+}) {
+  const u = size / 8;
+  // Corner origins with the inward direction for each corner.
+  const corners: { x: number; y: number; sx: number; sy: number }[] = [
+    { x: 0, y: 0, sx: 1, sy: 1 },
+    { x: size, y: 0, sx: -1, sy: 1 },
+    { x: 0, y: size, sx: 1, sy: -1 },
+    { x: size, y: size, sx: -1, sy: -1 },
+  ];
+  return (
+    <>
+      <rect x={0} y={0} width={size} height={size} fill={bg} />
+      <rect x={2 * u} y={2 * u} width={4 * u} height={4 * u} fill={centre} />
+      {corners.map((c, i) => {
+        // Map a local coordinate (measured inward from the corner) to canvas.
+        const px = (lx: number) => c.x + c.sx * lx;
+        const py = (ly: number) => c.y + c.sy * ly;
+        // Local cell origins: [0,0] outer, [1,0] along the horizontal edge,
+        // [0,1] along the vertical edge, [1,1] inner corner.
+        const pt = (lx: number, ly: number) => `${px(lx)},${py(ly)}`;
+        return (
+          <g key={`tlf-${i}`}>
+            {/* Inner corner: plain tulip square */}
+            <polygon
+              points={`${pt(u, u)} ${pt(2 * u, u)} ${pt(2 * u, 2 * u)} ${pt(u, 2 * u)}`}
+              fill={tulip}
+            />
+            {/* HST along the horizontal edge — tulip triangle on the inner side */}
+            <polygon points={`${pt(u, 0)} ${pt(u, u)} ${pt(2 * u, u)}`} fill={tulip} />
+            {/* HST along the vertical edge — tulip triangle on the inner side */}
+            <polygon points={`${pt(0, u)} ${pt(u, u)} ${pt(u, 2 * u)}`} fill={tulip} />
+          </g>
+        );
+      })}
     </>
   );
 }

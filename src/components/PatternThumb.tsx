@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock } from "./PatternDiagram";
 
 
 interface Props {
@@ -108,6 +108,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Broken Dishes quilt block diagram — four half-square-triangle units in a 2x2 grid, two accent triangles pointing in at the block centre and two on opposite outer corners",
   "swing-in-the-center":
     "Swing in the Center quilt block diagram — dark arrowheads of squares and half-square triangles in each corner, four double flying-geese units pointing in at the middle, and a dark square set on point in the centre",
+  "tulip-lady-fingers":
+    "Tulip Lady Fingers quilt block diagram — a large centre square framed by plain background rectangles with a small two-triangle tulip in each corner",
   "tippecanoe-and-tyler-too":
     "Tippecanoe and Tyler Too quilt block diagram — a 4x4 grid of sixteen half-square triangles forming a dark pinwheel ring on a light background with four blue triangles pinwheeling around the centre",
 };
@@ -967,6 +969,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return (
         <svg {...common}>
           <TippecanoeBlock size={90} bg={C.a} mid={C.b} dark={C.c} centre={C.d} />
+        </svg>
+      );
+    }
+    case "tulip-lady-fingers": {
+      return (
+        <svg {...common}>
+          <TulipLadyFingersBlock size={90} bg={C.a} tulip={C.b} centre={C.c} />
         </svg>
       );
     }

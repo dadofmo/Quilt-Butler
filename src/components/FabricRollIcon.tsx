@@ -51,6 +51,7 @@ export const PATTERN_DIFFICULTY: Record<PatternId, 1 | 2 | 3 | 4 | 5> = {
   "summer-winds": 3,
   "swing-in-the-center": 3,
   "tippecanoe-and-tyler-too": 2,
+  "tulip-lady-fingers": 2,
 };
 
 interface Props {

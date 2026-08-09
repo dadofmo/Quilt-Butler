@@ -1542,6 +1542,41 @@ export const PATTERNS: PatternDef[] = [
     ],
   },
 
+  {
+    id: "tulip-lady-fingers",
+    name: "Tulip Lady Fingers",
+    hasMath: true,
+    intro:
+      "Tulip Lady Fingers is a wonderfully calm block: one big open square in the middle, four plain rectangles around it, and a small tulip tucked into each corner. Every tulip is just two half-square triangles and a plain square, and the two triangle points reaching out along the block edges are the \"lady fingers\" the block is named for. Only three fabrics are needed, the piecing is straightforward, and the generous centre is the perfect stage for a large-scale print or some beautiful quilting.",
+    sections: [
+      {
+        id: "bg",
+        label: "Background fabric (Fabric A)",
+        defaultFabric: "A",
+        hint: "The fabric that surrounds everything — the four edge rectangles, the outer corner squares and the light half of every tulip triangle. A soft solid or tone-on-tone lets the tulips read clearly.",
+      },
+      {
+        id: "tulip",
+        label: "Tulip fabric — corner motifs (Fabric B)",
+        defaultFabric: "B",
+        hint: "The contrasting fabric that forms the four corner tulips: one plain square plus two triangle points per corner. Choose something with a clear step up in value from the background.",
+      },
+      {
+        id: "centre",
+        label: "Centre square (Fabric C)",
+        defaultFabric: "C",
+        hint: "The large square at the heart of the block — half the block wide. Ideal for a feature print, a fussy-cut motif, or a pale solid you plan to quilt heavily.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "D",
+        hint: "Optional strips of fabric that separate each Tulip Lady Fingers block — set sashing to 0\" on the previous step if you want the tulips of neighbouring blocks to meet at the corners.",
+      },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
