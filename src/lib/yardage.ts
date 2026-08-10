@@ -189,9 +189,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isSwingInTheCenter = s.pattern === "swing-in-the-center";
   const isTippecanoe = s.pattern === "tippecanoe-and-tyler-too";
   const isTulipLadyFingers = s.pattern === "tulip-lady-fingers";
+  const isWeathervane = s.pattern === "weathervane";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers)
+  const sashWidth = (isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -3540,6 +3541,85 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "weathervane") {
+    // Weathervane — drafted on a six-unit grid (u = blockSize / 6) with
+    // column/row tracks 1-1-2-1-1:
+    //   • 4 plain background squares at the block corners (1u),
+    //   • 8 star-point HSTs (1u) — 4 bg + 4 star starting squares at u+7/8,
+    //   • 4 plain star squares (1u) tucked inside each corner,
+    //   • 4 flying geese finishing 2u x 1u, made no-waste from 1 vane square
+    //     at 2u+1.25" plus 4 background squares at u+7/8" (exactly one set
+    //     per block — 4 geese, no leftovers),
+    //   • 4 vane arm rectangles finishing 2u x 1u,
+    //   • 1 star centre square finishing 2u.
+    const u = s.blockSize / 6;
+    const sqCut = u + SEAM;
+    const hstCut = u + HST_EXTRA;
+    const gooseLargeCut = 2 * u + 1.25;
+    const gooseSmallCut = u + HST_EXTRA;
+    const armLong = 2 * u + SEAM;
+    const armShort = u + SEAM;
+    const centreCut = 2 * u + SEAM;
+
+    const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
+    const starFab = (s.assignments["star"] ?? "B") as FabricKey;
+    const vaneFab = (s.assignments["vane"] ?? "C") as FabricKey;
+
+    const bgCorners = 4 * blockCount;
+    const hstPairs = 4 * blockCount; // per fabric — each pair yields 2 HSTs
+    const gooseLarge = blockCount; // 1 large square = 4 finished geese = 1 block
+    const gooseSmall = 4 * blockCount;
+    const starSquares = 4 * blockCount;
+    const armRects = 4 * blockCount;
+
+    addSquares(reqs[bgFab], "Corner background squares", bgCorners, sqCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "HST starting squares (background)", hstPairs, hstCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Flying-geese sky squares", gooseSmall, gooseSmallCut, s.fabricWidth);
+    addSquares(reqs[starFab], "HST starting squares (star points)", hstPairs, hstCut, s.fabricWidth);
+    addSquares(reqs[starFab], "Plain star squares", starSquares, sqCut, s.fabricWidth);
+    addSquares(reqs[starFab], "Centre squares", blockCount, centreCut, s.fabricWidth);
+    addSquares(reqs[vaneFab], "Large flying-geese squares", gooseLarge, gooseLargeCut, s.fabricWidth);
+    addRails(reqs[vaneFab], "Weathervane arm rectangles", armRects, armLong, armShort, s.fabricWidth);
+
+    notes.push(
+      `Each Weathervane block is drafted on a six-unit grid, so one unit finishes at ${u.toFixed(2)}". The rows and columns run 1-1-2-1-1 units: a one-unit band, a one-unit band, a two-unit band, then one and one again. Everything is built from three familiar units — plain squares, half-square triangles (HSTs) and flying geese.`,
+    );
+    notes.push(
+      `Cutting for all ${blockCount} blocks — Fabric ${bgFab} (background): ${bgCorners} squares at ${sqCut.toFixed(2)}" for the block corners, ${hstPairs} squares at ${hstCut.toFixed(2)}" for the star-point HSTs and ${gooseSmall} squares at ${gooseSmallCut.toFixed(2)}" for the flying-geese sky corners. Fabric ${starFab} (star points & centre): ${hstPairs} squares at ${hstCut.toFixed(2)}" for the HSTs, ${starSquares} squares at ${sqCut.toFixed(2)}" and ${blockCount} centre squares at ${centreCut.toFixed(2)}". Fabric ${vaneFab} (weathervane arms): ${gooseLarge} large squares at ${gooseLargeCut.toFixed(2)}" for the geese and ${armRects} rectangles at ${armShort.toFixed(2)}" × ${armLong.toFixed(2)}". All measurements include the 1/4" seam allowance.`,
+    );
+    notes.push(
+      `Star-point HSTs (8 per block, ${8 * blockCount} in total): pair one ${hstCut.toFixed(2)}" Fabric ${bgFab} square with one ${hstCut.toFixed(2)}" Fabric ${starFab} square right sides together (RST), draw a diagonal corner to corner on the back of the lighter square, sew a scant 1/4" seam down BOTH sides of the line, cut apart ON the line and press toward the star fabric. Each pair gives 2 HSTs, so ${hstPairs} pairs make all ${8 * blockCount}. Trim every unit to exactly ${sqCut.toFixed(2)}" square so it finishes at ${u.toFixed(2)}".`,
+    );
+    notes.push(
+      `Flying geese — no-waste, four at a time (exactly one set per block): take one ${gooseLargeCut.toFixed(2)}" Fabric ${vaneFab} square and four ${gooseSmallCut.toFixed(2)}" Fabric ${bgFab} squares. Draw a diagonal on the back of each small square. Place two small squares on opposite corners of the large square, RST, diagonals aligned in one line; sew 1/4" each side of the line, cut apart on the line and press the small triangles out. Place a third small square on the corner of each resulting unit, sew 1/4" each side, cut and press again. You now have 4 geese finishing ${(2 * u).toFixed(2)}" × ${u.toFixed(2)}" (trim to ${armLong.toFixed(2)}" × ${armShort.toFixed(2)}" if needed).`,
+    );
+    notes.push(
+      `Make the four corner units (2 × 2 patches each, ${(2 * u).toFixed(2)}" finished). Top-left corner: TOP ROW — a plain Fabric ${bgFab} square, then an HST with its Fabric ${starFab} triangle in the BOTTOM-LEFT. BOTTOM ROW — an HST with its Fabric ${starFab} triangle in the TOP-RIGHT, then a plain Fabric ${starFab} square. The three star patches join into one point wrapping the inner corner. Rotate this unit a quarter turn for each of the other three corners so all four star groups face the middle of the block.`,
+    );
+    notes.push(
+      `Make the four edge units (${(2 * u).toFixed(2)}" × ${(2 * u).toFixed(2)}" finished). Sew one goose to one Fabric ${vaneFab} arm rectangle along the goose's long BASE edge, with the goose point aimed OUT of the block and the rectangle on the inside. Press toward the rectangle. The top and bottom edge units are ${(2 * u).toFixed(2)}" wide × ${(2 * u).toFixed(2)}" tall as sewn; for the left and right edge units, sew the same way and rotate a quarter turn so their points aim out to the sides.`,
+    );
+    notes.push(
+      `Assemble the block as a nine-patch of ${(2 * u).toFixed(2)}" units. ROW 1 — top-left corner unit, top edge unit (goose pointing up), top-right corner unit. ROW 2 — left edge unit (goose pointing left), the ${centreCut.toFixed(2)}" Fabric ${starFab} centre square, right edge unit (goose pointing right). ROW 3 — bottom-left corner unit, bottom edge unit (goose pointing down), bottom-right corner unit. Press rows 1 and 3 toward the corner units and row 2 toward the centre so the seams nest, then join the three rows. Finished block: ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+    notes.push(
+      `Weathervane tips: (1) Keep the goose points 1/4" away from the raw edge — that seam allowance is what saves the point when the rows go together. (2) Every HST diagonal and every goose edge is bias; starch before cutting and press rather than iron. (3) Chain-piece all ${8 * blockCount} HSTs and trim them in one sitting before building a single corner. (4) Set the blocks edge to edge with no sashing and the star points of four neighbouring blocks meet to form a small secondary star at every intersection.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
@@ -3633,7 +3713,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "summer-winds" ||
     s.pattern === "swing-in-the-center" ||
     s.pattern === "tippecanoe-and-tyler-too" ||
-    s.pattern === "tulip-lady-fingers";
+    s.pattern === "tulip-lady-fingers" ||
+    s.pattern === "weathervane";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 

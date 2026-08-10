@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
-import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock } from "./PatternDiagram";
+import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock } from "./PatternDiagram";
 
 interface Props {
   pattern: PatternId;
@@ -1282,6 +1282,12 @@ function MiniBlock({
       const tulip = get("tulip", "B");
       const centre = get("centre", "C");
       return <TulipLadyFingersBlock size={200} bg={bg} tulip={tulip} centre={centre} />;
+    }
+    case "weathervane": {
+      const bg = get("bg", "A");
+      const star = get("star", "B");
+      const vane = get("vane", "C");
+      return <WeathervaneBlock size={200} bg={bg} star={star} vane={vane} />;
     }
 
   }

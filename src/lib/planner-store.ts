@@ -49,7 +49,8 @@ export type PatternId =
   | "summer-winds"
   | "swing-in-the-center"
   | "tippecanoe-and-tyler-too"
-  | "tulip-lady-fingers";
+  | "tulip-lady-fingers"
+  | "weathervane";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
