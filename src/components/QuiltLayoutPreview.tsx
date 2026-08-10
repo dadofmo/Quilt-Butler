@@ -1283,6 +1283,12 @@ function MiniBlock({
       const centre = get("centre", "C");
       return <TulipLadyFingersBlock size={200} bg={bg} tulip={tulip} centre={centre} />;
     }
+    case "weathervane": {
+      const bg = get("bg", "A");
+      const star = get("star", "B");
+      const vane = get("vane", "C");
+      return <WeathervaneBlock size={200} bg={bg} star={star} vane={vane} />;
+    }
 
   }
 }

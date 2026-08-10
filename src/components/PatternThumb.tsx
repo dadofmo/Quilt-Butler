@@ -981,6 +981,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "weathervane": {
+      return (
+        <svg {...common}>
+          <WeathervaneBlock size={90} bg={C.a} star={C.b} vane={C.c} />
+        </svg>
+      );
+    }
   }
 }
 
