@@ -1174,6 +1174,12 @@ function renderInner(
       const centre = get("centre", "C");
       return <TulipLadyFingersBlock size={200} bg={bg} tulip={tulip} centre={centre} />;
     }
+    case "weathervane": {
+      const bg = get("bg", "A");
+      const star = get("star", "B");
+      const vane = get("vane", "C");
+      return <WeathervaneBlock size={200} bg={bg} star={star} vane={vane} />;
+    }
 
 
 
@@ -2686,6 +2692,72 @@ export function TulipLadyFingersBlock({
             <polygon points={`${pt(u, 0)} ${pt(u, u)} ${pt(2 * u, u)}`} fill={tulip} />
             {/* HST along the vertical edge — tulip triangle on the inner side */}
             <polygon points={`${pt(0, u)} ${pt(u, u)} ${pt(u, 2 * u)}`} fill={tulip} />
+          </g>
+        );
+      })}
+    </>
+  );
+}
+
+/**
+ * Shared renderer for "Weathervane" — drafted on a six-unit grid
+ * (u = size / 6) with column/row tracks 1-1-2-1-1:
+ *   • plain background squares at the four block corners,
+ *   • eight star-point HSTs, two per corner, whose accent triangles meet at
+ *     the plain accent square tucked inside each corner,
+ *   • four flying geese (2u x 1u) pointing OUT of the block on each edge,
+ *     each backed by a 2u x 1u arm rectangle,
+ *   • a 2u x 2u accent square in the centre.
+ */
+export function WeathervaneBlock({
+  size,
+  bg,
+  star,
+  vane,
+}: {
+  size: number;
+  bg: string;
+  star: string;
+  vane: string;
+}) {
+  const u = size / 6;
+  const p = (x: number, y: number) => `${x * u},${y * u}`;
+  return (
+    <>
+      <rect x={0} y={0} width={size} height={size} fill={bg} />
+
+      {/* Centre square */}
+      <rect x={2 * u} y={2 * u} width={2 * u} height={2 * u} fill={star} />
+
+      {/* Weathervane arm rectangles (between each goose and the centre) */}
+      <rect x={2 * u} y={u} width={2 * u} height={u} fill={vane} />
+      <rect x={2 * u} y={4 * u} width={2 * u} height={u} fill={vane} />
+      <rect x={u} y={2 * u} width={u} height={2 * u} fill={vane} />
+      <rect x={4 * u} y={2 * u} width={u} height={2 * u} fill={vane} />
+
+      {/* Flying geese pointing out of the block */}
+      <polygon points={`${p(2, 1)} ${p(4, 1)} ${p(3, 0)}`} fill={vane} />
+      <polygon points={`${p(2, 5)} ${p(4, 5)} ${p(3, 6)}`} fill={vane} />
+      <polygon points={`${p(1, 2)} ${p(1, 4)} ${p(0, 3)}`} fill={vane} />
+      <polygon points={`${p(5, 2)} ${p(5, 4)} ${p(6, 3)}`} fill={vane} />
+
+      {/* Four corner star units: plain accent square + two HST points */}
+      {[
+        { x: 0, y: 0, sx: 1, sy: 1 },
+        { x: 6, y: 0, sx: -1, sy: 1 },
+        { x: 0, y: 6, sx: 1, sy: -1 },
+        { x: 6, y: 6, sx: -1, sy: -1 },
+      ].map((c, i) => {
+        const q = (lx: number, ly: number) =>
+          `${(c.x + c.sx * lx) * u},${(c.y + c.sy * ly) * u}`;
+        return (
+          <g key={`wv-${i}`}>
+            {/* Plain accent square just inside the corner */}
+            <polygon points={`${q(1, 1)} ${q(2, 1)} ${q(2, 2)} ${q(1, 2)}`} fill={star} />
+            {/* Star point along the horizontal edge */}
+            <polygon points={`${q(1, 0)} ${q(1, 1)} ${q(2, 1)}`} fill={star} />
+            {/* Star point along the vertical edge */}
+            <polygon points={`${q(0, 1)} ${q(1, 1)} ${q(1, 2)}`} fill={star} />
           </g>
         );
       })}
