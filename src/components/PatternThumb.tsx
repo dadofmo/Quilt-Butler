@@ -112,6 +112,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Tulip Lady Fingers quilt block diagram — a large centre square framed by plain background rectangles with a small two-triangle tulip in each corner",
   "tippecanoe-and-tyler-too":
     "Tippecanoe and Tyler Too quilt block diagram — a 4x4 grid of sixteen half-square triangles forming a dark pinwheel ring on a light background with four blue triangles pinwheeling around the centre",
+  weathervane:
+    "Weathervane quilt block diagram — a six-unit grid with plain background corners, eight small star-point triangles wrapping four accent squares, four flying geese pointing out from the edges with arm rectangles behind them, and a large accent square in the centre",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {

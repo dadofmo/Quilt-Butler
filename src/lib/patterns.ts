@@ -1577,6 +1577,41 @@ export const PATTERNS: PatternDef[] = [
     ],
   },
 
+  {
+    id: "weathervane",
+    name: "Weathervane",
+    hasMath: true,
+    intro:
+      "Weathervane is a classic three-fabric block drafted on a six-unit grid. Four small star points spin out of each corner, four flying geese point in from the edges like the arms of a weathervane, and a big square anchors the middle. Everything is built from three familiar units — plain squares, half-square triangles and flying geese — so it sews up quickly, and the two arm rectangles behind each goose give the block its unmistakable turning motion.",
+    sections: [
+      {
+        id: "bg",
+        label: "Background fabric (Fabric A)",
+        defaultFabric: "A",
+        hint: "The light fabric behind everything — the four outer corner squares, the light half of the eight small triangles and the sky corners on each flying goose.",
+      },
+      {
+        id: "star",
+        label: "Star points & centre (Fabric B)",
+        defaultFabric: "B",
+        hint: "Your boldest fabric: the eight small triangle points, the four squares they wrap around and the large square at the centre of the block.",
+      },
+      {
+        id: "vane",
+        label: "Weathervane arms (Fabric C)",
+        defaultFabric: "C",
+        hint: "The medium fabric forming the turning arms — the four flying geese pointing out of the block plus the four rectangles that sit between each goose and the centre square.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "D",
+        hint: "Optional strips of fabric that separate each Weathervane block — set sashing to 0\" on the previous step if you want the star points of neighbouring blocks to meet.",
+      },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {
