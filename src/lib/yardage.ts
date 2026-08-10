@@ -3713,7 +3713,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "summer-winds" ||
     s.pattern === "swing-in-the-center" ||
     s.pattern === "tippecanoe-and-tyler-too" ||
-    s.pattern === "tulip-lady-fingers";
+    s.pattern === "tulip-lady-fingers" ||
+    s.pattern === "weathervane";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
