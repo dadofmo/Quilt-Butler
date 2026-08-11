@@ -1612,6 +1612,35 @@ export const PATTERNS: PatternDef[] = [
     ],
   },
 
+  {
+    id: "wishing-ring",
+    name: "Wishing Ring",
+    hasMath: true,
+    intro:
+      "Wishing Ring is a friendly two-fabric 25-patch: five rows of five patches built from nothing but plain squares and eight half-square triangles. The dark patches step around the block while the light squares and triangle halves open up a ring through the middle — hence the name. It is a perfect second or third block for a new quilter, and set edge to edge the corner triangles of four blocks meet to make a bonus on-point square at every intersection.",
+    sections: [
+      {
+        id: "dark",
+        label: "Ring fabric (Fabric A)",
+        defaultFabric: "A",
+        hint: "The darker of your two fabrics — the twelve plain squares that step around the block plus the dark half of all eight triangle units.",
+      },
+      {
+        id: "light",
+        label: "Background fabric (Fabric B)",
+        defaultFabric: "B",
+        hint: "The lighter fabric — the five plain squares (centre, mid-edges and top/bottom middle) plus the light half of all eight triangle units, which together form the ring.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips of fabric that separate each Wishing Ring block — set sashing to 0\" on the previous step if you want the corner triangles of neighbouring blocks to meet.",
+      },
+      { ...borderSection, defaultFabric: "D" },
+    ],
+  },
+
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

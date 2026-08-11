@@ -1180,6 +1180,11 @@ function renderInner(
       const vane = get("vane", "C");
       return <WeathervaneBlock size={200} bg={bg} star={star} vane={vane} />;
     }
+    case "wishing-ring": {
+      const dark = get("dark", "A");
+      const light = get("light", "B");
+      return <WishingRingBlock size={200} dark={dark} light={light} />;
+    }
 
 
 
