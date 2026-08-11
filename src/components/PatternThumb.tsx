@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock } from "./PatternDiagram";
 
 
 interface Props {
@@ -114,6 +114,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Tippecanoe and Tyler Too quilt block diagram — a 4x4 grid of sixteen half-square triangles forming a dark pinwheel ring on a light background with four blue triangles pinwheeling around the centre",
   weathervane:
     "Weathervane quilt block diagram — a six-unit grid with plain background corners, eight small star-point triangles wrapping four accent squares, four flying geese pointing out from the edges with arm rectangles behind them, and a large accent square in the centre",
+  "wishing-ring":
+    "Wishing Ring quilt block diagram — a two-fabric 25-patch with twelve dark squares stepping around five light squares and eight half-square triangles that open a light ring through the middle",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -985,6 +987,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return (
         <svg {...common}>
           <WeathervaneBlock size={90} bg={C.a} star={C.b} vane={C.c} />
+        </svg>
+      );
+    }
+    case "wishing-ring": {
+      return (
+        <svg {...common}>
+          <WishingRingBlock size={90} dark={C.a} light={C.b} />
         </svg>
       );
     }

@@ -1180,6 +1180,11 @@ function renderInner(
       const vane = get("vane", "C");
       return <WeathervaneBlock size={200} bg={bg} star={star} vane={vane} />;
     }
+    case "wishing-ring": {
+      const dark = get("dark", "A");
+      const light = get("light", "B");
+      return <WishingRingBlock size={200} dark={dark} light={light} />;
+    }
 
 
 
@@ -2761,6 +2766,78 @@ export function WeathervaneBlock({
           </g>
         );
       })}
+    </>
+  );
+}
+
+/**
+ * Shared renderer for "Wishing Ring" — a two-fabric 25-patch on a five-unit
+ * grid (u = size / 5). Twelve plain dark squares, five plain light squares
+ * and eight half-square triangles: the four corner HSTs point their dark
+ * triangle OUT to the block corners, the four inner HSTs point their dark
+ * triangle IN toward the centre, which opens the light "ring".
+ */
+export function WishingRingBlock({
+  size,
+  dark,
+  light,
+}: {
+  size: number;
+  dark: string;
+  light: string;
+}) {
+  const u = size / 5;
+  const darkCells: [number, number][] = [
+    [0, 1], [0, 3],
+    [1, 0], [1, 2], [1, 4],
+    [2, 1], [2, 3],
+    [3, 0], [3, 2], [3, 4],
+    [4, 1], [4, 3],
+  ];
+  const lightCells: [number, number][] = [
+    [0, 2], [2, 0], [2, 2], [2, 4], [4, 2],
+  ];
+  const hstCells: { r: number; c: number; corner: "tl" | "tr" | "bl" | "br" }[] = [
+    { r: 0, c: 0, corner: "tl" },
+    { r: 0, c: 4, corner: "tr" },
+    { r: 1, c: 1, corner: "br" },
+    { r: 1, c: 3, corner: "bl" },
+    { r: 3, c: 1, corner: "tr" },
+    { r: 3, c: 3, corner: "tl" },
+    { r: 4, c: 0, corner: "bl" },
+    { r: 4, c: 4, corner: "br" },
+  ];
+
+  const tri = (r: number, c: number, corner: "tl" | "tr" | "bl" | "br") => {
+    const x = c * u;
+    const y = r * u;
+    switch (corner) {
+      case "tl":
+        return `${x},${y} ${x + u},${y} ${x},${y + u}`;
+      case "tr":
+        return `${x + u},${y} ${x + u},${y + u} ${x},${y}`;
+      case "bl":
+        return `${x},${y} ${x},${y + u} ${x + u},${y + u}`;
+      case "br":
+        return `${x + u},${y} ${x + u},${y + u} ${x},${y + u}`;
+    }
+  };
+
+  return (
+    <>
+      <rect x={0} y={0} width={size} height={size} fill={light} />
+      {darkCells.map(([r, c]) => (
+        <rect key={`wr-d-${r}-${c}`} x={c * u} y={r * u} width={u} height={u} fill={dark} />
+      ))}
+      {lightCells.map(([r, c]) => (
+        <rect key={`wr-l-${r}-${c}`} x={c * u} y={r * u} width={u} height={u} fill={light} />
+      ))}
+      {hstCells.map((h) => (
+        <g key={`wr-h-${h.r}-${h.c}`}>
+          <rect x={h.c * u} y={h.r * u} width={u} height={u} fill={light} />
+          <polygon points={tri(h.r, h.c, h.corner)} fill={dark} />
+        </g>
+      ))}
     </>
   );
 }

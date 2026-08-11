@@ -50,7 +50,8 @@ export type PatternId =
   | "swing-in-the-center"
   | "tippecanoe-and-tyler-too"
   | "tulip-lady-fingers"
-  | "weathervane";
+  | "weathervane"
+  | "wishing-ring";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
