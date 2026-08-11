@@ -3621,6 +3621,67 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "wishing-ring") {
+    // Wishing Ring — a two-fabric 25-patch drafted on a five-unit grid
+    // (u = blockSize / 5). Every patch finishes at 1u:
+    //   • 12 plain Fabric A (dark) squares,
+    //   • 5 plain Fabric B (light) squares — the block centre, the four
+    //     mid-edge patches of row/column 3 pattern, and the top/bottom middle,
+    //   • 8 half-square triangles (4 A + 4 B starting squares), whose dark
+    //     triangles point out at the four block corners and in toward the
+    //     centre on the inner ring, forming the "wishing ring" of light.
+    const u = s.blockSize / 5;
+    const sqCut = u + SEAM;
+    const hstCut = u + HST_EXTRA;
+
+    const darkFab = (s.assignments["dark"] ?? "A") as FabricKey;
+    const lightFab = (s.assignments["light"] ?? "B") as FabricKey;
+
+    const darkSquares = 12 * blockCount;
+    const lightSquares = 5 * blockCount;
+    const hstPairs = 4 * blockCount; // each pair yields 2 HSTs → 8 per block
+
+    addSquares(reqs[darkFab], "Plain squares (Fabric A)", darkSquares, sqCut, s.fabricWidth);
+    addSquares(reqs[darkFab], "HST starting squares (Fabric A)", hstPairs, hstCut, s.fabricWidth);
+    addSquares(reqs[lightFab], "Plain squares (Fabric B)", lightSquares, sqCut, s.fabricWidth);
+    addSquares(reqs[lightFab], "HST starting squares (Fabric B)", hstPairs, hstCut, s.fabricWidth);
+
+    notes.push(
+      `Each Wishing Ring block is a 25-patch on a five-unit grid, so every patch finishes at ${u.toFixed(2)}" square. One block uses 12 plain Fabric ${darkFab} squares, 5 plain Fabric ${lightFab} squares and 8 half-square triangles (HSTs) — nothing else.`,
+    );
+    notes.push(
+      `Cutting for all ${blockCount} blocks — Fabric ${darkFab}: ${darkSquares} squares at ${sqCut.toFixed(2)}" (plain patches) plus ${hstPairs} squares at ${hstCut.toFixed(2)}" (HSTs). Fabric ${lightFab}: ${lightSquares} squares at ${sqCut.toFixed(2)}" (plain patches) plus ${hstPairs} squares at ${hstCut.toFixed(2)}" (HSTs). All measurements include the 1/4" seam allowance.`,
+    );
+    notes.push(
+      `HSTs (8 per block, ${8 * blockCount} in total): pair one ${hstCut.toFixed(2)}" Fabric ${darkFab} square with one ${hstCut.toFixed(2)}" Fabric ${lightFab} square right sides together (RST), draw a diagonal corner to corner on the back of the lighter square, sew a scant 1/4" on BOTH sides of the line, cut apart ON the drawn line and press toward the darker fabric. Each pair gives 2 HSTs, so ${hstPairs} pairs make all ${8 * blockCount}. Trim each unit to exactly ${sqCut.toFixed(2)}" square.`,
+    );
+    notes.push(
+      `Lay out the 25 patches, five rows of five (D = Fabric ${darkFab} plain, L = Fabric ${lightFab} plain, HST corners named for where the DARK triangle sits). ROW 1: HST dark top-left, D, L, D, HST dark top-right. ROW 2: D, HST dark bottom-right, D, HST dark bottom-left, D. ROW 3: L, D, L, D, L. ROW 4: D, HST dark top-right, D, HST dark top-left, D. ROW 5: HST dark bottom-left, D, L, D, HST dark bottom-right.`,
+    );
+    notes.push(
+      `Notice the symmetry before you sew: the four corner HSTs point their dark triangles OUT to the block corners, while the four inner HSTs point their dark triangles IN toward the centre. Together with the five light squares this creates the light "ring" that gives the block its name — if a light diagonal ever runs the wrong way, that HST is rotated 90°.`,
+    );
+    notes.push(
+      `Sew each row together, pressing rows 1, 3 and 5 to the right and rows 2 and 4 to the left so the seams nest. Then join the five rows, matching every seam intersection. Finished block: ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+    notes.push(
+      `Wishing Ring tips: (1) Every HST diagonal is bias — starch the fabric before cutting and press, don't iron, or the block will grow. (2) Chain-piece all ${8 * blockCount} HSTs and trim them all before laying out a single block. (3) Set the blocks edge to edge with no sashing and the dark corner triangles of four neighbouring blocks meet to form a small on-point square at every intersection — a bonus secondary pattern across the quilt.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
