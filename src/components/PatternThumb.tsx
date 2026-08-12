@@ -116,6 +116,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Weathervane quilt block diagram — a six-unit grid with plain background corners, eight small star-point triangles wrapping four accent squares, four flying geese pointing out from the edges with arm rectangles behind them, and a large accent square in the centre",
   "wishing-ring":
     "Wishing Ring quilt block diagram — a two-fabric 25-patch with twelve dark squares stepping around five light squares and eight half-square triangles that open a light ring through the middle",
+  "alaska-homestead":
+    "Alaska Homestead quilt block diagram — a three-fabric 3x3 block with four half-square-triangle corners pointing in toward a plain centre square and four two-patch edge rectangles with a bold accent bar on the outside of each side",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
