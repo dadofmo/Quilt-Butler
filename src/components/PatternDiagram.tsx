@@ -2847,3 +2847,87 @@ export function WishingRingBlock({
     </>
   );
 }
+
+/**
+ * Shared renderer for "Alaska Homestead" — a three-fabric 3×3 block
+ * (u = size / 3).
+ *   • 4 corner cells are half-square triangles: the `points` fabric fills the
+ *     half nearest the block centre, `bg` fills the outer half.
+ *   • 4 edge cells are two-patch rectangles: `accent` on the OUTER half,
+ *     `bg` on the INNER half (so the accent bars ring the block edge).
+ *   • the centre cell is a plain `accent` square.
+ */
+export function AlaskaHomesteadBlock({
+  size,
+  bg,
+  points,
+  accent,
+}: {
+  size: number;
+  bg: string;
+  points: string;
+  accent: string;
+}) {
+  const u = size / 3;
+
+  // Corner HSTs — the `points` triangle always faces the block centre.
+  const corners: { r: number; c: number; half: "tl" | "tr" | "bl" | "br" }[] = [
+    { r: 0, c: 0, half: "br" },
+    { r: 0, c: 2, half: "bl" },
+    { r: 2, c: 0, half: "tr" },
+    { r: 2, c: 2, half: "tl" },
+  ];
+
+  const tri = (r: number, c: number, half: "tl" | "tr" | "bl" | "br") => {
+    const x = c * u;
+    const y = r * u;
+    switch (half) {
+      case "tl":
+        return `${x},${y} ${x + u},${y} ${x},${y + u}`;
+      case "tr":
+        return `${x + u},${y} ${x + u},${y + u} ${x},${y}`;
+      case "bl":
+        return `${x},${y} ${x},${y + u} ${x + u},${y + u}`;
+      case "br":
+        return `${x + u},${y} ${x + u},${y + u} ${x},${y + u}`;
+    }
+  };
+
+  // Edge two-patch units — accent half sits on the OUTER side of the block.
+  const edges: { r: number; c: number; side: "top" | "bottom" | "left" | "right" }[] = [
+    { r: 0, c: 1, side: "top" },
+    { r: 1, c: 0, side: "left" },
+    { r: 1, c: 2, side: "right" },
+    { r: 2, c: 1, side: "bottom" },
+  ];
+
+  const accentRect = (r: number, c: number, side: "top" | "bottom" | "left" | "right") => {
+    const x = c * u;
+    const y = r * u;
+    const h = u / 2;
+    switch (side) {
+      case "top":
+        return { x, y, width: u, height: h };
+      case "bottom":
+        return { x, y: y + h, width: u, height: h };
+      case "left":
+        return { x, y, width: h, height: u };
+      case "right":
+        return { x: x + h, y, width: h, height: u };
+    }
+  };
+
+  return (
+    <>
+      <rect x={0} y={0} width={size} height={size} fill={bg} />
+      {edges.map((e) => {
+        const rect = accentRect(e.r, e.c, e.side);
+        return <rect key={`ah-e-${e.r}-${e.c}`} {...rect} fill={accent} />;
+      })}
+      <rect x={u} y={u} width={u} height={u} fill={accent} />
+      {corners.map((k) => (
+        <polygon key={`ah-c-${k.r}-${k.c}`} points={tri(k.r, k.c, k.half)} fill={points} />
+      ))}
+    </>
+  );
+}
