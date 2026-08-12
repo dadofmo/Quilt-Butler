@@ -1185,6 +1185,12 @@ function renderInner(
       const light = get("light", "B");
       return <WishingRingBlock size={200} dark={dark} light={light} />;
     }
+    case "alaska-homestead": {
+      const bg = get("bg", "A");
+      const points = get("points", "B");
+      const accent = get("accent", "C");
+      return <AlaskaHomesteadBlock size={200} bg={bg} points={points} accent={accent} />;
+    }
 
 
 
