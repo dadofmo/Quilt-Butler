@@ -999,6 +999,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "alaska-homestead": {
+      return (
+        <svg {...common}>
+          <AlaskaHomesteadBlock size={90} bg={C.a} points={C.b} accent={C.c} />
+        </svg>
+      );
+    }
   }
 }
 
