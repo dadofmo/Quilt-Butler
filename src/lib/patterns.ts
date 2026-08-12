@@ -1641,6 +1641,41 @@ export const PATTERNS: PatternDef[] = [
     ],
   },
 
+  {
+    id: "alaska-homestead",
+    name: "Alaska Homestead",
+    hasMath: true,
+    intro:
+      "Alaska Homestead is a crisp three-fabric 3×3 block. Four half-square-triangle corners aim their accent triangles IN toward the middle, four two-patch edge rectangles put a bold bar on the OUTSIDE of every side, and a single plain square anchors the centre. The corner triangles and the centre square read as a large diamond, while the four outer bars frame it like the walls of a cabin. Only two unit types to make — HSTs and half-and-half rectangles — so it sews up fast while still looking far more complex than it is.",
+    sections: [
+      {
+        id: "bg",
+        label: "Background (Fabric A)",
+        defaultFabric: "A",
+        hint: "The light/calm fabric — the outer half of each corner triangle unit plus the INNER half of each of the four edge rectangles. Pick something low-contrast so the other two fabrics pop.",
+      },
+      {
+        id: "points",
+        label: "Corner triangles (Fabric B)",
+        defaultFabric: "B",
+        hint: "The four large triangles in the block corners, all pointing in toward the centre. This is the fabric that draws the big diamond.",
+      },
+      {
+        id: "accent",
+        label: "Centre & outer bars (Fabric C)",
+        defaultFabric: "C",
+        hint: "The centre square plus the OUTER half of each of the four edge rectangles — four bold bars around the frame of the block.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "D",
+        hint: "Optional strips of fabric that separate each Alaska Homestead block — set sashing to 0\" on the previous step if you want the corner triangles of neighbouring blocks to meet.",
+      },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+
 ];
 
 export function getPattern(id: PatternId | null): PatternDef | null {

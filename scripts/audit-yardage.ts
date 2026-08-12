@@ -2016,6 +2016,72 @@ console.log("\n=== Fancy Stripe: 50×65, 12\" block, no sashing/border ===");
 }
 
 
+
+// =========================================================================
+// ALASKA HOMESTEAD — 3×3 grid, 3 fabrics.
+// Block 12" → u=4". HST cut = 4.875", centre cut = 4.5",
+// edge rectangles = 4.5" × 2.5" (u/2 + 0.5 = 2.5").
+// Per block: A = 2 HST squares + 4 rects; B = 2 HST squares;
+//            C = 4 rects + 1 centre.
+// =========================================================================
+console.log("\n=== Alaska Homestead: 48×60, 12\" block, no sashing/border ===");
+{
+  const s = {
+    ...base(),
+    pattern: "alaska-homestead" as const,
+    quiltWidth: 48,
+    quiltHeight: 60,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { bg: "A", points: "B", accent: "C" } as Record<string, FabricKey>,
+  };
+  // 4×5 = 20 blocks.
+  const r = calculateYardage(s);
+  const A = r.fabrics.find(f => f.fabric === "A")!;
+  const B = r.fabrics.find(f => f.fabric === "B")!;
+  const C = r.fabrics.find(f => f.fabric === "C")!;
+  const aHst = A.pieces.find(p => /HST/i.test(p.label))!;
+  const aRect = A.pieces.find(p => /inner halves/i.test(p.label))!;
+  const bHst = B.pieces.find(p => /HST/i.test(p.label))!;
+  const cRect = C.pieces.find(p => /outer bars/i.test(p.label))!;
+  const cCentre = C.pieces.find(p => /centre/i.test(p.label))!;
+  check("Alaska A HST count", aHst.count, 40);
+  check("Alaska A HST cut", aHst.w, 4.875);
+  check("Alaska A rect count", aRect.count, 80);
+  check("Alaska A rect long", aRect.w, 4.5);
+  check("Alaska A rect short", aRect.h, 2.5);
+  check("Alaska B HST count", bHst.count, 40);
+  check("Alaska B HST cut", bHst.w, 4.875);
+  check("Alaska C rect count", cRect.count, 80);
+  check("Alaska C centre count", cCentre.count, 20);
+  check("Alaska C centre cut", cCentre.w, 4.5);
+}
+
+console.log("\n=== Alaska Homestead: 50×65, 10\" block, 2\" sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "alaska-homestead" as const,
+    blockSize: 10,
+    borderWidth: 0,
+    sashingWidth: 2,
+    assignments: { bg: "A", points: "B", accent: "C", sashing: "D" } as Record<string, FabricKey>,
+  };
+  // across=floor(50/10)=5, down=floor(65/10)=6 → 30 blocks.
+  // u=10/3 → HST cut = 3.3333+0.875 = 4.2083", centre = 3.8333",
+  // rects 3.8333" × 2.1667". Sashing: v=(5-1)*6=24, h=(6-1)*5=25 → 49.
+  const r = calculateYardage(s);
+  const A = r.fabrics.find(f => f.fabric === "A")!;
+  const D = r.fabrics.find(f => f.fabric === "D")!;
+  const aHst = A.pieces.find(p => /HST/i.test(p.label))!;
+  check("Alaska(sash) A HST count", aHst.count, 60);
+  check("Alaska(sash) A HST cut", Math.round(aHst.w * 10000) / 10000, Math.round((10 / 3 + 0.875) * 10000) / 10000);
+  check("Alaska(sash) D strip count", D.pieces[0].count, 49);
+  check("Alaska(sash) D strip width", D.pieces[0].h, 2.5);
+  check("Alaska(sash) D strip length", D.pieces[0].w, 10.5);
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {

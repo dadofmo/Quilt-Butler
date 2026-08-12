@@ -191,9 +191,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isTulipLadyFingers = s.pattern === "tulip-lady-fingers";
   const isWeathervane = s.pattern === "weathervane";
   const isWishingRing = s.pattern === "wishing-ring";
+  const isAlaskaHomestead = s.pattern === "alaska-homestead";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isAlaskaHomestead || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -3682,6 +3683,76 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "alaska-homestead") {
+    // Alaska Homestead — a three-fabric 3×3 grid block (u = blockSize / 3).
+    // Every one of the nine units finishes at u" square:
+    //   • 4 CORNER units are half-square triangles (HSTs) — Fabric A
+    //     (background) outer half, Fabric B (points) inner half, so all four
+    //     accent triangles aim IN at the centre and read as a big diamond.
+    //   • 4 EDGE units are two-patch rectangles, each u × u/2 finished —
+    //     Fabric C (accent) on the OUTER half, Fabric A on the INNER half.
+    //   • 1 CENTRE unit is a plain Fabric C square.
+    //
+    // HSTs are made two-at-a-time (no waste): pair one A square with one B
+    // square, so 4 HSTs per block = 2 pairs = 2 A + 2 B starting squares.
+    const u = s.blockSize / 3;
+    const hstCut = u + HST_EXTRA;
+    const centreCut = u + SEAM;
+    const rectLong = u + SEAM;        // full width of the edge unit
+    const rectShort = u / 2 + SEAM;   // half the height of the edge unit
+
+    const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
+    const pointFab = (s.assignments["points"] ?? "B") as FabricKey;
+    const accentFab = (s.assignments["accent"] ?? "C") as FabricKey;
+
+    const hstPairs = 2 * blockCount;       // 2 starting squares per fabric per block
+    const totalHsts = 4 * blockCount;
+    const innerRects = 4 * blockCount;     // background halves of the edge units
+    const outerRects = 4 * blockCount;     // accent halves of the edge units
+    const centres = 1 * blockCount;
+
+    addSquares(reqs[bgFab], "HST starting squares (background)", hstPairs, hstCut, s.fabricWidth);
+    addRails(reqs[bgFab], "Edge-unit rectangles (inner halves)", innerRects, rectLong, rectShort, s.fabricWidth);
+    addSquares(reqs[pointFab], "HST starting squares (corner triangles)", hstPairs, hstCut, s.fabricWidth);
+    addRails(reqs[accentFab], "Edge-unit rectangles (outer bars)", outerRects, rectLong, rectShort, s.fabricWidth);
+    addSquares(reqs[accentFab], "Block centre squares", centres, centreCut, s.fabricWidth);
+
+    notes.push(
+      `Each Alaska Homestead block is a 3×3 grid, so every unit finishes at ${u.toFixed(2)}" square (${(u + SEAM).toFixed(2)}" raw). One block needs 4 half-square triangles for the corners, 4 two-patch rectangles for the sides and 1 plain centre square — 9 units, three fabrics, no set-in seams.`,
+    );
+    notes.push(
+      `Cutting for all ${blockCount} blocks (every measurement already includes the 1/4" seam allowance). Fabric ${bgFab} — ${hstPairs} squares at ${hstCut.toFixed(2)}" for the HSTs, plus ${innerRects} rectangles ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}" for the inner half of each edge unit. Fabric ${pointFab} — ${hstPairs} squares at ${hstCut.toFixed(2)}" for the HSTs. Fabric ${accentFab} — ${outerRects} rectangles ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}" for the outer bars, plus ${centres} squares at ${centreCut.toFixed(2)}" for the block centres.`,
+    );
+    notes.push(
+      `Make the corner HSTs (4 per block, ${totalHsts} in total). Pair one ${hstCut.toFixed(2)}" Fabric ${bgFab} square with one ${hstCut.toFixed(2)}" Fabric ${pointFab} square, right sides together (RST). Draw a diagonal corner to corner on the wrong side of the lighter square, sew a scant 1/4" on BOTH sides of that line, then cut apart ON the drawn line — one pair yields 2 HSTs. Press toward Fabric ${pointFab} and trim every unit to exactly ${(u + SEAM).toFixed(2)}" square, keeping the diagonal running corner to corner. ${hstPairs} pairs make all ${totalHsts} triangles.`,
+    );
+    notes.push(
+      `Make the edge units (4 per block, ${outerRects} in total). Sew one Fabric ${accentFab} rectangle to one Fabric ${bgFab} rectangle along their long ${rectLong.toFixed(2)}" edges, RST. Press toward Fabric ${accentFab}. Each finished unit measures ${(u + SEAM).toFixed(2)}" square raw / ${u.toFixed(2)}" square finished, split half-and-half. All four are identical — the ORIENTATION when you lay them out is what makes the block, not the piecing.`,
+    );
+    notes.push(
+      `Lay the block out in 3 rows. ROW 1 — corner HST with the Fabric ${pointFab} triangle in its BOTTOM-RIGHT, an edge unit turned so the Fabric ${accentFab} bar is at the TOP (background facing in), corner HST with the Fabric ${pointFab} triangle in its BOTTOM-LEFT. ROW 2 — edge unit turned so Fabric ${accentFab} is on the LEFT, the plain Fabric ${accentFab} centre square, edge unit turned so Fabric ${accentFab} is on the RIGHT. ROW 3 — corner HST with Fabric ${pointFab} in its TOP-RIGHT, an edge unit with Fabric ${accentFab} at the BOTTOM, corner HST with Fabric ${pointFab} in its TOP-LEFT. Check before sewing: all four Fabric ${pointFab} triangles point at the centre, and every Fabric ${accentFab} bar hugs the OUTSIDE edge of the block.`,
+    );
+    notes.push(
+      `Sew each row together, press rows 1 and 3 toward the corner units and row 2 toward the centre so the seams nest, then join the three rows and press the long seams open (or toward the middle row) to keep the block flat. Finished block: ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+    notes.push(
+      `Alaska Homestead tips: (1) The HST diagonal is cut on the bias — starch the fabric before cutting and press rather than iron, or the corners will stretch and the block will grow past ${(s.blockSize + SEAM).toFixed(2)}". (2) Chain-piece and trim all ${totalHsts} HSTs in one sitting before you build a single row; a consistent HST size is what keeps the diamond points crisp. (3) When you join the rows, pin exactly where each triangle point hits the seam line — you want 1/4" of fabric beyond the point so it survives the seam. (4) Set the blocks edge to edge with no sashing and the accent bars of neighbouring blocks meet to form a continuous ladder of bars between the diamonds; add sashing instead and every block reads as its own framed cabin.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   }
 
 
@@ -3776,7 +3847,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "swing-in-the-center" ||
     s.pattern === "tippecanoe-and-tyler-too" ||
     s.pattern === "tulip-lady-fingers" ||
-    s.pattern === "weathervane";
+    s.pattern === "weathervane" ||
+    s.pattern === "alaska-homestead";
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
