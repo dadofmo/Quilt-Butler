@@ -328,7 +328,12 @@ function QuiltCanvas({
             // block for a checkerboard look. Driven by the alternateBlocks
             // prop set by Step 2.
             const shooflySwap = pattern === "shoofly" && alternateBlocks && (i + j) % 2 === 1;
-            const swap = snowballSwap || shooflySwap;
+            // Squares on Point: same opt-in swap — the diamond fabric and the
+            // background corners trade places on every other block, in both
+            // directions (rows and columns), for a checkerboard effect.
+            const sopSwap =
+              pattern === "squares-on-point" && alternateBlocks && (i + j) % 2 === 1;
+            const swap = snowballSwap || shooflySwap || sopSwap;
             return (
               <svg
                 key={`${i}-${j}`}
