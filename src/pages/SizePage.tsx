@@ -809,7 +809,13 @@ function SizeStepInner() {
             and the yardage math splits piece counts accordingly. */}
         {supportsAlternate && (
           <Field label="Alternate blocks (optional)">
-            <label className="bg-card border-input flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4">
+            <label
+              className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 transition-colors ${
+                alternateBlocks
+                  ? "border-primary bg-primary/5"
+                  : "bg-card border-input"
+              }`}
+            >
               <input
                 type="checkbox"
                 checked={alternateBlocks}
@@ -818,13 +824,30 @@ function SizeStepInner() {
               />
               <div>
                 <div className="text-base font-medium">
-                  Swap fabrics on every other block
+                  {isSquaresOnPoint
+                    ? "Reverse the fabrics on every other block"
+                    : "Swap fabrics on every other block"}
                 </div>
                 <p className="text-muted-foreground mt-1 text-xs leading-snug">
-                  When on, Fabric A and Fabric B trade roles on alternating
-                  blocks — creating a checkerboard effect across the finished
-                  quilt. Leave off for the traditional single-block-repeated
-                  look.
+                  {isSquaresOnPoint ? (
+                    <>
+                      When on, every other block is the reverse of its
+                      neighbours: one block has a Fabric A diamond on Fabric B
+                      corners, the next has a Fabric B diamond on Fabric A
+                      corners. The reversal alternates <strong>both</strong>{" "}
+                      side-to-side across each row and up-and-down each column,
+                      so no two touching blocks match — and your cutting list
+                      splits automatically. Leave off for the traditional look
+                      where every diamond is the same fabric.
+                    </>
+                  ) : (
+                    <>
+                      When on, Fabric A and Fabric B trade roles on alternating
+                      blocks — creating a checkerboard effect across the
+                      finished quilt. Leave off for the traditional
+                      single-block-repeated look.
+                    </>
+                  )}
                 </p>
               </div>
             </label>
