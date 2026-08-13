@@ -586,6 +586,29 @@ console.log("\n=== Squares on Point: 50×65, 12\" block, no border, 2\" sashing 
   check("SoP(sash) C strip length", c.pieces[0].w, 12.5);
 }
 
+console.log("\n=== Squares on Point: alternate (reversed) blocks ON ===");
+{
+  const s = {
+    ...base(), pattern: "squares-on-point" as const, blockSize: 12, borderWidth: 0,
+    alternateBlocks: true,
+  };
+  // 4 across × 5 down = 20 blocks → checkerboard split is 10 / 10.
+  // A: 10 on-point squares + 2*10 = 20 corner squares.
+  // B: 20 corner squares + 10 on-point squares.
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("SoP(alt) A on-point count", a.pieces[0].count, 10);
+  check("SoP(alt) A corner count", a.pieces[1].count, 20);
+  check("SoP(alt) B corner count", b.pieces[0].count, 20);
+  check("SoP(alt) B on-point count", b.pieces[1].count, 10);
+  const totalCenters =
+    a.pieces.filter(p => p.label.includes("On-point")).reduce((n, p) => n + p.count, 0) +
+    b.pieces.filter(p => p.label.includes("On-point")).reduce((n, p) => n + p.count, 0);
+  check("SoP(alt) total on-point squares still 20", totalCenters, 20);
+}
+
+
 
 // =========================================================================
 // PLUS BLOCK
