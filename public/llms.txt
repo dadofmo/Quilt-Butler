@@ -4,7 +4,7 @@
 
 ## Pages
 
-- [Pattern picker (home)](/): Choose from 40+ quilt patterns (Bear Paw, Irish Chain, Simple Squares, Half Square Triangles, Nine Patch, and more) to start planning.
+- [Pattern picker (home)](/): Choose from 50+ quilt patterns (Bear Paw, Irish Chain, Simple Squares, Half Square Triangles, Nine Patch, and more) to start planning.
 - [Quilt size & basics](/size): Enter quilt dimensions, block size, sashing, and border width to drive the math.
 - [Assign fabrics](/fabrics): Pick a fabric for each part of the block and preview the full quilt layout with optional fabric photos.
 - [Your quilt plan (results)](/results): Per-fabric yardage, cutting diagrams, project cost estimate, assembly tips, and a printable shopping list.

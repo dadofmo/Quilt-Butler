@@ -23,18 +23,18 @@ export default function PatternPicker() {
     <>
       <Helmet>
         <title>QuiltButler — Free Quilt Planner & Fabric Calculator</title>
-        <meta name="description" content="Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 40+ patterns, no login required." />
+        <meta name="description" content="Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 50+ patterns, no login required." />
         <link rel="canonical" href="https://quiltbutler.com/" />
         <link rel="preload" as="image" href={quiltButlerLogo} fetchPriority="high" />
         <meta property="og:title" content="QuiltButler — Free Quilt Planner & Fabric Calculator" />
-        <meta property="og:description" content="Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 40+ patterns, no login required." />
+        <meta property="og:description" content="Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 50+ patterns, no login required." />
         <meta property="og:url" content="https://quiltbutler.com/" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebApplication",
           "name": "QuiltButler",
           "url": "https://quiltbutler.com/",
-          "description": "Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 40+ patterns, no login required.",
+          "description": "Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 50+ patterns, no login required.",
           "applicationCategory": "DesignApplication",
           "operatingSystem": "Any",
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
