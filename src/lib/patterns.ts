@@ -196,6 +196,7 @@ export const PATTERNS: PatternDef[] = [
     id: "squares-on-point",
     name: "Squares on Point",
     hasMath: true,
+    supportsAlternate: true,
     intro:
       "Each block is one square rotated 45° (a diamond) framed by 4 background corner triangles — a classic 'square-in-a-square' unit. Pick a bold fabric for the on-point square and a calmer fabric for the background corners so the diamond reads clearly.",
     sections: [
