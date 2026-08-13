@@ -866,11 +866,38 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const sqFab = (s.assignments["square"] ?? "A") as FabricKey;
     const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
 
+    // `alternateBlocks` (Step 2 toggle): every other block reverses the two
+    // fabrics — diamond becomes the background fabric and the corners become
+    // the diamond fabric. Walk the real grid so odd totals split exactly, and
+    // because the flip is driven by (row + col) % 2 the reversal holds both
+    // across each row and down each column.
+    let sopEven = 0;
+    let sopOdd = 0;
+    for (let r = 0; r < blocksDown; r++) {
+      for (let c = 0; c < blocksAcross; c++) {
+        if ((r + c) % 2 === 0) sopEven++;
+        else sopOdd++;
+      }
+    }
+    const sopAlt = !!s.alternateBlocks;
+    const sopPrimary = sopAlt ? sopEven : blockCount;
+    const sopFlipped = sopAlt ? sopOdd : 0;
+
     const centerCount = blockCount;       // 1 on-point square per block
     const cornerSqCount = 2 * blockCount; // 2 corner squares per block (→ 4 triangles)
 
-    addSquares(reqs[sqFab], "On-point center squares", centerCount, centerCut, s.fabricWidth);
-    addSquares(reqs[bgFab], "Corner-triangle squares", cornerSqCount, cornerCut, s.fabricWidth);
+    if (!sopAlt || sqFab === bgFab) {
+      addSquares(reqs[sqFab], "On-point center squares", centerCount, centerCut, s.fabricWidth);
+      addSquares(reqs[bgFab], "Corner-triangle squares", cornerSqCount, cornerCut, s.fabricWidth);
+    } else {
+      // Fabric sqFab: diamonds on primary blocks + corner triangles on flipped blocks.
+      addSquares(reqs[sqFab], "On-point center squares", sopPrimary, centerCut, s.fabricWidth);
+      addSquares(reqs[sqFab], "Corner-triangle squares (reversed blocks)", 2 * sopFlipped, cornerCut, s.fabricWidth);
+      // Fabric bgFab: corner triangles on primary blocks + diamonds on flipped blocks.
+      addSquares(reqs[bgFab], "Corner-triangle squares", 2 * sopPrimary, cornerCut, s.fabricWidth);
+      addSquares(reqs[bgFab], "On-point center squares (reversed blocks)", sopFlipped, centerCut, s.fabricWidth);
+    }
+
 
     notes.push(
       `Each block = 1 on-point square (cut ${centerCut.toFixed(2)}") framed by 4 background corner triangles. The on-point square's points touch the midpoints of each block edge, so its finished side = ${(s.blockSize / SQRT2).toFixed(2)}".`,
@@ -878,9 +905,18 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `For the 4 corner triangles, cut 2 background squares at ${cornerCut.toFixed(2)}" per block — each square gets cut once on the diagonal to make 2 triangles. The +7/8" extra matches the standard half-square-triangle formula because two of each triangle's edges end up on the bias.`,
     );
-    notes.push(
-      `Across all ${blockCount} blocks: ${centerCount} on-point squares (Fabric ${sqFab}) and ${cornerSqCount} corner-triangle squares (Fabric ${bgFab}, which yield ${4 * blockCount} triangles).`,
-    );
+    if (sopAlt) {
+      notes.push(
+        `Reverse every other block is ON: ${sopPrimary} blocks have a Fabric ${sqFab} diamond on Fabric ${bgFab} corners, and ${sopFlipped} blocks reverse that (Fabric ${bgFab} diamond on Fabric ${sqFab} corners). Because the flip follows a checkerboard, every block is the reverse of the block beside it in its row AND the block above/below it in its column.`,
+      );
+      notes.push(
+        `Totals across all ${blockCount} blocks: Fabric ${sqFab} = ${sopPrimary} on-point squares + ${2 * sopFlipped} corner-triangle squares; Fabric ${bgFab} = ${sopFlipped} on-point squares + ${2 * sopPrimary} corner-triangle squares. Sew the two orientations in separate batches and label them so you don't mix them up while laying out the top.`,
+      );
+    } else {
+      notes.push(
+        `Across all ${blockCount} blocks: ${centerCount} on-point squares (Fabric ${sqFab}) and ${cornerSqCount} corner-triangle squares (Fabric ${bgFab}, which yield ${4 * blockCount} triangles).`,
+      );
+    }
     notes.push(
       `How to sew ONE block (square-in-a-square): take the 2 corner-triangle squares for this block and cut each one once corner-to-corner on the diagonal — you'll have 4 right triangles. Lay the on-point center square in front of you printed side up, oriented as a regular square (not yet rotated).`,
     );
