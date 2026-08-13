@@ -866,11 +866,38 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const sqFab = (s.assignments["square"] ?? "A") as FabricKey;
     const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
 
+    // `alternateBlocks` (Step 2 toggle): every other block reverses the two
+    // fabrics — diamond becomes the background fabric and the corners become
+    // the diamond fabric. Walk the real grid so odd totals split exactly, and
+    // because the flip is driven by (row + col) % 2 the reversal holds both
+    // across each row and down each column.
+    let sopEven = 0;
+    let sopOdd = 0;
+    for (let r = 0; r < blocksDown; r++) {
+      for (let c = 0; c < blocksAcross; c++) {
+        if ((r + c) % 2 === 0) sopEven++;
+        else sopOdd++;
+      }
+    }
+    const sopAlt = !!s.alternateBlocks;
+    const sopPrimary = sopAlt ? sopEven : blockCount;
+    const sopFlipped = sopAlt ? sopOdd : 0;
+
     const centerCount = blockCount;       // 1 on-point square per block
     const cornerSqCount = 2 * blockCount; // 2 corner squares per block (→ 4 triangles)
 
-    addSquares(reqs[sqFab], "On-point center squares", centerCount, centerCut, s.fabricWidth);
-    addSquares(reqs[bgFab], "Corner-triangle squares", cornerSqCount, cornerCut, s.fabricWidth);
+    if (!sopAlt || sqFab === bgFab) {
+      addSquares(reqs[sqFab], "On-point center squares", centerCount, centerCut, s.fabricWidth);
+      addSquares(reqs[bgFab], "Corner-triangle squares", cornerSqCount, cornerCut, s.fabricWidth);
+    } else {
+      // Fabric sqFab: diamonds on primary blocks + corner triangles on flipped blocks.
+      addSquares(reqs[sqFab], "On-point center squares", sopPrimary, centerCut, s.fabricWidth);
+      addSquares(reqs[sqFab], "Corner-triangle squares (reversed blocks)", 2 * sopFlipped, cornerCut, s.fabricWidth);
+      // Fabric bgFab: corner triangles on primary blocks + diamonds on flipped blocks.
+      addSquares(reqs[bgFab], "Corner-triangle squares", 2 * sopPrimary, cornerCut, s.fabricWidth);
+      addSquares(reqs[bgFab], "On-point center squares (reversed blocks)", sopFlipped, centerCut, s.fabricWidth);
+    }
+
 
     notes.push(
       `Each block = 1 on-point square (cut ${centerCut.toFixed(2)}") framed by 4 background corner triangles. The on-point square's points touch the midpoints of each block edge, so its finished side = ${(s.blockSize / SQRT2).toFixed(2)}".`,
