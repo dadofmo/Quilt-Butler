@@ -261,6 +261,58 @@ function FabricsStepInner() {
                     <> Each block is separated by <strong>{sashing}&quot; sashing</strong>{hasCornerstones ? " with cornerstone squares at the intersections" : ""}.</>
                   )}
                 </p>
+
+                {/* A/B "alternate blocks" toggle — opt-in per pattern via
+                    supportsAlternate. Lives here (not on the size step) so the
+                    full-quilt preview above updates live as the user toggles.
+                    Whatever is selected here is what the yardage, cutting list
+                    and sewing steps use on the results page. */}
+                {pattern.supportsAlternate && (
+                  <label
+                    className={`mt-4 flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 transition-colors ${
+                      planner.alternateBlocks
+                        ? "border-primary bg-primary/5"
+                        : "bg-card border-input"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={!!planner.alternateBlocks}
+                      onChange={(e) => setPlanner({ alternateBlocks: e.target.checked })}
+                      className="mt-1 h-5 w-5 shrink-0 accent-current"
+                    />
+                    <div>
+                      <div className="text-base font-medium">
+                        {pattern.id === "squares-on-point"
+                          ? "Reverse the fabrics on every other block"
+                          : "Swap fabrics on every other block"}
+                      </div>
+                      <p className="text-muted-foreground mt-1 text-xs leading-snug">
+                        {pattern.id === "squares-on-point" ? (
+                          <>
+                            When on, every other block is the reverse of its
+                            neighbours: one block has a Fabric A diamond on
+                            Fabric B corners, the next has a Fabric B diamond on
+                            Fabric A corners. The reversal alternates{" "}
+                            <strong>both</strong> side-to-side across each row
+                            and up-and-down each column, so no two touching
+                            blocks match. Watch the full-quilt preview above
+                            change as you toggle — your cutting list, yardage
+                            and sewing steps follow whatever you leave selected.
+                          </>
+                        ) : (
+                          <>
+                            When on, Fabric A and Fabric B trade roles on
+                            alternating blocks for a checkerboard effect. The
+                            preview above updates instantly, and your cutting
+                            list, yardage and sewing steps follow whatever you
+                            leave selected.
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  </label>
+                )}
               </>
             );
           })()}

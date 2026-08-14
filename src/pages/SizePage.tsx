@@ -79,9 +79,6 @@ function SizeStepInner() {
   // "Alternate blocks" toggle — opt-in per pattern via supportsAlternate.
   // Currently only Shoofly opts in; adding more patterns is a data-only change.
   const supportsAlternate = !!getPattern(planner.pattern)?.supportsAlternate;
-  const [alternateBlocks, setAlternateBlocks] = useState<boolean>(
-    !!planner.alternateBlocks,
-  );
   const [sashingText, setSashingText] = useState(
     // Preserve 0 explicitly (Nine Patch may legitimately use no sashing).
     typeof planner.sashingWidth === "number" && !isNaN(planner.sashingWidth)
@@ -436,7 +433,10 @@ function SizeStepInner() {
       fatQuarterHeight: isFatQuarter ? fqHeightNum : planner.fatQuarterHeight,
       fatQuarterTrimMargin: isFatQuarter ? fqTrimNum : planner.fatQuarterTrimMargin,
       fatQuarterCount: isFatQuarter ? fqCountNum : planner.fatQuarterCount,
-      alternateBlocks: supportsAlternate ? alternateBlocks : false,
+      // The A/B "alternate blocks" toggle now lives on the Assign Fabrics step
+      // (next to the full-quilt preview) so users can see the effect live.
+      // Here we only make sure it can't stay on for a pattern that dropped support.
+      alternateBlocks: supportsAlternate ? !!planner.alternateBlocks : false,
     });
     navigate("/fabrics");
   };
@@ -802,57 +802,10 @@ function SizeStepInner() {
           </Field>
         )}
 
-        {/* Reusable "Alternate blocks" toggle. Only rendered when the current
-            pattern opts in via supportsAlternate (currently: Shoofly). When on,
-            fabrics A and B swap roles on every other block for a checkerboard
-            look. Rendering wires this into <QuiltLayoutPreview alternateBlocks>
-            and the yardage math splits piece counts accordingly. */}
-        {supportsAlternate && (
-          <Field label="Alternate blocks (optional)">
-            <label
-              className={`flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 transition-colors ${
-                alternateBlocks
-                  ? "border-primary bg-primary/5"
-                  : "bg-card border-input"
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={alternateBlocks}
-                onChange={(e) => setAlternateBlocks(e.target.checked)}
-                className="mt-1 h-5 w-5 shrink-0 accent-current"
-              />
-              <div>
-                <div className="text-base font-medium">
-                  {isSquaresOnPoint
-                    ? "Reverse the fabrics on every other block"
-                    : "Swap fabrics on every other block"}
-                </div>
-                <p className="text-muted-foreground mt-1 text-xs leading-snug">
-                  {isSquaresOnPoint ? (
-                    <>
-                      When on, every other block is the reverse of its
-                      neighbours: one block has a Fabric A diamond on Fabric B
-                      corners, the next has a Fabric B diamond on Fabric A
-                      corners. The reversal alternates <strong>both</strong>{" "}
-                      side-to-side across each row and up-and-down each column,
-                      so no two touching blocks match — and your cutting list
-                      splits automatically. Leave off for the traditional look
-                      where every diamond is the same fabric.
-                    </>
-                  ) : (
-                    <>
-                      When on, Fabric A and Fabric B trade roles on alternating
-                      blocks — creating a checkerboard effect across the
-                      finished quilt. Leave off for the traditional
-                      single-block-repeated look.
-                    </>
-                  )}
-                </p>
-              </div>
-            </label>
-          </Field>
-        )}
+        {/* The "Alternate blocks" A/B toggle lives on the Assign Fabrics step,
+            directly under the full-quilt preview, so users can see the effect
+            live before continuing. Do not duplicate it here. */}
+
 
 
         {/* Finished quilt size — actual size produced by the current block +
