@@ -436,7 +436,10 @@ function SizeStepInner() {
       fatQuarterHeight: isFatQuarter ? fqHeightNum : planner.fatQuarterHeight,
       fatQuarterTrimMargin: isFatQuarter ? fqTrimNum : planner.fatQuarterTrimMargin,
       fatQuarterCount: isFatQuarter ? fqCountNum : planner.fatQuarterCount,
-      alternateBlocks: supportsAlternate ? alternateBlocks : false,
+      // The A/B "alternate blocks" toggle now lives on the Assign Fabrics step
+      // (next to the full-quilt preview) so users can see the effect live.
+      // Here we only make sure it can't stay on for a pattern that dropped support.
+      alternateBlocks: supportsAlternate ? !!planner.alternateBlocks : false,
     });
     navigate("/fabrics");
   };
