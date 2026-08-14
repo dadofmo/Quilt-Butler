@@ -601,8 +601,12 @@ function MiniBlock({
       );
     }
     case "plus-block": {
-      const plus = get("plus", "A");
-      const bg = get("bg", "B");
+      const plusFab = get("plus", "A");
+      const bgFab = get("bg", "B");
+      // Alternate-blocks toggle: on odd cells the plus and background fabrics
+      // trade places, so the quilt reads as positive/negative crosses.
+      const plus = swap ? bgFab : plusFab;
+      const bg = swap ? plusFab : bgFab;
       // 3×3 grid of equal squares — same geometry as PatternDiagram.
       const u = 200 / 3;
       const isPlus = (i: number, j: number) => i === 1 || j === 1;

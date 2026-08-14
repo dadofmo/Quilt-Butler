@@ -225,8 +225,9 @@ export const PATTERNS: PatternDef[] = [
     id: "pinwheel",
     name: "Pinwheel",
     hasMath: true,
+    supportsAlternate: true,
     intro:
-      "Each Pinwheel block is made from 4 Half Square Triangle units arranged in a 2×2 grid so the blade triangles all spin clockwise around the center, creating the iconic pinwheel illusion. Pick a bold fabric for the blades and a contrasting fabric for the background. Optionally add plain sashing strips between blocks for a framed look.",
+      "Each Pinwheel block is made from 4 Half Square Triangle units arranged in a 2×2 grid so the blade triangles all spin clockwise around the center, creating the iconic pinwheel illusion. Pick a bold fabric for the blades and a contrasting fabric for the background. Turn on \"Reverse the fabrics on every other block\" on the next step if you want the blades and background to trade places on alternating blocks for a light/dark checkerboard of pinwheels. Optionally add plain sashing strips between blocks for a framed look.",
     sections: [
       {
         id: "blades",
@@ -253,8 +254,9 @@ export const PATTERNS: PatternDef[] = [
     id: "plus-block",
     name: "Plus Block",
     hasMath: true,
+    supportsAlternate: true,
     intro:
-      "Each block is a 3×3 grid where the center column + center row form a bold '+' on a background. The 5 plus squares (center + 4 around it) use one fabric; the 4 corner squares use a contrasting background fabric. Optionally add plain sashing strips between blocks for a framed look.",
+      "Each block is a 3×3 grid where the center column + center row form a bold '+' on a background. The 5 plus squares (center + 4 around it) use one fabric; the 4 corner squares use a contrasting background fabric. Turn on \"Reverse the fabrics on every other block\" on the next step to trade the plus and background fabrics on alternating blocks — the plus signs then read as a positive/negative checkerboard. Optionally add plain sashing strips between blocks for a framed look.",
     sections: [
       {
         id: "plus",
