@@ -79,9 +79,6 @@ function SizeStepInner() {
   // "Alternate blocks" toggle — opt-in per pattern via supportsAlternate.
   // Currently only Shoofly opts in; adding more patterns is a data-only change.
   const supportsAlternate = !!getPattern(planner.pattern)?.supportsAlternate;
-  const [alternateBlocks, setAlternateBlocks] = useState<boolean>(
-    !!planner.alternateBlocks,
-  );
   const [sashingText, setSashingText] = useState(
     // Preserve 0 explicitly (Nine Patch may legitimately use no sashing).
     typeof planner.sashingWidth === "number" && !isNaN(planner.sashingWidth)
