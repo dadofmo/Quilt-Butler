@@ -1026,7 +1026,9 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Now sew the 3 rows together: place Row 1 on top of Row 2 RST, lining up the bottom edge of Row 1 with the top edge of Row 2 — make sure the vertical seams between squares match up exactly (a pin through each seam intersection helps). Sew a 1/4" seam across the whole edge, unfold, and press. Add Row 3 to the bottom of Row 2 the same way. The "+" should now read clearly across the finished block.`,
     );
     notes.push(
-      `Layout tip: Plus Blocks look striking sewn edge-to-edge in a straight grid (every "+" facing the same direction) so the plus shapes float on a sea of background. For a more scattered look, try mixing in a few blocks where the plus and background fabrics are swapped.`,
+      plusAlt
+        ? `Layout tip: with reversed blocks on, press the seams of the two block types in opposite directions — the seams then nest perfectly when you join the rows, and the positive/negative plus shapes line up crisply.`
+        : `Layout tip: Plus Blocks look striking sewn edge-to-edge in a straight grid (every "+" facing the same direction) so the plus shapes float on a sea of background. For a more scattered look, turn on "Reverse the fabrics on every other block" on the fabrics step.`,
     );
 
     // Optional sashing between blocks (Plus Block).
