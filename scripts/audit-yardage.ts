@@ -632,7 +632,7 @@ console.log("\n=== Plus Block: 50×65, 12\" block, no border ===");
   check("PB basics glossary attached", r.basics?.length ?? 0, 5);
 }
 
-console.log("\n=== Plus Block: plus & bg share fabric A — 2 buckets, same cut ===");
+console.log("\n=== Plus Block: plus & bg share fabric A — pooled into 1 bucket ===");
 {
   const s = {
     ...base(), pattern: "plus-block" as const, blockSize: 12, borderWidth: 0,
