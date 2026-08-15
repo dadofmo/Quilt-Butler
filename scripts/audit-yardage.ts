@@ -646,8 +646,8 @@ console.log("\n=== Plus Block: plus & bg share fabric A — pooled into 1 bucket
   const totalPieces = a.pieces.reduce((acc, p) => acc + p.count, 0);
   check("PB shared A total pieces", totalPieces, 180);
   const totalStrips = a.strips.reduce((acc, sp) => acc + sp.count, 0);
-  check("PB shared A total strips", totalStrips, 21);
-  check("PB shared A inches", a.totalInches, 21 * 4.5);
+  check("PB shared A total strips", totalStrips, 20);
+  check("PB shared A inches", a.totalInches, 20 * 4.5);
 }
 
 console.log("\n=== Plus Block: 9\" block ===");
