@@ -676,8 +676,12 @@ function MiniBlock({
       );
     }
     case "pinwheel": {
-      const blades = get("blades", "A");
-      const bg = get("bg", "B");
+      const bladeFab = get("blades", "A");
+      const bgFab = get("bg", "B");
+      // Alternate-blocks toggle: blades and background trade places on every
+      // other block for a light/dark checkerboard of pinwheels.
+      const blades = swap ? bgFab : bladeFab;
+      const bg = swap ? bladeFab : bgFab;
       // Traditional pinwheel — blade right angles rotate clockwise around the
       // block so all four blade hypotenuses meet at the center, creating the
       // spinning illusion. Kept in lockstep with PatternDiagram & the tile.
