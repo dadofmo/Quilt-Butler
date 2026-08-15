@@ -397,6 +397,15 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Pinwheel assembly: lay out 4 trimmed HST units in a 2×2 grid. Rotate each unit so the blade triangles all point the same rotational direction (clockwise) around the center. Sew the top pair together, sew the bottom pair together, then join the two rows. Press the final center seams open to reduce bulk where all 4 points meet — this helps the block lie flat.`,
     );
+    if (s.alternateBlocks) {
+      // Reversed blocks are purely a layout/orientation choice for Pinwheel:
+      // every pair of starting squares already yields one HST with the blade
+      // on each fabric, so the cut counts are identical either way.
+      notes.push(
+        `Reversed blocks are ON: each pair of squares you sew and cut gives you TWO HSTs that are mirror images — one with a Fabric ${blades} blade, one with a Fabric ${bg} blade. Build half your blocks (${Math.ceil(blockCount / 2)}) with Fabric ${blades} blades and half (${Math.floor(blockCount / 2)}) with Fabric ${bg} blades, then set them in a checkerboard so no two touching pinwheels are the same. Your cutting list does not change — you already cut equal amounts of both fabrics.`,
+      );
+    }
+
 
     // Optional sashing between blocks (Pinwheel).
     if (sashWidth > 0) {
@@ -957,19 +966,65 @@ export function calculateYardage(s: PlannerState): CalcResult {
     //   Per block: 5 plus squares + 4 background corner squares.
     const unitFinished = s.blockSize / 3;
     const cut = unitFinished + SEAM;
-    const plusCount = 5 * blockCount;
-    const bgCount = 4 * blockCount;
     const plusFab = (s.assignments["plus"] ?? "A") as FabricKey;
     const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
-    addSquares(reqs[plusFab], "Plus squares", plusCount, cut, s.fabricWidth);
-    addSquares(reqs[bgFab], "Background corner squares", bgCount, cut, s.fabricWidth);
+
+    // "Alternate blocks" toggle (gated by supportsAlternate): the plus and
+    // background fabrics trade roles on every other block, alternating both
+    // across rows and down columns. Walk the real grid so odd totals split
+    // exactly — even cells keep the primary orientation (same convention as
+    // Shoofly / Squares on Point).
+    const plusAlt = !!s.alternateBlocks;
+    let plusEven = 0;
+    let plusOdd = 0;
+    for (let r = 0; r < blocksDown; r++) {
+      for (let c = 0; c < blocksAcross; c++) {
+        if ((r + c) % 2 === 0) plusEven++;
+        else plusOdd++;
+      }
+    }
+    const primaryPlusBlocks = plusAlt ? plusEven : blockCount;
+    const flippedPlusBlocks = plusAlt ? plusOdd : 0;
+
+    // Fabric totals: each fabric plays "plus" on its blocks and "background"
+    // on the flipped ones.
+    const plusFab_plus = 5 * primaryPlusBlocks;
+    const plusFab_corners = 4 * flippedPlusBlocks;
+    const bgFab_corners = 4 * primaryPlusBlocks;
+    const bgFab_plus = 5 * flippedPlusBlocks;
+
+    const plusCount = plusFab_plus + bgFab_plus;
+    const bgCount = plusFab_corners + bgFab_corners;
+
+    if (plusFab === bgFab) {
+      // Same fabric plays both roles — pool into one pile.
+      addSquares(reqs[plusFab], "Block squares", plusCount + bgCount, cut, s.fabricWidth);
+    } else {
+      if (plusFab_plus > 0)
+        addSquares(reqs[plusFab], "Plus squares", plusFab_plus, cut, s.fabricWidth);
+      if (plusFab_corners > 0)
+        addSquares(reqs[plusFab], "Background corner squares (reversed blocks)", plusFab_corners, cut, s.fabricWidth);
+      if (bgFab_corners > 0)
+        addSquares(reqs[bgFab], "Background corner squares", bgFab_corners, cut, s.fabricWidth);
+      if (bgFab_plus > 0)
+        addSquares(reqs[bgFab], "Plus squares (reversed blocks)", bgFab_plus, cut, s.fabricWidth);
+    }
 
     notes.push(
       `Each block = 3×3 grid of ${unitFinished.toFixed(2)}"-finished squares (cut at ${cut.toFixed(2)}"). The center square + the 4 squares directly above, below, left, and right of it form the "+" — that's 5 plus squares per block. The 4 corner squares are background.`,
     );
-    notes.push(
-      `Across all ${blockCount} blocks: ${plusCount} squares of Fabric ${plusFab} (5 × ${blockCount}, the "+") and ${bgCount} squares of Fabric ${bgFab} (4 × ${blockCount}, the corners).`,
-    );
+    if (plusAlt) {
+      notes.push(
+        `Reversed blocks are ON: ${primaryPlusBlocks} blocks have a Fabric ${plusFab} "+" on Fabric ${bgFab} corners, and ${flippedPlusBlocks} blocks are the reverse (Fabric ${bgFab} "+" on Fabric ${plusFab} corners). Lay them out in a checkerboard so no two touching blocks match — alternating side-to-side across every row AND up-and-down every column. Start the top-left block with the Fabric ${plusFab} "+".`,
+      );
+      notes.push(
+        `Across all ${blockCount} blocks: Fabric ${plusFab} — ${plusFab_plus} plus squares + ${plusFab_corners} corner squares (${plusFab_plus + plusFab_corners} total); Fabric ${bgFab} — ${bgFab_corners} corner squares + ${bgFab_plus} plus squares (${bgFab_corners + bgFab_plus} total). Every square is cut at the same ${cut.toFixed(2)}" size, so you can cut them all from one strip set per fabric.`,
+      );
+    } else {
+      notes.push(
+        `Across all ${blockCount} blocks: ${plusCount} squares of Fabric ${plusFab} (5 × ${blockCount}, the "+") and ${bgCount} squares of Fabric ${bgFab} (4 × ${blockCount}, the corners).`,
+      );
+    }
     notes.push(
       `How to sew ONE block (3 rows of 3 squares): lay out the 9 squares for one block in front of you in a 3×3 grid — Row 1: background corner, plus, background corner. Row 2: plus, plus (center), plus. Row 3: background corner, plus, background corner. The 5 plus squares should form a clear "+" with the 4 background squares in the corners.`,
     );
@@ -980,7 +1035,9 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Now sew the 3 rows together: place Row 1 on top of Row 2 RST, lining up the bottom edge of Row 1 with the top edge of Row 2 — make sure the vertical seams between squares match up exactly (a pin through each seam intersection helps). Sew a 1/4" seam across the whole edge, unfold, and press. Add Row 3 to the bottom of Row 2 the same way. The "+" should now read clearly across the finished block.`,
     );
     notes.push(
-      `Layout tip: Plus Blocks look striking sewn edge-to-edge in a straight grid (every "+" facing the same direction) so the plus shapes float on a sea of background. For a more scattered look, try mixing in a few blocks where the plus and background fabrics are swapped.`,
+      plusAlt
+        ? `Layout tip: with reversed blocks on, press the seams of the two block types in opposite directions — the seams then nest perfectly when you join the rows, and the positive/negative plus shapes line up crisply.`
+        : `Layout tip: Plus Blocks look striking sewn edge-to-edge in a straight grid (every "+" facing the same direction) so the plus shapes float on a sea of background. For a more scattered look, turn on "Reverse the fabrics on every other block" on the fabrics step.`,
     );
 
     // Optional sashing between blocks (Plus Block).

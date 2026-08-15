@@ -333,7 +333,13 @@ function QuiltCanvas({
             // directions (rows and columns), for a checkerboard effect.
             const sopSwap =
               pattern === "squares-on-point" && alternateBlocks && (i + j) % 2 === 1;
-            const swap = snowballSwap || shooflySwap || sopSwap;
+            // Plus Block and Pinwheel use the same opt-in A/B role swap:
+            // plus ↔ background, blades ↔ background on every other block.
+            const altSwap =
+              (pattern === "plus-block" || pattern === "pinwheel") &&
+              alternateBlocks &&
+              (i + j) % 2 === 1;
+            const swap = snowballSwap || shooflySwap || sopSwap || altSwap;
             return (
               <svg
                 key={`${i}-${j}`}
@@ -676,8 +682,12 @@ function MiniBlock({
       );
     }
     case "pinwheel": {
-      const blades = get("blades", "A");
-      const bg = get("bg", "B");
+      const bladeFab = get("blades", "A");
+      const bgFab = get("bg", "B");
+      // Alternate-blocks toggle: blades and background trade places on every
+      // other block for a light/dark checkerboard of pinwheels.
+      const blades = swap ? bgFab : bladeFab;
+      const bg = swap ? bladeFab : bgFab;
       // Traditional pinwheel — blade right angles rotate clockwise around the
       // block so all four blade hypotenuses meet at the center, creating the
       // spinning illusion. Kept in lockstep with PatternDiagram & the tile.
