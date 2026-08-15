@@ -638,7 +638,9 @@ console.log("\n=== Plus Block: plus & bg share fabric A — pooled into 1 bucket
     ...base(), pattern: "plus-block" as const, blockSize: 12, borderWidth: 0,
     assignments: { plus: "A" as FabricKey, bg: "A" as FabricKey },
   };
-  // 9 squares × 20 blocks = 180 squares total. 2 buckets at 4.5". Strips = 12 + 9 = 21.
+  // 9 squares × 20 blocks = 180 squares total, pooled into ONE 4.5" bucket
+  // (same fabric plays both roles): per strip floor(42.5/4.5)=9 →
+  // strips = ceil(180/9) = 20, inches = 20 × 4.5 = 90.
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
   const totalPieces = a.pieces.reduce((acc, p) => acc + p.count, 0);
