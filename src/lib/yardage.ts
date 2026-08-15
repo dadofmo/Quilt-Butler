@@ -397,6 +397,15 @@ export function calculateYardage(s: PlannerState): CalcResult {
     notes.push(
       `Pinwheel assembly: lay out 4 trimmed HST units in a 2×2 grid. Rotate each unit so the blade triangles all point the same rotational direction (clockwise) around the center. Sew the top pair together, sew the bottom pair together, then join the two rows. Press the final center seams open to reduce bulk where all 4 points meet — this helps the block lie flat.`,
     );
+    if (s.alternateBlocks) {
+      // Reversed blocks are purely a layout/orientation choice for Pinwheel:
+      // every pair of starting squares already yields one HST with the blade
+      // on each fabric, so the cut counts are identical either way.
+      notes.push(
+        `Reversed blocks are ON: each pair of squares you sew and cut gives you TWO HSTs that are mirror images — one with a Fabric ${blades} blade, one with a Fabric ${bg} blade. Build half your blocks (${Math.ceil(blockCount / 2)}) with Fabric ${blades} blades and half (${Math.floor(blockCount / 2)}) with Fabric ${bg} blades, then set them in a checkerboard so no two touching pinwheels are the same. Your cutting list does not change — you already cut equal amounts of both fabrics.`,
+      );
+    }
+
 
     // Optional sashing between blocks (Pinwheel).
     if (sashWidth > 0) {
