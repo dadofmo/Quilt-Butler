@@ -2105,6 +2105,46 @@ console.log("\n=== Alaska Homestead: 50×65, 10\" block, 2\" sashing ===");
   check("Alaska(sash) D strip length", D.pieces[0].w, 10.5);
 }
 
+console.log("\n=== Plus Block: alternate (reversed) blocks ===");
+{
+  const off = { ...base(), pattern: "plus-block" as const, blockSize: 10, borderWidth: 0, sashingWidth: 0 };
+  // across=floor(50/10)=5, down=floor(65/10)=6 → 30 blocks (even split 15/15).
+  const r0 = calculateYardage(off);
+  const a0 = r0.fabrics.find(f => f.fabric === "A")!;
+  const b0 = r0.fabrics.find(f => f.fabric === "B")!;
+  check("Plus(off) A plus squares", a0.pieces[0].count, 150);
+  check("Plus(off) B corner squares", b0.pieces[0].count, 120);
+
+  const on = { ...off, alternateBlocks: true };
+  const r1 = calculateYardage(on);
+  const a1 = r1.fabrics.find(f => f.fabric === "A")!;
+  const b1 = r1.fabrics.find(f => f.fabric === "B")!;
+  const aTot = a1.pieces.reduce((n, p) => n + p.count, 0);
+  const bTot = b1.pieces.reduce((n, p) => n + p.count, 0);
+  check("Plus(alt) A plus squares", a1.pieces[0].count, 75);   // 5 × 15
+  check("Plus(alt) A corner squares", a1.pieces[1].count, 60); // 4 × 15
+  check("Plus(alt) B corner squares", b1.pieces[0].count, 60);
+  check("Plus(alt) B plus squares", b1.pieces[1].count, 75);
+  check("Plus(alt) A total squares", aTot, 135);
+  check("Plus(alt) B total squares", bTot, 135);
+  check("Plus(alt) total squares unchanged (9 × 30)", aTot + bTot, 270);
+  check("Plus(alt) cut size unchanged", a1.pieces[0].w, 10 / 3 + 0.5);
+}
+
+console.log("\n=== Pinwheel: alternate blocks leaves cut counts unchanged ===");
+{
+  const off = { ...base(), pattern: "pinwheel" as const, blockSize: 10, borderWidth: 0, sashingWidth: 0 };
+  const on = { ...off, alternateBlocks: true };
+  const r0 = calculateYardage(off);
+  const r1 = calculateYardage(on);
+  const a0 = r0.fabrics.find(f => f.fabric === "A")!.pieces[0];
+  const a1 = r1.fabrics.find(f => f.fabric === "A")!.pieces[0];
+  const b1 = r1.fabrics.find(f => f.fabric === "B")!.pieces[0];
+  check("Pinwheel(alt) A square count unchanged", a1.count, a0.count);
+  check("Pinwheel(alt) A/B counts equal", a1.count, b1.count);
+  check("Pinwheel(alt) A square count", a1.count, 60); // 30 blocks × 4 HST / 2
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {
