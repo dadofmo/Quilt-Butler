@@ -52,7 +52,7 @@ const borderSection: PatternSection = {
   hint: "The frame around the whole quilt.",
 };
 
-export const PATTERNS: PatternDef[] = [
+const BASE_PATTERNS: PatternDefBase[] = [
   {
     id: "nine-patch",
     name: "Nine Patch",
