@@ -1725,7 +1725,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "pinwheel": { skill: "beginner", fabricCount: 2, techniques: ["hst"] },
   "plus-block": { skill: "beginner", fabricCount: 2, techniques: ["squares"] },
   "churn-dash": { skill: "confident", fabricCount: 4, techniques: ["hst", "squares"] },
-  "bear-paw": { skill: "intermediate", fabricCount: 5, techniques: ["hst", "squares"] },
+  "bear-paw": { skill: "intermediate", fabricCount: 4, techniques: ["hst", "squares"] },
   "irish-chain": { skill: "confident", fabricCount: 2, techniques: ["squares"] },
   "sawtooth-star": { skill: "confident", fabricCount: 3, techniques: ["geese", "squares"] },
   "friendship-star": { skill: "beginner", fabricCount: 3, techniques: ["hst", "squares"] },
