@@ -155,10 +155,10 @@ function PatternPickerInner() {
                   }
                 >
                   <PatternThumb pattern={p.id} size={THUMB_PX} />
-                  {(p.id === "rail-fence" || p.id === "simple-squares") && (
+                  {p.precut && (
                     <img
-                      src={p.id === "rail-fence" ? jellyRollBadge : fatQuarterBadge}
-                      alt={p.id === "rail-fence" ? "Jelly Roll Friendly" : "Fat Quarter Friendly"}
+                      src={p.precut === "jelly-roll" ? jellyRollBadge : fatQuarterBadge}
+                      alt={p.precut === "jelly-roll" ? "Jelly Roll Friendly" : "Fat Quarter Friendly"}
                       width={BADGE_PX}
                       height={BADGE_PX}
                       loading="lazy"
