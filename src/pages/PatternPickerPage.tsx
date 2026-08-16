@@ -58,6 +58,15 @@ function PatternPickerInner() {
   const navigate = useNavigate();
   const [pendingPattern, setPendingPattern] = useState<(typeof PATTERNS)[number]["id"] | null>(null);
 
+  // Filter state lives in the URL so a filtered view is shareable and survives
+  // navigating back from Step 2.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filters = useMemo(() => decodeFilters(searchParams), [searchParams]);
+  const setFilters = (next: FilterState) =>
+    setSearchParams(encodeFilters(next), { replace: true });
+  const visible = useMemo(() => filterPatterns(PATTERNS, filters), [filters]);
+
+
   const choose = (id: (typeof PATTERNS)[number]["id"]) => {
     const pattern = getPattern(id);
     if (!pattern) return;
