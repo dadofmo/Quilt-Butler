@@ -91,8 +91,30 @@ function PatternPickerInner() {
       </div>
       <h1 className="text-foreground text-2xl font-semibold sm:text-3xl">Pick a quilt pattern</h1>
       <p className="text-muted-foreground mt-2 text-base">Tap a tile to start planning your quilt.</p>
+
+      <PatternFilterBar
+        state={filters}
+        onChange={setFilters}
+        shown={visible.length}
+        total={PATTERNS.length}
+      />
+
+      {visible.length === 0 ? (
+        <div className="border-border bg-card mt-6 rounded-xl border-2 border-dashed p-8 text-center">
+          <p className="text-foreground text-base font-semibold">No patterns match those filters</p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Try removing a filter or searching for a different block name.
+          </p>
+          <button
+            onClick={() => setFilters(EMPTY_FILTERS)}
+            className="text-primary mt-4 text-sm font-semibold underline underline-offset-2"
+          >
+            Clear filters
+          </button>
+        </div>
+      ) : (
       <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:grid-cols-3 sm:gap-4">
-        {PATTERNS.map((p) => {
+        {visible.map((p) => {
           const ready = p.hasMath;
           const locked = ready && !isUnlocked(p.id);
           return (
