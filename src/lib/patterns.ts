@@ -7,7 +7,31 @@ export interface PatternSection {
   hint?: string;
 }
 
-export interface PatternDef {
+/** Skill level shown in the pattern picker filter. */
+export type PatternSkill = "beginner" | "confident" | "intermediate" | "advanced";
+
+/** Piecing techniques a block requires — drives the technique filter. */
+export type TechniqueTag =
+  | "squares"
+  | "hst"
+  | "geese"
+  | "flip"
+  | "onpoint"
+  | "strips";
+
+/** Precut a pattern is especially friendly to (also drives the tile badge). */
+export type PrecutTag = "jelly-roll" | "fat-quarter";
+
+/** Filterable metadata, kept in one table (PATTERN_META) so it's easy to audit. */
+export interface PatternMeta {
+  skill: PatternSkill;
+  /** Distinct block fabrics, excluding sashing & border. */
+  fabricCount: number;
+  techniques: TechniqueTag[];
+  precut?: PrecutTag;
+}
+
+interface PatternDefBase {
   id: PatternId;
   name: string;
   sections: PatternSection[];
@@ -19,6 +43,8 @@ export interface PatternDef {
   supportsAlternate?: boolean;
 }
 
+export interface PatternDef extends PatternDefBase, PatternMeta {}
+
 const borderSection: PatternSection = {
   id: "border",
   label: "Border",
@@ -26,7 +52,7 @@ const borderSection: PatternSection = {
   hint: "The frame around the whole quilt.",
 };
 
-export const PATTERNS: PatternDef[] = [
+const BASE_PATTERNS: PatternDefBase[] = [
   {
     id: "nine-patch",
     name: "Nine Patch",
@@ -1680,6 +1706,71 @@ export const PATTERNS: PatternDef[] = [
   },
 
 ];
+
+/**
+ * Filter metadata for every pattern, kept in one table so it can be audited
+ * at a glance (and unit-tested against the section list). `fabricCount` must
+ * equal the number of block sections excluding sashing/cornerstone/border.
+ */
+export const PATTERN_META: Record<string, PatternMeta> = {
+  "nine-patch": { skill: "beginner", fabricCount: 2, techniques: ["squares"] },
+  "hst": { skill: "beginner", fabricCount: 2, techniques: ["hst"] },
+  "simple-squares": { skill: "beginner", fabricCount: 1, techniques: ["squares"], precut: "fat-quarter" },
+  "rail-fence": { skill: "beginner", fabricCount: 3, techniques: ["strips"], precut: "jelly-roll" },
+  "log-cabin": { skill: "confident", fabricCount: 3, techniques: ["strips"] },
+  "ohio-star": { skill: "confident", fabricCount: 3, techniques: ["hst", "squares"] },
+  "flying-geese": { skill: "confident", fabricCount: 2, techniques: ["geese"] },
+  "disappearing-nine-patch": { skill: "confident", fabricCount: 2, techniques: ["squares", "strips"] },
+  "squares-on-point": { skill: "confident", fabricCount: 2, techniques: ["onpoint", "flip"] },
+  "pinwheel": { skill: "beginner", fabricCount: 2, techniques: ["hst"] },
+  "plus-block": { skill: "beginner", fabricCount: 2, techniques: ["squares"] },
+  "churn-dash": { skill: "confident", fabricCount: 4, techniques: ["hst", "squares"] },
+  "bear-paw": { skill: "intermediate", fabricCount: 4, techniques: ["hst", "squares"] },
+  "irish-chain": { skill: "confident", fabricCount: 2, techniques: ["squares"] },
+  "sawtooth-star": { skill: "confident", fabricCount: 3, techniques: ["geese", "squares"] },
+  "friendship-star": { skill: "beginner", fabricCount: 3, techniques: ["hst", "squares"] },
+  "snowball-block": { skill: "beginner", fabricCount: 2, techniques: ["flip", "squares"] },
+  "four-patch": { skill: "beginner", fabricCount: 4, techniques: ["squares"] },
+  "streak-of-lightning": { skill: "beginner", fabricCount: 2, techniques: ["hst"] },
+  "bow-tie": { skill: "confident", fabricCount: 3, techniques: ["squares", "flip", "onpoint"] },
+  "shoofly": { skill: "beginner", fabricCount: 2, techniques: ["hst", "squares"] },
+  "jacobs-ladder": { skill: "confident", fabricCount: 3, techniques: ["hst", "squares"] },
+  "autumn-tints": { skill: "beginner", fabricCount: 4, techniques: ["squares"] },
+  "card-trick": { skill: "intermediate", fabricCount: 5, techniques: ["hst", "onpoint"] },
+  "oh-susannah": { skill: "confident", fabricCount: 3, techniques: ["hst", "squares"] },
+  "twin-star": { skill: "intermediate", fabricCount: 4, techniques: ["hst", "geese", "squares"] },
+  "star-and-cross": { skill: "beginner", fabricCount: 4, techniques: ["squares"] },
+  "idaho-beauty": { skill: "advanced", fabricCount: 3, techniques: ["geese", "onpoint", "flip"] },
+  "checkerboard": { skill: "intermediate", fabricCount: 4, techniques: ["hst", "onpoint", "squares"] },
+  "cabin-in-the-cotton": { skill: "confident", fabricCount: 4, techniques: ["strips"] },
+  "fancy-stripe": { skill: "confident", fabricCount: 2, techniques: ["hst"] },
+  "maple-star": { skill: "intermediate", fabricCount: 4, techniques: ["hst", "geese", "squares"] },
+  "love-in-a-mist": { skill: "intermediate", fabricCount: 3, techniques: ["onpoint", "flip", "squares"] },
+  "four-x-star": { skill: "intermediate", fabricCount: 4, techniques: ["hst", "squares"] },
+  "antique-tile": { skill: "confident", fabricCount: 5, techniques: ["squares"] },
+  "economy-block": { skill: "confident", fabricCount: 3, techniques: ["onpoint", "squares"] },
+  "california-quilt": { skill: "advanced", fabricCount: 4, techniques: ["geese", "flip", "onpoint", "squares"] },
+  "clowns-choice": { skill: "confident", fabricCount: 2, techniques: ["hst", "squares"] },
+  "corner-beam": { skill: "confident", fabricCount: 2, techniques: ["flip", "squares"] },
+  "four-queens": { skill: "advanced", fabricCount: 3, techniques: ["hst", "geese", "flip", "squares"] },
+  "four-xs": { skill: "intermediate", fabricCount: 5, techniques: ["onpoint", "squares"] },
+  "broken-dishes": { skill: "beginner", fabricCount: 3, techniques: ["hst"] },
+  "rolling-stone": { skill: "confident", fabricCount: 3, techniques: ["flip", "squares"] },
+  "summer-winds": { skill: "intermediate", fabricCount: 4, techniques: ["hst", "geese", "squares"] },
+  "swing-in-the-center": { skill: "advanced", fabricCount: 3, techniques: ["hst", "geese", "flip", "onpoint"] },
+  "tippecanoe-and-tyler-too": { skill: "confident", fabricCount: 4, techniques: ["hst"] },
+  "tulip-lady-fingers": { skill: "confident", fabricCount: 3, techniques: ["hst", "squares"] },
+  "weathervane": { skill: "intermediate", fabricCount: 3, techniques: ["hst", "geese", "squares"] },
+  "wishing-ring": { skill: "confident", fabricCount: 2, techniques: ["hst", "squares"] },
+  "alaska-homestead": { skill: "confident", fabricCount: 3, techniques: ["hst", "squares"] },
+};
+
+const FALLBACK_META: PatternMeta = { skill: "confident", fabricCount: 3, techniques: ["squares"] };
+
+export const PATTERNS: PatternDef[] = BASE_PATTERNS.map((p) => ({
+  ...p,
+  ...(PATTERN_META[p.id] ?? FALLBACK_META),
+}));
 
 export function getPattern(id: PatternId | null): PatternDef | null {
   if (!id) return null;

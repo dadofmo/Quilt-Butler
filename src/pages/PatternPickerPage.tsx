@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { PatternThumb } from "@/components/PatternThumb";
@@ -8,6 +8,14 @@ import { setPlanner } from "@/lib/planner-store";
 import { UnlockModal } from "@/components/UnlockModal";
 import { isUnlocked } from "@/lib/license";
 import { Lock } from "lucide-react";
+import { PatternFilterBar } from "@/components/PatternFilterBar";
+import {
+  EMPTY_FILTERS,
+  decodeFilters,
+  encodeFilters,
+  filterPatterns,
+  type FilterState,
+} from "@/lib/pattern-filters";
 
 import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
 import jellyRollBadge from "@/assets/jelly-roll-badge.webp";
@@ -50,6 +58,15 @@ function PatternPickerInner() {
   const navigate = useNavigate();
   const [pendingPattern, setPendingPattern] = useState<(typeof PATTERNS)[number]["id"] | null>(null);
 
+  // Filter state lives in the URL so a filtered view is shareable and survives
+  // navigating back from Step 2.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filters = useMemo(() => decodeFilters(searchParams), [searchParams]);
+  const setFilters = (next: FilterState) =>
+    setSearchParams(encodeFilters(next), { replace: true });
+  const visible = useMemo(() => filterPatterns(PATTERNS, filters), [filters]);
+
+
   const choose = (id: (typeof PATTERNS)[number]["id"]) => {
     const pattern = getPattern(id);
     if (!pattern) return;
@@ -91,8 +108,30 @@ function PatternPickerInner() {
       </div>
       <h1 className="text-foreground text-2xl font-semibold sm:text-3xl">Pick a quilt pattern</h1>
       <p className="text-muted-foreground mt-2 text-base">Tap a tile to start planning your quilt.</p>
+
+      <PatternFilterBar
+        state={filters}
+        onChange={setFilters}
+        shown={visible.length}
+        total={PATTERNS.length}
+      />
+
+      {visible.length === 0 ? (
+        <div className="border-border bg-card mt-6 rounded-xl border-2 border-dashed p-8 text-center">
+          <p className="text-foreground text-base font-semibold">No patterns match those filters</p>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Try removing a filter or searching for a different block name.
+          </p>
+          <button
+            onClick={() => setFilters(EMPTY_FILTERS)}
+            className="text-primary mt-4 text-sm font-semibold underline underline-offset-2"
+          >
+            Clear filters
+          </button>
+        </div>
+      ) : (
       <div className="mt-6 grid grid-cols-2 gap-3 sm:mt-8 sm:grid-cols-3 sm:gap-4">
-        {PATTERNS.map((p) => {
+        {visible.map((p) => {
           const ready = p.hasMath;
           const locked = ready && !isUnlocked(p.id);
           return (
@@ -116,10 +155,10 @@ function PatternPickerInner() {
                   }
                 >
                   <PatternThumb pattern={p.id} size={THUMB_PX} />
-                  {(p.id === "rail-fence" || p.id === "simple-squares") && (
+                  {p.precut && (
                     <img
-                      src={p.id === "rail-fence" ? jellyRollBadge : fatQuarterBadge}
-                      alt={p.id === "rail-fence" ? "Jelly Roll Friendly" : "Fat Quarter Friendly"}
+                      src={p.precut === "jelly-roll" ? jellyRollBadge : fatQuarterBadge}
+                      alt={p.precut === "jelly-roll" ? "Jelly Roll Friendly" : "Fat Quarter Friendly"}
                       width={BADGE_PX}
                       height={BADGE_PX}
                       loading="lazy"
@@ -162,6 +201,7 @@ function PatternPickerInner() {
         })}
 
       </div>
+      )}
       <section className="mx-auto mt-16 max-w-2xl px-4 py-10 text-center sm:mt-20 sm:py-12">
         <p className="text-xs leading-relaxed text-muted-foreground/70 sm:text-sm">
           QuiltButler is an online quilt planning tool built for quilters of every skill level. Start free with the beginner-friendly Nine Patch, then unlock the full pattern library — Half Square Triangles, Snowball, Friendship Star, Bear Paw and more — with a single one-time purchase. Enter your quilt size and fabric choices to instantly receive exact yardage requirements, visual cutting diagrams, and a printable shopping list. Use the Quilt Visualizer to see how your fabric choices will look before you buy a single yard, estimate your total project cost with the built-in cost calculator, and get helpful quilting tips along the way. No login required — just open QuiltButler and get your complete quilt plan. Happy Quilting!
