@@ -8,6 +8,14 @@ import { setPlanner } from "@/lib/planner-store";
 import { UnlockModal } from "@/components/UnlockModal";
 import { isUnlocked } from "@/lib/license";
 import { Lock } from "lucide-react";
+import { PatternFilterBar } from "@/components/PatternFilterBar";
+import {
+  EMPTY_FILTERS,
+  decodeFilters,
+  encodeFilters,
+  filterPatterns,
+  type FilterState,
+} from "@/lib/pattern-filters";
 
 import quiltButlerLogo from "@/assets/quilt-butler-logo.webp";
 import jellyRollBadge from "@/assets/jelly-roll-badge.webp";
