@@ -7,7 +7,31 @@ export interface PatternSection {
   hint?: string;
 }
 
-export interface PatternDef {
+/** Skill level shown in the pattern picker filter. */
+export type PatternSkill = "beginner" | "confident" | "intermediate" | "advanced";
+
+/** Piecing techniques a block requires — drives the technique filter. */
+export type TechniqueTag =
+  | "squares"
+  | "hst"
+  | "geese"
+  | "flip"
+  | "onpoint"
+  | "strips";
+
+/** Precut a pattern is especially friendly to (also drives the tile badge). */
+export type PrecutTag = "jelly-roll" | "fat-quarter";
+
+/** Filterable metadata, kept in one table (PATTERN_META) so it's easy to audit. */
+export interface PatternMeta {
+  skill: PatternSkill;
+  /** Distinct block fabrics, excluding sashing & border. */
+  fabricCount: number;
+  techniques: TechniqueTag[];
+  precut?: PrecutTag;
+}
+
+interface PatternDefBase {
   id: PatternId;
   name: string;
   sections: PatternSection[];
@@ -18,6 +42,8 @@ export interface PatternDef {
    *  Only 2-fabric block patterns should enable this. */
   supportsAlternate?: boolean;
 }
+
+export interface PatternDef extends PatternDefBase, PatternMeta {}
 
 const borderSection: PatternSection = {
   id: "border",
