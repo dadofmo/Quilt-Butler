@@ -1252,8 +1252,12 @@ function MiniBlock({
       return <ClownsChoiceBlock size={200} accent={accent} bg={bg} />;
     }
     case "corner-beam": {
-      const beam = get("beam", "A");
-      const bg = get("bg", "B");
+      // When swap is true (alternate blocks toggle + odd cell), the beam and
+      // background fabrics trade roles for the checkerboard star effect.
+      const beamFab = get("beam", "A");
+      const bgFab = get("bg", "B");
+      const beam = swap ? bgFab : beamFab;
+      const bg = swap ? beamFab : bgFab;
       return <CornerBeamBlock size={200} beam={beam} bg={bg} />;
     }
     case "four-queens": {
