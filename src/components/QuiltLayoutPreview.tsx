@@ -333,10 +333,13 @@ function QuiltCanvas({
             // directions (rows and columns), for a checkerboard effect.
             const sopSwap =
               pattern === "squares-on-point" && alternateBlocks && (i + j) % 2 === 1;
-            // Plus Block and Pinwheel use the same opt-in A/B role swap:
-            // plus ↔ background, blades ↔ background on every other block.
+            // Plus Block, Pinwheel and Corner Beam use the same opt-in A/B
+            // role swap: plus ↔ background, blades ↔ background, beam ↔
+            // background on every other block.
             const altSwap =
-              (pattern === "plus-block" || pattern === "pinwheel") &&
+              (pattern === "plus-block" ||
+                pattern === "pinwheel" ||
+                pattern === "corner-beam") &&
               alternateBlocks &&
               (i + j) % 2 === 1;
             const swap = snowballSwap || shooflySwap || sopSwap || altSwap;
@@ -1249,8 +1252,12 @@ function MiniBlock({
       return <ClownsChoiceBlock size={200} accent={accent} bg={bg} />;
     }
     case "corner-beam": {
-      const beam = get("beam", "A");
-      const bg = get("bg", "B");
+      // When swap is true (alternate blocks toggle + odd cell), the beam and
+      // background fabrics trade roles for the checkerboard star effect.
+      const beamFab = get("beam", "A");
+      const bgFab = get("bg", "B");
+      const beam = swap ? bgFab : beamFab;
+      const bg = swap ? beamFab : bgFab;
       return <CornerBeamBlock size={200} beam={beam} bg={bg} />;
     }
     case "four-queens": {
