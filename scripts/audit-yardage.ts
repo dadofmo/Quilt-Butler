@@ -2147,6 +2147,71 @@ console.log("\n=== Pinwheel: alternate blocks leaves cut counts unchanged ===");
   check("Pinwheel(alt) A square count", a1.count, 60); // 30 blocks × 4 HST / 2
 }
 
+console.log("\n=== Corner Beam: alternate (reversed) blocks ===");
+{
+  const off = { ...base(), pattern: "corner-beam" as const, blockSize: 10, borderWidth: 0, sashingWidth: 0 };
+  // across=floor(50/10)=5, down=floor(65/10)=6 → 30 blocks (even split 15/15).
+  const r0 = calculateYardage(off);
+  const a0 = r0.fabrics.find(f => f.fabric === "A")!;
+  const b0 = r0.fabrics.find(f => f.fabric === "B")!;
+  check("CB(off) A beam squares", a0.pieces[0].count, 120);      // 4 × 30
+  check("CB(off) A beam cut", a0.pieces[0].w, 5.5);              // u=5, +0.5
+  check("CB(off) B flip rects", b0.pieces[0].count, 240);        // 8 × 30
+  check("CB(off) B flip rect long", b0.pieces[0].w, 5.5);
+  check("CB(off) B flip rect short", b0.pieces[0].h, 3);         // u/2 + 0.5
+
+  const on = { ...off, alternateBlocks: true };
+  const r1 = calculateYardage(on);
+  const a1 = r1.fabrics.find(f => f.fabric === "A")!;
+  const b1 = r1.fabrics.find(f => f.fabric === "B")!;
+  const aSq = a1.pieces.filter(p => /beam squares/i.test(p.label)).reduce((n, p) => n + p.count, 0);
+  const aRe = a1.pieces.filter(p => /rectangles/i.test(p.label)).reduce((n, p) => n + p.count, 0);
+  const bSq = b1.pieces.filter(p => /beam squares/i.test(p.label)).reduce((n, p) => n + p.count, 0);
+  const bRe = b1.pieces.filter(p => /rectangles/i.test(p.label)).reduce((n, p) => n + p.count, 0);
+  check("CB(alt) A beam squares", aSq, 60);   // 4 × 15
+  check("CB(alt) A flip rects", aRe, 120);    // 8 × 15
+  check("CB(alt) B beam squares", bSq, 60);
+  check("CB(alt) B flip rects", bRe, 120);
+  check("CB(alt) total squares unchanged", aSq + bSq, 120);
+  check("CB(alt) total rects unchanged", aRe + bRe, 240);
+  check("CB(alt) beam cut unchanged", a1.pieces[0].w, 5.5);
+}
+
+console.log("\n=== Corner Beam: odd block count splits exactly + shared fabric pools ===");
+{
+  // 3 × 3 = 9 blocks → 5 primary / 4 reversed.
+  const odd = {
+    ...base(), pattern: "corner-beam" as const,
+    quiltWidth: 30, quiltHeight: 30, blockSize: 10, borderWidth: 0, sashingWidth: 0,
+    alternateBlocks: true,
+  };
+  const r = calculateYardage(odd);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const aSq = a.pieces.filter(p => /beam squares/i.test(p.label)).reduce((n, p) => n + p.count, 0);
+  const bSq = b.pieces.filter(p => /beam squares/i.test(p.label)).reduce((n, p) => n + p.count, 0);
+  const aRe = a.pieces.filter(p => /rectangles/i.test(p.label)).reduce((n, p) => n + p.count, 0);
+  const bRe = b.pieces.filter(p => /rectangles/i.test(p.label)).reduce((n, p) => n + p.count, 0);
+  check("CB(odd alt) A beam squares", aSq, 20); // 4 × 5
+  check("CB(odd alt) B beam squares", bSq, 16); // 4 × 4
+  check("CB(odd alt) A flip rects", aRe, 32);   // 8 × 4
+  check("CB(odd alt) B flip rects", bRe, 40);   // 8 × 5
+  check("CB(odd alt) squares total", aSq + bSq, 36); // 4 × 9
+  check("CB(odd alt) rects total", aRe + bRe, 72);   // 8 × 9
+
+  const shared = {
+    ...odd,
+    assignments: { beam: "A" as FabricKey, bg: "A" as FabricKey },
+  };
+  const rs = calculateYardage(shared);
+  const sa = rs.fabrics.find(f => f.fabric === "A")!;
+  const sSq = sa.pieces.filter(p => /beam squares/i.test(p.label)).reduce((n, p) => n + p.count, 0);
+  const sRe = sa.pieces.filter(p => /rectangles/i.test(p.label)).reduce((n, p) => n + p.count, 0);
+  check("CB(shared) pooled squares", sSq, 36);
+  check("CB(shared) pooled rects", sRe, 72);
+  check("CB(shared) one square pile", sa.pieces.filter(p => /beam squares/i.test(p.label)).length, 1);
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {
