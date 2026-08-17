@@ -3010,25 +3010,77 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const beamFab = (s.assignments["beam"] ?? "A") as FabricKey;
     const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
 
+    // "Alternate blocks" toggle (gated by supportsAlternate): the beam and
+    // background fabrics trade roles on every other block, alternating both
+    // across rows and down columns. Walk the real grid so odd totals split
+    // exactly — even cells keep the primary orientation (same convention as
+    // Plus Block / Squares on Point).
+    const cbAlt = !!s.alternateBlocks;
+    let cbEven = 0;
+    let cbOdd = 0;
+    for (let r = 0; r < blocksDown; r++) {
+      for (let c = 0; c < blocksAcross; c++) {
+        if ((r + c) % 2 === 0) cbEven++;
+        else cbOdd++;
+      }
+    }
+    const primaryCbBlocks = cbAlt ? cbEven : blockCount;
+    const flippedCbBlocks = cbAlt ? cbOdd : 0;
+
     const beamSquares = 4 * blockCount;
     const flipRects = 8 * blockCount;
 
-    addSquares(reqs[beamFab], "Quadrant beam squares", beamSquares, beamCut, s.fabricWidth);
-    addRails(
-      reqs[bgFab],
-      "Background stitch-and-flip rectangles",
-      flipRects,
-      flipLong,
-      flipShort,
-      s.fabricWidth,
-    );
+    // Per orientation: 4 beam squares of the "beam" fabric + 8 flip
+    // rectangles of the "background" fabric — reversed on flipped blocks.
+    const beamFab_squares = 4 * primaryCbBlocks;
+    const beamFab_rects = 8 * flippedCbBlocks;
+    const bgFab_rects = 8 * primaryCbBlocks;
+    const bgFab_squares = 4 * flippedCbBlocks;
+
+    if (beamFab_squares > 0)
+      addSquares(reqs[beamFab], "Quadrant beam squares", beamFab_squares, beamCut, s.fabricWidth);
+    if (bgFab_squares > 0)
+      addSquares(
+        reqs[bgFab],
+        "Quadrant beam squares (reversed blocks)",
+        bgFab_squares,
+        beamCut,
+        s.fabricWidth,
+      );
+    if (bgFab_rects > 0)
+      addRails(
+        reqs[bgFab],
+        "Background stitch-and-flip rectangles",
+        bgFab_rects,
+        flipLong,
+        flipShort,
+        s.fabricWidth,
+      );
+    if (beamFab_rects > 0)
+      addRails(
+        reqs[beamFab],
+        "Background stitch-and-flip rectangles (reversed blocks)",
+        beamFab_rects,
+        flipLong,
+        flipShort,
+        s.fabricWidth,
+      );
 
     notes.push(
       `Each Corner Beam block is made from 4 identical quadrant units, each ${u.toFixed(2)}" finished square. A quadrant is a Fabric ${beamFab} square with two Fabric ${bgFab} rectangles stitched and flipped across two adjacent corners, leaving a wide beam of Fabric ${beamFab} radiating out of the remaining corner.`,
     );
-    notes.push(
-      `Cut per block (sizes include the 1/4" seam allowance): 4 Fabric ${beamFab} squares at ${beamCut.toFixed(2)}" and 8 Fabric ${bgFab} rectangles at ${flipShort.toFixed(2)}" × ${flipLong.toFixed(2)}". Across all ${blockCount} blocks that's ${beamSquares} beam squares and ${flipRects} background rectangles.`,
-    );
+    if (cbAlt) {
+      notes.push(
+        `Reversed blocks are ON: ${primaryCbBlocks} blocks have a Fabric ${beamFab} star on a Fabric ${bgFab} background, and ${flippedCbBlocks} blocks are the exact reverse (Fabric ${bgFab} star on Fabric ${beamFab} background). Both block types are pieced identically — you simply swap which fabric is cut as the squares and which as the flip rectangles. Lay them out in a checkerboard so no two touching blocks match, alternating side-to-side across every row AND up-and-down every column; start the top-left block with the Fabric ${beamFab} star.`,
+      );
+      notes.push(
+        `Cut per block (sizes include the 1/4" seam allowance): 4 squares at ${beamCut.toFixed(2)}" and 8 rectangles at ${flipShort.toFixed(2)}" × ${flipLong.toFixed(2)}". Across all ${blockCount} blocks: Fabric ${beamFab} — ${beamFab_squares} beam squares + ${beamFab_rects} flip rectangles; Fabric ${bgFab} — ${bgFab_squares} beam squares + ${bgFab_rects} flip rectangles. Totals are unchanged overall (${beamSquares} squares and ${flipRects} rectangles), just split between the two fabrics.`,
+      );
+    } else {
+      notes.push(
+        `Cut per block (sizes include the 1/4" seam allowance): 4 Fabric ${beamFab} squares at ${beamCut.toFixed(2)}" and 8 Fabric ${bgFab} rectangles at ${flipShort.toFixed(2)}" × ${flipLong.toFixed(2)}". Across all ${blockCount} blocks that's ${beamSquares} beam squares and ${flipRects} background rectangles.`,
+      );
+    }
     notes.push(
       `Make one quadrant: lay a Fabric ${bgFab} rectangle right sides together (RST) on the beam square with its ${flipLong.toFixed(2)}" edge along the TOP edge of the square, so it covers the top ${flipShort.toFixed(2)}". Sew corner to corner across that rectangle — from the square's top-left corner down to the rectangle's lower-right corner. Trim 1/4" outside the stitching, flip the rectangle open and press. Repeat with the second rectangle on the LEFT edge, this time sewing from the same top-left corner down to the rectangle's lower-right corner on that side. Both diagonals start at the same corner, and the beam fabric left showing is the wedge. Trim the unit back to ${beamCut.toFixed(2)}" square.`,
     );
