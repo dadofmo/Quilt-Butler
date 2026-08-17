@@ -333,10 +333,13 @@ function QuiltCanvas({
             // directions (rows and columns), for a checkerboard effect.
             const sopSwap =
               pattern === "squares-on-point" && alternateBlocks && (i + j) % 2 === 1;
-            // Plus Block and Pinwheel use the same opt-in A/B role swap:
-            // plus ↔ background, blades ↔ background on every other block.
+            // Plus Block, Pinwheel and Corner Beam use the same opt-in A/B
+            // role swap: plus ↔ background, blades ↔ background, beam ↔
+            // background on every other block.
             const altSwap =
-              (pattern === "plus-block" || pattern === "pinwheel") &&
+              (pattern === "plus-block" ||
+                pattern === "pinwheel" ||
+                pattern === "corner-beam") &&
               alternateBlocks &&
               (i + j) % 2 === 1;
             const swap = snowballSwap || shooflySwap || sopSwap || altSwap;
