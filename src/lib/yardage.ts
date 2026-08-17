@@ -3037,34 +3037,47 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const bgFab_rects = 8 * primaryCbBlocks;
     const bgFab_squares = 4 * flippedCbBlocks;
 
-    if (beamFab_squares > 0)
-      addSquares(reqs[beamFab], "Quadrant beam squares", beamFab_squares, beamCut, s.fabricWidth);
-    if (bgFab_squares > 0)
-      addSquares(
-        reqs[bgFab],
-        "Quadrant beam squares (reversed blocks)",
-        bgFab_squares,
-        beamCut,
-        s.fabricWidth,
-      );
-    if (bgFab_rects > 0)
-      addRails(
-        reqs[bgFab],
-        "Background stitch-and-flip rectangles",
-        bgFab_rects,
-        flipLong,
-        flipShort,
-        s.fabricWidth,
-      );
-    if (beamFab_rects > 0)
+    if (beamFab === bgFab) {
+      // Same fabric plays both roles — pool into one pile per shape.
+      addSquares(reqs[beamFab], "Quadrant beam squares", beamSquares, beamCut, s.fabricWidth);
       addRails(
         reqs[beamFab],
-        "Background stitch-and-flip rectangles (reversed blocks)",
-        beamFab_rects,
+        "Background stitch-and-flip rectangles",
+        flipRects,
         flipLong,
         flipShort,
         s.fabricWidth,
       );
+    } else {
+      if (beamFab_squares > 0)
+        addSquares(reqs[beamFab], "Quadrant beam squares", beamFab_squares, beamCut, s.fabricWidth);
+      if (bgFab_squares > 0)
+        addSquares(
+          reqs[bgFab],
+          "Quadrant beam squares (reversed blocks)",
+          bgFab_squares,
+          beamCut,
+          s.fabricWidth,
+        );
+      if (bgFab_rects > 0)
+        addRails(
+          reqs[bgFab],
+          "Background stitch-and-flip rectangles",
+          bgFab_rects,
+          flipLong,
+          flipShort,
+          s.fabricWidth,
+        );
+      if (beamFab_rects > 0)
+        addRails(
+          reqs[beamFab],
+          "Background stitch-and-flip rectangles (reversed blocks)",
+          beamFab_rects,
+          flipLong,
+          flipShort,
+          s.fabricWidth,
+        );
+    }
 
     notes.push(
       `Each Corner Beam block is made from 4 identical quadrant units, each ${u.toFixed(2)}" finished square. A quadrant is a Fabric ${beamFab} square with two Fabric ${bgFab} rectangles stitched and flipped across two adjacent corners, leaving a wide beam of Fabric ${beamFab} radiating out of the remaining corner.`,
