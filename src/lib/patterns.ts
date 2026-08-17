@@ -1283,8 +1283,9 @@ const BASE_PATTERNS: PatternDefBase[] = [
     id: "corner-beam",
     name: "Corner Beam",
     hasMath: true,
+    supportsAlternate: true,
     intro:
-      "Corner Beam is built from four identical quadrant units, each a square with a wide wedge of accent fabric radiating out of one corner. Rotate the four units so every beam springs from an outer corner of the block and they meet in the middle — the result is a bold four-pointed star with softly pinched sides, and when the blocks are set side by side the background wedges join up into secondary diamonds between the stars. Only two fabrics and two shapes: a square and a rectangle, joined with easy stitch-and-flip corners — no triangle templates.",
+      "Corner Beam is built from four identical quadrant units, each a square with a wide wedge of accent fabric radiating out of one corner. Rotate the four units so every beam springs from an outer corner of the block and they meet in the middle — the result is a bold four-pointed star with softly pinched sides, and when the blocks are set side by side the background wedges join up into secondary diamonds between the stars. Only two fabrics and two shapes: a square and a rectangle, joined with easy stitch-and-flip corners — no triangle templates. Turn on \"Reverse the fabrics on every other block\" on the fabrics step and the beam and background trade places on alternating blocks, so the stars read light-on-dark and dark-on-light in a checkerboard.",
     sections: [
       {
         id: "beam",
