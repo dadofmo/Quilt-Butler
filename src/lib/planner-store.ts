@@ -133,6 +133,10 @@ export interface PlannerState {
    *  alternation across the whole quilt. Piece counts are unchanged; only
    *  the per-fabric split flips. Ignored for patterns that don't opt in. */
   alternateBlocks: boolean;
+  /** Chosen block-rotation setting for patterns that opt in via
+   *  `PatternDef.layouts`. Rotation only — never changes piece counts. */
+  blockLayout: BlockLayout;
+
 }
 
 
