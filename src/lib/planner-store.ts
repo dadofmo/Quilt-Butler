@@ -168,6 +168,7 @@ const initial: PlannerState = {
   fatQuarterTrimMargin: 0.5,
   fatQuarterCount: 20,
   alternateBlocks: false,
+  blockLayout: "straight",
 };
 
 
