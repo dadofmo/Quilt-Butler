@@ -2,6 +2,24 @@ import { useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "quiltbutler-planner-state";
 
+/**
+ * How finished blocks are turned/arranged when they're sewn into the quilt
+ * top. Rotation-only settings — every block is pieced identically, so the
+ * cutting list and yardage are unchanged; only the orientation of each block
+ * (and therefore the secondary design across the quilt) differs.
+ *
+ * Patterns opt in by listing settings in `PatternDef.layouts`. Patterns whose
+ * secondary design depends on a fixed, intrinsic tiling (Rail Fence, Jacob's
+ * Ladder, Broken Dishes, Irish Chain, ...) must NOT opt in.
+ */
+export type BlockLayout =
+  | "straight"
+  | "alternating"
+  | "barn-raising"
+  | "herringbone";
+
+
+
 export type PatternId =
   | "simple-squares"
   | "nine-patch"
@@ -115,6 +133,10 @@ export interface PlannerState {
    *  alternation across the whole quilt. Piece counts are unchanged; only
    *  the per-fabric split flips. Ignored for patterns that don't opt in. */
   alternateBlocks: boolean;
+  /** Chosen block-rotation setting for patterns that opt in via
+   *  `PatternDef.layouts`. Rotation only — never changes piece counts. */
+  blockLayout: BlockLayout;
+
 }
 
 
@@ -146,6 +168,7 @@ const initial: PlannerState = {
   fatQuarterTrimMargin: 0.5,
   fatQuarterCount: 20,
   alternateBlocks: false,
+  blockLayout: "straight",
 };
 
 

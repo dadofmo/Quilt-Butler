@@ -1,4 +1,4 @@
-import type { PatternId, FabricKey } from "./planner-store";
+import type { PatternId, FabricKey, BlockLayout } from "./planner-store";
 
 export interface PatternSection {
   id: string;
@@ -41,6 +41,15 @@ interface PatternDefBase {
    *  (swap Fabric A ↔ Fabric B on every other block for a checkerboard).
    *  Only 2-fabric block patterns should enable this. */
   supportsAlternate?: boolean;
+  /** Block-rotation settings this pattern offers on Step 2, beyond the
+   *  default straight set. Rotation only — piece counts never change.
+   *  Deliberately omitted for patterns whose secondary design depends on a
+   *  fixed intrinsic tiling (Rail Fence, Jacob's Ladder, Broken Dishes,
+   *  Irish Chain, Checkerboard, Fancy Stripe, Streak of Lightning, Four X's,
+   *  Tulip Lady Fingers, Four Queens) and for patterns that already expose
+   *  the A/B alternate-blocks toggle — a second layout control there would
+   *  fight the look the block was designed for. */
+  layouts?: BlockLayout[];
 }
 
 export interface PatternDef extends PatternDefBase, PatternMeta {}
