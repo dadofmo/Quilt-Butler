@@ -92,6 +92,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
   {
     id: "hst",
     name: "Half Square Triangles",
+    layouts: ["alternating", "barn-raising", "herringbone"],
     hasMath: true,
     intro: "Each block is a square split diagonally into two triangles of different fabrics. Pick a fabric for each triangle. Optionally add plain sashing strips between blocks for a framed look.",
     sections: [
@@ -146,6 +147,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
   {
     id: "log-cabin",
     name: "Log Cabin",
+    layouts: ["alternating", "barn-raising", "herringbone"],
     hasMath: true,
     intro:
       "Each block has a small center square (traditionally red — the 'hearth') with skinny strips called 'logs' added in rounds around it. Two adjacent sides of the block are LIGHT logs, the opposite two sides are DARK logs — that's what gives Log Cabin its iconic diagonal split. The center is the same for every block; the light & dark fabrics are usually one each, though many quilters use a small palette. Optionally add plain sashing strips between blocks for a framed look.",
@@ -184,6 +186,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
   {
     id: "flying-geese",
     name: "Flying Geese",
+    layouts: ["alternating", "barn-raising", "herringbone"],
     hasMath: true,
     intro:
       "Rows of triangle 'geese' (2:1 wide rectangles) flying across a sky background. Each block stacks 2 geese vertically — pick a bold fabric for the geese and a quieter sky fabric for the corners.",
@@ -589,6 +592,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
   {
     id: "bow-tie",
     name: "Bow Tie",
+    layouts: ["alternating", "herringbone"],
     hasMath: true,
     intro:
       "Each block is a 2×2 grid of four plain squares with a small on-point square (the 'knot') centered where they meet. Fabric A fills the two diagonal corners (top-left + bottom-right), Fabric B fills the other diagonal (top-right + bottom-left), and Fabric C is the knot — three distinct fabrics. The main squares are full, uncut squares; the knot is appliquéd on top of the center seam intersection so the only angled shape in the whole block is the rotated center square.",

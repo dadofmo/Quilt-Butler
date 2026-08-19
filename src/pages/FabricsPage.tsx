@@ -1,4 +1,5 @@
 import { useNavigate, Link } from "react-router-dom";
+import { BlockLayoutPicker } from "@/components/BlockLayoutPicker";
 import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { AffiliateShopCard } from "@/components/AffiliateShopCard";
@@ -251,6 +252,7 @@ function FabricsStepInner() {
                   cornerstoneFabric={hasCornerstones ? cornerstoneFabric : undefined}
                   photos={planner.fabricPhotos}
                   alternateBlocks={planner.alternateBlocks}
+                  blockLayout={planner.blockLayout}
                 />
                 <p className="text-muted-foreground mt-4 text-center text-xs leading-relaxed">
                   You&apos;re designing <strong>one block</strong>. That block will be sewn{" "}
@@ -312,6 +314,21 @@ function FabricsStepInner() {
                       </p>
                     </div>
                   </label>
+                )}
+
+                {/* Block-setting picker — opt-in per pattern via `layouts`.
+                    Rotation only: piece counts, cutting list and yardage are
+                    untouched, so patterns whose secondary design relies on a
+                    fixed tiling simply never declare `layouts`. */}
+                {pattern.layouts && pattern.layouts.length > 0 && (
+                  <BlockLayoutPicker
+                    pattern={pattern.id}
+                    assignments={planner.assignments}
+                    photos={planner.fabricPhotos}
+                    options={["straight", ...pattern.layouts]}
+                    value={planner.blockLayout}
+                    onChange={(next) => setPlanner({ blockLayout: next })}
+                  />
                 )}
               </>
             );

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import type { PatternId, SectionAssignments, FabricKey } from "@/lib/planner-store";
+import type { PatternId, SectionAssignments, FabricKey, BlockLayout } from "@/lib/planner-store";
+import { rotationFor } from "@/lib/block-layouts";
 import { FABRIC_COLORS } from "@/lib/planner-store";
 import { fabricFill } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
@@ -35,6 +36,9 @@ interface Props {
    *  swap — currently Shoofly via `supportsAlternate`), swap fabrics A ↔ B
    *  on every other block for a checkerboard alternation across the quilt. */
   alternateBlocks?: boolean;
+  /** Chosen block-rotation setting (patterns that opt in via
+   *  `PatternDef.layouts`). Rotation only — never changes piece counts. */
+  blockLayout?: BlockLayout;
 }
 
 export function QuiltLayoutPreview({
@@ -52,6 +56,7 @@ export function QuiltLayoutPreview({
   cornerstoneFabric,
   photos,
   alternateBlocks = false,
+  blockLayout = "straight",
 }: Props) {
   const blockCount = blocksAcross * blocksDown;
   const [fullOpen, setFullOpen] = useState(false);
@@ -72,6 +77,7 @@ export function QuiltLayoutPreview({
     cornerstoneFabric,
     photos,
     alternateBlocks,
+    blockLayout,
   };
 
   return (
@@ -208,6 +214,7 @@ interface CanvasProps {
   cornerstoneFabric?: FabricKey;
   photos?: Partial<Record<FabricKey, string>>;
   alternateBlocks: boolean;
+  blockLayout: BlockLayout;
 }
 
 /**
@@ -216,7 +223,7 @@ interface CanvasProps {
  * to `maxSize`, so the same code drives the small thumbnail and the
  * full-screen view.
  */
-function QuiltCanvas({
+export function QuiltCanvas({
   pattern,
   assignments,
   hasBorder,
@@ -231,6 +238,7 @@ function QuiltCanvas({
   cornerstoneFabric,
   photos,
   alternateBlocks,
+  blockLayout,
   maxSize,
 }: CanvasProps & { maxSize: number }) {
   const MAX = maxSize;
@@ -300,21 +308,21 @@ function QuiltCanvas({
         )}
         {Array.from({ length: blocksDown }).map((_, j) =>
           Array.from({ length: blocksAcross }).map((_, i) => {
-            // Rail Fence: rotate every other block 90° for the woven look.
-            // Jacob's Ladder: always rotate every other block 90° so the
-            // ladder diagonals from neighboring blocks meet up to form the
-            // classic on-point diamond secondary pattern — this is
-            // intrinsic to the pattern, not user-toggleable.
-            const railRotate = pattern === "rail-fence" && (i + j) % 2 === 1;
-            const jlRotate =
-              pattern === "jacobs-ladder" && (i + j) % 2 === 1;
-            // Broken Dishes: alternate blocks get a quarter turn — this is
-            // what joins the triangles of neighbouring blocks into the
-            // on-point diamonds and four-pointed bursts. Intrinsic to the
-            // pattern, not user-toggleable.
-            const bdRotate =
-              pattern === "broken-dishes" && (i + j) % 2 === 1;
-            const rotate = railRotate || jlRotate || bdRotate;
+            // Block rotation comes from one helper (src/lib/block-layouts.ts).
+            // It covers BOTH the intrinsic, non-negotiable rotations that
+            // some patterns depend on (Rail Fence's weave, Jacob's Ladder's
+            // on-point chain, Broken Dishes' diamonds) and the opt-in
+            // block-setting picker (straight / alternating / barn raising /
+            // diagonal streak) for patterns that declare `layouts`.
+            const rotateDeg = rotationFor(
+              pattern,
+              blockLayout,
+              j,
+              i,
+              blocksAcross,
+              blocksDown,
+            );
+            const rotate = rotateDeg !== 0;
             const bx = i * (cellW + sashPxX);
             const by = j * (cellH + sashPxY);
             // Irish Chain alternates a chain block with a plain background
@@ -354,11 +362,15 @@ function QuiltCanvas({
                 preserveAspectRatio="none"
               >
                 {rotate ? (
-                  <g transform="rotate(90 100 100)">
+                  <g transform={`rotate(${rotateDeg} 100 100)`}>
                     <MiniBlock
                       pattern={pattern}
                       assignments={assignments}
                       photos={photos}
+                      irishPlain={irishPlain}
+                      swap={swap}
+                      row={j}
+                      col={i}
                     />
                   </g>
                 ) : (
