@@ -4009,6 +4009,14 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "tulip-lady-fingers" ||
     s.pattern === "weathervane" ||
     s.pattern === "alaska-homestead";
+  // Block-setting note. Rotation-only settings never change piece counts —
+  // they only change how the finished blocks are turned when the top is
+  // assembled — so this is purely an assembly instruction.
+  if (pattern.layouts?.includes(s.blockLayout)) {
+    const layoutNote = layoutAssemblyNote(s.blockLayout);
+    if (layoutNote) notes.push(layoutNote);
+  }
+
   return { fabrics: out, notes, basics: showBasics ? basics : undefined, materials };
 }
 
