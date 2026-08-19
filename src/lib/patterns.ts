@@ -592,7 +592,9 @@ const BASE_PATTERNS: PatternDefBase[] = [
   {
     id: "bow-tie",
     name: "Bow Tie",
-    layouts: ["alternating", "herringbone"],
+    // Bow Tie is 180°-symmetric, so a 180° turn is invisible and the diagonal
+    // streak setting collapses into the alternating turn. Only offer the one.
+    layouts: ["alternating"],
     hasMath: true,
     intro:
       "Each block is a 2×2 grid of four plain squares with a small on-point square (the 'knot') centered where they meet. Fabric A fills the two diagonal corners (top-left + bottom-right), Fabric B fills the other diagonal (top-right + bottom-left), and Fabric C is the knot — three distinct fabrics. The main squares are full, uncut squares; the knot is appliquéd on top of the center seam intersection so the only angled shape in the whole block is the rotated center square.",
