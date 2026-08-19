@@ -223,7 +223,7 @@ interface CanvasProps {
  * to `maxSize`, so the same code drives the small thumbnail and the
  * full-screen view.
  */
-function QuiltCanvas({
+export function QuiltCanvas({
   pattern,
   assignments,
   hasBorder,
