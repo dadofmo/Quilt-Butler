@@ -285,12 +285,26 @@ function FabricsStepInner() {
                     />
                     <div>
                       <div className="text-base font-medium">
-                        {pattern.id === "squares-on-point"
-                          ? "Reverse the fabrics on every other block"
-                          : "Swap fabrics on every other block"}
+                        {pattern.id === "cabin-in-the-cotton"
+                          ? "Use the same block everywhere (one outer-ring fabric)"
+                          : pattern.id === "squares-on-point"
+                            ? "Reverse the fabrics on every other block"
+                            : "Swap fabrics on every other block"}
                       </div>
                       <p className="text-muted-foreground mt-1 text-xs leading-snug">
-                        {pattern.id === "squares-on-point" ? (
+                        {pattern.id === "cabin-in-the-cotton" ? (
+                          <>
+                            By default the outer ring alternates between Fabric
+                            D and Fabric E block to block for a checkerboard
+                            border. Turn this on to design{" "}
+                            <strong>one block</strong> and repeat it across the
+                            whole quilt — every block gets the Fabric D outer
+                            ring and Fabric E drops off your shopping list.
+                            The preview above updates instantly, and your
+                            cutting list, yardage and sewing steps follow
+                            whatever you leave selected.
+                          </>
+                        ) : pattern.id === "squares-on-point" ? (
                           <>
                             When on, every other block is the reverse of its
                             neighbours: one block has a Fabric A diamond on
@@ -350,6 +364,14 @@ function FabricsStepInner() {
             // For patchwork patterns, only show border + sashing pickers here
             // (the squares section is driven by the tap-to-cycle preview above).
             if (isPatchwork && s.id !== "border" && s.id !== "sashing") return null;
+            // Cabin in the Cotton with "same block everywhere" on: the second
+            // outer-ring fabric is unused, so don't ask for it.
+            if (
+              pattern.id === "cabin-in-the-cotton" &&
+              planner.alternateBlocks &&
+              s.id === "round3Odd"
+            )
+              return null;
             // Border & sashing choices = every fabric used in the BLOCK, plus
             // one extra "accent" option (the next unused letter) for a unique
             // accent. For Simple Squares the block fabrics are the user's

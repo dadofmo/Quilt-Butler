@@ -2376,13 +2376,17 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const dFab = (s.assignments["round3Even"] ?? "D") as FabricKey;
     const eFab = (s.assignments["round3Odd"] ?? "E") as FabricKey;
 
-    // Count blocks per outer-ring fabric by (row+col) parity.
+    // Count blocks per outer-ring fabric by (row+col) parity. When the
+    // "same block everywhere" toggle is on (alternateBlocks), every block
+    // uses the Fabric D outer ring instead and Fabric E drops out entirely.
+    const uniformOuter = !!s.alternateBlocks;
     let evenBlocks = 0;
     for (let j = 0; j < blocksDown; j++) {
       for (let i = 0; i < blocksAcross; i++) {
         if ((i + j) % 2 === 0) evenBlocks++;
       }
     }
+    if (uniformOuter) evenBlocks = blockCount;
     const oddBlocks = blockCount - evenBlocks;
 
     // Fabric A: centers + Round 2 strips
@@ -2394,10 +2398,11 @@ export function calculateYardage(s: PlannerState): CalcResult {
     addRails(reqs[r1Fab], `Round 1 top + bottom strips (${r1Short.toFixed(2)}" × ${stripCut.toFixed(2)}")`, 2 * blockCount, r1Short, stripCut, s.fabricWidth);
     addRails(reqs[r1Fab], `Round 1 left + right strips (${r1Tall.toFixed(2)}" × ${stripCut.toFixed(2)}")`, 2 * blockCount, r1Tall, stripCut, s.fabricWidth);
 
-    // Fabric D + E: Round 3 (outer ring)
+    // Fabric D (+ E when the outer ring alternates): Round 3 (outer ring)
+    const evenTag = uniformOuter ? "" : ` — "even" blocks`;
     if (evenBlocks > 0) {
-      addRails(reqs[dFab], `Round 3 top + bottom strips (${r3Short.toFixed(2)}" × ${stripCut.toFixed(2)}") — "even" blocks`, 2 * evenBlocks, r3Short, stripCut, s.fabricWidth);
-      addRails(reqs[dFab], `Round 3 left + right strips (${r3Tall.toFixed(2)}" × ${stripCut.toFixed(2)}") — "even" blocks`, 2 * evenBlocks, r3Tall, stripCut, s.fabricWidth);
+      addRails(reqs[dFab], `Round 3 top + bottom strips (${r3Short.toFixed(2)}" × ${stripCut.toFixed(2)}")${evenTag}`, 2 * evenBlocks, r3Short, stripCut, s.fabricWidth);
+      addRails(reqs[dFab], `Round 3 left + right strips (${r3Tall.toFixed(2)}" × ${stripCut.toFixed(2)}")${evenTag}`, 2 * evenBlocks, r3Tall, stripCut, s.fabricWidth);
     }
     if (oddBlocks > 0) {
       addRails(reqs[eFab], `Round 3 top + bottom strips (${r3Short.toFixed(2)}" × ${stripCut.toFixed(2)}") — "odd" blocks`, 2 * oddBlocks, r3Short, stripCut, s.fabricWidth);
@@ -2405,19 +2410,29 @@ export function calculateYardage(s: PlannerState): CalcResult {
     }
 
     notes.push(
-      `Cabin in the Cotton is a Courthouse Steps log cabin: a ${(S / 5).toFixed(2)}" center square (Fabric ${centerFab}), then three rings of ${stripFin.toFixed(2)}"-wide strips added in opposite pairs — Round 1 (Fabric ${r1Fab}), Round 2 (Fabric ${centerFab} again), and Round 3 outer ring which alternates by block position between Fabric ${dFab} and Fabric ${eFab}.`,
+      uniformOuter
+        ? `Cabin in the Cotton is a Courthouse Steps log cabin: a ${(S / 5).toFixed(2)}" center square (Fabric ${centerFab}), then three rings of ${stripFin.toFixed(2)}"-wide strips added in opposite pairs — Round 1 (Fabric ${r1Fab}), Round 2 (Fabric ${centerFab} again), and Round 3 outer ring (Fabric ${dFab}). Every block is pieced identically, so the whole quilt repeats one block.`
+        : `Cabin in the Cotton is a Courthouse Steps log cabin: a ${(S / 5).toFixed(2)}" center square (Fabric ${centerFab}), then three rings of ${stripFin.toFixed(2)}"-wide strips added in opposite pairs — Round 1 (Fabric ${r1Fab}), Round 2 (Fabric ${centerFab} again), and Round 3 outer ring which alternates by block position between Fabric ${dFab} and Fabric ${eFab}.`,
     );
     notes.push(
-      `Per block, cut: 1 center at ${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}" (Fabric ${centerFab}); 2 Round-1 short strips at ${r1Short.toFixed(2)}" × ${stripCut.toFixed(2)}" + 2 Round-1 tall strips at ${r1Tall.toFixed(2)}" × ${stripCut.toFixed(2)}" (Fabric ${r1Fab}); 2 Round-2 short at ${r2Short.toFixed(2)}" × ${stripCut.toFixed(2)}" + 2 Round-2 tall at ${r2Tall.toFixed(2)}" × ${stripCut.toFixed(2)}" (Fabric ${centerFab}); and 2 Round-3 short at ${r3Short.toFixed(2)}" × ${stripCut.toFixed(2)}" + 2 Round-3 tall at ${r3Tall.toFixed(2)}" × ${stripCut.toFixed(2)}" from Fabric ${dFab} OR Fabric ${eFab} depending on the block's position.`,
+      uniformOuter
+        ? `Per block, cut: 1 center at ${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}" (Fabric ${centerFab}); 2 Round-1 short strips at ${r1Short.toFixed(2)}" × ${stripCut.toFixed(2)}" + 2 Round-1 tall strips at ${r1Tall.toFixed(2)}" × ${stripCut.toFixed(2)}" (Fabric ${r1Fab}); 2 Round-2 short at ${r2Short.toFixed(2)}" × ${stripCut.toFixed(2)}" + 2 Round-2 tall at ${r2Tall.toFixed(2)}" × ${stripCut.toFixed(2)}" (Fabric ${centerFab}); and 2 Round-3 short at ${r3Short.toFixed(2)}" × ${stripCut.toFixed(2)}" + 2 Round-3 tall at ${r3Tall.toFixed(2)}" × ${stripCut.toFixed(2)}" (Fabric ${dFab}).`
+        : `Per block, cut: 1 center at ${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}" (Fabric ${centerFab}); 2 Round-1 short strips at ${r1Short.toFixed(2)}" × ${stripCut.toFixed(2)}" + 2 Round-1 tall strips at ${r1Tall.toFixed(2)}" × ${stripCut.toFixed(2)}" (Fabric ${r1Fab}); 2 Round-2 short at ${r2Short.toFixed(2)}" × ${stripCut.toFixed(2)}" + 2 Round-2 tall at ${r2Tall.toFixed(2)}" × ${stripCut.toFixed(2)}" (Fabric ${centerFab}); and 2 Round-3 short at ${r3Short.toFixed(2)}" × ${stripCut.toFixed(2)}" + 2 Round-3 tall at ${r3Tall.toFixed(2)}" × ${stripCut.toFixed(2)}" from Fabric ${dFab} OR Fabric ${eFab} depending on the block's position.`,
     );
     notes.push(
-      `Across all ${blockCount} blocks: ${evenBlocks} blocks use Fabric ${dFab} for the outer ring and ${oddBlocks} blocks use Fabric ${eFab}, forming a checkerboard of outer rings across the finished quilt.`,
+      uniformOuter
+        ? `Across all ${blockCount} blocks: every block uses Fabric ${dFab} for the outer ring, so all ${blockCount} blocks are identical. (Fabric ${eFab} isn't used in this setting.)`
+        : `Across all ${blockCount} blocks: ${evenBlocks} blocks use Fabric ${dFab} for the outer ring and ${oddBlocks} blocks use Fabric ${eFab}, forming a checkerboard of outer rings across the finished quilt.`,
     );
     notes.push(
-      `How to sew each block (Courthouse Steps): place the center square in front of you. Sew Round 1's TOP strip and BOTTOM strip on first (both are the short length — they match the center's width). Press outward. Now sew Round 1's LEFT and RIGHT strips (the tall length — they span the center + both just-added strips). Press outward. Repeat for Round 2 with Fabric ${centerFab} (top+bottom first, then left+right), and Round 3 with either Fabric ${dFab} or Fabric ${eFab} depending on the block's grid position.`,
+      uniformOuter
+        ? `How to sew each block (Courthouse Steps): place the center square in front of you. Sew Round 1's TOP strip and BOTTOM strip on first (both are the short length — they match the center's width). Press outward. Now sew Round 1's LEFT and RIGHT strips (the tall length — they span the center + both just-added strips). Press outward. Repeat for Round 2 with Fabric ${centerFab} (top+bottom first, then left+right) and Round 3 with Fabric ${dFab}. Every block is made exactly the same way.`
+        : `How to sew each block (Courthouse Steps): place the center square in front of you. Sew Round 1's TOP strip and BOTTOM strip on first (both are the short length — they match the center's width). Press outward. Now sew Round 1's LEFT and RIGHT strips (the tall length — they span the center + both just-added strips). Press outward. Repeat for Round 2 with Fabric ${centerFab} (top+bottom first, then left+right), and Round 3 with either Fabric ${dFab} or Fabric ${eFab} depending on the block's grid position.`,
     );
     notes.push(
-      `Layout tip: before sewing Round 3, lay out your ${blocksAcross} × ${blocksDown} grid and mark each block as "even" (Fabric ${dFab}) or "odd" (Fabric ${eFab}) — the top-left block is "even" and it alternates in a checkerboard from there. Sew all "even" blocks with Fabric ${dFab} outer rings and all "odd" blocks with Fabric ${eFab} outer rings, then assemble the quilt to reveal the two-tone border effect.`,
+      uniformOuter
+        ? `Layout tip: all ${blockCount} blocks are identical, so you can chain-piece every round in one go and lay the ${blocksAcross} × ${blocksDown} grid out in any order.`
+        : `Layout tip: before sewing Round 3, lay out your ${blocksAcross} × ${blocksDown} grid and mark each block as "even" (Fabric ${dFab}) or "odd" (Fabric ${eFab}) — the top-left block is "even" and it alternates in a checkerboard from there. Sew all "even" blocks with Fabric ${dFab} outer rings and all "odd" blocks with Fabric ${eFab} outer rings, then assemble the quilt to reveal the two-tone border effect.`,
     );
 
     if (sashWidth > 0) {

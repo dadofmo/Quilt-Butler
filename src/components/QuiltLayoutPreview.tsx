@@ -350,7 +350,11 @@ export function QuiltCanvas({
                 pattern === "corner-beam") &&
               alternateBlocks &&
               (i + j) % 2 === 1;
-            const swap = snowballSwap || shooflySwap || sopSwap || altSwap;
+            // Cabin in the Cotton is the inverse case: it alternates the outer
+            // ring by default, and the toggle makes every block identical.
+            const cabinUniform =
+              pattern === "cabin-in-the-cotton" && !!alternateBlocks;
+            const swap = snowballSwap || shooflySwap || sopSwap || altSwap || cabinUniform;
             return (
               <svg
                 key={`${i}-${j}`}
@@ -1203,10 +1207,12 @@ function MiniBlock({
     case "cabin-in-the-cotton": {
       // Outer ring alternates between Fabric D and Fabric E based on the
       // block's position in the finished quilt — checkerboard by (row+col).
+      // When `swap` is set (the "same block everywhere" toggle), every block
+      // uses the Fabric D outer ring instead.
       const center = get("center", "A");
       const round1 = get("round1", "B");
       const round2 = get("center", "A");
-      const even = (row + col) % 2 === 0;
+      const even = swap || (row + col) % 2 === 0;
       const round3 = even ? get("round3Even", "D") : get("round3Odd", "E");
       return <CabinInTheCottonBlock size={200} center={center} round1={round1} round2={round2} round3={round3} />;
     }

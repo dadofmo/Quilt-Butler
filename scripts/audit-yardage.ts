@@ -2027,6 +2027,26 @@ console.log("\n=== Cabin in the Cotton: 50×65, 15\" block, no sashing/border ==
   check("Cabin E total piece count", E.pieces.reduce((n, p) => n + p.count, 0), 24);
 }
 
+console.log("\n=== Cabin in the Cotton: same block everywhere (alternateBlocks) ===");
+{
+  const s = {
+    ...base(),
+    pattern: "cabin-in-the-cotton" as const,
+    blockSize: 15,
+    alternateBlocks: true,
+  };
+  const r = calculateYardage(s);
+  const A = r.fabrics.find(f => f.fabric === "A")!;
+  const B = r.fabrics.find(f => f.fabric === "B")!;
+  const D = r.fabrics.find(f => f.fabric === "D")!;
+  const E = r.fabrics.find(f => f.fabric === "E");
+  check("Cabin(uniform) A total piece count", A.pieces.reduce((n, p) => n + p.count, 0), 60);
+  check("Cabin(uniform) B total piece count", B.pieces.reduce((n, p) => n + p.count, 0), 48);
+  // All 12 blocks get a Fabric D outer ring: 24 short + 24 tall = 48.
+  check("Cabin(uniform) D total piece count", D.pieces.reduce((n, p) => n + p.count, 0), 48);
+  check("Cabin(uniform) E unused", E ? E.pieces.reduce((n, p) => n + p.count, 0) : 0, 0);
+}
+
 console.log("\n=== Fancy Stripe: 50×65, 12\" block, no sashing/border ===");
 {
   const s = { ...base(), pattern: "fancy-stripe" as const, blockSize: 12 };
