@@ -967,8 +967,9 @@ const BASE_PATTERNS: PatternDefBase[] = [
     id: "cabin-in-the-cotton",
     name: "Cabin in the Cotton",
     hasMath: true,
+    supportsAlternate: true,
     intro:
-      "Cabin in the Cotton is a Courthouse Steps log cabin — strips are added in opposite pairs (top+bottom together, then left+right together) around a center square for three rounds. The outermost ring alternates between two fabrics (D and E) based on each block's position in the finished quilt, creating a striking two-tone checkerboard border effect across the entire top. Fabric A is used for both the center square and the middle (round 2) frame.",
+      "Cabin in the Cotton is a Courthouse Steps log cabin — strips are added in opposite pairs (top+bottom together, then left+right together) around a center square for three rounds. By default the outermost ring alternates between two fabrics (D and E) based on each block's position, creating a striking two-tone checkerboard border effect — or flip the toggle on Step 3 to make every block identical with a single outer-ring fabric. Fabric A is used for both the center square and the middle (round 2) frame.",
     sections: [
       {
         id: "center",
