@@ -364,6 +364,14 @@ function FabricsStepInner() {
             // For patchwork patterns, only show border + sashing pickers here
             // (the squares section is driven by the tap-to-cycle preview above).
             if (isPatchwork && s.id !== "border" && s.id !== "sashing") return null;
+            // Cabin in the Cotton with "same block everywhere" on: the second
+            // outer-ring fabric is unused, so don't ask for it.
+            if (
+              pattern.id === "cabin-in-the-cotton" &&
+              planner.alternateBlocks &&
+              s.id === "round3Odd"
+            )
+              return null;
             // Border & sashing choices = every fabric used in the BLOCK, plus
             // one extra "accent" option (the next unused letter) for a unique
             // accent. For Simple Squares the block fabrics are the user's
