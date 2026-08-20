@@ -350,7 +350,11 @@ export function QuiltCanvas({
                 pattern === "corner-beam") &&
               alternateBlocks &&
               (i + j) % 2 === 1;
-            const swap = snowballSwap || shooflySwap || sopSwap || altSwap;
+            // Cabin in the Cotton is the inverse case: it alternates the outer
+            // ring by default, and the toggle makes every block identical.
+            const cabinUniform =
+              pattern === "cabin-in-the-cotton" && !!alternateBlocks;
+            const swap = snowballSwap || shooflySwap || sopSwap || altSwap || cabinUniform;
             return (
               <svg
                 key={`${i}-${j}`}
