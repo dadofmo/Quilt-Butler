@@ -186,7 +186,7 @@ const renderContent = () => (
       <p className="mt-2 text-muted-foreground">
         Bookmark this page — you'll likely find yourself back here more than once in your first few
         projects. And if you're ready to put these terms into practice, QuiltButler's pattern library
-        walks you through sizing, fabric assignment, and cutting diagrams for over 30
+        walks you through sizing, fabric assignment, and cutting diagrams for 50+
         beginner-friendly blocks.
       </p>
       <Link
