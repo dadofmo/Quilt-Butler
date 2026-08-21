@@ -30,10 +30,11 @@ describe("pattern metadata", () => {
   });
 
   it.each(PATTERNS.map((p) => [p.name, p] as const))(
-    "%s fabricCount matches its block sections",
+    "%s fabricCount matches its distinct block fabrics",
     (_n, p) => {
       const blockSections = p.sections.filter((s) => !NON_BLOCK.has(s.id));
-      expect(p.fabricCount).toBe(blockSections.length);
+      const distinct = new Set(blockSections.map((s) => s.defaultFabric)).size;
+      expect(p.fabricCount).toBe(distinct);
     },
   );
 
