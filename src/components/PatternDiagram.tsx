@@ -1191,6 +1191,11 @@ function renderInner(
       const accent = get("accent", "C");
       return <AlaskaHomesteadBlock size={200} bg={bg} points={points} accent={accent} />;
     }
+    case "blazing-arrows": {
+      const arrow = get("arrow", "A");
+      const bg = get("bg", "B");
+      return <BlazingArrowsBlock size={200} arrow={arrow} bg={bg} />;
+    }
 
 
 
@@ -2928,6 +2933,57 @@ export function AlaskaHomesteadBlock({
       {corners.map((k) => (
         <polygon key={`ah-c-${k.r}-${k.c}`} points={tri(k.r, k.c, k.half)} fill={points} />
       ))}
+    </>
+  );
+}
+
+/** Shared renderer for Blazing Arrows — four-unit grid (u = size / 4).
+ *
+ *  Layout (rows/cols of 1u, with a 2u × 2u centre):
+ *   • 4 corner HSTs: the ARROW triangle sits on the inner-vertical side of
+ *     each corner (TL → top-right half, TR → top-left half, BL → bottom-right
+ *     half, BR → bottom-left half) so it continues the top/bottom arrows.
+ *   • Top / bottom flying geese (2u × 1u): ARROW goose, background sky.
+ *   • Left / right flying geese (1u × 2u): BACKGROUND goose, arrow sky —
+ *     the reversal that gives the block its punch.
+ *   • Centre hourglass (2u × 2u): background top + bottom, arrow left + right.
+ */
+export function BlazingArrowsBlock({
+  size,
+  arrow,
+  bg,
+}: {
+  size: number;
+  arrow: string;
+  bg: string;
+}) {
+  const u = size / 4;
+  const S = size;
+  return (
+    <>
+      {/* Background everywhere, then the arrow-fabric shapes on top. */}
+      <rect x={0} y={0} width={S} height={S} fill={bg} />
+
+      {/* Left & right edge units: arrow-fabric sky rectangles (1u × 2u). */}
+      <rect x={0} y={u} width={u} height={2 * u} fill={arrow} />
+      <rect x={3 * u} y={u} width={u} height={2 * u} fill={arrow} />
+      {/* …with the BACKGROUND goose pointing in toward the centre. */}
+      <polygon points={`0,${u} 0,${3 * u} ${u},${2 * u}`} fill={bg} />
+      <polygon points={`${S},${u} ${S},${3 * u} ${3 * u},${2 * u}`} fill={bg} />
+
+      {/* Top & bottom edge units: ARROW goose on background sky. */}
+      <polygon points={`${u},0 ${3 * u},0 ${2 * u},${u}`} fill={arrow} />
+      <polygon points={`${u},${S} ${3 * u},${S} ${2 * u},${3 * u}`} fill={arrow} />
+
+      {/* Corner HSTs — arrow half on the centre-facing vertical side. */}
+      <polygon points={`0,0 ${u},0 ${u},${u}`} fill={arrow} />
+      <polygon points={`${3 * u},0 ${S},0 ${3 * u},${u}`} fill={arrow} />
+      <polygon points={`0,${S} ${u},${S} ${u},${3 * u}`} fill={arrow} />
+      <polygon points={`${S},${S} ${3 * u},${S} ${3 * u},${3 * u}`} fill={arrow} />
+
+      {/* Centre hourglass (2u square): left + right arrow, top + bottom bg. */}
+      <polygon points={`${u},${u} ${u},${3 * u} ${2 * u},${2 * u}`} fill={arrow} />
+      <polygon points={`${3 * u},${u} ${3 * u},${3 * u} ${2 * u},${2 * u}`} fill={arrow} />
     </>
   );
 }

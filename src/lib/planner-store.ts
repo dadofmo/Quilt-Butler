@@ -70,7 +70,8 @@ export type PatternId =
   | "tulip-lady-fingers"
   | "weathervane"
   | "wishing-ring"
-  | "alaska-homestead";
+  | "alaska-homestead"
+  | "blazing-arrows";
 
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
