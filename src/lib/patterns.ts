@@ -1722,6 +1722,35 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
 
+
+  {
+    id: "blazing-arrows",
+    name: "Blazing Arrows",
+    hasMath: true,
+    intro:
+      "Blazing Arrows is a bold two-fabric block drafted on a four-unit grid: four corner half-square triangles, four flying geese on the sides and one big hourglass in the middle. What makes it sing is the reversal — the top and bottom geese are DARK on a light sky, while the left and right geese are LIGHT on a dark sky, so the block reads as four arrows blazing out from the centre. Only three unit types to make, and set edge to edge the arrow tips of neighbouring blocks chase each other across the whole quilt.",
+    sections: [
+      {
+        id: "arrow",
+        label: "Arrow fabric (Fabric A)",
+        defaultFabric: "A",
+        hint: "The darker, bolder fabric: the inner half of all four corner triangles, the top and bottom arrows, the sky behind the left and right arrows, and the left/right triangles of the centre hourglass.",
+      },
+      {
+        id: "bg",
+        label: "Background fabric (Fabric B)",
+        defaultFabric: "B",
+        hint: "The lighter fabric: the outer half of all four corner triangles, the sky behind the top and bottom arrows, the left and right arrows themselves, and the top/bottom triangles of the centre hourglass.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips of fabric that separate each Blazing Arrows block — set sashing to 0\" on the previous step if you want the arrow tips of neighbouring blocks to meet.",
+      },
+      { ...borderSection, defaultFabric: "D" },
+    ],
+  },
 ];
 
 /**
@@ -1780,6 +1809,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "weathervane": { skill: "intermediate", fabricCount: 3, techniques: ["hst", "geese", "squares"] },
   "wishing-ring": { skill: "confident", fabricCount: 2, techniques: ["hst", "squares"] },
   "alaska-homestead": { skill: "confident", fabricCount: 3, techniques: ["hst", "squares"] },
+  "blazing-arrows": { skill: "intermediate", fabricCount: 2, techniques: ["hst", "geese"] },
 };
 
 const FALLBACK_META: PatternMeta = { skill: "confident", fabricCount: 3, techniques: ["squares"] };
