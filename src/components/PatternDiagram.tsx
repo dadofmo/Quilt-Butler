@@ -1191,6 +1191,11 @@ function renderInner(
       const accent = get("accent", "C");
       return <AlaskaHomesteadBlock size={200} bg={bg} points={points} accent={accent} />;
     }
+    case "blazing-arrows": {
+      const arrow = get("arrow", "A");
+      const bg = get("bg", "B");
+      return <BlazingArrowsBlock size={200} arrow={arrow} bg={bg} />;
+    }
 
 
 
