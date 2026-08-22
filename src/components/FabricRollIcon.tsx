@@ -55,6 +55,7 @@ export const PATTERN_DIFFICULTY: Record<PatternId, 1 | 2 | 3 | 4 | 5> = {
   weathervane: 3,
   "wishing-ring": 2,
   "alaska-homestead": 2,
+  "blazing-arrows": 3,
 };
 
 interface Props {
