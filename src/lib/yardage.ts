@@ -193,9 +193,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isWeathervane = s.pattern === "weathervane";
   const isWishingRing = s.pattern === "wishing-ring";
   const isAlaskaHomestead = s.pattern === "alaska-homestead";
+  const isBlazingArrows = s.pattern === "blazing-arrows";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isAlaskaHomestead || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -3859,6 +3860,86 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "blazing-arrows") {
+    // Blazing Arrows — a two-fabric block drafted on a four-unit grid
+    // (u = blockSize / 4). Per block:
+    //   • 4 corner HSTs finishing 1u — Fabric A (arrow) inner half,
+    //     Fabric B (background) outer half. Made two-at-a-time: 2 A + 2 B
+    //     starting squares per block.
+    //   • 2 TOP/BOTTOM flying geese finishing 2u × 1u — ARROW goose on
+    //     background sky. Made no-waste, 4 geese per large square, so one
+    //     Fabric A large square (2u + 1.25") + 4 Fabric B small squares
+    //     (u + 7/8") covers TWO blocks.
+    //   • 2 LEFT/RIGHT flying geese finishing 2u × 1u — BACKGROUND goose
+    //     on arrow sky (the reversal). One Fabric B large square + 4
+    //     Fabric A small squares covers TWO blocks.
+    //   • 1 centre hourglass (QST) finishing 2u — background top/bottom,
+    //     arrow left/right. Made two-at-a-time from 1 A + 1 B square at
+    //     2u + 1.25", so one pair covers TWO blocks.
+    const u = s.blockSize / 4;
+    const hstCut = u + HST_EXTRA;          // corner HST starting squares
+    const gooseLargeCut = 2 * u + 1.25;    // no-waste goose large square
+    const gooseSmallCut = u + HST_EXTRA;   // no-waste goose sky squares
+    const qstCut = 2 * u + 1.25;           // hourglass starting squares
+    const gooseLong = 2 * u + SEAM;        // finished goose unit, raw
+    const gooseShort = u + SEAM;
+    const centreRaw = 2 * u + SEAM;
+
+    const arrowFab = (s.assignments["arrow"] ?? "A") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
+
+    const hstPairs = 2 * blockCount;              // per fabric; each pair → 2 HSTs
+    const gooseSets = Math.ceil(blockCount / 2);  // each set yields 4 geese = 2 blocks
+    const qstPairs = Math.ceil(blockCount / 2);   // each pair yields 2 hourglasses
+
+    addSquares(reqs[arrowFab], "HST starting squares (corner triangles)", hstPairs, hstCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "HST starting squares (corner triangles)", hstPairs, hstCut, s.fabricWidth);
+    addSquares(reqs[arrowFab], "Large flying-geese squares (top/bottom arrows)", gooseSets, gooseLargeCut, s.fabricWidth);
+    addSquares(reqs[arrowFab], "Small flying-geese squares (side-arrow sky)", 4 * gooseSets, gooseSmallCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Large flying-geese squares (side arrows)", gooseSets, gooseLargeCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Small flying-geese squares (top/bottom sky)", 4 * gooseSets, gooseSmallCut, s.fabricWidth);
+    addSquares(reqs[arrowFab], "Hourglass starting squares (centre)", qstPairs, qstCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Hourglass starting squares (centre)", qstPairs, qstCut, s.fabricWidth);
+
+    notes.push(
+      `Each Blazing Arrows block is drafted on a four-unit grid, so one unit finishes at ${u.toFixed(2)}" and the centre hourglass and each flying geese unit finish at 2 units (${(2 * u).toFixed(2)}"). One block needs 4 corner half-square triangles, 4 flying geese and 1 hourglass — 9 units, two fabrics.`,
+    );
+    notes.push(
+      `Cutting for all ${blockCount} blocks (every measurement already includes the 1/4" seam allowance). Fabric ${arrowFab} — ${hstPairs} squares at ${hstCut.toFixed(2)}" for the corner HSTs, ${gooseSets} squares at ${gooseLargeCut.toFixed(2)}" for the top/bottom arrows, ${4 * gooseSets} squares at ${gooseSmallCut.toFixed(2)}" for the sky behind the side arrows, and ${qstPairs} squares at ${qstCut.toFixed(2)}" for the centre hourglasses. Fabric ${bgFab} — ${hstPairs} squares at ${hstCut.toFixed(2)}" for the corner HSTs, ${gooseSets} squares at ${gooseLargeCut.toFixed(2)}" for the side arrows, ${4 * gooseSets} squares at ${gooseSmallCut.toFixed(2)}" for the top/bottom sky, and ${qstPairs} squares at ${qstCut.toFixed(2)}" for the centre hourglasses.`,
+    );
+    notes.push(
+      `Corner HSTs (4 per block, ${4 * blockCount} in total): pair one ${hstCut.toFixed(2)}" Fabric ${arrowFab} square with one ${hstCut.toFixed(2)}" Fabric ${bgFab} square, right sides together (RST). Draw a diagonal corner to corner on the wrong side of the lighter square, sew a scant 1/4" on BOTH sides of the line, then cut apart ON the line — one pair yields 2 HSTs. Press toward Fabric ${arrowFab} and trim every unit to exactly ${(u + SEAM).toFixed(2)}" square.`,
+    );
+    notes.push(
+      `Flying geese — no-waste, four at a time (one set covers TWO blocks). TOP/BOTTOM arrows: take one ${gooseLargeCut.toFixed(2)}" Fabric ${arrowFab} square and four ${gooseSmallCut.toFixed(2)}" Fabric ${bgFab} squares. Draw a diagonal on the back of each small square. Place two small squares on opposite corners of the large square, RST, diagonals aligned in one line; sew 1/4" each side of the line, cut apart on the line and press the small triangles out. Place the two remaining small squares on the corners of each resulting unit, sew 1/4" each side, cut and press. You now have 4 geese finishing ${(2 * u).toFixed(2)}" × ${u.toFixed(2)}" — 2 per block. SIDE arrows: repeat the identical steps with the fabrics swapped — one ${gooseLargeCut.toFixed(2)}" Fabric ${bgFab} square and four ${gooseSmallCut.toFixed(2)}" Fabric ${arrowFab} squares.`,
+    );
+    notes.push(
+      `Centre hourglass (1 per block, made two at a time so each pair covers 2 blocks): pair one ${qstCut.toFixed(2)}" Fabric ${arrowFab} square with one ${qstCut.toFixed(2)}" Fabric ${bgFab} square RST. Draw a diagonal, sew 1/4" on BOTH sides, cut apart on the line and press to make 2 HSTs. Stack the two HSTs RST with the arrow triangle of one against the background triangle of the other (seams nesting), draw a NEW diagonal across the seam, sew 1/4" each side, cut on the line and press. You now have 2 hourglass units — Fabric ${bgFab} triangles at top and bottom, Fabric ${arrowFab} at left and right. Trim each to exactly ${centreRaw.toFixed(2)}" square.`,
+    );
+    notes.push(
+      `Lay the block out in 4 rows (u = ${u.toFixed(2)}"). ROW 1 (u tall): corner HST with the Fabric ${arrowFab} triangle in its TOP-RIGHT; a top goose with the Fabric ${arrowFab} arrow pointing DOWN; corner HST with Fabric ${arrowFab} in its TOP-LEFT. ROW 2 (2u tall): a side goose with the Fabric ${bgFab} arrow pointing RIGHT; the centre hourglass; a side goose with Fabric ${bgFab} pointing LEFT. ROW 3 is really the same row — the side units and hourglass are both 2 units tall. BOTTOM ROW (u tall): corner HST with Fabric ${arrowFab} in its BOTTOM-RIGHT; a bottom goose with Fabric ${arrowFab} pointing UP; corner HST with Fabric ${arrowFab} in its BOTTOM-LEFT. Check before sewing: all four arrows point IN at the hourglass, and the corner triangles continue the top/bottom arrows.`,
+    );
+    notes.push(
+      `Sew the top and bottom rows together first, then the left side goose + hourglass + right side goose as the middle band, then join the three bands and press the long seams open. Finished block: ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+    notes.push(
+      `Blazing Arrows tips: (1) The geese are the make-or-break units — after trimming, the arrow point must sit exactly ${u.toFixed(2)}" in from each side with 1/4" of sky beyond the point, or the point will disappear into the seam. (2) Chain-piece all the HSTs and geese before laying out a single block; a consistent unit size is what keeps the hourglass points crisp. (3) Every diagonal in this block is bias — starch before cutting and press, don't iron. (4) Set the blocks edge to edge with no sashing and each arrow tip touches the neighbouring block's corner triangles, so the arrows appear to chase each other across the quilt; add sashing instead and every block reads as its own framed medallion.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   } else if (s.pattern === "alaska-homestead") {
     // Alaska Homestead — a three-fabric 3×3 grid block (u = blockSize / 3).
     // Every one of the nine units finishes at u" square:
@@ -4024,7 +4105,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "tippecanoe-and-tyler-too" ||
     s.pattern === "tulip-lady-fingers" ||
     s.pattern === "weathervane" ||
-    s.pattern === "alaska-homestead";
+    s.pattern === "alaska-homestead" ||
+    s.pattern === "blazing-arrows";
   // Block-setting note. Rotation-only settings never change piece counts —
   // they only change how the finished blocks are turned when the top is
   // assembled — so this is purely an assembly instruction.

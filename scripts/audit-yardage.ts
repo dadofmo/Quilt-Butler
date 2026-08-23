@@ -2127,6 +2127,79 @@ console.log("\n=== Alaska Homestead: 50×65, 10\" block, 2\" sashing ===");
   check("Alaska(sash) D strip length", D.pieces[0].w, 10.5);
 }
 
+
+console.log("\n=== Blazing Arrows: 48×60, 12\" block, no sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "blazing-arrows" as const,
+    quiltWidth: 48,
+    quiltHeight: 60,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { arrow: "A", bg: "B" } as Record<string, FabricKey>,
+  };
+  // 4×5 = 20 blocks. u = 3".
+  const r = calculateYardage(s);
+  const A = r.fabrics.find(f => f.fabric === "A")!;
+  const B = r.fabrics.find(f => f.fabric === "B")!;
+  // HSTs: 2 pairs per block → 40 starting squares per fabric at 3+0.875=3.875".
+  check("Blazing A HST count", A.pieces.find(p => /HST/.test(p.label))!.count, 40);
+  check("Blazing A HST cut", A.pieces.find(p => /HST/.test(p.label))!.w, 3.875);
+  check("Blazing B HST count", B.pieces.find(p => /HST/.test(p.label))!.count, 40);
+  // Geese: ceil(20/2) = 10 no-waste sets → 10 large squares at 7.25", 40 small at 3.875" per fabric.
+  const aLarge = A.pieces.find(p => /top\/bottom arrows/.test(p.label))!;
+  check("Blazing A goose large count", aLarge.count, 10);
+  check("Blazing A goose large cut", aLarge.w, 7.25);
+  check("Blazing A goose small count", A.pieces.find(p => /side-arrow sky/.test(p.label))!.count, 40);
+  check("Blazing A goose small cut", A.pieces.find(p => /side-arrow sky/.test(p.label))!.w, 3.875);
+  check("Blazing B goose large count", B.pieces.find(p => /side arrows/.test(p.label))!.count, 10);
+  check("Blazing B goose large cut", B.pieces.find(p => /side arrows/.test(p.label))!.w, 7.25);
+  check("Blazing B goose small count", B.pieces.find(p => /top\/bottom sky/.test(p.label))!.count, 40);
+  // Hourglass: 10 pairs at 7.25" per fabric.
+  check("Blazing A QST count", A.pieces.find(p => /Hourglass/.test(p.label))!.count, 10);
+  check("Blazing A QST cut", A.pieces.find(p => /Hourglass/.test(p.label))!.w, 7.25);
+  check("Blazing B QST count", B.pieces.find(p => /Hourglass/.test(p.label))!.count, 10);
+  // No sashing: no C row.
+  check("Blazing no sashing row", r.fabrics.some(f => f.fabric === "C"), false);
+}
+
+console.log("\n=== Blazing Arrows: 50×65, 10\" block, 2\" sashing, 5 blocks (odd count) ===");
+{
+  const s = {
+    ...base(),
+    pattern: "blazing-arrows" as const,
+    quiltWidth: 30,
+    quiltHeight: 10,
+    blockSize: 10,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { arrow: "A", bg: "B" } as Record<string, FabricKey>,
+  };
+  // 3×1 = 3 blocks → goose sets = ceil(3/2) = 2, QST pairs = 2.
+  const r = calculateYardage(s);
+  const A = r.fabrics.find(f => f.fabric === "A")!;
+  const B = r.fabrics.find(f => f.fabric === "B")!;
+  check("Blazing(3) A HST count", A.pieces.find(p => /HST/.test(p.label))!.count, 6);
+  check("Blazing(3) A goose large count", A.pieces.find(p => /top\/bottom arrows/.test(p.label))!.count, 2);
+  check("Blazing(3) A goose small count", A.pieces.find(p => /side-arrow sky/.test(p.label))!.count, 8);
+  check("Blazing(3) A QST count", A.pieces.find(p => /Hourglass/.test(p.label))!.count, 2);
+  check("Blazing(3) B goose large count", B.pieces.find(p => /side arrows/.test(p.label))!.count, 2);
+  // u=2.5: HST cut 3.375, goose large 6.25, QST 6.25.
+  check("Blazing(3) A HST cut", A.pieces.find(p => /HST/.test(p.label))!.w, 3.375);
+  check("Blazing(3) A goose large cut", A.pieces.find(p => /top\/bottom arrows/.test(p.label))!.w, 6.25);
+  check("Blazing(3) A QST cut", A.pieces.find(p => /Hourglass/.test(p.label))!.w, 6.25);
+
+  const s2 = { ...s, sashingWidth: 2, assignments: { arrow: "A", bg: "B", sashing: "C" } as Record<string, FabricKey> };
+  const r2 = calculateYardage(s2);
+  const C = r2.fabrics.find(f => f.fabric === "C")!;
+  // vertical = (3-1)*1 = 2, horizontal = (1-1)*3 = 0 → 2 strips at 2.5" × 10.5".
+  check("Blazing(sash) C strip count", C.pieces[0].count, 2);
+  check("Blazing(sash) C strip width", C.pieces[0].h, 2.5);
+  check("Blazing(sash) C strip length", C.pieces[0].w, 10.5);
+}
+
 console.log("\n=== Plus Block: alternate (reversed) blocks ===");
 {
   const off = { ...base(), pattern: "plus-block" as const, blockSize: 10, borderWidth: 0, sashingWidth: 0 };
