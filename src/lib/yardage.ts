@@ -3926,6 +3926,28 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Blazing Arrows tips: (1) The geese are the make-or-break units — after trimming, the arrow point must sit exactly ${u.toFixed(2)}" in from each side with 1/4" of sky beyond the point, or the point will disappear into the seam. (2) Chain-piece all the HSTs and geese before laying out a single block; a consistent unit size is what keeps the hourglass points crisp. (3) Every diagonal in this block is bias — starch before cutting and press, don't iron. (4) Set the blocks edge to edge with no sashing and each arrow tip touches the neighbouring block's corner triangles, so the arrows appear to chase each other across the quilt; add sashing instead and every block reads as its own framed medallion.`,
     );
 
+    if (s.alternateBlocks) {
+      // Reversed blocks are purely a layout choice for Blazing Arrows: the
+      // block is self-complementary — every block already contains both a
+      // "Fabric A arrow on Fabric B sky" goose pair AND the reversed
+      // "Fabric B arrow on Fabric A sky" pair, and the HSTs and hourglass
+      // use both fabrics equally — so swapping the two fabric roles on
+      // every other block changes NOTHING in the cutting list. Walk the
+      // real grid so odd totals split exactly (same convention as the other
+      // alternate-capable patterns).
+      let baEven = 0;
+      let baOdd = 0;
+      for (let r = 0; r < blocksDown; r++) {
+        for (let c = 0; c < blocksAcross; c++) {
+          if ((r + c) % 2 === 0) baEven++;
+          else baOdd++;
+        }
+      }
+      notes.push(
+        `Reversed blocks are ON: build ${baEven} blocks exactly as described above (Fabric ${arrowFab} arrows) and ${baOdd} blocks with the two fabrics swapped — Fabric ${bgFab} plays the arrow role and Fabric ${arrowFab} the background. Your cutting list does NOT change: every Blazing Arrows block already uses both fabrics in equal amounts (the top/bottom arrows are Fabric ${arrowFab} on a Fabric ${bgFab} sky while the side arrows are the reverse), so each pile of cut squares builds either orientation. Set the blocks in a checkerboard so no two touching blocks match, alternating side-to-side across every row AND up-and-down every column; start the top-left block with the Fabric ${arrowFab} arrows.`,
+      );
+    }
+
     if (sashWidth > 0) {
       const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
       const sashCutW = sashWidth + SEAM;

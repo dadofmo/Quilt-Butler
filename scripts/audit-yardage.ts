@@ -2305,6 +2305,32 @@ console.log("\n=== Corner Beam: odd block count splits exactly + shared fabric p
   check("CB(shared) one square pile", sa.pieces.filter(p => /beam squares/i.test(p.label)).length, 1);
 }
 
+console.log("\n=== Blazing Arrows: alternate (reversed) blocks change nothing ===");
+{
+  // 5 × 6 = 30 blocks. The block is self-complementary — each fabric already
+  // plays both goose roles and shares the HSTs/hourglass equally — so the
+  // cutting list must be byte-identical with the toggle on.
+  const off = { ...base(), pattern: "blazing-arrows" as const, blockSize: 10, borderWidth: 0, sashingWidth: 0 };
+  const r0 = calculateYardage(off);
+  const r1 = calculateYardage({ ...off, alternateBlocks: true });
+  const flatten = (r: ReturnType<typeof calculateYardage>) =>
+    r.fabrics
+      .flatMap(f => f.pieces.map(p => `${f.fabric}|${p.label}|${p.count}|${p.w}|${p.h}`))
+      .sort()
+      .join("\n");
+  check("BA(alt) cutting list identical", flatten(r1) === flatten(r0) ? 1 : 0, 1);
+  check(
+    "BA(alt) reversal note present",
+    r1.notes.some(n => /Reversed blocks are ON/.test(n) && /15 blocks/.test(n)) ? 1 : 0,
+    1,
+  );
+  check(
+    "BA(off) no reversal note",
+    r0.notes.some(n => /Reversed blocks are ON/.test(n)) ? 1 : 0,
+    0,
+  );
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {

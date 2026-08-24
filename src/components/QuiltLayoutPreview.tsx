@@ -341,13 +341,15 @@ export function QuiltCanvas({
             // directions (rows and columns), for a checkerboard effect.
             const sopSwap =
               pattern === "squares-on-point" && alternateBlocks && (i + j) % 2 === 1;
-            // Plus Block, Pinwheel and Corner Beam use the same opt-in A/B
-            // role swap: plus ↔ background, blades ↔ background, beam ↔
-            // background on every other block.
+            // Plus Block, Pinwheel, Corner Beam and Blazing Arrows use the
+            // same opt-in A/B role swap: plus ↔ background, blades ↔
+            // background, beam ↔ background, arrow ↔ background on every
+            // other block.
             const altSwap =
               (pattern === "plus-block" ||
                 pattern === "pinwheel" ||
-                pattern === "corner-beam") &&
+                pattern === "corner-beam" ||
+                pattern === "blazing-arrows") &&
               alternateBlocks &&
               (i + j) % 2 === 1;
             // Cabin in the Cotton is the inverse case: it alternates the outer
@@ -1348,8 +1350,13 @@ function MiniBlock({
       return <AlaskaHomesteadBlock size={200} bg={bg} points={points} accent={accent} />;
     }
     case "blazing-arrows": {
-      const arrow = get("arrow", "A");
-      const bg = get("bg", "B");
+      // When swap is true (alternateBlocks + odd cell), the arrow and
+      // background fabrics trade roles — the whole block is the exact
+      // reverse of its neighbours.
+      const arrowFab = get("arrow", "A");
+      const bgFab = get("bg", "B");
+      const arrow = swap ? bgFab : arrowFab;
+      const bg = swap ? arrowFab : bgFab;
       return <BlazingArrowsBlock size={200} arrow={arrow} bg={bg} />;
     }
 

@@ -1727,6 +1727,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
     id: "blazing-arrows",
     name: "Blazing Arrows",
     hasMath: true,
+    supportsAlternate: true,
     intro:
       "Blazing Arrows is a bold two-fabric block drafted on a four-unit grid: four corner half-square triangles, four flying geese on the sides and one big hourglass in the middle. What makes it sing is the reversal — the top and bottom geese are DARK on a light sky, while the left and right geese are LIGHT on a dark sky, so the block reads as four arrows blazing out from the centre. Only three unit types to make, and set edge to edge the arrow tips of neighbouring blocks chase each other across the whole quilt.",
     sections: [
