@@ -2318,16 +2318,16 @@ console.log("\n=== Blazing Arrows: alternate (reversed) blocks change nothing ==
       .flatMap(f => f.pieces.map(p => `${f.fabric}|${p.label}|${p.count}|${p.w}|${p.h}`))
       .sort()
       .join("\n");
-  check("BA(alt) cutting list identical", flatten(r1), flatten(r0));
+  check("BA(alt) cutting list identical", flatten(r1) === flatten(r0) ? 1 : 0, 1);
   check(
     "BA(alt) reversal note present",
-    r1.notes.some(n => /Reversed blocks are ON/.test(n) && /15 blocks/.test(n)),
-    true,
+    r1.notes.some(n => /Reversed blocks are ON/.test(n) && /15 blocks/.test(n)) ? 1 : 0,
+    1,
   );
   check(
     "BA(off) no reversal note",
-    r0.notes.some(n => /Reversed blocks are ON/.test(n)),
-    false,
+    r0.notes.some(n => /Reversed blocks are ON/.test(n)) ? 1 : 0,
+    0,
   );
 }
 
