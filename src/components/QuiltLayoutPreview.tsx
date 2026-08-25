@@ -192,6 +192,23 @@ export function QuiltLayoutPreview({
           </p>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={blockFullOpen} onOpenChange={setBlockFullOpen}>
+        <DialogContent className="max-w-[96vw] sm:max-w-[96vw] p-4">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-semibold uppercase tracking-wide">
+              1 block
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center">
+            {renderBlock(fullMax)}
+          </div>
+          <p className="text-muted-foreground text-center text-xs">
+            One {getPattern(pattern)?.name ?? "quilt"} block
+          </p>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
