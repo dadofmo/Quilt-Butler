@@ -60,7 +60,53 @@ export function QuiltLayoutPreview({
 }: Props) {
   const blockCount = blocksAcross * blocksDown;
   const [fullOpen, setFullOpen] = useState(false);
+  const [blockFullOpen, setBlockFullOpen] = useState(false);
   const fullMax = useViewportMax();
+
+  const renderBlock = (size: number) =>
+    pattern === "rail-fence" ? (
+      <div className="flex items-stretch gap-2">
+        <div className="flex flex-col justify-around py-[5px] text-right">
+          {(["rail1", "rail2", "rail3"] as const).map((id, idx) => {
+            // Resolve through the pattern definition first so this stays
+            // in lockstep with src/lib/patterns.ts (Rail Fence rails = A/B/C).
+            const railDef = getPattern(pattern)?.sections.find((s) => s.id === id);
+            const fab = (assignments[id] ?? railDef?.defaultFabric ?? (["A", "B", "C"] as const)[idx]) as FabricKey;
+            const role = ["Top rail", "Middle rail", "Bottom rail"][idx];
+            return (
+              <div key={id} className="flex items-center justify-end gap-1.5">
+                <span className="text-foreground text-[10px] font-medium leading-tight">
+                  {role}
+                </span>
+                <span
+                  className="border-border text-foreground inline-flex h-5 w-5 items-center justify-center rounded border text-[10px] font-bold"
+                  style={{ background: fabricFill(fab, photos) }}
+                  aria-label={`Fabric ${fab}`}
+                >
+                  {fab}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+        <PatternDiagram
+          pattern={pattern}
+          assignments={assignments}
+          hasBorder={false}
+          size={size}
+          photos={photos}
+        />
+      </div>
+    ) : (
+      <PatternDiagram
+        pattern={pattern}
+        assignments={assignments}
+        hasBorder={false}
+        size={size}
+        photos={photos}
+      />
+    );
+
 
   const canvasProps: CanvasProps = {
     pattern,
@@ -83,52 +129,21 @@ export function QuiltLayoutPreview({
   return (
     <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
       <div className="flex flex-col items-center gap-2">
-        <div className="text-foreground text-xs font-semibold uppercase tracking-wide">
-          1 block
-        </div>
-        {pattern === "rail-fence" ? (
-          <div className="flex items-stretch gap-2">
-            <div className="flex flex-col justify-around py-[5px] text-right">
-              {(["rail1", "rail2", "rail3"] as const).map((id, idx) => {
-                // Resolve through the pattern definition first so this stays
-                // in lockstep with src/lib/patterns.ts (Rail Fence rails = A/B/C).
-                const railDef = getPattern(pattern)?.sections.find((s) => s.id === id);
-                const fab = (assignments[id] ?? railDef?.defaultFabric ?? (["A", "B", "C"] as const)[idx]) as FabricKey;
-                const role = ["Top rail", "Middle rail", "Bottom rail"][idx];
-                return (
-                  <div key={id} className="flex items-center justify-end gap-1.5">
-                    <span className="text-foreground text-[10px] font-medium leading-tight">
-                      {role}
-                    </span>
-                    <span
-                      className="border-border text-foreground inline-flex h-5 w-5 items-center justify-center rounded border text-[10px] font-bold"
-                      style={{ background: fabricFill(fab, photos) }}
-                      aria-label={`Fabric ${fab}`}
-                    >
-                      {fab}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-            <PatternDiagram
-              pattern={pattern}
-              assignments={assignments}
-              hasBorder={false}
-              size={220}
-              photos={photos}
-            />
+        <div className="flex flex-col items-center gap-1">
+          <div className="text-foreground text-xs font-semibold uppercase tracking-wide">
+            1 block
           </div>
-        ) : (
-          <PatternDiagram
-            pattern={pattern}
-            assignments={assignments}
-            hasBorder={false}
-            size={220}
-            photos={photos}
-          />
-        )}
+          <button
+            type="button"
+            onClick={() => setBlockFullOpen(true)}
+            className="text-primary no-print text-[11px] font-medium underline underline-offset-2 hover:opacity-80"
+          >
+            See block full screen
+          </button>
+        </div>
+        {renderBlock(220)}
       </div>
+
 
       <div className="flex flex-row items-center gap-1 sm:flex-col sm:gap-1 sm:pt-16">
         <span className="text-primary text-xl font-bold">×{blockCount}</span>
@@ -177,6 +192,23 @@ export function QuiltLayoutPreview({
           </p>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={blockFullOpen} onOpenChange={setBlockFullOpen}>
+        <DialogContent className="max-w-[96vw] sm:max-w-[96vw] p-4">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-semibold uppercase tracking-wide">
+              1 block
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center justify-center">
+            {renderBlock(fullMax)}
+          </div>
+          <p className="text-muted-foreground text-center text-xs">
+            One {getPattern(pattern)?.name ?? "quilt"} block
+          </p>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
