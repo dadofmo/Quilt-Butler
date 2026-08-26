@@ -19,12 +19,25 @@ A grid-based block editor that plugs into the existing Size → Fabrics → Resu
 
 **Everything downstream is unchanged.** Size, sashing, border, fabric assignment, full-quilt preview, "see block full screen", cutting list, cost estimator, and print view all work exactly as they do for named patterns.
 
+## Variation across the quilt
+
+Three variation controls appear on Step 2 once a custom block exists, so the finished quilt is never forced to be one block repeated identically.
+
+**Rotation settings.** The same picker your named patterns use — straight set, alternating turn, barn raising, herringbone — with a live full-quilt preview. Piece counts never change, so the cutting list is identical across all four. The editor computes the block's own symmetry and hides any setting that would look identical to another, so users never see two options that render the same (the Bow Tie problem).
+
+**Fabric swap on alternate blocks.** A general version of your existing alternate-blocks toggle. The user picks any two fabrics from their design, and every other block swaps that pair — a true checkerboard across the quilt. Because it only reassigns which fabric a piece is cut from, the totals per fabric split cleanly and the cutting list stays exact.
+
+**Two-block alternating set.** The most expressive option: design a Block B and alternate A/B across the quilt in a checkerboard. This is how many traditional quilts get their secondary design (a pieced block alternating with a plain or simpler block). Block B uses the same editor and the same grid size; the cutting list sums both blocks with the correct per-block counts for an alternating layout, including the odd/even split when the quilt has an odd number of blocks. Block B is optional and starts empty.
+
+These compose: a two-block set can still use a rotation setting, and rotation options are recomputed from both blocks' combined symmetry.
+
 ## Scope boundaries for v1
 
 - Unit types are exactly the four above. No square-in-a-square, no curves, no uneven grid tracks (like the 1-1-2-1-1 tracks Antique Tile uses).
-- One saved design at a time, persisted to the browser. No named library, no accounts.
-- No alternate-blocks toggle and no rotation layouts for custom blocks initially — those depend on knowing the block's symmetry, which is safest to add after the core is proven.
+- Two designs at a time (Block A and optional Block B), persisted to the browser. No named library, no accounts.
+- Variation is limited to the three controls above — no per-block hand-painting of a whole quilt, no randomized scrappy fill. Both are natural follow-ups once this ships.
 - Sewing instructions are generated per unit type (HST no-waste pairs, QST trim, no-waste geese, row assembly) rather than hand-written prose. They'll be accurate but less personal than the named patterns' notes.
+
 
 ## Technical notes
 
