@@ -45,7 +45,9 @@ These compose: a two-block set can still use a rotation setting, and rotation op
 
 **Block definition.** New `src/lib/custom-block.ts` holding the design type — grid size plus a cell map where each cell is `{ kind: "square" | "hst" | "qst" | "geese", rotation, fabrics }`, with geese recorded once against their anchor cell. Includes validation (no overlapping geese, no orphaned cells) and a `unitCounts()` helper that rolls the grid up into per-fabric piece tallies.
 
-**Planner state.** Add `customBlock: CustomBlockDesign | null` to `PlannerState` and a `"custom-block"` member of `PatternId`. The existing localStorage merge already tolerates new fields.
+**Planner state.** Add `customBlock` and `customBlockB` (`CustomBlockDesign | null`), a `customSwapPair` for the fabric-swap toggle, and a `"custom-block"` member of `PatternId`. The existing `blockLayout` and `alternateBlocks` fields are reused rather than duplicated. The existing localStorage merge already tolerates new fields.
+
+**Symmetry detection.** `custom-block.ts` gains a `distinctRotations()` helper that renders the cell map at 0/90/180/270 and compares normalized forms. `BlockLayoutPicker` uses it to offer only rotation settings that produce visibly different quilts, which is what prevented the duplicate Bow Tie options.
 
 **Pattern registration.** Register a synthetic `PatternDef` for `custom-block` in `src/lib/patterns.ts` with `hasMath: true`. Its `sections` are derived at runtime from the design's fabric regions rather than being a static list — `FabricsPage` reads sections from the pattern, so this needs a small accessor that returns the dynamic sections when the pattern is the custom one.
 
