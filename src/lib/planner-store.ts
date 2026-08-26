@@ -73,11 +73,25 @@ export type PatternId =
   | "alaska-homestead"
   | "blazing-arrows";
 
+/**
+ * Fabric slots. A–L are the classic palette used by every built-in pattern.
+ * M–Z exist so a user-designed custom block can be genuinely scrappy without
+ * running out of distinct fabrics. Built-in patterns never reach past L.
+ */
 export type FabricKey =
   | "A" | "B" | "C" | "D" | "E" | "F"
-  | "G" | "H" | "I" | "J" | "K" | "L";
+  | "G" | "H" | "I" | "J" | "K" | "L"
+  | "M" | "N" | "O" | "P" | "Q" | "R"
+  | "S" | "T" | "U" | "V" | "W" | "X"
+  | "Y" | "Z";
 
 export const ALL_FABRIC_KEYS: FabricKey[] = [
+  "A","B","C","D","E","F","G","H","I","J","K","L","M",
+  "N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+];
+
+/** The 12 slots the built-in (non-custom) patterns draw from. */
+export const CLASSIC_FABRIC_KEYS: FabricKey[] = [
   "A","B","C","D","E","F","G","H","I","J","K","L",
 ];
 
