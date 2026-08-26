@@ -41,6 +41,20 @@
   --color-fabric-j: var(--fabric-j);
   --color-fabric-k: var(--fabric-k);
   --color-fabric-l: var(--fabric-l);
+  --color-fabric-m: var(--fabric-m);
+  --color-fabric-n: var(--fabric-n);
+  --color-fabric-o: var(--fabric-o);
+  --color-fabric-p: var(--fabric-p);
+  --color-fabric-q: var(--fabric-q);
+  --color-fabric-r: var(--fabric-r);
+  --color-fabric-s: var(--fabric-s);
+  --color-fabric-t: var(--fabric-t);
+  --color-fabric-u: var(--fabric-u);
+  --color-fabric-v: var(--fabric-v);
+  --color-fabric-w: var(--fabric-w);
+  --color-fabric-x: var(--fabric-x);
+  --color-fabric-y: var(--fabric-y);
+  --color-fabric-z: var(--fabric-z);
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -82,7 +96,9 @@
   --shadow-md: 0 2px 4px -1px oklch(0.25 0.02 150 / 0.06), 0 4px 12px -2px oklch(0.25 0.02 150 / 0.06);
   --shadow-lg: 0 4px 8px -2px oklch(0.25 0.02 150 / 0.08), 0 12px 28px -6px oklch(0.25 0.02 150 / 0.10);
 
-  /* Fabric swatches — 12 distinct hues spaced around the wheel */
+  /* Fabric swatches — 26 distinct hues/values spaced around the wheel.
+     A–L are the original palette (never change these — existing saved
+     designs reference them). M–Z extend the palette for custom blocks. */
   --fabric-a: oklch(0.7 0.13 240);  /* blue */
   --fabric-b: oklch(0.88 0.16 95);  /* yellow */
   --fabric-c: oklch(0.72 0.14 145); /* green */
@@ -95,6 +111,20 @@
   --fabric-j: oklch(0.85 0.1 165);  /* mint */
   --fabric-k: oklch(0.6 0.15 50);   /* rust */
   --fabric-l: oklch(0.55 0.04 250); /* slate */
+  --fabric-m: oklch(0.45 0.14 265); /* navy */
+  --fabric-n: oklch(0.82 0.09 60);  /* butterscotch */
+  --fabric-o: oklch(0.5 0.12 155);  /* forest */
+  --fabric-p: oklch(0.66 0.19 15);  /* poppy */
+  --fabric-q: oklch(0.9 0.05 300);  /* orchid mist */
+  --fabric-r: oklch(0.62 0.11 100); /* olive */
+  --fabric-s: oklch(0.8 0.08 220);  /* sky */
+  --fabric-t: oklch(0.48 0.1 20);   /* brick */
+  --fabric-u: oklch(0.93 0.03 90);  /* cream */
+  --fabric-v: oklch(0.58 0.16 290); /* violet */
+  --fabric-w: oklch(0.75 0.11 180); /* aqua */
+  --fabric-x: oklch(0.4 0.05 300);  /* aubergine */
+  --fabric-y: oklch(0.86 0.12 130); /* pear */
+  --fabric-z: oklch(0.32 0.02 250); /* charcoal */
 }
 
 @layer base {
