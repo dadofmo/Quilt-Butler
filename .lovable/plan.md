@@ -51,17 +51,18 @@ These compose: a two-block set can still use a rotation setting, and rotation op
 
 **Pattern registration.** Register a synthetic `PatternDef` for `custom-block` in `src/lib/patterns.ts` with `hasMath: true`. Its `sections` are derived at runtime from the design's fabric regions rather than being a static list — `FabricsPage` reads sections from the pattern, so this needs a small accessor that returns the dynamic sections when the pattern is the custom one.
 
-**Yardage.** A new branch in `calculateYardage` in `src/lib/yardage.ts` that walks the cell map and routes every unit through `addSquares` per the existing rules — solid squares at `unit + 0.5`, HST starting squares at `unit + HST_EXTRA`, QST squares at `unit + 1.25`, geese via the existing no-waste method (one large goose square plus four sky squares per four geese). Squares are pooled by fabric and cut size so the cutting list stays tidy. Per the project rule, all math goes through `addSquares`/`addRails` — nothing is pushed to `req.pieces` directly.
+**Yardage.** A new branch in `calculateYardage` in `src/lib/yardage.ts` that walks the cell map and routes every unit through `addSquares` per the existing rules — solid squares at `unit + 0.5`, HST starting squares at `unit + HST_EXTRA`, QST squares at `unit + 1.25`, geese via the existing no-waste method (one large goose square plus four sky squares per four geese). Squares are pooled by fabric and cut size so the cutting list stays tidy. When a two-block set or a fabric swap is active, the branch walks the quilt's block grid to get the exact even/odd counts before pooling — the same approach used for Plus Block and Pinwheel. Per the project rule, all math goes through `addSquares`/`addRails` — nothing is pushed to `req.pieces` directly.
 
-**Rendering.** A `CustomBlock` renderer component drawing the grid with the shared `fabric-*` fill tokens via `fillFor`, wired into `QuiltLayoutPreview` so the one-block preview, full-quilt tiling, both full-screen dialogs, and `PatternThumb` all pick it up. No white seam strokes; adjacent units butt flush.
+**Rendering.** A `CustomBlock` renderer component drawing the grid with the shared `fabric-*` fill tokens via `fillFor`, wired into `QuiltLayoutPreview` so the one-block preview, full-quilt tiling, both full-screen dialogs, and `PatternThumb` all pick it up. The tiling path already handles per-block rotation and A/B alternation for existing patterns, so it extends to Block B and the swap pair. No white seam strokes; adjacent units butt flush.
 
-**Verification.** Extend `scripts/audit-yardage.ts` to cover a set of representative custom designs, including a Pinwheel-equivalent 2×2 that must produce an identical cutting list to the built-in Pinwheel, an Ohio Star equivalent 3×3 (QST parity), a geese-heavy design, and a 8×8 scrappy design using 15+ fabrics. Run `bun audit:math` and the full test suite, and drive the editor end to end with Playwright.
+**Verification.** Extend `scripts/audit-yardage.ts` to cover representative custom designs: a Pinwheel-equivalent 2×2 that must produce an identical cutting list to the built-in Pinwheel, an Ohio Star equivalent 3×3 (QST parity), a geese-heavy design, an 8×8 scrappy design using 15+ fabrics, and a two-block A/B set whose totals must equal the sum of its per-block counts at the correct even/odd split — checked on both an even and an odd block count. Run `bun audit:math` and the full test suite, and drive the editor end to end with Playwright.
 
 ## Build order
 
 1. Extend the fabric palette to A–Z and confirm existing patterns and tests are unaffected.
-2. Add the custom block type, validation, and planner state.
+2. Add the custom block type, validation, symmetry detection, and planner state.
 3. Build the block renderer and wire it into all preview surfaces.
 4. Build the editor UI and the picker tile.
 5. Add the yardage branch and generated sewing instructions.
-6. Extend the audit script with parity cases; run audit, tests, and a Playwright pass.
+6. Add the three variation controls to Step 2 and extend the tiling preview.
+7. Extend the audit script with parity and A/B split cases; run audit, tests, and a Playwright pass.
