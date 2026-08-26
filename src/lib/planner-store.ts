@@ -231,32 +231,48 @@ export const SIZE_PRESETS: Record<string, { label: string; w: number; h: number 
   custom: { label: "Custom", w: 0, h: 0 },
 };
 
-export const FABRIC_COLORS: Record<FabricKey, string> = {
-  A: "var(--fabric-a)",
-  B: "var(--fabric-b)",
-  C: "var(--fabric-c)",
-  D: "var(--fabric-d)",
-  E: "var(--fabric-e)",
-  F: "var(--fabric-f)",
-  G: "var(--fabric-g)",
-  H: "var(--fabric-h)",
-  I: "var(--fabric-i)",
-  J: "var(--fabric-j)",
-  K: "var(--fabric-k)",
-  L: "var(--fabric-l)",
+export const FABRIC_COLORS: Record<FabricKey, string> = ALL_FABRIC_KEYS.reduce(
+  (acc, k) => {
+    acc[k] = `var(--fabric-${k.toLowerCase()})`;
+    return acc;
+  },
+  {} as Record<FabricKey, string>,
+);
+
+/** Human-friendly colour name for each fabric slot, mirroring the CSS tokens. */
+const FABRIC_COLOR_NAMES: Record<FabricKey, string> = {
+  A: "Blue",
+  B: "Yellow",
+  C: "Green",
+  D: "Pink",
+  E: "Coral",
+  F: "Teal",
+  G: "Lavender",
+  H: "Mustard",
+  I: "Plum",
+  J: "Mint",
+  K: "Rust",
+  L: "Slate",
+  M: "Navy",
+  N: "Butterscotch",
+  O: "Forest",
+  P: "Poppy",
+  Q: "Orchid",
+  R: "Olive",
+  S: "Sky",
+  T: "Brick",
+  U: "Cream",
+  V: "Violet",
+  W: "Aqua",
+  X: "Aubergine",
+  Y: "Pear",
+  Z: "Charcoal",
 };
 
-export const FABRIC_LABELS: Record<FabricKey, string> = {
-  A: "Fabric A — Blue",
-  B: "Fabric B — Yellow",
-  C: "Fabric C — Green",
-  D: "Fabric D — Pink",
-  E: "Fabric E — Coral",
-  F: "Fabric F — Teal",
-  G: "Fabric G — Lavender",
-  H: "Fabric H — Mustard",
-  I: "Fabric I — Plum",
-  J: "Fabric J — Mint",
-  K: "Fabric K — Rust",
-  L: "Fabric L — Slate",
-};
+export const FABRIC_LABELS: Record<FabricKey, string> = ALL_FABRIC_KEYS.reduce(
+  (acc, k) => {
+    acc[k] = `Fabric ${k} — ${FABRIC_COLOR_NAMES[k]}`;
+    return acc;
+  },
+  {} as Record<FabricKey, string>,
+);
