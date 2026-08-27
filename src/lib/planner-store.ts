@@ -197,6 +197,10 @@ const initial: PlannerState = {
   fatQuarterCount: 20,
   alternateBlocks: false,
   blockLayout: "straight",
+  customBlock: null,
+  customBlockB: null,
+  useBlockB: false,
+  customSwapPair: null,
 };
 
 
