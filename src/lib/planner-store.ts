@@ -154,7 +154,18 @@ export interface PlannerState {
    *  `PatternDef.layouts`. Rotation only — never changes piece counts. */
   blockLayout: BlockLayout;
 
+  // ---- "Design Your Own Block" (pattern id "custom-block") ----
+  /** The user's Block A design. Null until they use the editor. */
+  customBlock: CustomBlockDesign | null;
+  /** Optional Block B for a two-block alternating set. */
+  customBlockB: CustomBlockDesign | null;
+  /** When true (and Block B exists), blocks A and B alternate in a checkerboard. */
+  useBlockB: boolean;
+  /** Fabric pair swapped on every other block when `alternateBlocks` is on
+   *  for a custom block. Null = fall back to the first two fabrics used. */
+  customSwapPair: [FabricKey, FabricKey] | null;
 }
+
 
 
 const initial: PlannerState = {
