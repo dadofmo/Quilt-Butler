@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import type { CustomBlockDesign } from "./custom-block";
 
 const STORAGE_KEY = "quiltbutler-planner-state";
 
@@ -71,7 +72,9 @@ export type PatternId =
   | "weathervane"
   | "wishing-ring"
   | "alaska-homestead"
-  | "blazing-arrows";
+  | "blazing-arrows"
+  /** The user-designed block from the "Design Your Own Block" editor. */
+  | "custom-block";
 
 /**
  * Fabric slots. A–L are the classic palette used by every built-in pattern.
@@ -152,7 +155,18 @@ export interface PlannerState {
    *  `PatternDef.layouts`. Rotation only — never changes piece counts. */
   blockLayout: BlockLayout;
 
+  // ---- "Design Your Own Block" (pattern id "custom-block") ----
+  /** The user's Block A design. Null until they use the editor. */
+  customBlock: CustomBlockDesign | null;
+  /** Optional Block B for a two-block alternating set. */
+  customBlockB: CustomBlockDesign | null;
+  /** When true (and Block B exists), blocks A and B alternate in a checkerboard. */
+  useBlockB: boolean;
+  /** Fabric pair swapped on every other block when `alternateBlocks` is on
+   *  for a custom block. Null = fall back to the first two fabrics used. */
+  customSwapPair: [FabricKey, FabricKey] | null;
 }
+
 
 
 const initial: PlannerState = {
@@ -184,6 +198,10 @@ const initial: PlannerState = {
   fatQuarterCount: 20,
   alternateBlocks: false,
   blockLayout: "straight",
+  customBlock: null,
+  customBlockB: null,
+  useBlockB: false,
+  customSwapPair: null,
 };
 
 

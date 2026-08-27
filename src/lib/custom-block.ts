@@ -1,0 +1,494 @@
+import type { FabricKey } from "./planner-store";
+
+/**
+ * "Design Your Own Block" data model.
+ *
+ * A custom block is an N×N grid of cells (N = 2..8). Each cell holds one
+ * pieced UNIT. Everything here is pure data + geometry — no React, no yardage.
+ * The yardage engine (src/lib/yardage.ts) consumes `unitTally()` and routes
+ * every count through the shared addSquares helper, exactly like the built-in
+ * patterns do.
+ */
+
+export const MIN_GRID = 2;
+export const MAX_GRID = 8;
+
+/** The four unit types a user can place. */
+export type UnitKind = "square" | "hst" | "qst" | "geese";
+
+/** Quarter-turn rotation, clockwise, in degrees. */
+export type Rotation = 0 | 90 | 180 | 270;
+
+export interface CustomCell {
+  kind: UnitKind;
+  rotation: Rotation;
+  /**
+   * Fabric per region, in the unit's canonical (unrotated) region order:
+   *   square → [whole]
+   *   hst    → [triangle 1, triangle 2]
+   *   qst    → [top, right, bottom, left]
+   *   geese  → [goose, sky]
+   */
+  fabrics: FabricKey[];
+}
+
+export interface CustomBlockDesign {
+  /** Grid is always square: `size` × `size` cells. */
+  size: number;
+  /**
+   * Cells keyed "row,col". A geese unit is stored ONCE against its anchor
+   * (top-left) cell and covers a second cell — see `geeseFootprint`.
+   */
+  cells: Record<string, CustomCell>;
+}
+
+export const REGION_COUNT: Record<UnitKind, number> = {
+  square: 1,
+  hst: 2,
+  qst: 4,
+  geese: 2,
+};
+
+export const UNIT_LABEL: Record<UnitKind, string> = {
+  square: "Solid square",
+  hst: "Half-square triangle",
+  qst: "Quarter-square triangle",
+  geese: "Flying geese",
+};
+
+/** Region names shown in the editor's fabric list, in canonical order. */
+export const REGION_LABELS: Record<UnitKind, string[]> = {
+  square: ["Square"],
+  hst: ["Triangle 1", "Triangle 2"],
+  qst: ["Top", "Right", "Bottom", "Left"],
+  geese: ["Goose", "Sky"],
+};
+
+/** How many visually distinct rotations a unit type has. */
+export const ROTATION_STEPS: Record<UnitKind, number> = {
+  square: 1,
+  hst: 4,
+  qst: 4,
+  geese: 4,
+};
+
+export const key = (r: number, c: number) => `${r},${c}`;
+
+export function parseKey(k: string): [number, number] {
+  const [r, c] = k.split(",").map(Number);
+  return [r, c];
+}
+
+/**
+ * Flying geese finish 2:1. At rotation 0/180 the unit lies flat (1 row × 2
+ * cols); at 90/270 it stands up (2 rows × 1 col).
+ */
+export function geeseFootprint(rotation: Rotation): { rows: number; cols: number } {
+  return rotation === 90 || rotation === 270 ? { rows: 2, cols: 1 } : { rows: 1, cols: 2 };
+}
+
+/** Every grid cell a unit anchored at (r,c) occupies. */
+export function cellsCovered(r: number, c: number, cell: CustomCell): Array<[number, number]> {
+  if (cell.kind !== "geese") return [[r, c]];
+  const { rows, cols } = geeseFootprint(cell.rotation);
+  const out: Array<[number, number]> = [];
+  for (let dr = 0; dr < rows; dr++) for (let dc = 0; dc < cols; dc++) out.push([r + dr, c + dc]);
+  return out;
+}
+
+/**
+ * Map of "row,col" → anchor key for every occupied cell. Cells absent from
+ * this map are empty.
+ */
+export function occupancy(design: CustomBlockDesign): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, cell] of Object.entries(design.cells)) {
+    const [r, c] = parseKey(k);
+    for (const [rr, cc] of cellsCovered(r, c, cell)) out[key(rr, cc)] = k;
+  }
+  return out;
+}
+
+/** True when a unit of this kind/rotation fits at (r,c) without collisions. */
+export function canPlace(
+  design: CustomBlockDesign,
+  r: number,
+  c: number,
+  kind: UnitKind,
+  rotation: Rotation,
+  ignoreAnchor?: string,
+): boolean {
+  const probe: CustomCell = { kind, rotation, fabrics: [] };
+  const occ = occupancy(design);
+  for (const [rr, cc] of cellsCovered(r, c, probe)) {
+    if (rr < 0 || cc < 0 || rr >= design.size || cc >= design.size) return false;
+    const owner = occ[key(rr, cc)];
+    if (owner && owner !== ignoreAnchor) return false;
+  }
+  return true;
+}
+
+/** A blank design: every cell a solid square of Fabric A. */
+export function emptyDesign(size: number, fabric: FabricKey = "A"): CustomBlockDesign {
+  const cells: Record<string, CustomCell> = {};
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      cells[key(r, c)] = { kind: "square", rotation: 0, fabrics: [fabric] };
+    }
+  }
+  return { size, cells };
+}
+
+/**
+ * Resize a design, keeping any units that still fit inside the new grid and
+ * back-filling the rest with plain squares.
+ */
+export function resizeDesign(design: CustomBlockDesign, size: number): CustomBlockDesign {
+  const next = emptyDesign(size, "A");
+  for (const [k, cell] of Object.entries(design.cells)) {
+    const [r, c] = parseKey(k);
+    const fits = cellsCovered(r, c, cell).every(([rr, cc]) => rr < size && cc < size);
+    if (!fits) continue;
+    // Clear the cells this unit will occupy, then place it.
+    for (const [rr, cc] of cellsCovered(r, c, cell)) delete next.cells[key(rr, cc)];
+    next.cells[k] = { ...cell, fabrics: [...cell.fabrics] };
+  }
+  return next;
+}
+
+/** Distinct fabrics used anywhere in the design, in canonical A→Z order. */
+export function fabricsUsed(design: CustomBlockDesign | null): FabricKey[] {
+  if (!design) return [];
+  const set = new Set<FabricKey>();
+  for (const cell of Object.values(design.cells)) {
+    for (let i = 0; i < REGION_COUNT[cell.kind]; i++) {
+      const f = cell.fabrics[i];
+      if (f) set.add(f);
+    }
+  }
+  return [...set].sort();
+}
+
+/** Validation problems the editor should surface before letting the user move on. */
+export function validateDesign(design: CustomBlockDesign | null): string[] {
+  const errors: string[] = [];
+  if (!design) return ["No block designed yet."];
+  if (design.size < MIN_GRID || design.size > MAX_GRID) {
+    errors.push(`Grid must be between ${MIN_GRID}×${MIN_GRID} and ${MAX_GRID}×${MAX_GRID}.`);
+  }
+  const occ = occupancy(design);
+  let empty = 0;
+  for (let r = 0; r < design.size; r++) {
+    for (let c = 0; c < design.size; c++) if (!occ[key(r, c)]) empty++;
+  }
+  if (empty > 0) {
+    errors.push(`${empty} cell${empty === 1 ? " is" : "s are"} still empty — every cell needs a unit.`);
+  }
+  for (const [k, cell] of Object.entries(design.cells)) {
+    if (cell.fabrics.length < REGION_COUNT[cell.kind] || cell.fabrics.some((f) => !f)) {
+      errors.push(`The unit at ${k} is missing a fabric.`);
+      break;
+    }
+  }
+  return errors;
+}
+
+// ---------------------------------------------------------------------------
+// Rotation & symmetry
+// ---------------------------------------------------------------------------
+
+const rotate = (rotation: Rotation, by: Rotation): Rotation =>
+  (((rotation + by) % 360) as Rotation);
+
+/**
+ * Rotate a whole design 90/180/270° clockwise. Used both for the quilt-tiling
+ * preview (rotation layout settings) and for symmetry detection.
+ */
+export function rotateDesign(design: CustomBlockDesign, by: Rotation): CustomBlockDesign {
+  if (by === 0) return design;
+  const n = design.size;
+  const cells: Record<string, CustomCell> = {};
+  for (const [k, cell] of Object.entries(design.cells)) {
+    const [r, c] = parseKey(k);
+    const covered = cellsCovered(r, c, cell);
+    // Rotate every covered cell, then re-anchor at the new top-left.
+    const moved = covered.map(([rr, cc]) => {
+      if (by === 90) return [cc, n - 1 - rr] as [number, number];
+      if (by === 180) return [n - 1 - rr, n - 1 - cc] as [number, number];
+      return [n - 1 - cc, rr] as [number, number];
+    });
+    const minR = Math.min(...moved.map((m) => m[0]));
+    const minC = Math.min(...moved.map((m) => m[1]));
+    cells[key(minR, minC)] = {
+      ...cell,
+      rotation: rotate(cell.rotation, by),
+      fabrics: [...cell.fabrics],
+    };
+  }
+  return { size: n, cells };
+}
+
+/** Stable string form of a design — two designs that look identical match. */
+export function fingerprint(design: CustomBlockDesign): string {
+  const parts: string[] = [`${design.size}`];
+  for (let r = 0; r < design.size; r++) {
+    for (let c = 0; c < design.size; c++) {
+      const cell = design.cells[key(r, c)];
+      if (!cell) {
+        parts.push(".");
+        continue;
+      }
+      parts.push(
+        `${cell.kind}${cell.rotation}:${cell.fabrics
+          .slice(0, REGION_COUNT[cell.kind])
+          .join("")}`,
+      );
+    }
+  }
+  return parts.join("|");
+}
+
+/**
+ * Which quarter-turns produce a VISUALLY different block. Always includes 0.
+ * The rotation-layout picker uses this so users never get offered two
+ * settings that render an identical quilt.
+ */
+export function distinctRotations(design: CustomBlockDesign | null): Rotation[] {
+  if (!design) return [0];
+  const seen = new Map<string, Rotation>();
+  for (const by of [0, 90, 180, 270] as Rotation[]) {
+    const fp = fingerprint(rotateDesign(design, by));
+    if (!seen.has(fp)) seen.set(fp, by);
+  }
+  return [...seen.values()].sort((a, b) => a - b);
+}
+
+/** True when the block looks the same at every quarter-turn (rotation is pointless). */
+export function isFullyRotationSymmetric(design: CustomBlockDesign | null): boolean {
+  return distinctRotations(design).length === 1;
+}
+
+// ---------------------------------------------------------------------------
+// Geometry (for rendering)
+// ---------------------------------------------------------------------------
+
+export interface Poly {
+  /** Points in the block's own coordinate space, where the block is `size` units wide. */
+  points: Array<[number, number]>;
+  fabric: FabricKey;
+}
+
+/** Rotate a point within a w×h box by a quarter turn clockwise. */
+function rotPoint(
+  [x, y]: [number, number],
+  by: Rotation,
+  w: number,
+  h: number,
+): [number, number] {
+  if (by === 0) return [x, y];
+  if (by === 90) return [h - y, x];
+  if (by === 180) return [w - x, h - y];
+  return [y, w - x];
+}
+
+/**
+ * Polygons for one unit, in cell-local coordinates scaled so one grid cell is
+ * 1×1. Geese occupy 2×1 before rotation.
+ */
+function unitPolys(cell: CustomCell): { w: number; h: number; polys: Poly[] } {
+  const f = (i: number) => cell.fabrics[i] ?? cell.fabrics[0] ?? "A";
+  const rot = cell.rotation;
+
+  if (cell.kind === "square") {
+    return {
+      w: 1,
+      h: 1,
+      polys: [{ fabric: f(0), points: [[0, 0], [1, 0], [1, 1], [0, 1]] }],
+    };
+  }
+
+  if (cell.kind === "hst") {
+    // Canonical (rotation 0): triangle 1 is the UPPER-LEFT half, split on the
+    // anti-diagonal (top-right → bottom-left).
+    const base: Poly[] = [
+      { fabric: f(0), points: [[0, 0], [1, 0], [0, 1]] },
+      { fabric: f(1), points: [[1, 0], [1, 1], [0, 1]] },
+    ];
+    return {
+      w: 1,
+      h: 1,
+      polys: base.map((p) => ({
+        fabric: p.fabric,
+        points: p.points.map((pt) => rotPoint(pt, rot, 1, 1)),
+      })),
+    };
+  }
+
+  if (cell.kind === "qst") {
+    // Four triangles meeting at the centre: top, right, bottom, left.
+    const base: Poly[] = [
+      { fabric: f(0), points: [[0, 0], [1, 0], [0.5, 0.5]] },
+      { fabric: f(1), points: [[1, 0], [1, 1], [0.5, 0.5]] },
+      { fabric: f(2), points: [[1, 1], [0, 1], [0.5, 0.5]] },
+      { fabric: f(3), points: [[0, 1], [0, 0], [0.5, 0.5]] },
+    ];
+    return {
+      w: 1,
+      h: 1,
+      polys: base.map((p) => ({
+        fabric: p.fabric,
+        points: p.points.map((pt) => rotPoint(pt, rot, 1, 1)),
+      })),
+    };
+  }
+
+  // Flying geese, canonical rotation 0: 2 wide × 1 tall, goose apex at
+  // top-centre, base along the bottom edge, sky triangles top-left/top-right.
+  const base: Poly[] = [
+    { fabric: f(0), points: [[0, 1], [1, 0], [2, 1]] },
+    { fabric: f(1), points: [[0, 0], [1, 0], [0, 1]] },
+    { fabric: f(1), points: [[1, 0], [2, 0], [2, 1]] },
+  ];
+  const flat = rot === 0 || rot === 180;
+  return {
+    w: flat ? 2 : 1,
+    h: flat ? 1 : 2,
+    polys: base.map((p) => ({
+      fabric: p.fabric,
+      points: p.points.map((pt) => rotPoint(pt, rot, 2, 1)),
+    })),
+  };
+}
+
+/**
+ * Every polygon in the block, in block coordinates where the whole block is
+ * `size` × `size`. Multiply by (pixels / size) to draw.
+ */
+export function blockPolys(design: CustomBlockDesign): Poly[] {
+  const out: Poly[] = [];
+  for (const [k, cell] of Object.entries(design.cells)) {
+    const [r, c] = parseKey(k);
+    const { polys } = unitPolys(cell);
+    for (const p of polys) {
+      out.push({
+        fabric: p.fabric,
+        points: p.points.map(([x, y]) => [c + x, r + y] as [number, number]),
+      });
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Piece tallies (consumed by the yardage engine)
+// ---------------------------------------------------------------------------
+
+export interface UnitTally {
+  /** Plain squares: fabric → count of finished-size squares. */
+  squares: Record<string, number>;
+  /**
+   * HST units needing a starting-square pair at the PLAIN unit size.
+   * Key is `${fabricA}|${fabricB}` with the pair sorted, value = unit count.
+   */
+  hst: Record<string, number>;
+  /**
+   * HST units cut at the larger QST trim size (these get recut into
+   * hourglass units). Same key format as `hst`.
+   */
+  qstHalves: Record<string, number>;
+  /** Flying geese units, keyed `${goose}|${sky}`. */
+  geese: Record<string, number>;
+  /** Finished hourglass (QST) unit count — for the instructions only. */
+  qstUnits: number;
+}
+
+const bump = (rec: Record<string, number>, k: string, n = 1) => {
+  rec[k] = (rec[k] ?? 0) + n;
+};
+
+const pairKey = (a: FabricKey, b: FabricKey) => (a <= b ? `${a}|${b}` : `${b}|${a}`);
+
+/**
+ * Roll a design up into per-fabric piece counts for ONE block.
+ *
+ * HST/QST counts are kept as UNIT counts (not starting squares) so the caller
+ * can multiply by the block count FIRST and only then divide by the
+ * 2-at-a-time / 4-at-a-time yields. Doing it in that order avoids rounding up
+ * once per block, which would badly overstate yardage on a big quilt.
+ */
+export function unitTally(design: CustomBlockDesign): UnitTally {
+  const tally: UnitTally = { squares: {}, hst: {}, qstHalves: {}, geese: {}, qstUnits: 0 };
+  for (const cell of Object.values(design.cells)) {
+    const f = (i: number) => (cell.fabrics[i] ?? cell.fabrics[0] ?? "A") as FabricKey;
+    switch (cell.kind) {
+      case "square":
+        bump(tally.squares, f(0));
+        break;
+      case "hst":
+        bump(tally.hst, pairKey(f(0), f(1)));
+        break;
+      case "qst":
+        // An hourglass is two HSTs (cut oversized) sewn back together and
+        // recut. Each HST supplies two ADJACENT triangles: top+right and
+        // bottom+left.
+        tally.qstUnits += 1;
+        bump(tally.qstHalves, pairKey(f(0), f(1)));
+        bump(tally.qstHalves, pairKey(f(2), f(3)));
+        break;
+      case "geese":
+        bump(tally.geese, `${f(0)}|${f(1)}`);
+        break;
+    }
+  }
+  return tally;
+}
+
+/** Sum tallies from several blocks (weighted by how many of each are needed). */
+export function scaleTally(tally: UnitTally, factor: number): UnitTally {
+  const scaleRec = (rec: Record<string, number>) => {
+    const out: Record<string, number> = {};
+    for (const [k, v] of Object.entries(rec)) out[k] = v * factor;
+    return out;
+  };
+  return {
+    squares: scaleRec(tally.squares),
+    hst: scaleRec(tally.hst),
+    qstHalves: scaleRec(tally.qstHalves),
+    geese: scaleRec(tally.geese),
+    qstUnits: tally.qstUnits * factor,
+  };
+}
+
+export function mergeTallies(a: UnitTally, b: UnitTally): UnitTally {
+  const mergeRec = (x: Record<string, number>, y: Record<string, number>) => {
+    const out = { ...x };
+    for (const [k, v] of Object.entries(y)) out[k] = (out[k] ?? 0) + v;
+    return out;
+  };
+  return {
+    squares: mergeRec(a.squares, b.squares),
+    hst: mergeRec(a.hst, b.hst),
+    qstHalves: mergeRec(a.qstHalves, b.qstHalves),
+    geese: mergeRec(a.geese, b.geese),
+    qstUnits: a.qstUnits + b.qstUnits,
+  };
+}
+
+/**
+ * Swap one fabric pair throughout a design — powers the "alternate blocks"
+ * fabric-swap variation.
+ */
+export function swapFabrics(
+  design: CustomBlockDesign,
+  a: FabricKey,
+  b: FabricKey,
+): CustomBlockDesign {
+  const cells: Record<string, CustomCell> = {};
+  for (const [k, cell] of Object.entries(design.cells)) {
+    cells[k] = {
+      ...cell,
+      fabrics: cell.fabrics.map((f) => (f === a ? b : f === b ? a : f)),
+    };
+  }
+  return { size: design.size, cells };
+}
