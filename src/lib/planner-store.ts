@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import type { CustomBlockDesign } from "./custom-block";
 
 const STORAGE_KEY = "quiltbutler-planner-state";
 
