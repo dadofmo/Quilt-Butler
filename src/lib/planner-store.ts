@@ -71,7 +71,9 @@ export type PatternId =
   | "weathervane"
   | "wishing-ring"
   | "alaska-homestead"
-  | "blazing-arrows";
+  | "blazing-arrows"
+  /** The user-designed block from the "Design Your Own Block" editor. */
+  | "custom-block";
 
 /**
  * Fabric slots. A–L are the classic palette used by every built-in pattern.
