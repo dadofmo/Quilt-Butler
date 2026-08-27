@@ -1,3 +1,4 @@
+import { ALL_FABRIC_KEYS } from "./planner-store";
 import type { PatternId, FabricKey, BlockLayout } from "./planner-store";
 
 export interface PatternSection {
@@ -1842,9 +1843,7 @@ export function patternHasSashingSection(pattern: PatternDef | null): boolean {
  * Returned in canonical order A, B, C, D.
  */
 export function fabricsForPattern(pattern: PatternDef, includeBorder: boolean): FabricKey[] {
-  const order: FabricKey[] = [
-    "A","B","C","D","E","F","G","H","I","J","K","L",
-  ];
+  const order: FabricKey[] = ALL_FABRIC_KEYS;
   const used = new Set<FabricKey>();
   pattern.sections.forEach((s) => {
     if (s.id === "border" && !includeBorder) return;
@@ -1870,9 +1869,7 @@ export function getEffectiveBorderDefault(
   hasSashing: boolean,
   hasCornerstones: boolean,
 ): FabricKey {
-  const order: FabricKey[] = [
-    "A","B","C","D","E","F","G","H","I","J","K","L",
-  ];
+  const order: FabricKey[] = ALL_FABRIC_KEYS;
   const used = new Set<FabricKey>();
   pattern.sections.forEach((s) => {
     if (s.id === "border") return;
