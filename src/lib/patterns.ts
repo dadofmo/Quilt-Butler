@@ -1829,7 +1829,12 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "wishing-ring": { skill: "confident", fabricCount: 2, techniques: ["hst", "squares"] },
   "alaska-homestead": { skill: "confident", fabricCount: 3, techniques: ["hst", "squares"] },
   "blazing-arrows": { skill: "intermediate", fabricCount: 2, techniques: ["hst", "geese"] },
+  // Metadata for the user-designed block is nominal: the real fabric count and
+  // techniques depend on what the user draws, and the tile is surfaced through
+  // its own entry point rather than the filterable pattern grid.
+  "custom-block": { skill: "confident", fabricCount: 2, techniques: ["squares", "hst", "geese"] },
 };
+
 
 const FALLBACK_META: PatternMeta = { skill: "confident", fabricCount: 3, techniques: ["squares"] };
 
