@@ -1,6 +1,15 @@
 import { ALL_FABRIC_KEYS, type FabricKey, type PlannerState } from "./planner-store";
 import { getPattern, getEffectiveBorderDefault } from "./patterns";
 import { layoutAssemblyNote } from "./block-layouts";
+import {
+  mergeTallies,
+  scaleTally,
+  swapFabrics,
+  unitTally,
+} from "./custom-block";
+
+/** Round an inch measurement to 2dp so cut sizes stay tidy. */
+const round2 = (n: number) => Math.round(n * 100) / 100;
 
 export interface FabricRequirement {
   fabric: FabricKey;
@@ -194,9 +203,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isWishingRing = s.pattern === "wishing-ring";
   const isAlaskaHomestead = s.pattern === "alaska-homestead";
   const isBlazingArrows = s.pattern === "blazing-arrows";
+  const isCustomBlock = s.pattern === "custom-block";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isCustomBlock || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -4038,6 +4048,141 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
 
 
+  // =========================================================================
+  // DESIGN YOUR OWN BLOCK
+  //
+  // The user's grid is rolled up into unit tallies (src/lib/custom-block.ts)
+  // and every cut still goes through the shared addSquares/addRails helpers,
+  // exactly like the built-in patterns. Unit counts are multiplied by the
+  // block count FIRST and only then divided by the 2-at-a-time / 4-at-a-time
+  // yields, so we never round up once per block.
+  // =========================================================================
+  if (isCustomBlock) {
+    const designA = s.customBlock;
+    if (!designA) {
+      return {
+        fabrics: [],
+        unsupported: true,
+        notes: ["Design a block first — open the block editor to draw your grid."],
+        materials: calculateMaterials(s),
+      };
+    }
+
+    const grid = designA.size;
+    const unit = s.blockSize / grid;
+    const usingB = !!(s.useBlockB && s.customBlockB && s.customBlockB.size === grid);
+    const designB = usingB ? s.customBlockB! : null;
+    const pair = s.customSwapPair;
+    const swapping = !!(s.alternateBlocks && pair);
+
+    // Cells with (row + col) even take the "first" block; odd cells take the
+    // variation (Block B and/or the fabric swap). This mirrors exactly what
+    // QuiltLayoutPreview draws.
+    const evenCount = Math.ceil(blockCount / 2);
+    const oddCount = blockCount - evenCount;
+
+    let oddDesign = designB ?? designA;
+    if (swapping && pair) oddDesign = swapFabrics(oddDesign, pair[0], pair[1]);
+
+    const tally = mergeTallies(
+      scaleTally(unitTally(designA), evenCount),
+      oddCount > 0 ? scaleTally(unitTally(oddDesign), oddCount) : scaleTally(unitTally(designA), 0),
+    );
+
+    const sqCut = round2(unit + SEAM);
+    const hstCut = round2(unit + HST_EXTRA);
+    const qstCut = round2(unit + 1.25);
+    const gooseCut = round2(2 * unit + 1.25);
+    const gooseSkyCut = round2(unit + HST_EXTRA);
+
+    notes.push(
+      `Your block is a ${grid}×${grid} grid, so each grid square finishes at ${unit.toFixed(2)}".`,
+    );
+    if (usingB) {
+      notes.push(
+        `Two-block set: cut ${evenCount} of Block A and ${oddCount} of Block B, then alternate them across the quilt like a checkerboard (Block A in the top-left corner).`,
+      );
+    } else if (swapping && pair) {
+      notes.push(
+        `Alternate blocks: piece ${evenCount} blocks as drawn, and ${oddCount} blocks with Fabric ${pair[0]} and Fabric ${pair[1]} swapped. Set them out checkerboard style, starting with an "as drawn" block in the top-left corner.`,
+      );
+    }
+
+    // ---- Solid squares -----------------------------------------------------
+    for (const [fab, count] of Object.entries(tally.squares)) {
+      if (count <= 0) continue;
+      const f = fab as FabricKey;
+      addSquares(reqs[f], "Plain squares", count, sqCut, s.fabricWidth);
+      notes.push(
+        `Plain squares: cut ${count} squares of Fabric ${f} at ${sqCut.toFixed(2)}" (finishes ${unit.toFixed(2)}").`,
+      );
+    }
+
+    // ---- Half-square triangles (2-at-a-time) -------------------------------
+    for (const [k, units] of Object.entries(tally.hst)) {
+      if (units <= 0) continue;
+      const [a, b] = k.split("|") as [FabricKey, FabricKey];
+      const squaresEach = Math.ceil(units / 2);
+      if (a === b) {
+        addSquares(reqs[a], "HST starting squares", squaresEach * 2, hstCut, s.fabricWidth);
+      } else {
+        addSquares(reqs[a], "HST starting squares", squaresEach, hstCut, s.fabricWidth);
+        addSquares(reqs[b], "HST starting squares", squaresEach, hstCut, s.fabricWidth);
+      }
+      notes.push(
+        `Half-square triangles (Fabric ${a} + Fabric ${b}): you need ${units} HST units. Cut ${squaresEach} squares of each fabric at ${hstCut.toFixed(2)}". Pair them right sides together (RST), draw a line corner to corner on the back of the lighter square, sew 1/4" from BOTH sides of that line, cut on the line and press — 2 HSTs per pair. Trim each to ${sqCut.toFixed(2)}" square.`,
+      );
+    }
+
+    // ---- Hourglass / quarter-square triangles ------------------------------
+    for (const [k, halves] of Object.entries(tally.qstHalves)) {
+      if (halves <= 0) continue;
+      const [a, b] = k.split("|") as [FabricKey, FabricKey];
+      const hstUnits = Math.ceil(halves / 2);
+      const squaresEach = Math.ceil(hstUnits / 2);
+      if (a === b) {
+        addSquares(reqs[a], "Hourglass starting squares", squaresEach * 2, qstCut, s.fabricWidth);
+      } else {
+        addSquares(reqs[a], "Hourglass starting squares", squaresEach, qstCut, s.fabricWidth);
+        addSquares(reqs[b], "Hourglass starting squares", squaresEach, qstCut, s.fabricWidth);
+      }
+      notes.push(
+        `Hourglass halves (Fabric ${a} + Fabric ${b}): cut ${squaresEach} squares of each fabric at ${qstCut.toFixed(2)}" — these are cut LARGER than a plain HST because the unit gets cut a second time. Make ${hstUnits} HSTs from them the same 2-at-a-time way, then lay two HSTs right sides together with opposite fabrics facing, seams nested, and cut on the diagonal that crosses the first seam. Sew each pair to make an hourglass and trim to ${sqCut.toFixed(2)}" square.`,
+      );
+    }
+
+    // ---- Flying geese (4-at-a-time, no waste) ------------------------------
+    for (const [k, units] of Object.entries(tally.geese)) {
+      if (units <= 0) continue;
+      const [goose, sky] = k.split("|") as [FabricKey, FabricKey];
+      const sets = Math.ceil(units / 4);
+      addSquares(reqs[goose], "Flying geese — large squares", sets, gooseCut, s.fabricWidth);
+      addSquares(reqs[sky], "Flying geese — corner squares", sets * 4, gooseSkyCut, s.fabricWidth);
+      notes.push(
+        `Flying geese (goose Fabric ${goose}, sky Fabric ${sky}): you need ${units} geese, each finishing ${(2 * unit).toFixed(2)}" × ${unit.toFixed(2)}". Cut ${sets} large squares of Fabric ${goose} at ${gooseCut.toFixed(2)}" and ${sets * 4} small squares of Fabric ${sky} at ${gooseSkyCut.toFixed(2)}". Each set of one large + four small squares makes 4 geese with no waste.`,
+      );
+    }
+
+    notes.push(
+      `Block assembly: sew the units of each row together left to right, press the seams in opposite directions row to row, then join the ${grid} rows. Every finished block should measure ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "Y") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
+  }
+
   // Border
   if (s.borderWidth > 0) {
     // Sashing runs only BETWEEN blocks (not around the outer perimeter), so the
@@ -4128,7 +4273,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "tulip-lady-fingers" ||
     s.pattern === "weathervane" ||
     s.pattern === "alaska-homestead" ||
-    s.pattern === "blazing-arrows";
+    s.pattern === "blazing-arrows" ||
+    s.pattern === "custom-block";
   // Block-setting note. Rotation-only settings never change piece counts —
   // they only change how the finished blocks are turned when the top is
   // assembled — so this is purely an assembly instruction.
