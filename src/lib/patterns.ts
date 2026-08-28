@@ -1753,7 +1753,24 @@ const BASE_PATTERNS: PatternDefBase[] = [
       { ...borderSection, defaultFabric: "D" },
     ],
   },
+  {
+    id: "custom-block",
+    name: "Design Your Own Block",
+    hasMath: true,
+    intro:
+      "Draw your own block on a grid from 2×2 up to 8×8 using solid squares, half-square triangles, hourglass (quarter-square) units and flying geese. QuiltButler works out the cutting list, yardage and sewing order from whatever you draw — then you can vary how the block is set across the quilt.",
+    sections: [
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "Y",
+        hint: "Optional strips of fabric that separate each block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "Z" },
+    ],
+  },
 ];
+
 
 /**
  * Filter metadata for every pattern, kept in one table so it can be audited
