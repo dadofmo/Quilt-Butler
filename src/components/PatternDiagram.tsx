@@ -4,6 +4,8 @@ import { fabricFill } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
+import { CustomBlockShapes } from "./CustomBlockSvg";
+import type { CustomBlockDesign } from "@/lib/custom-block";
 
 interface Props {
   pattern: PatternId;
@@ -11,6 +13,8 @@ interface Props {
   hasBorder: boolean;
   size?: number;
   photos?: Partial<Record<FabricKey, string>>;
+  /** Required when `pattern` is "custom-block": the user's own design. */
+  customBlock?: CustomBlockDesign | null;
 }
 
 /**
@@ -32,7 +36,7 @@ function fillFor(
   return fabricFill(f, photos);
 }
 
-export function PatternDiagram({ pattern, assignments, hasBorder, size = 280, photos }: Props) {
+export function PatternDiagram({ pattern, assignments, hasBorder, size = 280, photos, customBlock }: Props) {
   const def = getPattern(pattern);
   const borderDefault = (def?.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey;
   const borderKey = (assignments["border"] ?? borderDefault) as FabricKey;
@@ -67,7 +71,9 @@ export function PatternDiagram({ pattern, assignments, hasBorder, size = 280, ph
               log shows the fabric, and the same strip looks identical in
               every block of the full quilt. */}
           <FabricPatternDefs photos={photos} />
-          {renderInner(pattern, assignments, photos)}
+          {pattern === "custom-block"
+            ? customBlock && <CustomBlockShapes design={customBlock} photos={photos} />
+            : renderInner(pattern, assignments, photos)}
         </svg>
       </div>
     </div>
