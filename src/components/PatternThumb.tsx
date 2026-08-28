@@ -19,6 +19,8 @@ const C = {
 
 
 const PATTERN_ALT: Record<PatternId, string> = {
+  "custom-block":
+    "Preview of the quilt block you designed yourself in the block editor",
   "nine-patch":
     "Nine Patch quilt block diagram showing 3x3 checkerboard grid layout",
   hst: "Half Square Triangle quilt block diagram showing diagonal triangle layout",
