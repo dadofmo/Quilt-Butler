@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
+import { CustomBlockShapes } from "./CustomBlockSvg";
+import { swapFabrics, type CustomBlockDesign } from "@/lib/custom-block";
 import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock } from "./PatternDiagram";
 
 interface Props {
@@ -39,6 +41,14 @@ interface Props {
   /** Chosen block-rotation setting (patterns that opt in via
    *  `PatternDef.layouts`). Rotation only — never changes piece counts. */
   blockLayout?: BlockLayout;
+  /** "custom-block" only: the user's Block A design. */
+  customBlock?: CustomBlockDesign | null;
+  /** "custom-block" only: optional Block B for a two-block alternating set. */
+  customBlockB?: CustomBlockDesign | null;
+  /** "custom-block" only: when true (and Block B exists) A/B alternate. */
+  useBlockB?: boolean;
+  /** "custom-block" only: the fabric pair swapped on every other block. */
+  customSwapPair?: [FabricKey, FabricKey] | null;
 }
 
 export function QuiltLayoutPreview({
@@ -57,6 +67,10 @@ export function QuiltLayoutPreview({
   photos,
   alternateBlocks = false,
   blockLayout = "straight",
+  customBlock = null,
+  customBlockB = null,
+  useBlockB = false,
+  customSwapPair = null,
 }: Props) {
   const blockCount = blocksAcross * blocksDown;
   const [fullOpen, setFullOpen] = useState(false);
@@ -104,6 +118,7 @@ export function QuiltLayoutPreview({
         hasBorder={false}
         size={size}
         photos={photos}
+        customBlock={customBlock}
       />
     );
 
@@ -124,6 +139,10 @@ export function QuiltLayoutPreview({
     photos,
     alternateBlocks,
     blockLayout,
+    customBlock,
+    customBlockB,
+    useBlockB,
+    customSwapPair,
   };
 
   return (
@@ -247,6 +266,10 @@ interface CanvasProps {
   photos?: Partial<Record<FabricKey, string>>;
   alternateBlocks: boolean;
   blockLayout: BlockLayout;
+  customBlock?: CustomBlockDesign | null;
+  customBlockB?: CustomBlockDesign | null;
+  useBlockB?: boolean;
+  customSwapPair?: [FabricKey, FabricKey] | null;
 }
 
 /**
@@ -271,6 +294,10 @@ export function QuiltCanvas({
   photos,
   alternateBlocks,
   blockLayout,
+  customBlock = null,
+  customBlockB = null,
+  useBlockB = false,
+  customSwapPair = null,
   maxSize,
 }: CanvasProps & { maxSize: number }) {
   const MAX = maxSize;
@@ -389,6 +416,17 @@ export function QuiltCanvas({
             const cabinUniform =
               pattern === "cabin-in-the-cotton" && !!alternateBlocks;
             const swap = snowballSwap || shooflySwap || sopSwap || altSwap || cabinUniform;
+            // Custom blocks carry their variation in the design itself: an
+            // optional Block B on alternating cells, and/or a two-fabric swap
+            // on alternating cells. Rotation is handled above like any other
+            // pattern, so piece counts never change here.
+            let cellDesign: CustomBlockDesign | null = customBlock;
+            if (pattern === "custom-block" && (i + j) % 2 === 1) {
+              if (useBlockB && customBlockB) cellDesign = customBlockB;
+              if (alternateBlocks && customSwapPair && cellDesign) {
+                cellDesign = swapFabrics(cellDesign, customSwapPair[0], customSwapPair[1]);
+              }
+            }
             return (
               <svg
                 key={`${i}-${j}`}
@@ -409,6 +447,7 @@ export function QuiltCanvas({
                       swap={swap}
                       row={j}
                       col={i}
+                      customDesign={cellDesign}
                     />
                   </g>
                 ) : (
@@ -420,6 +459,7 @@ export function QuiltCanvas({
                     swap={swap}
                     row={j}
                     col={i}
+                    customDesign={cellDesign}
                   />
                 )}
               </svg>
@@ -461,6 +501,7 @@ function MiniBlock({
   swap,
   row = 0,
   col = 0,
+  customDesign,
 }: {
   pattern: PatternId;
   assignments: SectionAssignments;
@@ -474,6 +515,8 @@ function MiniBlock({
    *  "Cabin in the Cotton" to alternate the outer-ring fabric (D vs E). */
   row?: number;
   col?: number;
+  /** "custom-block" only: the design to draw in THIS cell (already varied). */
+  customDesign?: CustomBlockDesign | null;
 }) {
   // Fallback resolves through the pattern definition (single source of truth
   // in src/lib/patterns.ts) before the literal — so a section's defaultFabric
@@ -483,6 +526,10 @@ function MiniBlock({
     const sectionDefault = def?.sections.find((s) => s.id === k)?.defaultFabric;
     return fabricFill((assignments[k] ?? sectionDefault ?? fb) as FabricKey, photos);
   };
+
+  if (pattern === "custom-block") {
+    return customDesign ? <CustomBlockShapes design={customDesign} photos={photos} /> : null;
+  }
 
   switch (pattern) {
     case "simple-squares": {

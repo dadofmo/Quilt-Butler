@@ -1753,7 +1753,24 @@ const BASE_PATTERNS: PatternDefBase[] = [
       { ...borderSection, defaultFabric: "D" },
     ],
   },
+  {
+    id: "custom-block",
+    name: "Design Your Own Block",
+    hasMath: true,
+    intro:
+      "Draw your own block on a grid from 2×2 up to 8×8 using solid squares, half-square triangles, hourglass (quarter-square) units and flying geese. QuiltButler works out the cutting list, yardage and sewing order from whatever you draw — then you can vary how the block is set across the quilt.",
+    sections: [
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "Y",
+        hint: "Optional strips of fabric that separate each block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "Z" },
+    ],
+  },
 ];
+
 
 /**
  * Filter metadata for every pattern, kept in one table so it can be audited
@@ -1812,7 +1829,12 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "wishing-ring": { skill: "confident", fabricCount: 2, techniques: ["hst", "squares"] },
   "alaska-homestead": { skill: "confident", fabricCount: 3, techniques: ["hst", "squares"] },
   "blazing-arrows": { skill: "intermediate", fabricCount: 2, techniques: ["hst", "geese"] },
+  // Metadata for the user-designed block is nominal: the real fabric count and
+  // techniques depend on what the user draws, and the tile is surfaced through
+  // its own entry point rather than the filterable pattern grid.
+  "custom-block": { skill: "confident", fabricCount: 2, techniques: ["squares", "hst", "geese"] },
 };
+
 
 const FALLBACK_META: PatternMeta = { skill: "confident", fabricCount: 3, techniques: ["squares"] };
 
@@ -1869,6 +1891,9 @@ export function getEffectiveBorderDefault(
   hasSashing: boolean,
   hasCornerstones: boolean,
 ): FabricKey {
+  // The custom block owns A–X for its own pieces, so the border always sits
+  // in the reserved Z slot (sashing takes Y).
+  if (pattern.id === "custom-block") return "Z";
   const order: FabricKey[] = ALL_FABRIC_KEYS;
   const used = new Set<FabricKey>();
   pattern.sections.forEach((s) => {
