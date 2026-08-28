@@ -1891,6 +1891,9 @@ export function getEffectiveBorderDefault(
   hasSashing: boolean,
   hasCornerstones: boolean,
 ): FabricKey {
+  // The custom block owns A–X for its own pieces, so the border always sits
+  // in the reserved Z slot (sashing takes Y).
+  if (pattern.id === "custom-block") return "Z";
   const order: FabricKey[] = ALL_FABRIC_KEYS;
   const used = new Set<FabricKey>();
   pattern.sections.forEach((s) => {
