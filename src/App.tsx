@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import PatternPickerPage from "./pages/PatternPickerPage";
+const DesignBlockPage = lazy(() => import("./pages/DesignBlockPage"));
 const SizePage = lazy(() => import("./pages/SizePage"));
 const FabricsPage = lazy(() => import("./pages/FabricsPage"));
 const ResultsPage = lazy(() => import("./pages/ResultsPage"));
