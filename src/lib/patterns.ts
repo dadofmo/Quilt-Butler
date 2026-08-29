@@ -1838,14 +1838,26 @@ export const PATTERN_META: Record<string, PatternMeta> = {
 
 const FALLBACK_META: PatternMeta = { skill: "confident", fabricCount: 3, techniques: ["squares"] };
 
-export const PATTERNS: PatternDef[] = BASE_PATTERNS.map((p) => ({
+/** Id of the user-designed block. It lives in the registry (so the calculator,
+ *  diagrams and results page can resolve it like any other pattern) but is NOT
+ *  part of the browsable pattern grid — it has its own entry point. */
+export const CUSTOM_BLOCK_ID = "custom-block" as const;
+
+const ALL_PATTERNS: PatternDef[] = BASE_PATTERNS.map((p) => ({
   ...p,
   ...(PATTERN_META[p.id] ?? FALLBACK_META),
 }));
 
+/** Every browsable pattern — what the picker grid and filters iterate. */
+export const PATTERNS: PatternDef[] = ALL_PATTERNS.filter((p) => p.id !== CUSTOM_BLOCK_ID);
+
+/** The user-designed block definition. */
+export const CUSTOM_BLOCK_PATTERN: PatternDef =
+  ALL_PATTERNS.find((p) => p.id === CUSTOM_BLOCK_ID)!;
+
 export function getPattern(id: PatternId | null): PatternDef | null {
   if (!id) return null;
-  return PATTERNS.find((p) => p.id === id) ?? null;
+  return ALL_PATTERNS.find((p) => p.id === id) ?? null;
 }
 
 /**

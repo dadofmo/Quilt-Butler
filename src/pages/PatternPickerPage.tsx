@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { PatternThumb } from "@/components/PatternThumb";
-import { PATTERNS, getPattern } from "@/lib/patterns";
+import { PATTERNS, CUSTOM_BLOCK_ID, getPattern } from "@/lib/patterns";
 import { setPlanner } from "@/lib/planner-store";
 import { UnlockModal } from "@/components/UnlockModal";
 import { isUnlocked } from "@/lib/license";
@@ -56,7 +56,7 @@ export default function PatternPicker() {
 
 function PatternPickerInner() {
   const navigate = useNavigate();
-  const [pendingPattern, setPendingPattern] = useState<(typeof PATTERNS)[number]["id"] | null>(null);
+  const [pendingPattern, setPendingPattern] = useState<import("@/lib/planner-store").PatternId | null>(null);
 
   // Filter state lives in the URL so a filtered view is shareable and survives
   // navigating back from Step 2.
@@ -67,7 +67,7 @@ function PatternPickerInner() {
   const visible = useMemo(() => filterPatterns(PATTERNS, filters), [filters]);
 
 
-  const choose = (id: (typeof PATTERNS)[number]["id"]) => {
+  const choose = (id: import("@/lib/planner-store").PatternId) => {
     const pattern = getPattern(id);
     if (!pattern) return;
     const assignments: Record<string, import("@/lib/planner-store").FabricKey> = {};
@@ -80,10 +80,12 @@ function PatternPickerInner() {
       assignments[s.id] = s.defaultFabric;
     });
     setPlanner({ pattern: id, assignments });
-    navigate("/size");
+    // The custom block is drawn first, then sized — everything else starts
+    // with the quilt size.
+    navigate(id === CUSTOM_BLOCK_ID ? "/design" : "/size");
   };
 
-  const handleTileClick = (id: (typeof PATTERNS)[number]["id"]) => {
+  const handleTileClick = (id: import("@/lib/planner-store").PatternId) => {
     if (isUnlocked(id)) {
       choose(id);
     } else {
@@ -108,6 +110,27 @@ function PatternPickerInner() {
       </div>
       <h1 className="text-foreground text-2xl font-semibold sm:text-3xl">Pick a quilt pattern</h1>
       <p className="text-muted-foreground mt-2 text-base">Tap a tile to start planning your quilt.</p>
+
+      {/* Design-your-own entry point — deliberately outside the grid and the
+          filters: it isn't a fixed pattern, it's the block editor. */}
+      <button
+        onClick={() => handleTileClick(CUSTOM_BLOCK_ID)}
+        className="border-primary/60 bg-primary/5 hover:border-primary mt-6 flex w-full items-center gap-4 rounded-xl border-2 border-dashed p-4 text-left transition-colors"
+      >
+        <span className="bg-background flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border-2 border-border text-2xl">
+          ✎
+        </span>
+        <span>
+          <span className="text-foreground block text-base font-semibold">
+            Design your own block
+          </span>
+          <span className="text-muted-foreground block text-sm leading-snug">
+            Draw your own block on a 2×2 to 8×8 grid using squares, half-square
+            triangles, quarter-square triangles and flying geese — then get the
+            exact yardage, cutting list and sewing steps.
+          </span>
+        </span>
+      </button>
 
       <PatternFilterBar
         state={filters}
