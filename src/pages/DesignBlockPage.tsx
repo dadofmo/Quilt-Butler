@@ -12,12 +12,10 @@ import {
   REGION_LABELS,
   ROTATION_STEPS,
   UNIT_LABEL,
-  canPlace,
   cellsCovered,
   emptyDesign,
   key,
   occupancy,
-  parseKey,
   resizeDesign,
   validateDesign,
   type CustomBlockDesign,
@@ -338,29 +336,22 @@ function previewDesign(
     rotation: kind === "square" ? 0 : rotation,
     fabrics: fabrics.slice(0, REGION_COUNT[kind]),
   };
-  if (kind === "geese") {
-    // Draw geese in a 2×2 so both orientations fit the thumbnail.
-    const cells: Record<string, CustomCell> = { [key(0, 0)] = undefined as never };
-    return { size: 2, cells: buildGeesePreview(cell) };
-  }
+  // Geese cover two cells, so draw them in a 2x2 and fill the rest with sky.
+  if (kind === "geese") return { size: 2, cells: buildGeesePreview(cell) };
   return { size: 1, cells: { [key(0, 0)]: cell } };
 }
 
 function buildGeesePreview(cell: CustomCell): Record<string, CustomCell> {
   const cells: Record<string, CustomCell> = { [key(0, 0)]: cell };
-  for (const [r, c] of [
-    [0, 0],
-    [0, 1],
-    [1, 0],
-    [1, 1],
-  ] as Array<[number, number]>) {
-    if (cellsCovered(0, 0, cell).some(([rr, cc]) => rr === r && cc === c)) continue;
+  const covered = cellsCovered(0, 0, cell);
+  for (const [r, c] of [[0, 0], [0, 1], [1, 0], [1, 1]] as Array<[number, number]>) {
+    if (covered.some(([rr, cc]) => rr === r && cc === c)) continue;
     cells[key(r, c)] = { kind: "square", rotation: 0, fabrics: [cell.fabrics[1] ?? "B"] };
   }
   return cells;
 }
 
-/** Wrapper that keeps the collision rules in one place. */
+/** A unit may overwrite whatever is already there — it only has to fit. */
 function canPlaceHere(
   design: CustomBlockDesign,
   r: number,
@@ -368,16 +359,8 @@ function canPlaceHere(
   kind: UnitKind,
   rotation: Rotation,
 ): boolean {
-  // A unit may always overwrite whatever is already there — the only real
-  // constraint is that it fits inside the grid.
   const probe: CustomCell = { kind, rotation, fabrics: [] };
   return cellsCovered(r, c, probe).every(
     ([rr, cc]) => rr >= 0 && cc >= 0 && rr < design.size && cc < design.size,
   );
 }
-
-// Keep the imports honest — canPlace/parseKey are part of the model's public
-// surface and used by the yardage layer; referenced here so lint stays quiet
-// about the shared module contract.
-void canPlace;
-void parseKey;
