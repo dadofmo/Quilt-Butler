@@ -9,10 +9,12 @@ import {
   ALL_FABRIC_KEYS,
   setPlanner,
   usePlanner,
+  type BlockLayout,
   type FabricKey,
 } from "@/lib/planner-store";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { FabricSwatchOption } from "@/components/FabricSwatchOption";
+import { distinctRotations, fabricsUsed, isFullyRotationSymmetric } from "@/lib/custom-block";
 import { getPattern, fabricsForPattern, getEffectiveBorderDefault, patternHasSashingSection } from "@/lib/patterns";
 
 export default function FabricsStep() {
@@ -44,6 +46,16 @@ function FabricsStepInner() {
     );
   }
 
+  if (pattern.id === "custom-block" && !planner.customBlock) {
+    return (
+      <StepShell step={3} title="Design your block first" backTo="/">
+        <Link to="/design" className="text-primary underline">
+          Open the block editor
+        </Link>
+      </StepShell>
+    );
+  }
+
   const hasBorder = planner.borderWidth > 0;
   const isBearPawPattern = pattern.id === "bear-paw";
   const isNinePatchPattern = pattern.id === "nine-patch";
@@ -64,6 +76,8 @@ function FabricsStepInner() {
   const isFourPatchPattern = pattern.id === "four-patch";
   const isStreakPattern = pattern.id === "streak-of-lightning";
   const isBowTiePattern = pattern.id === "bow-tie";
+  const isCustomPattern = pattern.id === "custom-block";
+  const customFabrics = fabricsUsed(planner.customBlock);
   const hasSashing = patternHasSashingSection(pattern) && (planner.sashingWidth || 0) > 0;
   const hasCornerstonesSection = isBearPawPattern && hasSashing;
   const sections = pattern.sections.filter((s) => {
@@ -253,6 +267,10 @@ function FabricsStepInner() {
                   photos={planner.fabricPhotos}
                   alternateBlocks={planner.alternateBlocks}
                   blockLayout={planner.blockLayout}
+                  customBlock={planner.customBlock}
+                  customBlockB={planner.customBlockB}
+                  useBlockB={planner.useBlockB}
+                  customSwapPair={planner.customSwapPair}
                 />
                 <p className="text-muted-foreground mt-4 text-center text-xs leading-relaxed">
                   You&apos;re designing <strong>one block</strong>. That block will be sewn{" "}
@@ -269,7 +287,17 @@ function FabricsStepInner() {
                     full-quilt preview above updates live as the user toggles.
                     Whatever is selected here is what the yardage, cutting list
                     and sewing steps use on the results page. */}
-                {pattern.supportsAlternate && (
+                {isCustomPattern && (
+                  <CustomVariationControls
+                    fabrics={customFabrics}
+                    swapPair={planner.customSwapPair}
+                    alternate={!!planner.alternateBlocks}
+                    useBlockB={!!planner.useBlockB}
+                    hasBlockB={!!planner.customBlockB}
+                  />
+                )}
+
+                {pattern.supportsAlternate && !isCustomPattern && (
                   <label
                     className={`mt-4 flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 transition-colors ${
                       planner.alternateBlocks
@@ -334,7 +362,22 @@ function FabricsStepInner() {
                     Rotation only: piece counts, cutting list and yardage are
                     untouched, so patterns whose secondary design relies on a
                     fixed tiling simply never declare `layouts`. */}
-                {pattern.layouts && pattern.layouts.length > 0 && (
+                {isCustomPattern && !isFullyRotationSymmetric(planner.customBlock) && (
+                  <BlockLayoutPicker
+                    pattern={pattern.id}
+                    assignments={planner.assignments}
+                    photos={planner.fabricPhotos}
+                    options={customLayoutOptions(distinctRotations(planner.customBlock).length)}
+                    value={planner.blockLayout}
+                    onChange={(next) => setPlanner({ blockLayout: next })}
+                    customBlock={planner.customBlock}
+                    customBlockB={planner.customBlockB}
+                    useBlockB={planner.useBlockB}
+                    customSwapPair={planner.customSwapPair}
+                  />
+                )}
+
+                {!isCustomPattern && pattern.layouts && pattern.layouts.length > 0 && (
                   <BlockLayoutPicker
                     pattern={pattern.id}
                     assignments={planner.assignments}
@@ -364,6 +407,9 @@ function FabricsStepInner() {
             // For patchwork patterns, only show border + sashing pickers here
             // (the squares section is driven by the tap-to-cycle preview above).
             if (isPatchwork && s.id !== "border" && s.id !== "sashing") return null;
+            // Custom blocks get their block fabrics in the editor — only the
+            // sashing and border are assigned here.
+            if (isCustomPattern && s.id !== "border" && s.id !== "sashing") return null;
             // Cabin in the Cotton with "same block everywhere" on: the second
             // outer-ring fabric is unused, so don't ask for it.
             if (
@@ -378,11 +424,17 @@ function FabricsStepInner() {
             // patchwork palette; for other patterns it's the pattern's fabrics.
             const isBorder = s.id === "border";
             const isSashingSection = s.id === "sashing";
-            const blockFabrics = isPatchwork ? palette : blockOnlyFabrics;
+            const blockFabrics = isPatchwork
+              ? palette
+              : isCustomPattern
+                ? customFabrics
+                : blockOnlyFabrics;
             const nextAccent = ALL_FABRIC_KEYS.find((f) => !blockFabrics.includes(f));
             const choices = (isBorder || isSashingSection)
               ? (nextAccent ? [...blockFabrics, nextAccent] : blockFabrics)
-              : blockOnlyFabrics;
+              : isCustomPattern
+                ? customFabrics
+                : blockOnlyFabrics;
             return (
               <div key={s.id} className="bg-card rounded-xl border-2 border-border p-4">
                 <div className="text-foreground mb-1 text-base font-semibold">{s.label}</div>
@@ -422,5 +474,142 @@ function FabricsStepInner() {
           </button>
         </div>
     </StepShell>
+  );
+}
+
+
+/** Layout settings offered for a custom block, based on how many of its four
+ *  quarter turns actually look different. */
+function customLayoutOptions(distinct: number): BlockLayout[] {
+  if (distinct <= 1) return ["straight"];
+  if (distinct === 2) return ["straight", "alternating"];
+  return ["straight", "alternating", "barn-raising", "herringbone"];
+}
+
+/**
+ * Variation controls for a user-designed block: alternate a second block, and
+ * / or swap a pair of fabrics on every other block. Both are checkerboard
+ * alternations, so no two touching blocks match.
+ */
+function CustomVariationControls({
+  fabrics,
+  swapPair,
+  alternate,
+  useBlockB,
+  hasBlockB,
+}: {
+  fabrics: FabricKey[];
+  swapPair: [FabricKey, FabricKey] | null;
+  alternate: boolean;
+  useBlockB: boolean;
+  hasBlockB: boolean;
+}) {
+  return (
+    <div className="mt-4 space-y-3">
+      <div className="rounded-xl border-2 border-input bg-card p-4">
+        <div className="text-base font-medium">Vary your blocks</div>
+        <p className="text-muted-foreground mt-1 text-xs leading-snug">
+          A quilt of identical blocks is only one option. Alternate a second
+          block, swap two fabrics on every other block, or turn your blocks as
+          you sew the rows — every choice below flows through to your cutting
+          list and yardage.
+        </p>
+
+        <label className="mt-3 flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={useBlockB && hasBlockB}
+            disabled={!hasBlockB}
+            onChange={(e) => setPlanner({ useBlockB: e.target.checked })}
+            className="mt-1 h-5 w-5 shrink-0 accent-current disabled:opacity-40"
+          />
+          <span>
+            <span className="block text-sm font-medium">
+              Alternate Block A and Block B
+            </span>
+            <span className="text-muted-foreground block text-xs leading-snug">
+              {hasBlockB ? (
+                <>
+                  Your two blocks alternate like a checkerboard.{" "}
+                  <Link to="/design" className="text-primary underline">
+                    Edit your blocks
+                  </Link>
+                  .
+                </>
+              ) : (
+                <>
+                  You haven&apos;t drawn a Block B yet —{" "}
+                  <Link to="/design" className="text-primary underline">
+                    add one in the block editor
+                  </Link>
+                  .
+                </>
+              )}
+            </span>
+          </span>
+        </label>
+
+        <label className="mt-4 flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            checked={alternate && !!swapPair}
+            disabled={fabrics.length < 2}
+            onChange={(e) =>
+              setPlanner({
+                alternateBlocks: e.target.checked,
+                customSwapPair:
+                  e.target.checked && !swapPair
+                    ? [fabrics[0], fabrics[1]]
+                    : swapPair,
+              })
+            }
+            className="mt-1 h-5 w-5 shrink-0 accent-current disabled:opacity-40"
+          />
+          <span>
+            <span className="block text-sm font-medium">
+              Swap two fabrics on every other block
+            </span>
+            <span className="text-muted-foreground block text-xs leading-snug">
+              Pick a pair and they trade places on alternating blocks — the same
+              block, sewn in reversed colours.
+            </span>
+          </span>
+        </label>
+
+        {alternate && fabrics.length >= 2 && (
+          <div className="mt-3 flex flex-wrap items-center gap-2 pl-8">
+            {[0, 1].map((slot) => (
+              <select
+                key={slot}
+                value={(swapPair?.[slot] ?? fabrics[slot]) as string}
+                onChange={(e) => {
+                  const next: [FabricKey, FabricKey] = [
+                    (swapPair?.[0] ?? fabrics[0]) as FabricKey,
+                    (swapPair?.[1] ?? fabrics[1]) as FabricKey,
+                  ];
+                  next[slot] = e.target.value as FabricKey;
+                  setPlanner({ customSwapPair: next });
+                }}
+                className="border-input bg-background rounded-md border-2 px-2 py-1 text-sm"
+                aria-label={slot === 0 ? "First fabric to swap" : "Second fabric to swap"}
+              >
+                {fabrics.map((f) => (
+                  <option key={f} value={f}>
+                    Fabric {f}
+                  </option>
+                ))}
+              </select>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Link
+        to="/design"
+        className="text-primary block text-center text-sm font-semibold underline underline-offset-2"
+      >
+        Edit your block design
+      </Link>
+    </div>
   );
 }

@@ -6,6 +6,7 @@ import type {
 } from "@/lib/planner-store";
 import { LAYOUT_HINTS, LAYOUT_LABELS } from "@/lib/block-layouts";
 import { QuiltCanvas } from "./QuiltLayoutPreview";
+import type { CustomBlockDesign } from "@/lib/custom-block";
 
 interface Props {
   pattern: PatternId;
@@ -15,6 +16,11 @@ interface Props {
   options: BlockLayout[];
   value: BlockLayout;
   onChange: (next: BlockLayout) => void;
+  /** "custom-block" only — the user's design(s), passed to each thumbnail. */
+  customBlock?: CustomBlockDesign | null;
+  customBlockB?: CustomBlockDesign | null;
+  useBlockB?: boolean;
+  customSwapPair?: [FabricKey, FabricKey] | null;
 }
 
 /**
@@ -29,6 +35,10 @@ export function BlockLayoutPicker({
   options,
   value,
   onChange,
+  customBlock = null,
+  customBlockB = null,
+  useBlockB = false,
+  customSwapPair = null,
 }: Props) {
   return (
     <div className="mt-4 rounded-xl border-2 border-input bg-card p-4">
@@ -66,6 +76,10 @@ export function BlockLayoutPicker({
                 photos={photos}
                 alternateBlocks={false}
                 blockLayout={opt}
+                customBlock={customBlock}
+                customBlockB={customBlockB}
+                useBlockB={useBlockB}
+                customSwapPair={customSwapPair}
                 maxSize={84}
               />
               <span className="text-xs font-medium leading-tight">
