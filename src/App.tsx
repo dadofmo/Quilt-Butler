@@ -65,6 +65,7 @@ export default function App() {
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<PatternPickerPage />} />
+            <Route path="/design" element={<DesignBlockPage />} />
             <Route path="/size" element={<SizePage />} />
             <Route path="/fabrics" element={<FabricsPage />} />
             <Route path="/results" element={<ResultsPage />} />
