@@ -179,9 +179,11 @@ function DesignBlockInner() {
           </span>
         </div>
         <p className="text-muted-foreground mt-2 text-xs leading-snug">
-          Each cell finishes at {(planner.blockSize / design.size).toFixed(2)}&quot; in your{" "}
-          {planner.blockSize}&quot; block.
+          {planner.blockSize > 0
+            ? `Each cell finishes at ${(planner.blockSize / design.size).toFixed(2)}" in your ${planner.blockSize}" block.`
+            : `Your block is split into ${design.size} × ${design.size} equal cells. You'll pick the finished block size on the next step.`}
         </p>
+
       </div>
 
       {/* Tool palette */}
