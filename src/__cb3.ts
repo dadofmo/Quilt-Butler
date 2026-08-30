@@ -1,0 +1,11 @@
+import { calculateYardage } from "@/lib/yardage";
+import { emptyDesign, key } from "@/lib/custom-block";
+const d = emptyDesign(4, "A");
+d.cells[key(0,0)] = { kind:"hst", rotation:0, fabrics:["A","B"] };
+const s:any = { pattern:"custom-block", quiltWidth:60, quiltHeight:72, blockSize:12, borderWidth:4, sashingWidth:0, fabricWidth:42, safetyBuffer:0.1, assignments:{}, fabricPhotos:{}, alternateBlocks:false, blockLayout:"straight", customBlock:d, customBlockB:null, useBlockB:false, customSwapPair:null, fabricSource:"yardage", pricePerYard:"", itemPrices:{}, patchworkFabricCount:4, patchworkGrid:{}, jellyRollStripCount:40, fatQuarterWidth:18, fatQuarterHeight:21, fatQuarterTrimMargin:0.5, fatQuarterCount:20, battingType:"cotton" };
+const r:any = calculateYardage(s);
+const bad:string[] = [];
+const walk=(o:any,p:string)=>{ if(o==null) return; if(typeof o==="number"){ if(!Number.isFinite(o)||o>100000) bad.push(p+"="+o); return;} if(typeof o==="object") for(const k of Object.keys(o)) walk(o[k], p+"."+k); };
+walk(r,"result");
+console.log("BAD:", bad.slice(0,20));
+console.log(Object.keys(r));
