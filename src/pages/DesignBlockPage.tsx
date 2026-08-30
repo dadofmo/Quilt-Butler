@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { CustomBlockSvg } from "@/components/CustomBlockSvg";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
+import { CUSTOM_BLOCK_PATTERN, CUSTOM_BLOCK_ID } from "@/lib/patterns";
 import {
   MIN_GRID,
   MAX_GRID,
@@ -54,6 +55,18 @@ export default function DesignBlockPage() {
 function DesignBlockInner() {
   const planner = usePlanner();
   const navigate = useNavigate();
+
+  // Landing here directly (deep link, refresh) still has to select the
+  // custom pattern and seed its sashing/border defaults.
+  useEffect(() => {
+    if (planner.pattern === CUSTOM_BLOCK_ID) return;
+    const assignments: Record<string, FabricKey> = {};
+    CUSTOM_BLOCK_PATTERN.sections.forEach((sec) => {
+      if (sec.id === "border") return;
+      assignments[sec.id] = sec.defaultFabric;
+    });
+    setPlanner({ pattern: CUSTOM_BLOCK_ID, assignments });
+  }, [planner.pattern]);
 
   const [which, setWhich] = useState<"A" | "B">("A");
   const design =
