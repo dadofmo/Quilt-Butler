@@ -356,7 +356,16 @@ function DesignBlockInner() {
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           <button
             type="button"
-            onClick={() => save(emptyDesign(design.size, regionFabrics[0] ?? "A"))}
+            onClick={undo}
+            disabled={undoStack.length === 0}
+            className="border-input bg-background inline-flex items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Undo2 className="h-4 w-4" aria-hidden />
+            Undo
+          </button>
+          <button
+            type="button"
+            onClick={() => saveWithHistory(emptyDesign(design.size, regionFabrics[0] ?? "A"))}
             className="border-input bg-background rounded-lg border-2 px-4 py-2 text-sm font-semibold"
           >
             Clear the grid
