@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { Undo2 } from "lucide-react";
 import { StepShell } from "@/components/StepShell";
 import { CustomBlockSvg } from "@/components/CustomBlockSvg";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
@@ -98,8 +99,23 @@ function DesignBlockInner() {
   const save = (next: CustomBlockDesign) =>
     setPlanner(which === "A" ? { customBlock: next } : { customBlockB: next });
 
+  // Undo history: snapshots of the design before each change (per block).
+  const [history, setHistory] = useState<Record<"A" | "B", CustomBlockDesign[]>>({ A: [], B: [] });
+  const undoStack = history[which];
 
-  const setSize = (size: number) => save(resizeDesign(design, size));
+  const saveWithHistory = (next: CustomBlockDesign) => {
+    setHistory((h) => ({ ...h, [which]: [...h[which].slice(-49), design] }));
+    save(next);
+  };
+
+  const undo = () => {
+    const prev = undoStack[undoStack.length - 1];
+    if (!prev) return;
+    setHistory((h) => ({ ...h, [which]: h[which].slice(0, -1) }));
+    save(prev);
+  };
+
+  const setSize = (size: number) => saveWithHistory(resizeDesign(design, size));
 
   const paint = (r: number, c: number) => {
     if (!canPlaceHere(design, r, c, kind, rotation)) return;
@@ -117,7 +133,7 @@ function DesignBlockInner() {
       rotation,
       fabrics: regionFabrics.slice(0, REGION_COUNT[kind]),
     };
-    save({ ...design, cells });
+    saveWithHistory({ ...design, cells });
   };
 
   const errors = validateDesign(design);
@@ -340,7 +356,16 @@ function DesignBlockInner() {
         <div className="mt-4 flex flex-wrap justify-center gap-2">
           <button
             type="button"
-            onClick={() => save(emptyDesign(design.size, regionFabrics[0] ?? "A"))}
+            onClick={undo}
+            disabled={undoStack.length === 0}
+            className="border-input bg-background inline-flex items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Undo2 className="h-4 w-4" aria-hidden />
+            Undo
+          </button>
+          <button
+            type="button"
+            onClick={() => saveWithHistory(emptyDesign(design.size, regionFabrics[0] ?? "A"))}
             className="border-input bg-background rounded-lg border-2 px-4 py-2 text-sm font-semibold"
           >
             Clear the grid
