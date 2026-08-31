@@ -76,8 +76,26 @@ function DesignBlockInner() {
   const [rotation, setRotation] = useState<Rotation>(0);
   const [regionFabrics, setRegionFabrics] = useState<FabricKey[]>(["A", "B", "C", "D"]);
 
+  const setFabricPhoto = (fk: FabricKey, dataUrl: string | null) => {
+    const next = { ...planner.fabricPhotos };
+    if (dataUrl) next[fk] = dataUrl;
+    else delete next[fk];
+    setPlanner({ fabricPhotos: next });
+  };
+
+  const handlePhotoUpload = (fk: FabricKey, file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result === "string") setFabricPhoto(fk, result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const save = (next: CustomBlockDesign) =>
     setPlanner(which === "A" ? { customBlock: next } : { customBlockB: next });
+
 
   const setSize = (size: number) => save(resizeDesign(design, size));
 
