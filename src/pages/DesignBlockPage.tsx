@@ -4,6 +4,8 @@ import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { CustomBlockSvg } from "@/components/CustomBlockSvg";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
+import { FabricSwatchOption } from "@/components/FabricSwatchOption";
+
 import { setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
 import { CUSTOM_BLOCK_PATTERN, CUSTOM_BLOCK_ID } from "@/lib/patterns";
 import {
@@ -76,8 +78,26 @@ function DesignBlockInner() {
   const [rotation, setRotation] = useState<Rotation>(0);
   const [regionFabrics, setRegionFabrics] = useState<FabricKey[]>(["A", "B", "C", "D"]);
 
+  const setFabricPhoto = (fk: FabricKey, dataUrl: string | null) => {
+    const next = { ...planner.fabricPhotos };
+    if (dataUrl) next[fk] = dataUrl;
+    else delete next[fk];
+    setPlanner({ fabricPhotos: next });
+  };
+
+  const handlePhotoUpload = (fk: FabricKey, file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result === "string") setFabricPhoto(fk, result);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const save = (next: CustomBlockDesign) =>
     setPlanner(which === "A" ? { customBlock: next } : { customBlockB: next });
+
 
   const setSize = (size: number) => save(resizeDesign(design, size));
 
@@ -185,6 +205,34 @@ function DesignBlockInner() {
         </p>
 
       </div>
+
+      {/* Fabric palette + photo uploads */}
+      <div className="bg-card mb-6 rounded-xl border-2 border-border p-4">
+        <div className="text-foreground mb-1 text-base font-semibold">Your fabrics</div>
+        <p className="text-muted-foreground mb-3 text-xs leading-snug">
+          Fabrics A–H start as the standard planner colors. If you have the real
+          fabric, upload a photo and it&apos;ll show up in your block, the full-quilt
+          preview and the cutting diagrams.
+        </p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {BLOCK_FABRICS.map((f) => (
+            <FabricSwatchOption
+              key={f}
+              fabricKey={f}
+              selected={regionFabrics.includes(f)}
+              photo={planner.fabricPhotos[f]}
+              onSelect={() => {
+                const next = [...regionFabrics];
+                next[0] = f;
+                setRegionFabrics(next);
+              }}
+              onUpload={(file) => handlePhotoUpload(f, file)}
+              onClear={() => setFabricPhoto(f, null)}
+            />
+          ))}
+        </div>
+      </div>
+
 
       {/* Tool palette */}
       <div className="bg-card mb-6 rounded-xl border-2 border-border p-4">

@@ -393,9 +393,40 @@ function FabricsStepInner() {
         </div>
       )}
 
+      {/* Custom block: the fabrics themselves are chosen in the editor, but
+          photos for them still need to be uploadable here. */}
+      {isCustomPattern && customFabrics.length > 0 && (
+        <div className="bg-card mb-4 rounded-xl border-2 border-border p-4">
+          <div className="text-foreground mb-1 text-base font-semibold">
+            Fabrics in your block
+          </div>
+          <div className="text-muted-foreground mb-3 text-xs leading-snug">
+            These are the fabrics you painted in the block editor. Upload a photo of
+            the real fabric to see it in your quilt preview and cutting diagrams.
+          </div>
+          <div
+            className="grid gap-2"
+            style={{ gridTemplateColumns: `repeat(${Math.min(customFabrics.length, 6)}, minmax(0,1fr))` }}
+          >
+            {customFabrics.map((f) => (
+              <FabricSwatchOption
+                key={f}
+                fabricKey={f}
+                selected={false}
+                photo={planner.fabricPhotos[f]}
+                onSelect={() => {}}
+                onUpload={(file) => handlePhotoUpload(f, file)}
+                onClear={() => setFabricPhoto(f, null)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* SECTION-BY-SECTION FABRIC PICKER (always shown — even for patchwork,
           so the border + the canonical "all squares" fabric stay assignable). */}
       <div className="space-y-4">
+
           {sections.map((s) => {
             // Border uses the dynamic effective default (see getEffectiveBorderDefault)
             // so the selected swatch always matches the "Your full quilt" preview.
