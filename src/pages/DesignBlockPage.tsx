@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import { Undo2 } from "lucide-react";
 import { StepShell } from "@/components/StepShell";
 import { CustomBlockSvg } from "@/components/CustomBlockSvg";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
