@@ -133,7 +133,7 @@ function DesignBlockInner() {
       rotation,
       fabrics: regionFabrics.slice(0, REGION_COUNT[kind]),
     };
-    save({ ...design, cells });
+    saveWithHistory({ ...design, cells });
   };
 
   const errors = validateDesign(design);
