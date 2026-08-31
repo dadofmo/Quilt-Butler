@@ -38,7 +38,18 @@ function ResultsStepInner() {
     );
   }
 
+  // Without a finished block size (Step 2) the cutting math has nothing to work
+  // from, so send people back instead of trying to compute an infinite plan.
+  if (!(planner.blockSize > 0)) {
+    return (
+      <StepShell step={4} title="Add your quilt size first" backTo="/size">
+        <Link to="/size" className="text-primary underline">Go back to quilt size &amp; basics</Link>
+      </StepShell>
+    );
+  }
+
   const result = calculateYardage(planner);
+
   const precut = computePrecutPlan(planner);
   const fqPlan = computeFatQuarterPlan(planner);
 
