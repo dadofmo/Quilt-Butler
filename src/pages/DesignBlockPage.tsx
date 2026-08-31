@@ -4,6 +4,8 @@ import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
 import { CustomBlockSvg } from "@/components/CustomBlockSvg";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
+import { FabricSwatchOption } from "@/components/FabricSwatchOption";
+
 import { setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
 import { CUSTOM_BLOCK_PATTERN, CUSTOM_BLOCK_ID } from "@/lib/patterns";
 import {
