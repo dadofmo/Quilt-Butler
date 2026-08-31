@@ -117,10 +117,6 @@ function DesignBlockInner() {
 
   const setSize = (size: number) => saveWithHistory(resizeDesign(design, size));
 
-
-
-  const setSize = (size: number) => save(resizeDesign(design, size));
-
   const paint = (r: number, c: number) => {
     if (!canPlaceHere(design, r, c, kind, rotation)) return;
     const cells = { ...design.cells };
