@@ -99,6 +99,25 @@ function DesignBlockInner() {
   const save = (next: CustomBlockDesign) =>
     setPlanner(which === "A" ? { customBlock: next } : { customBlockB: next });
 
+  // Undo history: snapshots of the design before each change (per block).
+  const [history, setHistory] = useState<Record<"A" | "B", CustomBlockDesign[]>>({ A: [], B: [] });
+  const undoStack = history[which];
+
+  const saveWithHistory = (next: CustomBlockDesign) => {
+    setHistory((h) => ({ ...h, [which]: [...h[which].slice(-49), design] }));
+    save(next);
+  };
+
+  const undo = () => {
+    const prev = undoStack[undoStack.length - 1];
+    if (!prev) return;
+    setHistory((h) => ({ ...h, [which]: h[which].slice(0, -1) }));
+    save(prev);
+  };
+
+  const setSize = (size: number) => saveWithHistory(resizeDesign(design, size));
+
+
 
   const setSize = (size: number) => save(resizeDesign(design, size));
 
