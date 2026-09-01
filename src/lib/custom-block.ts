@@ -128,20 +128,15 @@ export function canPlace(
   return true;
 }
 
-/** A blank design: every cell a solid square of Fabric A. */
-export function emptyDesign(size: number, fabric: FabricKey = "A"): CustomBlockDesign {
-  const cells: Record<string, CustomCell> = {};
-  for (let r = 0; r < size; r++) {
-    for (let c = 0; c < size; c++) {
-      cells[key(r, c)] = { kind: "square", rotation: 0, fabrics: [fabric] };
-    }
-  }
-  return { size, cells };
+/** A blank design: no units placed yet — the grid starts empty and the
+ * editor won't let the quilter continue until every cell is filled. */
+export function emptyDesign(size: number, _fabric: FabricKey = "A"): CustomBlockDesign {
+  return { size, cells: {} };
 }
 
 /**
- * Resize a design, keeping any units that still fit inside the new grid and
- * back-filling the rest with plain squares.
+ * Resize a design, keeping any units that still fit inside the new grid.
+ * Cells that don't fit a kept unit stay empty so the quilter can fill them.
  */
 export function resizeDesign(design: CustomBlockDesign, size: number): CustomBlockDesign {
   const next = emptyDesign(size, "A");
