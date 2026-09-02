@@ -13,8 +13,8 @@ import type { FabricKey } from "./planner-store";
 export const MIN_GRID = 2;
 export const MAX_GRID = 8;
 
-/** The four unit types a user can place. */
-export type UnitKind = "square" | "hst" | "qst" | "geese";
+/** The three unit types a user can place. */
+export type UnitKind = "square" | "hst" | "qst";
 
 /** Quarter-turn rotation, clockwise, in degrees. */
 export type Rotation = 0 | 90 | 180 | 270;
@@ -24,10 +24,9 @@ export interface CustomCell {
   rotation: Rotation;
   /**
    * Fabric per region, in the unit's canonical (unrotated) region order:
-   *   square → [whole]
+ *   square → [whole]
    *   hst    → [triangle 1, triangle 2]
    *   qst    → [top, right, bottom, left]
-   *   geese  → [goose, sky]
    */
   fabrics: FabricKey[];
 }
