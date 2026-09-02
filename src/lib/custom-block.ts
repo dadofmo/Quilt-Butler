@@ -357,8 +357,6 @@ export interface UnitTally {
    * hourglass units). Same key format as `hst`.
    */
   qstHalves: Record<string, number>;
-  /** Flying geese units, keyed `${goose}|${sky}`. */
-  geese: Record<string, number>;
   /** Finished hourglass (QST) unit count — for the instructions only. */
   qstUnits: number;
 }
@@ -378,7 +376,7 @@ const pairKey = (a: FabricKey, b: FabricKey) => (a <= b ? `${a}|${b}` : `${b}|${
  * once per block, which would badly overstate yardage on a big quilt.
  */
 export function unitTally(design: CustomBlockDesign): UnitTally {
-  const tally: UnitTally = { squares: {}, hst: {}, qstHalves: {}, geese: {}, qstUnits: 0 };
+  const tally: UnitTally = { squares: {}, hst: {}, qstHalves: {}, qstUnits: 0 };
   for (const cell of Object.values(design.cells)) {
     const f = (i: number) => (cell.fabrics[i] ?? cell.fabrics[0] ?? "A") as FabricKey;
     switch (cell.kind) {
