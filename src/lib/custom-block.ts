@@ -13,8 +13,8 @@ import type { FabricKey } from "./planner-store";
 export const MIN_GRID = 2;
 export const MAX_GRID = 8;
 
-/** The three unit types a user can place. */
-export type UnitKind = "square" | "hst" | "qst";
+/** The unit types a user can place. */
+export type UnitKind = "square" | "hst" | "qst" | "cornered" | "onpoint" | "hrt" | "split";
 
 /** Quarter-turn rotation, clockwise, in degrees. */
 export type Rotation = 0 | 90 | 180 | 270;
@@ -24,11 +24,20 @@ export interface CustomCell {
   rotation: Rotation;
   /**
    * Fabric per region, in the unit's canonical (unrotated) region order:
- *   square → [whole]
-   *   hst    → [triangle 1, triangle 2]
-   *   qst    → [top, right, bottom, left]
+   *   square   → [whole]
+   *   hst      → [triangle 1, triangle 2]
+   *   qst      → [top, right, bottom, left]
+   *   cornered → [main square, corner triangles]
+   *   onpoint  → [diamond, background corners]
+   *   hrt      → [triangle 1, triangle 2]  (covers 2 cells)
+   *   split    → [first half, second half]
    */
   fabrics: FabricKey[];
+  /**
+   * Only used by "cornered": which corners carry a triangle, in canonical
+   * order [top-left, top-right, bottom-right, bottom-left]. Missing = all four.
+   */
+  corners?: boolean[];
 }
 
 export interface CustomBlockDesign {
@@ -42,12 +51,34 @@ export const REGION_COUNT: Record<UnitKind, number> = {
   square: 1,
   hst: 2,
   qst: 4,
+  cornered: 2,
+  onpoint: 2,
+  hrt: 2,
+  split: 2,
 };
 
 export const UNIT_LABEL: Record<UnitKind, string> = {
-  square: "Solid square",
-  hst: "Half-square triangle",
-  qst: "Quarter-square triangle",
+  square: "Plain square",
+  hst: "Two triangles",
+  qst: "Four triangles",
+  cornered: "Snipped corners",
+  onpoint: "Square on point",
+  hrt: "Long triangles",
+  split: "Split in half",
+};
+
+/** Plain-English explanation shown under each palette button. */
+export const UNIT_HELP: Record<UnitKind, string> = {
+  square: "One whole square of a single fabric. The simplest piece there is.",
+  hst: "A square cut corner to corner so two fabrics meet on the diagonal. Quilters call this an HST.",
+  qst: "A square split into four triangles that meet in the middle — the classic hourglass piece.",
+  cornered:
+    "A square with a small triangle across one or more corners, like a Snowball block. Tap the corners below to turn them on and off.",
+  onpoint:
+    "A square turned 45° so it sits like a diamond, with background triangles filling the four corners.",
+  hrt: "A stretched diagonal across two side-by-side cells — a slant you cannot make from single squares.",
+  split:
+    "A square split straight across the middle into two halves — for stripes, bars and rails.",
 };
 
 /** Region names shown in the editor's fabric list, in canonical order. */
@@ -55,6 +86,10 @@ export const REGION_LABELS: Record<UnitKind, string[]> = {
   square: ["Square"],
   hst: ["Triangle 1", "Triangle 2"],
   qst: ["Top", "Right", "Bottom", "Left"],
+  cornered: ["Main square", "Corner triangles"],
+  onpoint: ["Diamond in the middle", "Background corners"],
+  hrt: ["Triangle 1", "Triangle 2"],
+  split: ["First half", "Second half"],
 };
 
 /** How many visually distinct rotations a unit type has. */
@@ -62,7 +97,16 @@ export const ROTATION_STEPS: Record<UnitKind, number> = {
   square: 1,
   hst: 4,
   qst: 4,
+  cornered: 4,
+  onpoint: 1,
+  hrt: 4,
+  split: 4,
 };
+
+/** Canonical corner flags for a "Snipped corners" unit. */
+export const cornerFlags = (cell: CustomCell): boolean[] =>
+  cell.corners && cell.corners.length === 4 ? cell.corners : [true, true, true, true];
+
 
 export const key = (r: number, c: number) => `${r},${c}`;
 
