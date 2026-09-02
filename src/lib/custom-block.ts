@@ -34,10 +34,7 @@ export interface CustomCell {
 export interface CustomBlockDesign {
   /** Grid is always square: `size` × `size` cells. */
   size: number;
-  /**
-   * Cells keyed "row,col". A geese unit is stored ONCE against its anchor
-   * (top-left) cell and covers a second cell — see `geeseFootprint`.
-   */
+  /** Cells keyed "row,col" — one unit per cell. */
   cells: Record<string, CustomCell>;
 }
 
@@ -45,14 +42,12 @@ export const REGION_COUNT: Record<UnitKind, number> = {
   square: 1,
   hst: 2,
   qst: 4,
-  geese: 2,
 };
 
 export const UNIT_LABEL: Record<UnitKind, string> = {
   square: "Solid square",
   hst: "Half-square triangle",
   qst: "Quarter-square triangle",
-  geese: "Flying geese",
 };
 
 /** Region names shown in the editor's fabric list, in canonical order. */
@@ -60,7 +55,6 @@ export const REGION_LABELS: Record<UnitKind, string[]> = {
   square: ["Square"],
   hst: ["Triangle 1", "Triangle 2"],
   qst: ["Top", "Right", "Bottom", "Left"],
-  geese: ["Goose", "Sky"],
 };
 
 /** How many visually distinct rotations a unit type has. */
@@ -68,7 +62,6 @@ export const ROTATION_STEPS: Record<UnitKind, number> = {
   square: 1,
   hst: 4,
   qst: 4,
-  geese: 4,
 };
 
 export const key = (r: number, c: number) => `${r},${c}`;
