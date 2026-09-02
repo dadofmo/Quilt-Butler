@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import type { CustomBlockDesign } from "./custom-block";
+import { migrateDesign, type CustomBlockDesign } from "./custom-block";
 
 const STORAGE_KEY = "quiltbutler-planner-state";
 
@@ -211,7 +211,11 @@ function loadPlannerState(): PlannerState {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return initial;
     const parsed = JSON.parse(raw) as Partial<PlannerState>;
-    return { ...initial, ...parsed };
+    const merged = { ...initial, ...parsed };
+    // Saved designs from older versions may contain removed unit kinds.
+    merged.customBlock = migrateDesign(merged.customBlock);
+    merged.customBlockB = migrateDesign(merged.customBlockB);
+    return merged;
   } catch {
     return initial;
   }

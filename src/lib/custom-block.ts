@@ -13,8 +13,8 @@ import type { FabricKey } from "./planner-store";
 export const MIN_GRID = 2;
 export const MAX_GRID = 8;
 
-/** The four unit types a user can place. */
-export type UnitKind = "square" | "hst" | "qst" | "geese";
+/** The three unit types a user can place. */
+export type UnitKind = "square" | "hst" | "qst";
 
 /** Quarter-turn rotation, clockwise, in degrees. */
 export type Rotation = 0 | 90 | 180 | 270;
@@ -24,10 +24,9 @@ export interface CustomCell {
   rotation: Rotation;
   /**
    * Fabric per region, in the unit's canonical (unrotated) region order:
-   *   square → [whole]
+ *   square → [whole]
    *   hst    → [triangle 1, triangle 2]
    *   qst    → [top, right, bottom, left]
-   *   geese  → [goose, sky]
    */
   fabrics: FabricKey[];
 }
@@ -35,10 +34,7 @@ export interface CustomCell {
 export interface CustomBlockDesign {
   /** Grid is always square: `size` × `size` cells. */
   size: number;
-  /**
-   * Cells keyed "row,col". A geese unit is stored ONCE against its anchor
-   * (top-left) cell and covers a second cell — see `geeseFootprint`.
-   */
+  /** Cells keyed "row,col" — one unit per cell. */
   cells: Record<string, CustomCell>;
 }
 
@@ -46,14 +42,12 @@ export const REGION_COUNT: Record<UnitKind, number> = {
   square: 1,
   hst: 2,
   qst: 4,
-  geese: 2,
 };
 
 export const UNIT_LABEL: Record<UnitKind, string> = {
   square: "Solid square",
   hst: "Half-square triangle",
   qst: "Quarter-square triangle",
-  geese: "Flying geese",
 };
 
 /** Region names shown in the editor's fabric list, in canonical order. */
@@ -61,7 +55,6 @@ export const REGION_LABELS: Record<UnitKind, string[]> = {
   square: ["Square"],
   hst: ["Triangle 1", "Triangle 2"],
   qst: ["Top", "Right", "Bottom", "Left"],
-  geese: ["Goose", "Sky"],
 };
 
 /** How many visually distinct rotations a unit type has. */
@@ -69,7 +62,6 @@ export const ROTATION_STEPS: Record<UnitKind, number> = {
   square: 1,
   hst: 4,
   qst: 4,
-  geese: 4,
 };
 
 export const key = (r: number, c: number) => `${r},${c}`;
@@ -79,21 +71,9 @@ export function parseKey(k: string): [number, number] {
   return [r, c];
 }
 
-/**
- * Flying geese finish 2:1. At rotation 0/180 the unit lies flat (1 row × 2
- * cols); at 90/270 it stands up (2 rows × 1 col).
- */
-export function geeseFootprint(rotation: Rotation): { rows: number; cols: number } {
-  return rotation === 90 || rotation === 270 ? { rows: 2, cols: 1 } : { rows: 1, cols: 2 };
-}
-
-/** Every grid cell a unit anchored at (r,c) occupies. */
-export function cellsCovered(r: number, c: number, cell: CustomCell): Array<[number, number]> {
-  if (cell.kind !== "geese") return [[r, c]];
-  const { rows, cols } = geeseFootprint(cell.rotation);
-  const out: Array<[number, number]> = [];
-  for (let dr = 0; dr < rows; dr++) for (let dc = 0; dc < cols; dc++) out.push([r + dr, c + dc]);
-  return out;
+/** Every grid cell a unit anchored at (r,c) occupies — always a single cell. */
+export function cellsCovered(r: number, c: number, _cell: CustomCell): Array<[number, number]> {
+  return [[r, c]];
 }
 
 /**
@@ -288,7 +268,7 @@ function rotPoint(
 
 /**
  * Polygons for one unit, in cell-local coordinates scaled so one grid cell is
- * 1×1. Geese occupy 2×1 before rotation.
+ * 1×1.
  */
 function unitPolys(cell: CustomCell): { w: number; h: number; polys: Poly[] } {
   const f = (i: number) => cell.fabrics[i] ?? cell.fabrics[0] ?? "A";
@@ -337,22 +317,8 @@ function unitPolys(cell: CustomCell): { w: number; h: number; polys: Poly[] } {
     };
   }
 
-  // Flying geese, canonical rotation 0: 2 wide × 1 tall, goose apex at
-  // top-centre, base along the bottom edge, sky triangles top-left/top-right.
-  const base: Poly[] = [
-    { fabric: f(0), points: [[0, 1], [1, 0], [2, 1]] },
-    { fabric: f(1), points: [[0, 0], [1, 0], [0, 1]] },
-    { fabric: f(1), points: [[1, 0], [2, 0], [2, 1]] },
-  ];
-  const flat = rot === 0 || rot === 180;
-  return {
-    w: flat ? 2 : 1,
-    h: flat ? 1 : 2,
-    polys: base.map((p) => ({
-      fabric: p.fabric,
-      points: p.points.map((pt) => rotPoint(pt, rot, 2, 1)),
-    })),
-  };
+  // QST handled above; unreachable for the remaining unit kinds.
+  return { w: 1, h: 1, polys: [] };
 }
 
 /**
@@ -391,8 +357,6 @@ export interface UnitTally {
    * hourglass units). Same key format as `hst`.
    */
   qstHalves: Record<string, number>;
-  /** Flying geese units, keyed `${goose}|${sky}`. */
-  geese: Record<string, number>;
   /** Finished hourglass (QST) unit count — for the instructions only. */
   qstUnits: number;
 }
@@ -412,7 +376,7 @@ const pairKey = (a: FabricKey, b: FabricKey) => (a <= b ? `${a}|${b}` : `${b}|${
  * once per block, which would badly overstate yardage on a big quilt.
  */
 export function unitTally(design: CustomBlockDesign): UnitTally {
-  const tally: UnitTally = { squares: {}, hst: {}, qstHalves: {}, geese: {}, qstUnits: 0 };
+  const tally: UnitTally = { squares: {}, hst: {}, qstHalves: {}, qstUnits: 0 };
   for (const cell of Object.values(design.cells)) {
     const f = (i: number) => (cell.fabrics[i] ?? cell.fabrics[0] ?? "A") as FabricKey;
     switch (cell.kind) {
@@ -430,9 +394,6 @@ export function unitTally(design: CustomBlockDesign): UnitTally {
         bump(tally.qstHalves, pairKey(f(0), f(1)));
         bump(tally.qstHalves, pairKey(f(2), f(3)));
         break;
-      case "geese":
-        bump(tally.geese, `${f(0)}|${f(1)}`);
-        break;
     }
   }
   return tally;
@@ -449,7 +410,6 @@ export function scaleTally(tally: UnitTally, factor: number): UnitTally {
     squares: scaleRec(tally.squares),
     hst: scaleRec(tally.hst),
     qstHalves: scaleRec(tally.qstHalves),
-    geese: scaleRec(tally.geese),
     qstUnits: tally.qstUnits * factor,
   };
 }
@@ -464,7 +424,6 @@ export function mergeTallies(a: UnitTally, b: UnitTally): UnitTally {
     squares: mergeRec(a.squares, b.squares),
     hst: mergeRec(a.hst, b.hst),
     qstHalves: mergeRec(a.qstHalves, b.qstHalves),
-    geese: mergeRec(a.geese, b.geese),
     qstUnits: a.qstUnits + b.qstUnits,
   };
 }
@@ -486,4 +445,25 @@ export function swapFabrics(
     };
   }
   return { size: design.size, cells };
+}
+
+/**
+ * Upgrade a design saved by an older version of the editor. Flying geese
+ * units were removed from the palette; any saved geese cell becomes an HST
+ * using the same two fabrics ([goose, sky] → [triangle 1, triangle 2]) so
+ * the quilter's design still loads and fills every cell.
+ */
+export function migrateDesign(design: CustomBlockDesign | null): CustomBlockDesign | null {
+  if (!design) return design;
+  let changed = false;
+  const cells: Record<string, CustomCell> = {};
+  for (const [k, cell] of Object.entries(design.cells)) {
+    if ((cell.kind as string) === "geese") {
+      cells[k] = { kind: "hst", rotation: cell.rotation, fabrics: cell.fabrics.slice(0, 2) };
+      changed = true;
+    } else {
+      cells[k] = cell;
+    }
+  }
+  return changed ? { size: design.size, cells } : design;
 }

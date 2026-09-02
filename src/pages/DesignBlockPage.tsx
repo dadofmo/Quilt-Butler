@@ -31,7 +31,7 @@ import {
 /** Letters the block itself may use — Y (sashing) and Z (border) are reserved. */
 const BLOCK_FABRICS: FabricKey[] = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
-const UNIT_KINDS: UnitKind[] = ["square", "hst", "qst", "geese"];
+const UNIT_KINDS: UnitKind[] = ["square", "hst", "qst"];
 
 export default function DesignBlockPage() {
   return (
@@ -40,7 +40,7 @@ export default function DesignBlockPage() {
         <title>Design Your Own Quilt Block — QuiltButler</title>
         <meta
           name="description"
-          content="Draw your own quilt block on a grid of squares, half-square triangles, quarter-square triangles and flying geese, then get exact yardage and a cutting list."
+          content="Draw your own quilt block on a grid of squares, half-square triangles and quarter-square triangles, then get exact yardage and a cutting list."
         />
         <link rel="canonical" href="https://quiltbutler.com/design" />
         <meta property="og:title" content="Design Your Own Quilt Block — QuiltButler" />
@@ -121,8 +121,8 @@ function DesignBlockInner() {
     if (!canPlaceHere(design, r, c, kind, rotation)) return;
     const cells = { ...design.cells };
     const occ = occupancy(design);
-    // Free every cell the new unit will sit on (a flying geese unit may be
-    // anchored elsewhere, so remove the owner, not just this key).
+    // Free the cell the new unit will sit on (remove the owner, not just
+    // this key).
     const probe: CustomCell = { kind, rotation, fabrics: [] };
     for (const [rr, cc] of cellsCovered(r, c, probe)) {
       const owner = occ[key(rr, cc)];
@@ -424,19 +424,7 @@ function previewDesign(
     rotation: kind === "square" ? 0 : rotation,
     fabrics: fabrics.slice(0, REGION_COUNT[kind]),
   };
-  // Geese cover two cells, so draw them in a 2x2 and fill the rest with sky.
-  if (kind === "geese") return { size: 2, cells: buildGeesePreview(cell) };
   return { size: 1, cells: { [key(0, 0)]: cell } };
-}
-
-function buildGeesePreview(cell: CustomCell): Record<string, CustomCell> {
-  const cells: Record<string, CustomCell> = { [key(0, 0)]: cell };
-  const covered = cellsCovered(0, 0, cell);
-  for (const [r, c] of [[0, 0], [0, 1], [1, 0], [1, 1]] as Array<[number, number]>) {
-    if (covered.some(([rr, cc]) => rr === r && cc === c)) continue;
-    cells[key(r, c)] = { kind: "square", rotation: 0, fabrics: [cell.fabrics[1] ?? "B"] };
-  }
-  return cells;
 }
 
 /** A unit may overwrite whatever is already there — it only has to fit. */
