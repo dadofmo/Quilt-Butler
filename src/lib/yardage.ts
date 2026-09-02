@@ -4092,8 +4092,6 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const sqCut = round2(unit + SEAM);
     const hstCut = round2(unit + HST_EXTRA);
     const qstCut = round2(unit + 1.25);
-    const gooseCut = round2(2 * unit + 1.25);
-    const gooseSkyCut = round2(unit + HST_EXTRA);
 
     notes.push(
       `Your block is a ${grid}×${grid} grid, so each grid square finishes at ${unit.toFixed(2)}".`,
@@ -4148,18 +4146,6 @@ export function calculateYardage(s: PlannerState): CalcResult {
       }
       notes.push(
         `Hourglass halves (Fabric ${a} + Fabric ${b}): cut ${squaresEach} squares of each fabric at ${qstCut.toFixed(2)}" — these are cut LARGER than a plain HST because the unit gets cut a second time. Make ${hstUnits} HSTs from them the same 2-at-a-time way, then lay two HSTs right sides together with opposite fabrics facing, seams nested, and cut on the diagonal that crosses the first seam. Sew each pair to make an hourglass and trim to ${sqCut.toFixed(2)}" square.`,
-      );
-    }
-
-    // ---- Flying geese (4-at-a-time, no waste) ------------------------------
-    for (const [k, units] of Object.entries(tally.geese)) {
-      if (units <= 0) continue;
-      const [goose, sky] = k.split("|") as [FabricKey, FabricKey];
-      const sets = Math.ceil(units / 4);
-      addSquares(reqs[goose], "Flying geese — large squares", sets, gooseCut, s.fabricWidth);
-      addSquares(reqs[sky], "Flying geese — corner squares", sets * 4, gooseSkyCut, s.fabricWidth);
-      notes.push(
-        `Flying geese (goose Fabric ${goose}, sky Fabric ${sky}): you need ${units} geese, each finishing ${(2 * unit).toFixed(2)}" × ${unit.toFixed(2)}". Cut ${sets} large squares of Fabric ${goose} at ${gooseCut.toFixed(2)}" and ${sets * 4} small squares of Fabric ${sky} at ${gooseSkyCut.toFixed(2)}". Each set of one large + four small squares makes 4 geese with no waste.`,
       );
     }
 
