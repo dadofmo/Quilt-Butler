@@ -446,3 +446,24 @@ export function swapFabrics(
   }
   return { size: design.size, cells };
 }
+
+/**
+ * Upgrade a design saved by an older version of the editor. Flying geese
+ * units were removed from the palette; any saved geese cell becomes an HST
+ * using the same two fabrics ([goose, sky] → [triangle 1, triangle 2]) so
+ * the quilter's design still loads and fills every cell.
+ */
+export function migrateDesign(design: CustomBlockDesign | null): CustomBlockDesign | null {
+  if (!design) return design;
+  let changed = false;
+  const cells: Record<string, CustomCell> = {};
+  for (const [k, cell] of Object.entries(design.cells)) {
+    if ((cell.kind as string) === "geese") {
+      cells[k] = { kind: "hst", rotation: cell.rotation, fabrics: cell.fabrics.slice(0, 2) };
+      changed = true;
+    } else {
+      cells[k] = cell;
+    }
+  }
+  return changed ? { size: design.size, cells } : design;
+}
