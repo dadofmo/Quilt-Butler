@@ -71,21 +71,9 @@ export function parseKey(k: string): [number, number] {
   return [r, c];
 }
 
-/**
- * Flying geese finish 2:1. At rotation 0/180 the unit lies flat (1 row × 2
- * cols); at 90/270 it stands up (2 rows × 1 col).
- */
-export function geeseFootprint(rotation: Rotation): { rows: number; cols: number } {
-  return rotation === 90 || rotation === 270 ? { rows: 2, cols: 1 } : { rows: 1, cols: 2 };
-}
-
-/** Every grid cell a unit anchored at (r,c) occupies. */
-export function cellsCovered(r: number, c: number, cell: CustomCell): Array<[number, number]> {
-  if (cell.kind !== "geese") return [[r, c]];
-  const { rows, cols } = geeseFootprint(cell.rotation);
-  const out: Array<[number, number]> = [];
-  for (let dr = 0; dr < rows; dr++) for (let dc = 0; dc < cols; dc++) out.push([r + dr, c + dc]);
-  return out;
+/** Every grid cell a unit anchored at (r,c) occupies — always a single cell. */
+export function cellsCovered(r: number, c: number, _cell: CustomCell): Array<[number, number]> {
+  return [[r, c]];
 }
 
 /**
