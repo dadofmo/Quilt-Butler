@@ -268,7 +268,7 @@ function rotPoint(
 
 /**
  * Polygons for one unit, in cell-local coordinates scaled so one grid cell is
- * 1×1. Geese occupy 2×1 before rotation.
+ * 1×1.
  */
 function unitPolys(cell: CustomCell): { w: number; h: number; polys: Poly[] } {
   const f = (i: number) => cell.fabrics[i] ?? cell.fabrics[0] ?? "A";
@@ -317,22 +317,8 @@ function unitPolys(cell: CustomCell): { w: number; h: number; polys: Poly[] } {
     };
   }
 
-  // Flying geese, canonical rotation 0: 2 wide × 1 tall, goose apex at
-  // top-centre, base along the bottom edge, sky triangles top-left/top-right.
-  const base: Poly[] = [
-    { fabric: f(0), points: [[0, 1], [1, 0], [2, 1]] },
-    { fabric: f(1), points: [[0, 0], [1, 0], [0, 1]] },
-    { fabric: f(1), points: [[1, 0], [2, 0], [2, 1]] },
-  ];
-  const flat = rot === 0 || rot === 180;
-  return {
-    w: flat ? 2 : 1,
-    h: flat ? 1 : 2,
-    polys: base.map((p) => ({
-      fabric: p.fabric,
-      points: p.points.map((pt) => rotPoint(pt, rot, 2, 1)),
-    })),
-  };
+  // QST handled above; unreachable for the remaining unit kinds.
+  return { w: 1, h: 1, polys: [] };
 }
 
 /**
