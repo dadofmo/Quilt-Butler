@@ -394,9 +394,6 @@ export function unitTally(design: CustomBlockDesign): UnitTally {
         bump(tally.qstHalves, pairKey(f(0), f(1)));
         bump(tally.qstHalves, pairKey(f(2), f(3)));
         break;
-      case "geese":
-        bump(tally.geese, `${f(0)}|${f(1)}`);
-        break;
     }
   }
   return tally;
@@ -413,7 +410,6 @@ export function scaleTally(tally: UnitTally, factor: number): UnitTally {
     squares: scaleRec(tally.squares),
     hst: scaleRec(tally.hst),
     qstHalves: scaleRec(tally.qstHalves),
-    geese: scaleRec(tally.geese),
     qstUnits: tally.qstUnits * factor,
   };
 }
@@ -428,7 +424,6 @@ export function mergeTallies(a: UnitTally, b: UnitTally): UnitTally {
     squares: mergeRec(a.squares, b.squares),
     hst: mergeRec(a.hst, b.hst),
     qstHalves: mergeRec(a.qstHalves, b.qstHalves),
-    geese: mergeRec(a.geese, b.geese),
     qstUnits: a.qstUnits + b.qstUnits,
   };
 }
