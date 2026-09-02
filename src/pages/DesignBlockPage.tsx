@@ -40,7 +40,7 @@ export default function DesignBlockPage() {
         <title>Design Your Own Quilt Block — QuiltButler</title>
         <meta
           name="description"
-          content="Draw your own quilt block on a grid of squares, half-square triangles, quarter-square triangles and flying geese, then get exact yardage and a cutting list."
+          content="Draw your own quilt block on a grid of squares, half-square triangles and quarter-square triangles, then get exact yardage and a cutting list."
         />
         <link rel="canonical" href="https://quiltbutler.com/design" />
         <meta property="og:title" content="Design Your Own Quilt Block — QuiltButler" />
@@ -121,8 +121,8 @@ function DesignBlockInner() {
     if (!canPlaceHere(design, r, c, kind, rotation)) return;
     const cells = { ...design.cells };
     const occ = occupancy(design);
-    // Free every cell the new unit will sit on (a flying geese unit may be
-    // anchored elsewhere, so remove the owner, not just this key).
+    // Free the cell the new unit will sit on (remove the owner, not just
+    // this key).
     const probe: CustomCell = { kind, rotation, fabrics: [] };
     for (const [rr, cc] of cellsCovered(r, c, probe)) {
       const owner = occ[key(rr, cc)];
