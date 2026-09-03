@@ -600,7 +600,14 @@ export function mergeTallies(a: UnitTally, b: UnitTally): UnitTally {
     hst: mergeRec(a.hst, b.hst),
     qstHalves: mergeRec(a.qstHalves, b.qstHalves),
     qstUnits: a.qstUnits + b.qstUnits,
+    corneredBases: mergeRec(a.corneredBases, b.corneredBases),
+    corneredCorners: mergeRec(a.corneredCorners, b.corneredCorners),
+    onpointCenters: mergeRec(a.onpointCenters, b.onpointCenters),
+    onpointCornerTris: mergeRec(a.onpointCornerTris, b.onpointCornerTris),
+    hrtUnits: mergeRec(a.hrtUnits, b.hrtUnits),
+    splitHalves: mergeRec(a.splitHalves, b.splitHalves),
   };
+
 }
 
 /**
