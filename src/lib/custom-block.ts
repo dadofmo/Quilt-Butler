@@ -218,6 +218,10 @@ export function validateDesign(design: CustomBlockDesign | null): string[] {
       errors.push(`The unit at ${k} is missing a fabric.`);
       break;
     }
+    if (cell.kind === "cornered" && cornerFlags(cell).every((on) => !on)) {
+      errors.push(`The unit at ${k} needs at least one snipped corner.`);
+      break;
+    }
   }
   return errors;
 }
