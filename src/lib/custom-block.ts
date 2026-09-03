@@ -487,6 +487,18 @@ export interface UnitTally {
   qstHalves: Record<string, number>;
   /** Finished hourglass (QST) unit count — for the instructions only. */
   qstUnits: number;
+  /** "Snipped corners": base squares per fabric. */
+  corneredBases: Record<string, number>;
+  /** "Snipped corners": stitch-and-flip corner squares per fabric. */
+  corneredCorners: Record<string, number>;
+  /** "Square on point": centre (diamond) squares per fabric. */
+  onpointCenters: Record<string, number>;
+  /** "Square on point": background corner TRIANGLES per fabric (4 per unit). */
+  onpointCornerTris: Record<string, number>;
+  /** "Long triangles": unit count keyed `${fabricA}|${fabricB}` (sorted). */
+  hrtUnits: Record<string, number>;
+  /** "Split in half": half-cell rectangles per fabric. */
+  splitHalves: Record<string, number>;
 }
 
 const bump = (rec: Record<string, number>, k: string, n = 1) => {
@@ -504,7 +516,18 @@ const pairKey = (a: FabricKey, b: FabricKey) => (a <= b ? `${a}|${b}` : `${b}|${
  * once per block, which would badly overstate yardage on a big quilt.
  */
 export function unitTally(design: CustomBlockDesign): UnitTally {
-  const tally: UnitTally = { squares: {}, hst: {}, qstHalves: {}, qstUnits: 0 };
+  const tally: UnitTally = {
+    squares: {},
+    hst: {},
+    qstHalves: {},
+    qstUnits: 0,
+    corneredBases: {},
+    corneredCorners: {},
+    onpointCenters: {},
+    onpointCornerTris: {},
+    hrtUnits: {},
+    splitHalves: {},
+  };
   for (const cell of Object.values(design.cells)) {
     const f = (i: number) => (cell.fabrics[i] ?? cell.fabrics[0] ?? "A") as FabricKey;
     switch (cell.kind) {
@@ -521,6 +544,23 @@ export function unitTally(design: CustomBlockDesign): UnitTally {
         tally.qstUnits += 1;
         bump(tally.qstHalves, pairKey(f(0), f(1)));
         bump(tally.qstHalves, pairKey(f(2), f(3)));
+        break;
+      case "cornered": {
+        bump(tally.corneredBases, f(0));
+        const on = cornerFlags(cell).filter(Boolean).length;
+        if (on > 0) bump(tally.corneredCorners, f(1), on);
+        break;
+      }
+      case "onpoint":
+        bump(tally.onpointCenters, f(0));
+        bump(tally.onpointCornerTris, f(1), 4);
+        break;
+      case "hrt":
+        bump(tally.hrtUnits, pairKey(f(0), f(1)));
+        break;
+      case "split":
+        bump(tally.splitHalves, f(0));
+        bump(tally.splitHalves, f(1));
         break;
     }
   }
@@ -539,8 +579,15 @@ export function scaleTally(tally: UnitTally, factor: number): UnitTally {
     hst: scaleRec(tally.hst),
     qstHalves: scaleRec(tally.qstHalves),
     qstUnits: tally.qstUnits * factor,
+    corneredBases: scaleRec(tally.corneredBases),
+    corneredCorners: scaleRec(tally.corneredCorners),
+    onpointCenters: scaleRec(tally.onpointCenters),
+    onpointCornerTris: scaleRec(tally.onpointCornerTris),
+    hrtUnits: scaleRec(tally.hrtUnits),
+    splitHalves: scaleRec(tally.splitHalves),
   };
 }
+
 
 export function mergeTallies(a: UnitTally, b: UnitTally): UnitTally {
   const mergeRec = (x: Record<string, number>, y: Record<string, number>) => {
