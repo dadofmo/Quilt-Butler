@@ -115,10 +115,20 @@ export function parseKey(k: string): [number, number] {
   return [r, c];
 }
 
-/** Every grid cell a unit anchored at (r,c) occupies — always a single cell. */
-export function cellsCovered(r: number, c: number, _cell: CustomCell): Array<[number, number]> {
+/**
+ * Every grid cell a unit anchored at (r,c) occupies. All units are one cell
+ * except "Long triangles" (hrt), which spans two: side by side at 0°/180°,
+ * stacked at 90°/270°.
+ */
+export function cellsCovered(r: number, c: number, cell: CustomCell): Array<[number, number]> {
+  if (cell.kind === "hrt") {
+    return cell.rotation === 90 || cell.rotation === 270
+      ? [[r, c], [r + 1, c]]
+      : [[r, c], [r, c + 1]];
+  }
   return [[r, c]];
 }
+
 
 /**
  * Map of "row,col" → anchor key for every occupied cell. Cells absent from
