@@ -371,9 +371,83 @@ function unitPolys(cell: CustomCell): { w: number; h: number; polys: Poly[] } {
     };
   }
 
-  // QST handled above; unreachable for the remaining unit kinds.
+  if (cell.kind === "cornered") {
+    // A whole square with a small triangle folded across the chosen corners
+    // (Snowball style). Corner order: TL, TR, BR, BL. The cut is at the
+    // midpoints, so each triangle covers half the cell on both edges.
+    const flags = cornerFlags(cell);
+    const corners: Array<Array<[number, number]>> = [
+      [[0, 0], [0.5, 0], [0, 0.5]],
+      [[1, 0], [1, 0.5], [0.5, 0]],
+      [[1, 1], [0.5, 1], [1, 0.5]],
+      [[0, 1], [0, 0.5], [0.5, 1]],
+    ];
+    const base: Poly[] = [
+      { fabric: f(0), points: [[0, 0], [1, 0], [1, 1], [0, 1]] },
+      ...corners.flatMap((pts, i) => (flags[i] ? [{ fabric: f(1), points: pts }] : [])),
+    ];
+    return {
+      w: 1,
+      h: 1,
+      polys: base.map((p) => ({
+        fabric: p.fabric,
+        points: p.points.map((pt) => rotPoint(pt, rot, 1, 1)),
+      })),
+    };
+  }
+
+  if (cell.kind === "onpoint") {
+    // A square turned 45° inside the cell, with four background triangles
+    // filling the corners.
+    return {
+      w: 1,
+      h: 1,
+      polys: [
+        { fabric: f(1), points: [[0, 0], [0.5, 0], [0, 0.5]] },
+        { fabric: f(1), points: [[1, 0], [1, 0.5], [0.5, 0]] },
+        { fabric: f(1), points: [[1, 1], [0.5, 1], [1, 0.5]] },
+        { fabric: f(1), points: [[0, 1], [0, 0.5], [0.5, 1]] },
+        { fabric: f(0), points: [[0.5, 0], [1, 0.5], [0.5, 1], [0, 0.5]] },
+      ],
+    };
+  }
+
+  if (cell.kind === "hrt") {
+    // A 2×1 rectangle split corner to corner — a long, stretched diagonal.
+    const base: Poly[] = [
+      { fabric: f(0), points: [[0, 0], [2, 0], [0, 1]] },
+      { fabric: f(1), points: [[2, 0], [2, 1], [0, 1]] },
+    ];
+    const upright = rot === 90 || rot === 270;
+    return {
+      w: upright ? 1 : 2,
+      h: upright ? 2 : 1,
+      polys: base.map((p) => ({
+        fabric: p.fabric,
+        points: p.points.map((pt) => rotPoint(pt, rot, 2, 1)),
+      })),
+    };
+  }
+
+  if (cell.kind === "split") {
+    // The cell cut straight across the middle into two equal halves.
+    const base: Poly[] = [
+      { fabric: f(0), points: [[0, 0], [1, 0], [1, 0.5], [0, 0.5]] },
+      { fabric: f(1), points: [[0, 0.5], [1, 0.5], [1, 1], [0, 1]] },
+    ];
+    return {
+      w: 1,
+      h: 1,
+      polys: base.map((p) => ({
+        fabric: p.fabric,
+        points: p.points.map((pt) => rotPoint(pt, rot, 1, 1)),
+      })),
+    };
+  }
+
   return { w: 1, h: 1, polys: [] };
 }
+
 
 /**
  * Every polygon in the block, in block coordinates where the whole block is
