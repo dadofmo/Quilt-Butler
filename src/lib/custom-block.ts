@@ -115,10 +115,20 @@ export function parseKey(k: string): [number, number] {
   return [r, c];
 }
 
-/** Every grid cell a unit anchored at (r,c) occupies — always a single cell. */
-export function cellsCovered(r: number, c: number, _cell: CustomCell): Array<[number, number]> {
+/**
+ * Every grid cell a unit anchored at (r,c) occupies. All units are one cell
+ * except "Long triangles" (hrt), which spans two: side by side at 0°/180°,
+ * stacked at 90°/270°.
+ */
+export function cellsCovered(r: number, c: number, cell: CustomCell): Array<[number, number]> {
+  if (cell.kind === "hrt") {
+    return cell.rotation === 90 || cell.rotation === 270
+      ? [[r, c], [r + 1, c]]
+      : [[r, c], [r, c + 1]];
+  }
   return [[r, c]];
 }
+
 
 /**
  * Map of "row,col" → anchor key for every occupied cell. Cells absent from
@@ -206,6 +216,10 @@ export function validateDesign(design: CustomBlockDesign | null): string[] {
   for (const [k, cell] of Object.entries(design.cells)) {
     if (cell.fabrics.length < REGION_COUNT[cell.kind] || cell.fabrics.some((f) => !f)) {
       errors.push(`The unit at ${k} is missing a fabric.`);
+      break;
+    }
+    if (cell.kind === "cornered" && cornerFlags(cell).every((on) => !on)) {
+      errors.push(`The unit at ${k} needs at least one snipped corner.`);
       break;
     }
   }
@@ -361,9 +375,83 @@ function unitPolys(cell: CustomCell): { w: number; h: number; polys: Poly[] } {
     };
   }
 
-  // QST handled above; unreachable for the remaining unit kinds.
+  if (cell.kind === "cornered") {
+    // A whole square with a small triangle folded across the chosen corners
+    // (Snowball style). Corner order: TL, TR, BR, BL. The cut is at the
+    // midpoints, so each triangle covers half the cell on both edges.
+    const flags = cornerFlags(cell);
+    const corners: Array<Array<[number, number]>> = [
+      [[0, 0], [0.5, 0], [0, 0.5]],
+      [[1, 0], [1, 0.5], [0.5, 0]],
+      [[1, 1], [0.5, 1], [1, 0.5]],
+      [[0, 1], [0, 0.5], [0.5, 1]],
+    ];
+    const base: Poly[] = [
+      { fabric: f(0), points: [[0, 0], [1, 0], [1, 1], [0, 1]] },
+      ...corners.flatMap((pts, i) => (flags[i] ? [{ fabric: f(1), points: pts }] : [])),
+    ];
+    return {
+      w: 1,
+      h: 1,
+      polys: base.map((p) => ({
+        fabric: p.fabric,
+        points: p.points.map((pt) => rotPoint(pt, rot, 1, 1)),
+      })),
+    };
+  }
+
+  if (cell.kind === "onpoint") {
+    // A square turned 45° inside the cell, with four background triangles
+    // filling the corners.
+    return {
+      w: 1,
+      h: 1,
+      polys: [
+        { fabric: f(1), points: [[0, 0], [0.5, 0], [0, 0.5]] },
+        { fabric: f(1), points: [[1, 0], [1, 0.5], [0.5, 0]] },
+        { fabric: f(1), points: [[1, 1], [0.5, 1], [1, 0.5]] },
+        { fabric: f(1), points: [[0, 1], [0, 0.5], [0.5, 1]] },
+        { fabric: f(0), points: [[0.5, 0], [1, 0.5], [0.5, 1], [0, 0.5]] },
+      ],
+    };
+  }
+
+  if (cell.kind === "hrt") {
+    // A 2×1 rectangle split corner to corner — a long, stretched diagonal.
+    const base: Poly[] = [
+      { fabric: f(0), points: [[0, 0], [2, 0], [0, 1]] },
+      { fabric: f(1), points: [[2, 0], [2, 1], [0, 1]] },
+    ];
+    const upright = rot === 90 || rot === 270;
+    return {
+      w: upright ? 1 : 2,
+      h: upright ? 2 : 1,
+      polys: base.map((p) => ({
+        fabric: p.fabric,
+        points: p.points.map((pt) => rotPoint(pt, rot, 2, 1)),
+      })),
+    };
+  }
+
+  if (cell.kind === "split") {
+    // The cell cut straight across the middle into two equal halves.
+    const base: Poly[] = [
+      { fabric: f(0), points: [[0, 0], [1, 0], [1, 0.5], [0, 0.5]] },
+      { fabric: f(1), points: [[0, 0.5], [1, 0.5], [1, 1], [0, 1]] },
+    ];
+    return {
+      w: 1,
+      h: 1,
+      polys: base.map((p) => ({
+        fabric: p.fabric,
+        points: p.points.map((pt) => rotPoint(pt, rot, 1, 1)),
+      })),
+    };
+  }
+
   return { w: 1, h: 1, polys: [] };
 }
+
 
 /**
  * Every polygon in the block, in block coordinates where the whole block is
@@ -403,6 +491,18 @@ export interface UnitTally {
   qstHalves: Record<string, number>;
   /** Finished hourglass (QST) unit count — for the instructions only. */
   qstUnits: number;
+  /** "Snipped corners": base squares per fabric. */
+  corneredBases: Record<string, number>;
+  /** "Snipped corners": stitch-and-flip corner squares per fabric. */
+  corneredCorners: Record<string, number>;
+  /** "Square on point": centre (diamond) squares per fabric. */
+  onpointCenters: Record<string, number>;
+  /** "Square on point": background corner TRIANGLES per fabric (4 per unit). */
+  onpointCornerTris: Record<string, number>;
+  /** "Long triangles": unit count keyed `${fabricA}|${fabricB}` (sorted). */
+  hrtUnits: Record<string, number>;
+  /** "Split in half": half-cell rectangles per fabric. */
+  splitHalves: Record<string, number>;
 }
 
 const bump = (rec: Record<string, number>, k: string, n = 1) => {
@@ -420,7 +520,18 @@ const pairKey = (a: FabricKey, b: FabricKey) => (a <= b ? `${a}|${b}` : `${b}|${
  * once per block, which would badly overstate yardage on a big quilt.
  */
 export function unitTally(design: CustomBlockDesign): UnitTally {
-  const tally: UnitTally = { squares: {}, hst: {}, qstHalves: {}, qstUnits: 0 };
+  const tally: UnitTally = {
+    squares: {},
+    hst: {},
+    qstHalves: {},
+    qstUnits: 0,
+    corneredBases: {},
+    corneredCorners: {},
+    onpointCenters: {},
+    onpointCornerTris: {},
+    hrtUnits: {},
+    splitHalves: {},
+  };
   for (const cell of Object.values(design.cells)) {
     const f = (i: number) => (cell.fabrics[i] ?? cell.fabrics[0] ?? "A") as FabricKey;
     switch (cell.kind) {
@@ -437,6 +548,23 @@ export function unitTally(design: CustomBlockDesign): UnitTally {
         tally.qstUnits += 1;
         bump(tally.qstHalves, pairKey(f(0), f(1)));
         bump(tally.qstHalves, pairKey(f(2), f(3)));
+        break;
+      case "cornered": {
+        bump(tally.corneredBases, f(0));
+        const on = cornerFlags(cell).filter(Boolean).length;
+        if (on > 0) bump(tally.corneredCorners, f(1), on);
+        break;
+      }
+      case "onpoint":
+        bump(tally.onpointCenters, f(0));
+        bump(tally.onpointCornerTris, f(1), 4);
+        break;
+      case "hrt":
+        bump(tally.hrtUnits, pairKey(f(0), f(1)));
+        break;
+      case "split":
+        bump(tally.splitHalves, f(0));
+        bump(tally.splitHalves, f(1));
         break;
     }
   }
@@ -455,8 +583,15 @@ export function scaleTally(tally: UnitTally, factor: number): UnitTally {
     hst: scaleRec(tally.hst),
     qstHalves: scaleRec(tally.qstHalves),
     qstUnits: tally.qstUnits * factor,
+    corneredBases: scaleRec(tally.corneredBases),
+    corneredCorners: scaleRec(tally.corneredCorners),
+    onpointCenters: scaleRec(tally.onpointCenters),
+    onpointCornerTris: scaleRec(tally.onpointCornerTris),
+    hrtUnits: scaleRec(tally.hrtUnits),
+    splitHalves: scaleRec(tally.splitHalves),
   };
 }
+
 
 export function mergeTallies(a: UnitTally, b: UnitTally): UnitTally {
   const mergeRec = (x: Record<string, number>, y: Record<string, number>) => {
@@ -469,7 +604,14 @@ export function mergeTallies(a: UnitTally, b: UnitTally): UnitTally {
     hst: mergeRec(a.hst, b.hst),
     qstHalves: mergeRec(a.qstHalves, b.qstHalves),
     qstUnits: a.qstUnits + b.qstUnits,
+    corneredBases: mergeRec(a.corneredBases, b.corneredBases),
+    corneredCorners: mergeRec(a.corneredCorners, b.corneredCorners),
+    onpointCenters: mergeRec(a.onpointCenters, b.onpointCenters),
+    onpointCornerTris: mergeRec(a.onpointCornerTris, b.onpointCornerTris),
+    hrtUnits: mergeRec(a.hrtUnits, b.hrtUnits),
+    splitHalves: mergeRec(a.splitHalves, b.splitHalves),
   };
+
 }
 
 /**
