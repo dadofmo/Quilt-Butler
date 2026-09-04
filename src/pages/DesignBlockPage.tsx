@@ -92,7 +92,9 @@ function DesignBlockInner() {
 
   const [kind, setKind] = useState<UnitKind>("hst");
   const [rotation, setRotation] = useState<Rotation>(0);
+  const [corners, setCorners] = useState<boolean[]>([true, true, true, true]);
   const [regionFabrics, setRegionFabrics] = useState<FabricKey[]>(["A", "B", "C", "D"]);
+
 
   const setFabricPhoto = (fk: FabricKey, dataUrl: string | null) => {
     const next = { ...planner.fabricPhotos };
