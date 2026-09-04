@@ -83,25 +83,63 @@ export const UNIT_HELP: Record<UnitKind, string> = {
 
 /** Region names shown in the editor's fabric list, in canonical order. */
 export const REGION_LABELS: Record<UnitKind, string[]> = {
-  square: ["Square"],
-  hst: ["Triangle 1", "Triangle 2"],
-  qst: ["Top", "Right", "Bottom", "Left"],
+  square: ["Whole square"],
+  hst: ["Top-left triangle", "Bottom-right triangle"],
+  qst: ["Top triangle", "Right triangle", "Bottom triangle", "Left triangle"],
   cornered: ["Main square", "Corner triangles"],
   onpoint: ["Diamond in the middle", "Background corners"],
-  hrt: ["Triangle 1", "Triangle 2"],
-  split: ["First half", "Second half"],
+  hrt: ["Long triangle", "Other long triangle"],
+  split: ["Top half", "Bottom half"],
 };
 
-/** How many visually distinct rotations a unit type has. */
+/**
+ * How many visually distinct rotations a unit type has. Units set to 1 hide
+ * the turn button entirely — turning them changes nothing the quilter can
+ * see (a plain square, a diamond), or is done another way ("Snipped corners"
+ * is steered by tapping the corners instead).
+ */
 export const ROTATION_STEPS: Record<UnitKind, number> = {
   square: 1,
   hst: 4,
   qst: 4,
-  cornered: 4,
+  cornered: 1,
   onpoint: 1,
   hrt: 4,
   split: 4,
 };
+
+/** Plain-English name for the current turn of a unit, used on the button. */
+export const rotationWord = (kind: UnitKind, rotation: Rotation): string => {
+  if (kind === "hrt") {
+    return rotation === 0
+      ? "lying flat, slanting down"
+      : rotation === 90
+        ? "standing up, slanting down"
+        : rotation === 180
+          ? "lying flat, slanting up"
+          : "standing up, slanting up";
+  }
+  if (kind === "split") {
+    return rotation === 0
+      ? "split across the middle"
+      : rotation === 90
+        ? "split down the middle"
+        : rotation === 180
+          ? "split across (halves swapped)"
+          : "split down (halves swapped)";
+  }
+  if (kind === "hst") {
+    return rotation === 0
+      ? "first fabric top-left"
+      : rotation === 90
+        ? "first fabric top-right"
+        : rotation === 180
+          ? "first fabric bottom-right"
+          : "first fabric bottom-left";
+  }
+  return `turned ${rotation}°`;
+};
+
 
 /** Canonical corner flags for a "Snipped corners" unit. */
 export const cornerFlags = (cell: CustomCell): boolean[] =>
