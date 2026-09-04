@@ -271,11 +271,14 @@ export function fingerprint(design: CustomBlockDesign): string {
         parts.push(".");
         continue;
       }
+      const corners =
+        cell.kind === "cornered" ? cornerFlags(cell).map((on) => (on ? "1" : "0")).join("") : "";
       parts.push(
         `${cell.kind}${cell.rotation}:${cell.fabrics
           .slice(0, REGION_COUNT[cell.kind])
-          .join("")}`,
+          .join("")}${corners}`,
       );
+
     }
   }
   return parts.join("|");
