@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Undo2 } from "lucide-react";
+import { RotateCw, Undo2 } from "lucide-react";
 import { StepShell } from "@/components/StepShell";
 import { CustomBlockSvg } from "@/components/CustomBlockSvg";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
@@ -15,12 +15,15 @@ import {
   REGION_COUNT,
   REGION_LABELS,
   ROTATION_STEPS,
+  UNIT_HELP,
   UNIT_LABEL,
   cellsCovered,
   emptyDesign,
   key,
   occupancy,
   resizeDesign,
+  rotateDesign,
+  rotationWord,
   validateDesign,
   type CustomBlockDesign,
   type CustomCell,
@@ -31,7 +34,19 @@ import {
 /** Letters the block itself may use — Y (sashing) and Z (border) are reserved. */
 const BLOCK_FABRICS: FabricKey[] = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
-const UNIT_KINDS: UnitKind[] = ["square", "hst", "qst"];
+const UNIT_KINDS: UnitKind[] = [
+  "square",
+  "hst",
+  "qst",
+  "cornered",
+  "onpoint",
+  "hrt",
+  "split",
+];
+
+/** Corner buttons for "Snipped corners", in canonical order TL, TR, BR, BL. */
+const CORNER_LABELS = ["Top left", "Top right", "Bottom right", "Bottom left"];
+
 
 export default function DesignBlockPage() {
   return (
