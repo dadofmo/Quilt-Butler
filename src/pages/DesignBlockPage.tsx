@@ -535,14 +535,18 @@ function previewDesign(
   kind: UnitKind,
   rotation: Rotation,
   fabrics: FabricKey[],
+  corners: boolean[],
 ): CustomBlockDesign {
   const cell: CustomCell = {
     kind,
-    rotation: kind === "square" ? 0 : rotation,
+    rotation: ROTATION_STEPS[kind] === 1 ? 0 : rotation,
     fabrics: fabrics.slice(0, REGION_COUNT[kind]),
+    ...(kind === "cornered" ? { corners: [...corners] } : {}),
   };
-  return { size: 1, cells: { [key(0, 0)]: cell } };
+  // "Long triangles" covers two cells, so its thumbnail needs a 2×2 frame.
+  return { size: kind === "hrt" ? 2 : 1, cells: { [key(0, 0)]: cell } };
 }
+
 
 /** A unit may overwrite whatever is already there — it only has to fit. */
 function canPlaceHere(
