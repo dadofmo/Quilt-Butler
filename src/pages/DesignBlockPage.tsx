@@ -149,9 +149,14 @@ function DesignBlockInner() {
       kind,
       rotation,
       fabrics: regionFabrics.slice(0, REGION_COUNT[kind]),
+      ...(kind === "cornered" ? { corners: [...corners] } : {}),
     };
     saveWithHistory({ ...design, cells });
   };
+
+  /** Turn the finished block a quarter turn — units and all. */
+  const turnWholeBlock = () => saveWithHistory(rotateDesign(design, 90));
+
 
   const errors = validateDesign(design);
   const occ = occupancy(design);
