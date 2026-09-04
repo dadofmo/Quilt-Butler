@@ -406,7 +406,13 @@ function DesignBlockInner() {
 
       {/* The grid */}
       <div className="bg-card mb-6 rounded-xl border-2 border-border p-4">
-        <div className="text-foreground mb-3 text-base font-semibold">Tap to place</div>
+        <div className="text-foreground mb-1 text-base font-semibold">
+          Step 3 — tap a square to place your piece
+        </div>
+        <p className="text-muted-foreground mb-3 text-xs leading-snug">
+          Tapping a square that already has a piece replaces it. Dotted squares
+          are still empty.
+        </p>
         <div className="flex justify-center">
           <div className="relative">
             <CustomBlockSvg
@@ -425,13 +431,22 @@ function DesignBlockInner() {
                 const r = Math.floor(idx / design.size);
                 const c = idx % design.size;
                 const filled = !!occ[key(r, c)];
+                const fits = canPlaceHere(design, r, c, kind, rotation);
                 return (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => paint(r, c)}
+                    disabled={!fits}
+                    title={
+                      fits
+                        ? undefined
+                        : "This piece needs two squares side by side — it won't fit here."
+                    }
                     aria-label={`Row ${r + 1}, column ${c + 1}`}
-                    className={`border transition-colors hover:bg-primary/20 ${
+                    className={`border transition-colors ${
+                      fits ? "hover:bg-primary/20" : "cursor-not-allowed"
+                    } ${
                       filled ? "border-border/40" : "border-dashed border-primary/60 bg-muted/40"
                     }`}
                   />
@@ -452,12 +467,27 @@ function DesignBlockInner() {
           </button>
           <button
             type="button"
+            onClick={turnWholeBlock}
+            disabled={Object.keys(design.cells).length === 0}
+            className="border-input bg-background inline-flex items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <RotateCw className="h-4 w-4" aria-hidden />
+            Turn the whole block
+          </button>
+          <button
+            type="button"
             onClick={() => saveWithHistory(emptyDesign(design.size, regionFabrics[0] ?? "A"))}
             className="border-input bg-background rounded-lg border-2 px-4 py-2 text-sm font-semibold"
           >
             Clear the grid
           </button>
         </div>
+        <p className="text-muted-foreground mt-2 text-center text-xs leading-snug">
+          &ldquo;Turn the whole block&rdquo; spins everything you&apos;ve drawn a
+          quarter turn clockwise. Undo puts it back.
+        </p>
+      </div>
+
       </div>
 
       {/* Preview + continue */}
