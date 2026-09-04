@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { Undo2 } from "lucide-react";
+import { RotateCw, Undo2 } from "lucide-react";
 import { StepShell } from "@/components/StepShell";
 import { CustomBlockSvg } from "@/components/CustomBlockSvg";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
@@ -15,12 +15,15 @@ import {
   REGION_COUNT,
   REGION_LABELS,
   ROTATION_STEPS,
+  UNIT_HELP,
   UNIT_LABEL,
   cellsCovered,
   emptyDesign,
   key,
   occupancy,
   resizeDesign,
+  rotateDesign,
+  rotationWord,
   validateDesign,
   type CustomBlockDesign,
   type CustomCell,
@@ -31,7 +34,19 @@ import {
 /** Letters the block itself may use — Y (sashing) and Z (border) are reserved. */
 const BLOCK_FABRICS: FabricKey[] = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
-const UNIT_KINDS: UnitKind[] = ["square", "hst", "qst"];
+const UNIT_KINDS: UnitKind[] = [
+  "square",
+  "hst",
+  "qst",
+  "cornered",
+  "onpoint",
+  "hrt",
+  "split",
+];
+
+/** Corner buttons for "Snipped corners", in canonical order TL, TR, BR, BL. */
+const CORNER_LABELS = ["Top left", "Top right", "Bottom right", "Bottom left"];
+
 
 export default function DesignBlockPage() {
   return (
@@ -77,7 +92,9 @@ function DesignBlockInner() {
 
   const [kind, setKind] = useState<UnitKind>("hst");
   const [rotation, setRotation] = useState<Rotation>(0);
+  const [corners, setCorners] = useState<boolean[]>([true, true, true, true]);
   const [regionFabrics, setRegionFabrics] = useState<FabricKey[]>(["A", "B", "C", "D"]);
+
 
   const setFabricPhoto = (fk: FabricKey, dataUrl: string | null) => {
     const next = { ...planner.fabricPhotos };
@@ -132,9 +149,14 @@ function DesignBlockInner() {
       kind,
       rotation,
       fabrics: regionFabrics.slice(0, REGION_COUNT[kind]),
+      ...(kind === "cornered" ? { corners: [...corners] } : {}),
     };
     saveWithHistory({ ...design, cells });
   };
+
+  /** Turn the finished block a quarter turn — units and all. */
+  const turnWholeBlock = () => saveWithHistory(rotateDesign(design, 90));
+
 
   const errors = validateDesign(design);
   const occ = occupancy(design);
@@ -252,7 +274,13 @@ function DesignBlockInner() {
 
       {/* Tool palette */}
       <div className="bg-card mb-6 rounded-xl border-2 border-border p-4">
-        <div className="text-foreground mb-2 text-base font-semibold">Your unit</div>
+        <div className="text-foreground mb-1 text-base font-semibold">
+          Step 1 — pick a piece
+        </div>
+        <p className="text-muted-foreground mb-3 text-xs leading-snug">
+          Each picture below shows one piece exactly as it will look in your
+          block. Tap one to choose it.
+        </p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {UNIT_KINDS.map((k) => (
             <button
@@ -268,7 +296,7 @@ function DesignBlockInner() {
               }`}
             >
               <CustomBlockSvg
-                design={previewDesign(k, rotation, regionFabrics)}
+                design={previewDesign(k, rotation, regionFabrics, corners)}
                 photos={planner.fabricPhotos}
                 size={52}
               />
@@ -277,17 +305,75 @@ function DesignBlockInner() {
           ))}
         </div>
 
+        <p className="text-muted-foreground bg-muted/50 mt-3 rounded-lg p-3 text-xs leading-snug">
+          <strong className="text-foreground">{UNIT_LABEL[kind]}:</strong>{" "}
+          {UNIT_HELP[kind]}
+        </p>
+
+        {kind === "hrt" && (
+          <p className="text-muted-foreground mt-2 text-xs leading-snug">
+            This piece is wider than the rest — it fills{" "}
+            <strong>two squares of the grid</strong>. Tap the left square (or
+            the top one if it&apos;s standing up) and it fills its neighbour
+            too. Squares at the very edge can&apos;t take it, because the
+            second half would fall off the block.
+          </p>
+        )}
+
         {ROTATION_STEPS[kind] > 1 && (
-          <button
-            type="button"
-            onClick={() => setRotation((((rotation + 90) % 360) as Rotation))}
-            className="border-input bg-background mt-3 rounded-lg border-2 px-4 py-2 text-sm font-semibold"
-          >
-            Turn a quarter turn ({rotation}°)
-          </button>
+          <div className="mt-3">
+            <button
+              type="button"
+              onClick={() => setRotation((((rotation + 90) % 360) as Rotation))}
+              className="border-input bg-background inline-flex items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold"
+            >
+              <RotateCw className="h-4 w-4" aria-hidden />
+              Turn this piece
+            </button>
+            <div className="text-muted-foreground mt-1 text-xs">
+              Right now it is {rotationWord(kind, rotation)}.
+            </div>
+          </div>
+        )}
+
+        {kind === "cornered" && (
+          <div className="mt-4">
+            <div className="text-foreground mb-1 text-sm font-medium">
+              Which corners get a triangle?
+            </div>
+            <p className="text-muted-foreground mb-2 text-xs leading-snug">
+              Tap a corner to turn its triangle on or off. Leave all four on for
+              a classic Snowball.
+            </p>
+            <div className="grid w-28 grid-cols-2 gap-1">
+              {[0, 1, 3, 2].map((idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    const next = [...corners];
+                    next[idx] = !next[idx];
+                    if (next.some(Boolean)) setCorners(next);
+                  }}
+                  aria-pressed={corners[idx]}
+                  aria-label={`${CORNER_LABELS[idx]} corner triangle`}
+                  className={`h-12 rounded-md border-2 text-[10px] font-semibold transition-colors ${
+                    corners[idx]
+                      ? "border-primary bg-primary/10"
+                      : "border-input bg-background text-muted-foreground"
+                  }`}
+                >
+                  {corners[idx] ? "On" : "Off"}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
 
         <div className="mt-4 space-y-3">
+          <div className="text-foreground text-base font-semibold">
+            Step 2 — pick the fabrics for this piece
+          </div>
           {REGION_LABELS[kind].map((label, i) => (
             <div key={label}>
               <div className="text-foreground mb-1 text-sm font-medium">{label}</div>
@@ -317,9 +403,16 @@ function DesignBlockInner() {
         </div>
       </div>
 
+
       {/* The grid */}
       <div className="bg-card mb-6 rounded-xl border-2 border-border p-4">
-        <div className="text-foreground mb-3 text-base font-semibold">Tap to place</div>
+        <div className="text-foreground mb-1 text-base font-semibold">
+          Step 3 — tap a square to place your piece
+        </div>
+        <p className="text-muted-foreground mb-3 text-xs leading-snug">
+          Tapping a square that already has a piece replaces it. Dotted squares
+          are still empty.
+        </p>
         <div className="flex justify-center">
           <div className="relative">
             <CustomBlockSvg
@@ -338,13 +431,22 @@ function DesignBlockInner() {
                 const r = Math.floor(idx / design.size);
                 const c = idx % design.size;
                 const filled = !!occ[key(r, c)];
+                const fits = canPlaceHere(design, r, c, kind, rotation);
                 return (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => paint(r, c)}
+                    disabled={!fits}
+                    title={
+                      fits
+                        ? undefined
+                        : "This piece needs two squares side by side — it won't fit here."
+                    }
                     aria-label={`Row ${r + 1}, column ${c + 1}`}
-                    className={`border transition-colors hover:bg-primary/20 ${
+                    className={`border transition-colors ${
+                      fits ? "hover:bg-primary/20" : "cursor-not-allowed"
+                    } ${
                       filled ? "border-border/40" : "border-dashed border-primary/60 bg-muted/40"
                     }`}
                   />
@@ -365,12 +467,27 @@ function DesignBlockInner() {
           </button>
           <button
             type="button"
+            onClick={turnWholeBlock}
+            disabled={Object.keys(design.cells).length === 0}
+            className="border-input bg-background inline-flex items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <RotateCw className="h-4 w-4" aria-hidden />
+            Turn the whole block
+          </button>
+          <button
+            type="button"
             onClick={() => saveWithHistory(emptyDesign(design.size, regionFabrics[0] ?? "A"))}
             className="border-input bg-background rounded-lg border-2 px-4 py-2 text-sm font-semibold"
           >
             Clear the grid
           </button>
         </div>
+        <p className="text-muted-foreground mt-2 text-center text-xs leading-snug">
+          &ldquo;Turn the whole block&rdquo; spins everything you&apos;ve drawn a
+          quarter turn clockwise. Undo puts it back.
+        </p>
+      </div>
+
       </div>
 
       {/* Preview + continue */}
@@ -418,14 +535,18 @@ function previewDesign(
   kind: UnitKind,
   rotation: Rotation,
   fabrics: FabricKey[],
+  corners: boolean[],
 ): CustomBlockDesign {
   const cell: CustomCell = {
     kind,
-    rotation: kind === "square" ? 0 : rotation,
+    rotation: ROTATION_STEPS[kind] === 1 ? 0 : rotation,
     fabrics: fabrics.slice(0, REGION_COUNT[kind]),
+    ...(kind === "cornered" ? { corners: [...corners] } : {}),
   };
-  return { size: 1, cells: { [key(0, 0)]: cell } };
+  // "Long triangles" covers two cells, so its thumbnail needs a 2×2 frame.
+  return { size: kind === "hrt" ? 2 : 1, cells: { [key(0, 0)]: cell } };
 }
+
 
 /** A unit may overwrite whatever is already there — it only has to fit. */
 function canPlaceHere(

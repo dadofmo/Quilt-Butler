@@ -4149,6 +4149,80 @@ export function calculateYardage(s: PlannerState): CalcResult {
       );
     }
 
+    // ---- Snipped corners (Snowball-style stitch and flip) ------------------
+    const cornerCut = round2(unit / 2 + SEAM);
+    for (const [fab, count] of Object.entries(tally.corneredBases)) {
+      if (count <= 0) continue;
+      const f = fab as FabricKey;
+      addSquares(reqs[f], "Snipped-corner base squares", count, sqCut, s.fabricWidth);
+    }
+    for (const [fab, count] of Object.entries(tally.corneredCorners)) {
+      if (count <= 0) continue;
+      const f = fab as FabricKey;
+      addSquares(reqs[f], "Corner squares (stitch and flip)", count, cornerCut, s.fabricWidth);
+      notes.push(
+        `Snipped corners: cut ${count} small squares of Fabric ${f} at ${cornerCut.toFixed(2)}". Lay one on a corner of the base square right sides together (RST), draw a line corner to corner across the small square, sew ON that line, trim the outer corner away 1/4" past the stitching and press the triangle open. Repeat for every corner you marked.`,
+      );
+    }
+
+    // ---- Square on point (square in a square) ------------------------------
+    const onpointCenterCut = round2(unit / Math.SQRT2 + SEAM);
+    const onpointCornerCut = round2(unit / 2 + HST_EXTRA);
+    for (const [fab, count] of Object.entries(tally.onpointCenters)) {
+      if (count <= 0) continue;
+      const f = fab as FabricKey;
+      addSquares(reqs[f], "On-point centre squares", count, onpointCenterCut, s.fabricWidth);
+      notes.push(
+        `Square on point (Fabric ${f} centre): cut ${count} squares at ${onpointCenterCut.toFixed(2)}". Cut smaller than the cell because the square is turned 45°, so its diagonal — not its side — spans the cell.`,
+      );
+    }
+    for (const [fab, tris] of Object.entries(tally.onpointCornerTris)) {
+      if (tris <= 0) continue;
+      const f = fab as FabricKey;
+      const squares = Math.ceil(tris / 2);
+      addSquares(
+        reqs[f],
+        "Background corner squares||then cut each square ONCE corner-to-corner on the diagonal",
+        squares,
+        onpointCornerCut,
+        s.fabricWidth,
+      );
+      notes.push(
+        `Square on point (Fabric ${f} background): cut ${squares} squares at ${onpointCornerCut.toFixed(2)}", then cut each ONCE corner to corner on the diagonal → ${squares * 2} triangles (you need ${tris}). Sew a triangle to the top and bottom of the centre square, press outward, then the left and right, and trim the unit to ${sqCut.toFixed(2)}" square keeping 1/4" beyond every point.`,
+      );
+    }
+
+    // ---- Long triangles (half-rectangle triangles, 2 cells wide) -----------
+    const hrtLongCut = round2(unit * 2 + 1);
+    const hrtShortCut = round2(unit + 1);
+    for (const [k, units] of Object.entries(tally.hrtUnits)) {
+      if (units <= 0) continue;
+      const [a, b] = k.split("|") as [FabricKey, FabricKey];
+      const rectsEach = Math.ceil(units / 2);
+      if (a === b) {
+        addRails(reqs[a], "Long-triangle rectangles", rectsEach * 2, hrtLongCut, hrtShortCut, s.fabricWidth);
+      } else {
+        addRails(reqs[a], "Long-triangle rectangles", rectsEach, hrtLongCut, hrtShortCut, s.fabricWidth);
+        addRails(reqs[b], "Long-triangle rectangles", rectsEach, hrtLongCut, hrtShortCut, s.fabricWidth);
+      }
+      notes.push(
+        `Long triangles (Fabric ${a} + Fabric ${b}): you need ${units} units, each finishing ${(unit * 2).toFixed(2)}" × ${unit.toFixed(2)}". Cut ${rectsEach} rectangles of each fabric at ${hrtShortCut.toFixed(2)}" × ${hrtLongCut.toFixed(2)}" (cut generously on purpose — you trim after sewing). Stack one rectangle of each fabric RIGHT SIDES TOGETHER and cut the pair once corner to corner; sewing each cut pair along that long slanted edge gives 2 units. Press toward the darker fabric and trim each unit to ${round2(unit * 2 + SEAM).toFixed(2)}" × ${sqCut.toFixed(2)}", keeping the slant running corner to corner.`,
+      );
+    }
+
+    // ---- Split in half -----------------------------------------------------
+    const splitLongCut = round2(unit + SEAM);
+    const splitShortCut = round2(unit / 2 + SEAM);
+    for (const [fab, count] of Object.entries(tally.splitHalves)) {
+      if (count <= 0) continue;
+      const f = fab as FabricKey;
+      addRails(reqs[f], "Half-cell strips", count, splitLongCut, splitShortCut, s.fabricWidth);
+      notes.push(
+        `Split in half (Fabric ${f}): cut ${count} strips at ${splitShortCut.toFixed(2)}" × ${splitLongCut.toFixed(2)}". Sew two halves together along their long edges and press — the finished piece is ${unit.toFixed(2)}" square.`,
+      );
+    }
+
+
     notes.push(
       `Block assembly: sew the units of each row together left to right, press the seams in opposite directions row to row, then join the ${grid} rows. Every finished block should measure ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
     );
