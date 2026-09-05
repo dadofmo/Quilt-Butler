@@ -295,12 +295,22 @@ function DesignBlockInner() {
                 kind === k ? "border-primary bg-primary/5" : "border-input bg-background"
               }`}
             >
-              <CustomBlockSvg
-                design={previewDesign(k, rotation, regionFabrics, corners)}
-                photos={planner.fabricPhotos}
-                size={52}
-              />
+              <div className="flex h-[52px] items-center justify-center">
+                <CustomBlockSvg
+                  design={previewDesign(k, rotation, regionFabrics, corners)}
+                  photos={planner.fabricPhotos}
+                  size={52}
+                  crop={
+                    k === "hrt"
+                      ? rotation === 90 || rotation === 270
+                        ? { w: 0.5, h: 1 }
+                        : { w: 1, h: 0.5 }
+                      : undefined
+                  }
+                />
+              </div>
               {UNIT_LABEL[k]}
+
             </button>
           ))}
         </div>
@@ -488,7 +498,7 @@ function DesignBlockInner() {
         </p>
       </div>
 
-      </div>
+
 
       {/* Preview + continue */}
       <div className="bg-card mb-6 rounded-xl border-2 border-border p-4 text-center">

@@ -1758,7 +1758,8 @@ const BASE_PATTERNS: PatternDefBase[] = [
     name: "Design Your Own Block",
     hasMath: true,
     intro:
-      "Draw your own block on a grid from 2×2 up to 8×8 using solid squares, half-square triangles, hourglass (quarter-square) units and flying geese. QuiltButler works out the cutting list, yardage and sewing order from whatever you draw — then you can vary how the block is set across the quilt.",
+      "Draw your own block on a grid from 2×2 up to 8×8 using plain squares, two-triangle and four-triangle units, snipped corners, squares on point, long triangles and halves. QuiltButler works out the cutting list, yardage and sewing order from whatever you draw — then you can vary how the block is set across the quilt.",
+
     sections: [
       {
         id: "sashing",
@@ -1832,7 +1833,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   // Metadata for the user-designed block is nominal: the real fabric count and
   // techniques depend on what the user draws, and the tile is surfaced through
   // its own entry point rather than the filterable pattern grid.
-  "custom-block": { skill: "confident", fabricCount: 2, techniques: ["squares", "hst", "geese"] },
+  "custom-block": { skill: "confident", fabricCount: 2, techniques: ["squares", "hst", "onpoint", "flip"] },
 };
 
 

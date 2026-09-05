@@ -35,23 +35,32 @@ export function CustomBlockShapes({
 /**
  * Standalone square preview of a custom block, used by the editor and by the
  * pattern tile. `size` is the rendered pixel width.
+ *
+ * `crop` narrows the visible area to part of the block — the editor uses it
+ * for the "Long triangles" thumbnail, whose piece covers two grid cells and
+ * so would otherwise float in a half-empty square.
  */
 export function CustomBlockSvg({
   design,
   photos,
   size = 220,
   className,
+  crop,
 }: {
   design: CustomBlockDesign;
   photos?: Partial<Record<FabricKey, string>>;
   size?: number;
   className?: string;
+  /** Visible fraction of the 200×200 block, as { w, h } in 0–1. */
+  crop?: { w: number; h: number };
 }) {
+  const vw = 200 * (crop?.w ?? 1);
+  const vh = 200 * (crop?.h ?? 1);
   return (
     <svg
-      width={size}
-      height={size}
-      viewBox="0 0 200 200"
+      width={(size * vw) / 200}
+      height={(size * vh) / 200}
+      viewBox={`0 0 ${vw} ${vh}`}
       className={className}
       role="img"
       aria-label="Preview of your custom quilt block"
@@ -61,3 +70,4 @@ export function CustomBlockSvg({
     </svg>
   );
 }
+
