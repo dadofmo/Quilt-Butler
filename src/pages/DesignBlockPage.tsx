@@ -488,7 +488,7 @@ function DesignBlockInner() {
         </p>
       </div>
 
-      </div>
+
 
       {/* Preview + continue */}
       <div className="bg-card mb-6 rounded-xl border-2 border-border p-4 text-center">
