@@ -2501,7 +2501,7 @@ console.log("\n=== Custom block: alternate-blocks fabric swap splits counts exac
   check("CSC(alt) B base count", bucket(b, /base squares/i), 128);
   check("CSC(alt) B corner count", bucket(b, /Corner squares/i), 512);
   check("CSC(alt) base total unchanged", bucket(a, /base/i) + bucket(b, /base/i), 256);
-  check("CSC(alt) corner total unchanged", bucket(a, /Corner/i) + bucket(b, /Corner/i), 1024);
+  check("CSC(alt) corner total unchanged", bucket(a, /^Corner squares/) + bucket(b, /^Corner squares/), 1024);
 }
 
 console.log("\n=== Custom block: Block B checkerboard alternation ===");
