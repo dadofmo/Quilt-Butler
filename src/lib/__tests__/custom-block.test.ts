@@ -262,9 +262,7 @@ describe("custom block — whole-block rotation", () => {
     delete cells["3,2"];
     delete cells["3,3"];
     cells["2,2"] = unitOfKind("hrt", 0);   // covers (2,2),(2,3)
-    cells["2,3"] = unitOfKind("hrt", 90);  // wait — collision; use vertical pair instead
     cells["3,2"] = unitOfKind("hrt", 0);   // covers (3,2),(3,3)
-    delete cells["2,3"];
     const d: CustomBlockDesign = { size, cells };
     expect(validateDesign(d)).toEqual([]);
     const flat = (des: CustomBlockDesign) =>
