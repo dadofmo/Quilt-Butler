@@ -4,6 +4,7 @@
  */
 import { calculateYardage, calculateMaterials, computePrecutPlan } from "/dev-server/src/lib/yardage";
 import type { PlannerState, FabricKey } from "/dev-server/src/lib/planner-store";
+import { rotateDesign, type CustomBlockDesign, type CustomCell } from "/dev-server/src/lib/custom-block";
 
 function base(): PlannerState {
   return {
@@ -2329,6 +2330,210 @@ console.log("\n=== Blazing Arrows: alternate (reversed) blocks change nothing ==
     r0.notes.some(n => /Reversed blocks are ON/.test(n)) ? 1 : 0,
     0,
   );
+}
+
+// =========================================================================
+// DESIGN YOUR OWN BLOCK — hand-calculated cases for the seven unit types
+// =========================================================================
+
+/** Build a design with every grid cell filled by the given unit factory. */
+function fullDesign(size: number, make: (r: number, c: number) => CustomCell | null): CustomBlockDesign {
+  const cells: Record<string, CustomCell> = {};
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      const cell = make(r, c);
+      if (cell) cells[`${r},${c}`] = cell;
+    }
+  }
+  return { size, cells };
+}
+
+// Shared fixture: 48×48 quilt, 12" block, 4×4 grid → unit = 3", 16 blocks.
+// 44" bolt → 42.5" usable.
+function customBase(design: CustomBlockDesign) {
+  return {
+    ...base(),
+    pattern: "custom-block" as const,
+    quiltWidth: 48,
+    quiltHeight: 48,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    customBlock: design,
+  };
+}
+
+console.log("\n=== Custom block: Snipped corners, all 4 corners on ===");
+{
+  // Per block: 16 base squares (A) + 64 corner squares (B). ×16 blocks:
+  // A: 256 at unit+0.5 = 3.5". Per strip floor(42.5/3.5)=12. Strips=ceil(256/12)=22. In=77.
+  // B: 1024 at unit/2+0.5 = 2".  Per strip floor(42.5/2)=21.   Strips=ceil(1024/21)=49. In=98.
+  const d = fullDesign(4, () => ({ kind: "cornered", rotation: 0, fabrics: ["A", "B"] as FabricKey[], corners: [true, true, true, true] }));
+  const r = calculateYardage(customBase(d));
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("CSC A base count", a.pieces[0].count, 256);
+  check("CSC A base cut", a.pieces[0].w, 3.5);
+  check("CSC A strips", a.strips[0].count, 22);
+  check("CSC A inches", a.totalInches, 77);
+  check("CSC B corner count", b.pieces[0].count, 1024);
+  check("CSC B corner cut", b.pieces[0].w, 2);
+  check("CSC B strips", b.strips[0].count, 49);
+  check("CSC B inches", b.totalInches, 98);
+}
+
+console.log("\n=== Custom block: Snipped corners, only 2 corners on ===");
+{
+  // Same base; corner count halves: B = 512. Strips=ceil(512/21)=25. In=50.
+  const d = fullDesign(4, () => ({ kind: "cornered", rotation: 0, fabrics: ["A", "B"] as FabricKey[], corners: [true, true, false, false] }));
+  const r = calculateYardage(customBase(d));
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("CSC-2 B corner count", b.pieces[0].count, 512);
+  check("CSC-2 B strips", b.strips[0].count, 25);
+  check("CSC-2 B inches", b.totalInches, 50);
+}
+
+console.log("\n=== Custom block: Square on point ===");
+{
+  // unit=3. centreCut = 3/√2 + 0.5 ≈ 2.6213 → round2 = 2.62.
+  //   A: 256 at 2.62. Per strip floor(42.5/2.62)=16. Strips=16. In=41.92.
+  // cornerCut = 3/2 + 7/8 = 2.375 → round2 = 2.38 (rounds half up).
+  //   B: 4 tris/unit → 1024 tris → 512 squares at 2.38.
+  //   Per strip floor(42.5/2.38)=17. Strips=ceil(512/17)=31. In=73.78.
+  const d = fullDesign(4, () => ({ kind: "onpoint", rotation: 0, fabrics: ["A", "B"] as FabricKey[] }));
+  const r = calculateYardage(customBase(d));
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("SoP-C A centre count", a.pieces[0].count, 256);
+  check("SoP-C A centre cut", a.pieces[0].w, 2.62);
+  check("SoP-C A strips", a.strips[0].count, 16);
+  check("SoP-C A inches", a.totalInches, 41.92);
+  check("SoP-C B corner squares", b.pieces[0].count, 512);
+  check("SoP-C B corner cut", b.pieces[0].w, 2.38);
+  check("SoP-C B strips", b.strips[0].count, 31);
+  check("SoP-C B inches", b.totalInches, 73.78);
+}
+
+console.log("\n=== Custom block: Long triangles (2-cell HRT), horizontal ===");
+{
+  // 8 anchors per block (rows 0-3, cols 0 & 2). 16 blocks → 128 units.
+  // rectsEach = 64 per fabric at (2u+1)=7" × (u+1)=4".
+  // Per strip floor(42.5/7)=6. Strips=ceil(64/6)=11. In = 11×4 = 44.
+  const d = fullDesign(4, (r, c) =>
+    c % 2 === 0 ? { kind: "hrt", rotation: 0, fabrics: ["A", "B"] as FabricKey[] } : null,
+  );
+  const r = calculateYardage(customBase(d));
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("HRT A rect count", a.pieces[0].count, 64);
+  check("HRT A rect length", a.pieces[0].w, 7);
+  check("HRT A rect height", a.pieces[0].h, 4);
+  check("HRT A strips", a.strips[0].count, 11);
+  check("HRT A inches", a.totalInches, 44);
+  check("HRT B mirrors A", b.totalInches, 44);
+}
+
+console.log("\n=== Custom block: Long triangles, vertical orientation ===");
+{
+  // Same counts — rotation 90 stacks the pair vertically; cutting math is identical.
+  const d = fullDesign(4, (r, c) =>
+    r % 2 === 0 ? { kind: "hrt", rotation: 90 as const, fabrics: ["A", "B"] as FabricKey[] } : null,
+  );
+  const r = calculateYardage(customBase(d));
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("HRT-90 A rect count", a.pieces[0].count, 64);
+  check("HRT-90 A inches", a.totalInches, 44);
+}
+
+console.log("\n=== Custom block: Split in half ===");
+{
+  // 16 halves of each fabric per block → 256 each at (u+0.5)=3.5" × (u/2+0.5)=2".
+  // Per strip floor(42.5/3.5)=12. Strips=ceil(256/12)=22. In = 22×2 = 44.
+  const d = fullDesign(4, () => ({ kind: "split", rotation: 0, fabrics: ["A", "B"] as FabricKey[] }));
+  const r = calculateYardage(customBase(d));
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("Split A half count", a.pieces[0].count, 256);
+  check("Split A length", a.pieces[0].w, 3.5);
+  check("Split A height", a.pieces[0].h, 2);
+  check("Split A strips", a.strips[0].count, 22);
+  check("Split A inches", a.totalInches, 44);
+  check("Split B mirrors A", b.totalInches, 44);
+}
+
+console.log("\n=== Custom block: whole-block rotation never changes the cutting list ===");
+{
+  // Mixed design using every unit type, then rotated 90/180/270. Rotation only
+  // rearranges cells — every piece count must be byte-identical.
+  const mixed = fullDesign(4, (r, c) => {
+    if (r === 0 && c % 2 === 0) return { kind: "hrt", rotation: 0, fabrics: ["A", "B"] as FabricKey[] };
+    if (r === 0) return null;
+    if (r === 1) return { kind: "cornered", rotation: 0, fabrics: ["A", "C"] as FabricKey[], corners: [true, false, true, false] };
+    if (r === 2) return { kind: "onpoint", rotation: 0, fabrics: ["D", "E"] as FabricKey[] };
+    if (c % 2 === 0) return { kind: "split", rotation: 90 as const, fabrics: ["A", "D"] as FabricKey[] };
+    return { kind: "qst", rotation: 0, fabrics: ["A", "B", "C", "D"] as FabricKey[] };
+  });
+  const flatten = (res: ReturnType<typeof calculateYardage>) =>
+    res.fabrics
+      .flatMap(f => f.pieces.map(p => `${f.fabric}|${p.label}|${p.count}|${p.w}|${p.h}`))
+      .sort()
+      .join("\n");
+  const r0 = flatten(calculateYardage(customBase(mixed)));
+  for (const by of [90, 180, 270] as const) {
+    const rr = flatten(calculateYardage(customBase(rotateDesign(mixed, by))));
+    check(`Rotation ${by}° keeps cutting list identical`, rr === r0 ? 1 : 0, 1);
+  }
+}
+
+console.log("\n=== Custom block: alternate-blocks fabric swap splits counts exactly ===");
+{
+  // Snipped-corner design, swap A↔B on odd blocks. 16 blocks → 8 as drawn,
+  // 8 swapped. Even 8: 128 A bases + 512 B corners. Odd 8: 128 B bases + 512 A corners.
+  const d = fullDesign(4, () => ({ kind: "cornered", rotation: 0, fabrics: ["A", "B"] as FabricKey[] }));
+  const s = { ...customBase(d), alternateBlocks: true, customSwapPair: ["A", "B"] as [FabricKey, FabricKey] };
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  const bucket = (f: typeof a, re: RegExp) =>
+    f.pieces.filter(p => re.test(p.label)).reduce((n, p) => n + p.count, 0);
+  check("CSC(alt) A base count", bucket(a, /base squares/i), 128);
+  check("CSC(alt) A corner count", bucket(a, /Corner squares/i), 512);
+  check("CSC(alt) B base count", bucket(b, /base squares/i), 128);
+  check("CSC(alt) B corner count", bucket(b, /Corner squares/i), 512);
+  check("CSC(alt) base total unchanged", bucket(a, /base/i) + bucket(b, /base/i), 256);
+  check("CSC(alt) corner total unchanged", bucket(a, /^Corner squares/) + bucket(b, /^Corner squares/), 1024);
+}
+
+console.log("\n=== Custom block: Block B checkerboard alternation ===");
+{
+  // Block A = all plain squares of A; Block B = all plain squares of C.
+  // 16 blocks → 8 each. A: 8×16 = 128 squares at 3.5". C: 128 at 3.5".
+  const dA = fullDesign(4, () => ({ kind: "square", rotation: 0, fabrics: ["A"] as FabricKey[] }));
+  const dB = fullDesign(4, () => ({ kind: "square", rotation: 0, fabrics: ["C"] as FabricKey[] }));
+  const s = { ...customBase(dA), customBlockB: dB, useBlockB: true };
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("BlockB A square count", a.pieces[0].count, 128);
+  check("BlockB C square count", c.pieces[0].count, 128);
+  check("BlockB no fabric B", r.fabrics.find(f => f.fabric === "B") ? 1 : 0, 0);
+}
+
+console.log("\n=== Custom block: odd block count with swap (rounding safety) ===");
+{
+  // 36×36 quilt with 12" block → 9 blocks → 5 as drawn / 4 swapped.
+  // HST design: 16 HST units/block. Even 5 blocks: 80 units A|B.
+  // Odd 4 swapped: 64 units B|A (same pair). Total 144 units → 72 squares each.
+  const d = fullDesign(4, () => ({ kind: "hst", rotation: 0, fabrics: ["A", "B"] as FabricKey[] }));
+  const s = {
+    ...customBase(d),
+    quiltWidth: 36, quiltHeight: 36,
+    alternateBlocks: true, customSwapPair: ["A", "B"] as [FabricKey, FabricKey],
+  };
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  check("HST(alt odd) A starting squares", a.pieces[0].count, 72);
+  check("HST(alt odd) A cut", a.pieces[0].w, 3.88); // round2(3 + 0.875)
 }
 
 if (failures.length === 0) {
