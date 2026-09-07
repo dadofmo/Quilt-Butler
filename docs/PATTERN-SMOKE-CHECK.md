@@ -41,6 +41,31 @@ Walk through every pattern once. For each:
 | Rail Fence           | Only pattern with a Yardage / Jelly Roll toggle.                         |
 | Friendship Star      | Thumbnail uses yellow / blue / pink (brand fabrics), no off-brand colors. |
 
+## Design Your Own Block (the custom-block editor)
+
+- [ ] All seven palette pieces show a picture, a plain-English name, and a
+      one-sentence explanation (no jargon-only labels).
+- [ ] **Snipped corners**: tapping a corner on the preview toggles its
+      triangle; the app refuses to turn the last corner off and says why.
+- [ ] **Long triangles**: tapping a cell where the piece would hang off the
+      edge does nothing except show the short help line; the turn button
+      stands it upright / lays it flat as described.
+- [ ] **Turn the whole block** spins the preview a quarter turn; Undo
+      restores the previous design; quilt preview and cutting list follow.
+- [ ] Next stays disabled until every grid cell is filled, and the message
+      lists what's left in plain words.
+- [ ] On Results, each unit type used appears in the cutting list with a
+      sensible label and sewing note (stitch-and-flip for snipped corners,
+      diagonal cut for on-point corners, oversized rectangles for long
+      triangles, halves for split units).
+- [ ] The full-quilt preview and full-screen block view both render the
+      custom design with no gaps, overlaps, or missing pieces.
+
+Automated backup for this section: `scripts/audit-yardage.ts` hand-calc cases
+for all four new units, and `src/lib/__tests__/custom-block.test.ts` — a
+permutation sweep (every unit × grid sizes 2–8 × rotations × corner masks),
+placement rules, rotation invariance, alternation, and render safety.
+
 ## Before shipping
 
 Run, in order:
