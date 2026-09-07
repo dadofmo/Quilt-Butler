@@ -363,7 +363,12 @@ function DesignBlockInner() {
                   onClick={() => {
                     const next = [...corners];
                     next[idx] = !next[idx];
-                    if (next.some(Boolean)) setCorners(next);
+                    if (next.some(Boolean)) {
+                      setCorners(next);
+                      setLastCornerWarn(false);
+                    } else {
+                      setLastCornerWarn(true);
+                    }
                   }}
                   aria-pressed={corners[idx]}
                   aria-label={`${CORNER_LABELS[idx]} corner triangle`}
