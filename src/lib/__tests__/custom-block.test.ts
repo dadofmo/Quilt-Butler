@@ -296,10 +296,13 @@ describe("custom block — fabric swap and Block B alternation", () => {
       calculateYardage(s).fabrics.flatMap((f) => f.pieces).reduce((n, p) => n + p.count, 0);
     expect(pieceCount(on)).toBe(pieceCount(off));
     // And the per-shape totals must match too (bases with bases, corners with corners).
-    const byShape = (s: PlannerState) =>
-      calculateYardage(s)
-        .fabrics.flatMap((f) => f.pieces.map((p) => `${p.w}x${p.h}:${p.count}`))
-        .sort();
+    const byShape = (s: PlannerState) => {
+      const totals = new Map<string, number>();
+      for (const f of calculateYardage(s).fabrics)
+        for (const p of f.pieces)
+          totals.set(`${p.w}x${p.h}`, (totals.get(`${p.w}x${p.h}`) ?? 0) + p.count);
+      return [...totals.entries()].sort();
+    };
     expect(byShape(on)).toEqual(byShape(off));
   });
 

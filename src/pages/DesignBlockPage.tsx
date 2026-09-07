@@ -93,6 +93,7 @@ function DesignBlockInner() {
   const [kind, setKind] = useState<UnitKind>("hst");
   const [rotation, setRotation] = useState<Rotation>(0);
   const [corners, setCorners] = useState<boolean[]>([true, true, true, true]);
+  const [lastCornerWarn, setLastCornerWarn] = useState(false);
   const [regionFabrics, setRegionFabrics] = useState<FabricKey[]>(["A", "B", "C", "D"]);
 
 
@@ -363,7 +364,12 @@ function DesignBlockInner() {
                   onClick={() => {
                     const next = [...corners];
                     next[idx] = !next[idx];
-                    if (next.some(Boolean)) setCorners(next);
+                    if (next.some(Boolean)) {
+                      setCorners(next);
+                      setLastCornerWarn(false);
+                    } else {
+                      setLastCornerWarn(true);
+                    }
                   }}
                   aria-pressed={corners[idx]}
                   aria-label={`${CORNER_LABELS[idx]} corner triangle`}
@@ -377,6 +383,12 @@ function DesignBlockInner() {
                 </button>
               ))}
             </div>
+            {lastCornerWarn && (
+              <p className="text-destructive mt-2 text-xs leading-snug">
+                At least one corner needs to stay on — otherwise this piece is
+                just a plain square. Pick "Plain square" from the list instead.
+              </p>
+            )}
           </div>
         )}
 
