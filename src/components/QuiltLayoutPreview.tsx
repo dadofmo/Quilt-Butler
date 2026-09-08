@@ -74,10 +74,14 @@ export function QuiltLayoutPreview({
 }: Props) {
   const blockCount = blocksAcross * blocksDown;
   const [fullOpen, setFullOpen] = useState(false);
-  const [blockFullOpen, setBlockFullOpen] = useState(false);
+  const [blockFullOpen, setBlockFullOpen] = useState<null | "A" | "B">(null);
   const fullMax = useViewportMax();
 
-  const renderBlock = (size: number) =>
+  // Two-block set: show Block A and Block B side by side, each with its own
+  // full-screen link, so the user can check both drawings.
+  const showTwoBlocks = pattern === "custom-block" && !!useBlockB && !!customBlockB;
+
+  const renderBlock = (size: number, design: CustomBlockDesign | null = customBlock) =>
     pattern === "rail-fence" ? (
       <div className="flex items-stretch gap-2">
         <div className="flex flex-col justify-around py-[5px] text-right">
@@ -118,7 +122,7 @@ export function QuiltLayoutPreview({
         hasBorder={false}
         size={size}
         photos={photos}
-        customBlock={customBlock}
+        customBlock={design}
       />
     );
 
@@ -147,20 +151,24 @@ export function QuiltLayoutPreview({
 
   return (
     <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
-      <div className="flex flex-col items-center gap-2">
-        <div className="flex flex-col items-center gap-1">
-          <div className="text-foreground text-xs font-semibold uppercase tracking-wide">
-            1 block
+      <div className={showTwoBlocks ? "flex flex-col items-center gap-4 sm:flex-row sm:items-start" : "flex flex-col items-center gap-2"}>
+        {(showTwoBlocks ? (["A", "B"] as const) : (["A"] as const)).map((which) => (
+          <div key={which} className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-1">
+              <div className="text-foreground text-xs font-semibold uppercase tracking-wide">
+                {showTwoBlocks ? `Block ${which}` : "1 block"}
+              </div>
+              <button
+                type="button"
+                onClick={() => setBlockFullOpen(which)}
+                className="text-primary no-print text-[11px] font-medium underline underline-offset-2 hover:opacity-80"
+              >
+                See block full screen
+              </button>
+            </div>
+            {renderBlock(showTwoBlocks ? 170 : 220, which === "B" ? customBlockB : customBlock)}
           </div>
-          <button
-            type="button"
-            onClick={() => setBlockFullOpen(true)}
-            className="text-primary no-print text-[11px] font-medium underline underline-offset-2 hover:opacity-80"
-          >
-            See block full screen
-          </button>
-        </div>
-        {renderBlock(220)}
+        ))}
       </div>
 
 
@@ -212,15 +220,15 @@ export function QuiltLayoutPreview({
         </DialogContent>
       </Dialog>
 
-      <Dialog open={blockFullOpen} onOpenChange={setBlockFullOpen}>
+      <Dialog open={blockFullOpen !== null} onOpenChange={(o) => setBlockFullOpen(o ? blockFullOpen : null)}>
         <DialogContent className="max-w-[96vw] sm:max-w-[96vw] p-4">
           <DialogHeader>
             <DialogTitle className="text-sm font-semibold uppercase tracking-wide">
-              1 block
+              {showTwoBlocks ? `Block ${blockFullOpen ?? "A"}` : "1 block"}
             </DialogTitle>
           </DialogHeader>
           <div className="flex items-center justify-center">
-            {renderBlock(fullMax)}
+            {renderBlock(fullMax, blockFullOpen === "B" ? customBlockB : customBlock)}
           </div>
           <p className="text-muted-foreground text-center text-xs">
             One {getPattern(pattern)?.name ?? "quilt"} block

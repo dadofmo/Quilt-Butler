@@ -77,7 +77,13 @@ function FabricsStepInner() {
   const isStreakPattern = pattern.id === "streak-of-lightning";
   const isBowTiePattern = pattern.id === "bow-tie";
   const isCustomPattern = pattern.id === "custom-block";
-  const customFabrics = fabricsUsed(planner.customBlock);
+  // Fabrics used across BOTH blocks when the A/B alternation is on, so the
+  // fabric pickers and the swap-pair dropdowns cover every fabric in the quilt.
+  const customFabrics = (() => {
+    const a = fabricsUsed(planner.customBlock);
+    if (!planner.useBlockB || !planner.customBlockB) return a;
+    return [...new Set([...a, ...fabricsUsed(planner.customBlockB)])].sort();
+  })();
   const hasSashing = patternHasSashingSection(pattern) && (planner.sashingWidth || 0) > 0;
   const hasCornerstonesSection = isBearPawPattern && hasSashing;
   const sections = pattern.sections.filter((s) => {
