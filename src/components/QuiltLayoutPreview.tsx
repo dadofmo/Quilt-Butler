@@ -122,7 +122,7 @@ export function QuiltLayoutPreview({
         hasBorder={false}
         size={size}
         photos={photos}
-        customBlock={customBlock}
+        customBlock={design}
       />
     );
 
