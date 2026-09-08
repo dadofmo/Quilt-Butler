@@ -151,20 +151,24 @@ export function QuiltLayoutPreview({
 
   return (
     <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-5">
-      <div className="flex flex-col items-center gap-2">
-        <div className="flex flex-col items-center gap-1">
-          <div className="text-foreground text-xs font-semibold uppercase tracking-wide">
-            1 block
+      <div className={showTwoBlocks ? "flex flex-col items-center gap-4 sm:flex-row sm:items-start" : "flex flex-col items-center gap-2"}>
+        {(showTwoBlocks ? (["A", "B"] as const) : (["A"] as const)).map((which) => (
+          <div key={which} className="flex flex-col items-center gap-2">
+            <div className="flex flex-col items-center gap-1">
+              <div className="text-foreground text-xs font-semibold uppercase tracking-wide">
+                {showTwoBlocks ? `Block ${which}` : "1 block"}
+              </div>
+              <button
+                type="button"
+                onClick={() => setBlockFullOpen(which)}
+                className="text-primary no-print text-[11px] font-medium underline underline-offset-2 hover:opacity-80"
+              >
+                See block full screen
+              </button>
+            </div>
+            {renderBlock(showTwoBlocks ? 170 : 220, which === "B" ? customBlockB : customBlock)}
           </div>
-          <button
-            type="button"
-            onClick={() => setBlockFullOpen(true)}
-            className="text-primary no-print text-[11px] font-medium underline underline-offset-2 hover:opacity-80"
-          >
-            See block full screen
-          </button>
-        </div>
-        {renderBlock(220)}
+        ))}
       </div>
 
 
