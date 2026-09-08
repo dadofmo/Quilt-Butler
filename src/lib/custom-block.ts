@@ -95,14 +95,15 @@ export const REGION_LABELS: Record<UnitKind, string[]> = {
 /**
  * How many visually distinct rotations a unit type has. Units set to 1 hide
  * the turn button entirely — turning them changes nothing the quilter can
- * see (a plain square, a diamond), or is done another way ("Snipped corners"
- * is steered by tapping the corners instead).
+ * see (a plain square, a diamond). "Snipped corners" can be turned too —
+ * the corner toggles pick WHICH corners carry a triangle, the turn button
+ * spins the whole piece.
  */
 export const ROTATION_STEPS: Record<UnitKind, number> = {
   square: 1,
   hst: 4,
   qst: 4,
-  cornered: 1,
+  cornered: 4,
   onpoint: 1,
   hrt: 4,
   split: 4,
@@ -127,6 +128,15 @@ export const rotationWord = (kind: UnitKind, rotation: Rotation): string => {
         : rotation === 180
           ? "split across (halves swapped)"
           : "split down (halves swapped)";
+  }
+  if (kind === "cornered") {
+    return rotation === 0
+      ? "right way up"
+      : rotation === 90
+        ? "turned a quarter turn to the right"
+        : rotation === 180
+          ? "upside down"
+          : "turned a quarter turn to the left";
   }
   if (kind === "hst") {
     return rotation === 0
