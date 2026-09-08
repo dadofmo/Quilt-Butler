@@ -74,10 +74,14 @@ export function QuiltLayoutPreview({
 }: Props) {
   const blockCount = blocksAcross * blocksDown;
   const [fullOpen, setFullOpen] = useState(false);
-  const [blockFullOpen, setBlockFullOpen] = useState(false);
+  const [blockFullOpen, setBlockFullOpen] = useState<null | "A" | "B">(null);
   const fullMax = useViewportMax();
 
-  const renderBlock = (size: number) =>
+  // Two-block set: show Block A and Block B side by side, each with its own
+  // full-screen link, so the user can check both drawings.
+  const showTwoBlocks = pattern === "custom-block" && !!useBlockB && !!customBlockB;
+
+  const renderBlock = (size: number, design: CustomBlockDesign | null = customBlock) =>
     pattern === "rail-fence" ? (
       <div className="flex items-stretch gap-2">
         <div className="flex flex-col justify-around py-[5px] text-right">
