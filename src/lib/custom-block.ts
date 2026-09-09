@@ -38,7 +38,13 @@ export interface CustomCell {
    * order [top-left, top-right, bottom-right, bottom-left]. Missing = all four.
    */
   corners?: boolean[];
+  /**
+   * Only used by "hrt" (Long triangles): flip the piece to its mirror image so
+   * the long slant leans the other way. Rotation alone can never produce this.
+   */
+  mirrored?: boolean;
 }
+
 
 export interface CustomBlockDesign {
   /** Grid is always square: `size` × `size` cells. */
@@ -110,16 +116,23 @@ export const ROTATION_STEPS: Record<UnitKind, number> = {
 };
 
 /** Plain-English name for the current turn of a unit, used on the button. */
-export const rotationWord = (kind: UnitKind, rotation: Rotation): string => {
+export const rotationWord = (
+  kind: UnitKind,
+  rotation: Rotation,
+  mirrored = false,
+): string => {
   if (kind === "hrt") {
-    return rotation === 0
-      ? "lying flat, slanting down"
-      : rotation === 90
-        ? "standing up, slanting down"
-        : rotation === 180
-          ? "lying flat, slanting up"
-          : "standing up, slanting up";
+    const flat = rotation === 0 || rotation === 180;
+    const lie = flat ? "lying flat" : "standing up";
+    // A quarter turn flips which way the long slant leans; mirroring flips it
+    // the other way again.
+    const down = mirrored ? flat : !flat;
+    const swapped = rotation === 180 || rotation === 270 ? ", fabrics swapped" : "";
+    return `${lie}, slanting ${down ? "down" : "up"}${swapped}`;
   }
+
+
+
   if (kind === "split") {
     return rotation === 0
       ? "split across the middle"
@@ -149,6 +162,20 @@ export const rotationWord = (kind: UnitKind, rotation: Rotation): string => {
   }
   return `turned ${rotation}°`;
 };
+
+/**
+ * Plain-English description of which way a Long-triangle piece leans before
+ * any turning, used on the mirror button.
+ */
+export const mirrorWord = (mirrored: boolean): string =>
+  mirrored
+    ? "the slant runs from the top-left corner down to the bottom-right"
+    : "the slant runs from the bottom-left corner up to the top-right";
+
+/** Long triangles come in two mirror-image versions; this names the one in use. */
+export const hrtLeanKey = (mirrored?: boolean): "left" | "right" =>
+  mirrored ? "left" : "right";
+
 
 
 /** Canonical corner flags for a "Snipped corners" unit. */
@@ -469,20 +496,29 @@ function unitPolys(cell: CustomCell): { w: number; h: number; polys: Poly[] } {
 
   if (cell.kind === "hrt") {
     // A 2×1 rectangle split corner to corner — a long, stretched diagonal.
+    // Mirroring flips it left-to-right, which gives the opposite lean; no
+    // amount of turning can do that.
     const base: Poly[] = [
       { fabric: f(0), points: [[0, 0], [2, 0], [0, 1]] },
       { fabric: f(1), points: [[2, 0], [2, 1], [0, 1]] },
     ];
+    const flipped: Poly[] = cell.mirrored
+      ? base.map((p) => ({
+          fabric: p.fabric,
+          points: p.points.map(([x, y]) => [2 - x, y] as [number, number]),
+        }))
+      : base;
     const upright = rot === 90 || rot === 270;
     return {
       w: upright ? 1 : 2,
       h: upright ? 2 : 1,
-      polys: base.map((p) => ({
+      polys: flipped.map((p) => ({
         fabric: p.fabric,
         points: p.points.map((pt) => rotPoint(pt, rot, 2, 1)),
       })),
     };
   }
+
 
   if (cell.kind === "split") {
     // The cell cut straight across the middle into two equal halves.
