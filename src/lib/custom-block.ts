@@ -116,16 +116,20 @@ export const ROTATION_STEPS: Record<UnitKind, number> = {
 };
 
 /** Plain-English name for the current turn of a unit, used on the button. */
-export const rotationWord = (kind: UnitKind, rotation: Rotation): string => {
+export const rotationWord = (
+  kind: UnitKind,
+  rotation: Rotation,
+  mirrored = false,
+): string => {
   if (kind === "hrt") {
-    return rotation === 0
-      ? "lying flat, slanting down"
-      : rotation === 90
-        ? "standing up, slanting down"
-        : rotation === 180
-          ? "lying flat, slanting up"
-          : "standing up, slanting up";
+    const flat = rotation === 0 || rotation === 180;
+    const lie = flat ? "lying flat" : "standing up";
+    // At 0°/180° the un-mirrored piece slants down from the top-left corner;
+    // mirroring swaps which corner the slant starts from.
+    const down = mirrored ? rotation === 90 || rotation === 270 : flat;
+    return `${lie}, slanting ${down ? "down" : "up"}`;
   }
+
   if (kind === "split") {
     return rotation === 0
       ? "split across the middle"
