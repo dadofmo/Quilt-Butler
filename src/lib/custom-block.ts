@@ -496,20 +496,29 @@ function unitPolys(cell: CustomCell): { w: number; h: number; polys: Poly[] } {
 
   if (cell.kind === "hrt") {
     // A 2×1 rectangle split corner to corner — a long, stretched diagonal.
+    // Mirroring flips it left-to-right, which gives the opposite lean; no
+    // amount of turning can do that.
     const base: Poly[] = [
       { fabric: f(0), points: [[0, 0], [2, 0], [0, 1]] },
       { fabric: f(1), points: [[2, 0], [2, 1], [0, 1]] },
     ];
+    const flipped: Poly[] = cell.mirrored
+      ? base.map((p) => ({
+          fabric: p.fabric,
+          points: p.points.map(([x, y]) => [2 - x, y] as [number, number]),
+        }))
+      : base;
     const upright = rot === 90 || rot === 270;
     return {
       w: upright ? 1 : 2,
       h: upright ? 2 : 1,
-      polys: base.map((p) => ({
+      polys: flipped.map((p) => ({
         fabric: p.fabric,
         points: p.points.map((pt) => rotPoint(pt, rot, 2, 1)),
       })),
     };
   }
+
 
   if (cell.kind === "split") {
     // The cell cut straight across the middle into two equal halves.
