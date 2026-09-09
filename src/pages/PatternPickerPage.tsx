@@ -115,7 +115,7 @@ function PatternPickerInner() {
           filters: it isn't a fixed pattern, it's the block editor. */}
       <button
         onClick={() => handleTileClick(CUSTOM_BLOCK_ID)}
-        className="border-primary/60 bg-primary/5 hover:border-primary mt-6 flex w-full items-center gap-4 rounded-xl border-2 border-dashed p-4 text-left transition-colors"
+        className="border-primary/60 bg-primary/5 hover:border-primary relative mt-6 flex w-full items-center gap-4 rounded-xl border-2 border-dashed p-4 text-left transition-colors"
       >
         <span className="bg-background flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border-2 border-border text-2xl">
           ✎
@@ -130,6 +130,14 @@ function PatternPickerInner() {
             exact yardage, cutting list and sewing steps.
           </span>
         </span>
+        {!isUnlocked(CUSTOM_BLOCK_ID) && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md"
+          >
+            <Lock className="h-3.5 w-3.5" />
+          </span>
+        )}
       </button>
 
       <PatternFilterBar
@@ -216,6 +224,14 @@ function PatternPickerInner() {
                     className="pointer-events-none absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md"
                   >
                     <Lock className="h-3.5 w-3.5" />
+                  </span>
+                )}
+                {p.id === "nine-patch" && (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute right-2 top-2 flex h-7 items-center justify-center rounded-full bg-emerald-600 px-2 text-xs font-bold text-white shadow-md"
+                  >
+                    Free
                   </span>
                 )}
               </button>
