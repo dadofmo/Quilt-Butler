@@ -124,11 +124,14 @@ export const rotationWord = (
   if (kind === "hrt") {
     const flat = rotation === 0 || rotation === 180;
     const lie = flat ? "lying flat" : "standing up";
-    // At 0°/180° the un-mirrored piece slants down from the top-left corner;
-    // mirroring swaps which corner the slant starts from.
-    const down = mirrored ? rotation === 90 || rotation === 270 : flat;
-    return `${lie}, slanting ${down ? "down" : "up"}`;
+    // A quarter turn flips which way the long slant leans; mirroring flips it
+    // the other way again.
+    const down = mirrored ? flat : !flat;
+    const swapped = rotation === 180 || rotation === 270 ? ", fabrics swapped" : "";
+    return `${lie}, slanting ${down ? "down" : "up"}${swapped}`;
   }
+
+
 
   if (kind === "split") {
     return rotation === 0
