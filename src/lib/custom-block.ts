@@ -38,7 +38,13 @@ export interface CustomCell {
    * order [top-left, top-right, bottom-right, bottom-left]. Missing = all four.
    */
   corners?: boolean[];
+  /**
+   * Only used by "hrt" (Long triangles): flip the piece to its mirror image so
+   * the long slant leans the other way. Rotation alone can never produce this.
+   */
+  mirrored?: boolean;
 }
+
 
 export interface CustomBlockDesign {
   /** Grid is always square: `size` × `size` cells. */
