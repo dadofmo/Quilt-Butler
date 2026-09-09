@@ -226,6 +226,14 @@ function PatternPickerInner() {
                     <Lock className="h-3.5 w-3.5" />
                   </span>
                 )}
+                {p.id === "nine-patch" && (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute right-2 top-2 flex h-7 items-center justify-center rounded-full bg-emerald-600 px-2 text-xs font-bold text-white shadow-md"
+                  >
+                    Free
+                  </span>
+                )}
               </button>
             </div>
           );
