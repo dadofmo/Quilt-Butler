@@ -163,6 +163,20 @@ export const rotationWord = (
   return `turned ${rotation}°`;
 };
 
+/**
+ * Plain-English description of which way a Long-triangle piece leans before
+ * any turning, used on the mirror button.
+ */
+export const mirrorWord = (mirrored: boolean): string =>
+  mirrored
+    ? "the slant runs from the top-left corner down to the bottom-right"
+    : "the slant runs from the bottom-left corner up to the top-right";
+
+/** Long triangles come in two mirror-image versions; this names the one in use. */
+export const hrtLeanKey = (mirrored?: boolean): "left" | "right" =>
+  mirrored ? "left" : "right";
+
+
 
 /** Canonical corner flags for a "Snipped corners" unit. */
 export const cornerFlags = (cell: CustomCell): boolean[] =>
