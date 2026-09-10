@@ -332,20 +332,42 @@ function DesignBlockInner() {
         )}
 
         {ROTATION_STEPS[kind] > 1 && (
-          <div className="mt-3">
-            <button
-              type="button"
-              onClick={() => setRotation((((rotation + 90) % 360) as Rotation))}
-              className="border-input bg-background inline-flex items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold"
-            >
-              <RotateCw className="h-4 w-4" aria-hidden />
-              Turn this piece
-            </button>
-            <div className="text-muted-foreground mt-1 text-xs">
-              Right now it is {rotationWord(kind, rotation)}.
+          <div className="mt-3 flex flex-wrap items-start gap-x-6 gap-y-3">
+            <div>
+              <button
+                type="button"
+                onClick={() => setRotation((((rotation + 90) % 360) as Rotation))}
+                className="border-input bg-background inline-flex items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold"
+              >
+                <RotateCw className="h-4 w-4" aria-hidden />
+                Turn this piece
+              </button>
+              <div className="text-muted-foreground mt-1 text-xs">
+                Right now it is {rotationWord(kind, rotation, mirrored)}.
+              </div>
             </div>
+
+            {kind === "hrt" && (
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setMirrored((m) => !m)}
+                  aria-pressed={mirrored}
+                  className="border-input bg-background inline-flex items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold"
+                >
+                  <FlipHorizontal2 className="h-4 w-4" aria-hidden />
+                  Mirror this piece
+                </button>
+                <div className="text-muted-foreground mt-1 max-w-xs text-xs leading-snug">
+                  Before turning, {mirrorWord(mirrored)}. Mirroring gives you
+                  the opposite lean — the one turning can never reach — so you
+                  can match opposite sides of your block.
+                </div>
+              </div>
+            )}
           </div>
         )}
+
 
         {kind === "cornered" && (
           <div className="mt-4">
