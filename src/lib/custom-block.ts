@@ -653,8 +653,9 @@ export function unitTally(design: CustomBlockDesign): UnitTally {
         bump(tally.onpointCornerTris, f(1), 4);
         break;
       case "hrt":
-        bump(tally.hrtUnits, pairKey(f(0), f(1)));
+        bump(tally.hrtUnits, `${pairKey(f(0), f(1))}|${hrtLeanKey(cell.mirrored)}`);
         break;
+
       case "split":
         bump(tally.splitHalves, f(0));
         bump(tally.splitHalves, f(1));
