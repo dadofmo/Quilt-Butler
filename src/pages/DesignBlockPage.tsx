@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { RotateCw, Undo2 } from "lucide-react";
+import { FlipHorizontal2, RotateCw, Undo2 } from "lucide-react";
 import { StepShell } from "@/components/StepShell";
 import { CustomBlockSvg } from "@/components/CustomBlockSvg";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
@@ -20,10 +20,12 @@ import {
   cellsCovered,
   emptyDesign,
   key,
+  mirrorWord,
   occupancy,
   resizeDesign,
   rotateDesign,
   rotationWord,
+
   validateDesign,
   type CustomBlockDesign,
   type CustomCell,
@@ -92,7 +94,9 @@ function DesignBlockInner() {
 
   const [kind, setKind] = useState<UnitKind>("hst");
   const [rotation, setRotation] = useState<Rotation>(0);
+  const [mirrored, setMirrored] = useState(false);
   const [corners, setCorners] = useState<boolean[]>([true, true, true, true]);
+
   const [lastCornerWarn, setLastCornerWarn] = useState(false);
   const [regionFabrics, setRegionFabrics] = useState<FabricKey[]>(["A", "B", "C", "D"]);
 
