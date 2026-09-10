@@ -155,7 +155,9 @@ function DesignBlockInner() {
       rotation,
       fabrics: regionFabrics.slice(0, REGION_COUNT[kind]),
       ...(kind === "cornered" ? { corners: [...corners] } : {}),
+      ...(kind === "hrt" && mirrored ? { mirrored: true } : {}),
     };
+
     saveWithHistory({ ...design, cells });
   };
 
@@ -302,7 +304,7 @@ function DesignBlockInner() {
             >
               <div className="flex h-[52px] items-center justify-center">
                 <CustomBlockSvg
-                  design={previewDesign(k, rotation, regionFabrics, corners)}
+                  design={previewDesign(k, rotation, regionFabrics, corners, mirrored)}
                   photos={planner.fabricPhotos}
                   size={52}
                   crop={
