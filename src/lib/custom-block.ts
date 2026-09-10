@@ -349,10 +349,11 @@ export function fingerprint(design: CustomBlockDesign): string {
       const corners =
         cell.kind === "cornered" ? cornerFlags(cell).map((on) => (on ? "1" : "0")).join("") : "";
       parts.push(
-        `${cell.kind}${cell.rotation}:${cell.fabrics
+        `${cell.kind}${cell.rotation}${cell.mirrored ? "m" : ""}:${cell.fabrics
           .slice(0, REGION_COUNT[cell.kind])
           .join("")}${corners}`,
       );
+
 
     }
   }
