@@ -587,8 +587,13 @@ export interface UnitTally {
   onpointCenters: Record<string, number>;
   /** "Square on point": background corner TRIANGLES per fabric (4 per unit). */
   onpointCornerTris: Record<string, number>;
-  /** "Long triangles": unit count keyed `${fabricA}|${fabricB}` (sorted). */
+  /**
+   * "Long triangles": unit count keyed `${fabricA}|${fabricB}|${lean}` where
+   * lean is "right" (default) or "left" (the mirrored piece). The two leans
+   * are cut on OPPOSITE diagonals, so they can never share a cut list.
+   */
   hrtUnits: Record<string, number>;
+
   /** "Split in half": half-cell rectangles per fabric. */
   splitHalves: Record<string, number>;
 }
