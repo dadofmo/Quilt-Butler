@@ -2445,6 +2445,48 @@ console.log("\n=== Custom block: Long triangles, vertical orientation ===");
   check("HRT-90 A inches", a.totalInches, 44);
 }
 
+console.log("\n=== Custom block: Long triangles, mirrored (opposite lean) ===");
+{
+  // Mirroring flips the piece; the rectangles and yields are identical, so the
+  // cutting list matches the un-mirrored case exactly.
+  const d = fullDesign(4, (r, c) =>
+    c % 2 === 0
+      ? { kind: "hrt", rotation: 0, mirrored: true, fabrics: ["A", "B"] as FabricKey[] }
+      : null,
+  );
+  const r = calculateYardage(customBase(d));
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("HRT-mirror A rect count", a.pieces[0].count, 64);
+  check("HRT-mirror A rect length", a.pieces[0].w, 7);
+  check("HRT-mirror A rect height", a.pieces[0].h, 4);
+  check("HRT-mirror A strips", a.strips[0].count, 11);
+  check("HRT-mirror A inches", a.totalInches, 44);
+  check("HRT-mirror B mirrors A", b.totalInches, 44);
+}
+
+console.log("\n=== Custom block: Long triangles, both leans in one block ===");
+{
+  // Rows 0-1 mirrored, rows 2-3 not: 4 anchors of each lean per block →
+  // 64 units per lean. rectsEach = 32 per fabric per lean, per strip 6,
+  // strips = ceil(32/6) = 6 → 24" per lean, 48" per fabric in total. The two
+  // leans are cut on opposite diagonals, so they round separately on purpose.
+  const d = fullDesign(4, (r, c) =>
+    c % 2 === 0
+      ? { kind: "hrt", rotation: 0, mirrored: r < 2, fabrics: ["A", "B"] as FabricKey[] }
+      : null,
+  );
+  const r = calculateYardage(customBase(d));
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("HRT-both A cut lines", a.pieces.length, 2);
+  check("HRT-both A lean 1 count", a.pieces[0].count, 32);
+  check("HRT-both A lean 2 count", a.pieces[1].count, 32);
+  check("HRT-both A inches", a.totalInches, 48);
+  check("HRT-both B mirrors A", b.totalInches, 48);
+}
+
+
 console.log("\n=== Custom block: Split in half ===");
 {
   // 16 halves of each fabric per block → 256 each at (u+0.5)=3.5" × (u/2+0.5)=2".

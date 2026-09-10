@@ -15,8 +15,10 @@ import { describe, it, expect } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 import {
+  blockPolys,
   canPlace,
   cornerFlags,
+
   migrateDesign,
   rotateDesign,
   unitTally,
@@ -215,6 +217,84 @@ describe("custom block — Long triangles placement rules", () => {
     }
   });
 });
+
+describe("custom block — Long triangles mirror (opposite lean)", () => {
+  const hrtDesign = (rot: Rotation, mirrored: boolean): CustomBlockDesign => ({
+    size: 2,
+    cells: { "0,0": { kind: "hrt", rotation: rot, fabrics: ["A", "B"], mirrored } },
+  });
+
+  const shape = (d: CustomBlockDesign) =>
+    JSON.stringify(
+      blockPolys(d)
+        .map((p) => `${p.fabric}:${p.points.map(([x, y]) => `${x},${y}`).sort().join(" ")}`)
+        .sort(),
+    );
+
+  it("the mirrored piece is unreachable by any rotation", () => {
+    for (const rot of ROTATIONS) {
+      const mirroredShape = shape(hrtDesign(rot, true));
+      for (const other of ROTATIONS) {
+        expect(mirroredShape, `mirrored ${rot} vs plain ${other}`).not.toBe(
+          shape(hrtDesign(other, false)),
+        );
+      }
+    }
+  });
+
+  it("all eight positions are visually distinct", () => {
+    const seen = new Set<string>();
+    for (const mirrored of [false, true]) {
+      for (const rot of ROTATIONS) seen.add(shape(hrtDesign(rot, mirrored)));
+    }
+    expect(seen.size).toBe(8);
+  });
+
+  it("counts each lean under its own cutting key", () => {
+    const d: CustomBlockDesign = {
+      size: 2,
+      cells: {
+        "0,0": { kind: "hrt", rotation: 0, fabrics: ["A", "B"], mirrored: false },
+        "1,0": { kind: "hrt", rotation: 0, fabrics: ["A", "B"], mirrored: true },
+      },
+    };
+    expect(validateDesign(d)).toEqual([]);
+    const tally = unitTally(d);
+    expect(Object.keys(tally.hrtUnits).sort()).toEqual(["A|B|left", "A|B|right"]);
+    expect(Object.values(tally.hrtUnits)).toEqual([1, 1]);
+  });
+
+  it("whole-block rotation keeps the lean and the cutting list", () => {
+    const d: CustomBlockDesign = {
+      size: 2,
+      cells: { "0,0": { kind: "hrt", rotation: 0, fabrics: ["A", "B"], mirrored: true } },
+    };
+    for (const by of [90, 180, 270] as Rotation[]) {
+      const rotated = rotateDesign(d, by);
+      for (const cell of Object.values(rotated.cells)) expect(cell.mirrored).toBe(true);
+      expect(unitTally(rotated).hrtUnits).toEqual(unitTally(d).hrtUnits);
+    }
+  });
+
+  it("mirrored designs cut sanely at every grid size", () => {
+    for (const size of [2, 4, 6, 8]) {
+      const d = fillDesign(size, (r, c) => (c % 2 === 0 ? { kind: "hrt", rotation: 0 as Rotation, fabrics: ["A", "B"] as FabricKey[], mirrored: true } : null));
+      expect(validateDesign(d)).toEqual([]);
+      expectSaneYardage(baseState(d), `hrt-mirror@${size}`);
+    }
+  });
+
+  it("renders mirrored polygons without NaN", () => {
+    for (const rot of ROTATIONS) {
+      const html = renderToStaticMarkup(
+        createElement("svg", null, createElement(CustomBlockShapes, { design: hrtDesign(rot, true) })),
+      );
+      expect(html).toContain("<polygon");
+      expect(html).not.toContain("NaN");
+    }
+  });
+});
+
 
 describe("custom block — whole-block rotation", () => {
   const mixed = (): CustomBlockDesign =>

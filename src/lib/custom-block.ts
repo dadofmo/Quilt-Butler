@@ -349,10 +349,11 @@ export function fingerprint(design: CustomBlockDesign): string {
       const corners =
         cell.kind === "cornered" ? cornerFlags(cell).map((on) => (on ? "1" : "0")).join("") : "";
       parts.push(
-        `${cell.kind}${cell.rotation}:${cell.fabrics
+        `${cell.kind}${cell.rotation}${cell.mirrored ? "m" : ""}:${cell.fabrics
           .slice(0, REGION_COUNT[cell.kind])
           .join("")}${corners}`,
       );
+
 
     }
   }
@@ -586,8 +587,13 @@ export interface UnitTally {
   onpointCenters: Record<string, number>;
   /** "Square on point": background corner TRIANGLES per fabric (4 per unit). */
   onpointCornerTris: Record<string, number>;
-  /** "Long triangles": unit count keyed `${fabricA}|${fabricB}` (sorted). */
+  /**
+   * "Long triangles": unit count keyed `${fabricA}|${fabricB}|${lean}` where
+   * lean is "right" (default) or "left" (the mirrored piece). The two leans
+   * are cut on OPPOSITE diagonals, so they can never share a cut list.
+   */
   hrtUnits: Record<string, number>;
+
   /** "Split in half": half-cell rectangles per fabric. */
   splitHalves: Record<string, number>;
 }
@@ -647,8 +653,9 @@ export function unitTally(design: CustomBlockDesign): UnitTally {
         bump(tally.onpointCornerTris, f(1), 4);
         break;
       case "hrt":
-        bump(tally.hrtUnits, pairKey(f(0), f(1)));
+        bump(tally.hrtUnits, `${pairKey(f(0), f(1))}|${hrtLeanKey(cell.mirrored)}`);
         break;
+
       case "split":
         bump(tally.splitHalves, f(0));
         bump(tally.splitHalves, f(1));

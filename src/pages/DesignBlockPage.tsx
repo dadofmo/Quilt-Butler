@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { RotateCw, Undo2 } from "lucide-react";
+import { FlipHorizontal2, RotateCw, Undo2 } from "lucide-react";
 import { StepShell } from "@/components/StepShell";
 import { CustomBlockSvg } from "@/components/CustomBlockSvg";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
@@ -20,10 +20,12 @@ import {
   cellsCovered,
   emptyDesign,
   key,
+  mirrorWord,
   occupancy,
   resizeDesign,
   rotateDesign,
   rotationWord,
+
   validateDesign,
   type CustomBlockDesign,
   type CustomCell,
@@ -92,7 +94,9 @@ function DesignBlockInner() {
 
   const [kind, setKind] = useState<UnitKind>("hst");
   const [rotation, setRotation] = useState<Rotation>(0);
+  const [mirrored, setMirrored] = useState(false);
   const [corners, setCorners] = useState<boolean[]>([true, true, true, true]);
+
   const [lastCornerWarn, setLastCornerWarn] = useState(false);
   const [regionFabrics, setRegionFabrics] = useState<FabricKey[]>(["A", "B", "C", "D"]);
 
@@ -151,7 +155,9 @@ function DesignBlockInner() {
       rotation,
       fabrics: regionFabrics.slice(0, REGION_COUNT[kind]),
       ...(kind === "cornered" ? { corners: [...corners] } : {}),
+      ...(kind === "hrt" && mirrored ? { mirrored: true } : {}),
     };
+
     saveWithHistory({ ...design, cells });
   };
 
@@ -298,7 +304,7 @@ function DesignBlockInner() {
             >
               <div className="flex h-[52px] items-center justify-center">
                 <CustomBlockSvg
-                  design={previewDesign(k, rotation, regionFabrics, corners)}
+                  design={previewDesign(k, rotation, regionFabrics, corners, mirrored)}
                   photos={planner.fabricPhotos}
                   size={52}
                   crop={
@@ -332,20 +338,42 @@ function DesignBlockInner() {
         )}
 
         {ROTATION_STEPS[kind] > 1 && (
-          <div className="mt-3">
-            <button
-              type="button"
-              onClick={() => setRotation((((rotation + 90) % 360) as Rotation))}
-              className="border-input bg-background inline-flex items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold"
-            >
-              <RotateCw className="h-4 w-4" aria-hidden />
-              Turn this piece
-            </button>
-            <div className="text-muted-foreground mt-1 text-xs">
-              Right now it is {rotationWord(kind, rotation)}.
+          <div className="mt-3 flex flex-wrap items-start gap-x-6 gap-y-3">
+            <div>
+              <button
+                type="button"
+                onClick={() => setRotation((((rotation + 90) % 360) as Rotation))}
+                className="border-input bg-background inline-flex items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold"
+              >
+                <RotateCw className="h-4 w-4" aria-hidden />
+                Turn this piece
+              </button>
+              <div className="text-muted-foreground mt-1 text-xs">
+                Right now it is {rotationWord(kind, rotation, mirrored)}.
+              </div>
             </div>
+
+            {kind === "hrt" && (
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setMirrored((m) => !m)}
+                  aria-pressed={mirrored}
+                  className="border-input bg-background inline-flex items-center gap-2 rounded-lg border-2 px-4 py-2 text-sm font-semibold"
+                >
+                  <FlipHorizontal2 className="h-4 w-4" aria-hidden />
+                  Mirror this piece
+                </button>
+                <div className="text-muted-foreground mt-1 max-w-xs text-xs leading-snug">
+                  Before turning, {mirrorWord(mirrored)}. Mirroring gives you
+                  the opposite lean — the one turning can never reach — so you
+                  can match opposite sides of your block.
+                </div>
+              </div>
+            )}
           </div>
         )}
+
 
         {kind === "cornered" && (
           <div className="mt-4">
@@ -558,13 +586,16 @@ function previewDesign(
   rotation: Rotation,
   fabrics: FabricKey[],
   corners: boolean[],
+  mirrored = false,
 ): CustomBlockDesign {
   const cell: CustomCell = {
     kind,
     rotation: ROTATION_STEPS[kind] === 1 ? 0 : rotation,
     fabrics: fabrics.slice(0, REGION_COUNT[kind]),
     ...(kind === "cornered" ? { corners: [...corners] } : {}),
+    ...(kind === "hrt" && mirrored ? { mirrored: true } : {}),
   };
+
   // "Long triangles" covers two cells, so its thumbnail needs a 2×2 frame.
   return { size: kind === "hrt" ? 2 : 1, cells: { [key(0, 0)]: cell } };
 }
