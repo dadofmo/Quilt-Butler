@@ -586,13 +586,16 @@ function previewDesign(
   rotation: Rotation,
   fabrics: FabricKey[],
   corners: boolean[],
+  mirrored = false,
 ): CustomBlockDesign {
   const cell: CustomCell = {
     kind,
     rotation: ROTATION_STEPS[kind] === 1 ? 0 : rotation,
     fabrics: fabrics.slice(0, REGION_COUNT[kind]),
     ...(kind === "cornered" ? { corners: [...corners] } : {}),
+    ...(kind === "hrt" && mirrored ? { mirrored: true } : {}),
   };
+
   // "Long triangles" covers two cells, so its thumbnail needs a 2×2 frame.
   return { size: kind === "hrt" ? 2 : 1, cells: { [key(0, 0)]: cell } };
 }
