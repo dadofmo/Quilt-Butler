@@ -4197,18 +4197,24 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const hrtShortCut = round2(unit + 1);
     for (const [k, units] of Object.entries(tally.hrtUnits)) {
       if (units <= 0) continue;
-      const [a, b] = k.split("|") as [FabricKey, FabricKey];
+      const [a, b, lean] = k.split("|") as [FabricKey, FabricKey, string | undefined];
+      const mirrored = lean === "left";
       const rectsEach = Math.ceil(units / 2);
+      const label = mirrored ? "Long-triangle rectangles (mirrored)" : "Long-triangle rectangles";
       if (a === b) {
-        addRails(reqs[a], "Long-triangle rectangles", rectsEach * 2, hrtLongCut, hrtShortCut, s.fabricWidth);
+        addRails(reqs[a], label, rectsEach * 2, hrtLongCut, hrtShortCut, s.fabricWidth);
       } else {
-        addRails(reqs[a], "Long-triangle rectangles", rectsEach, hrtLongCut, hrtShortCut, s.fabricWidth);
-        addRails(reqs[b], "Long-triangle rectangles", rectsEach, hrtLongCut, hrtShortCut, s.fabricWidth);
+        addRails(reqs[a], label, rectsEach, hrtLongCut, hrtShortCut, s.fabricWidth);
+        addRails(reqs[b], label, rectsEach, hrtLongCut, hrtShortCut, s.fabricWidth);
       }
+      const diagonal = mirrored
+        ? "from the TOP-LEFT corner down to the bottom-right"
+        : "from the BOTTOM-LEFT corner up to the top-right";
       notes.push(
-        `Long triangles (Fabric ${a} + Fabric ${b}): you need ${units} units, each finishing ${(unit * 2).toFixed(2)}" × ${unit.toFixed(2)}". Cut ${rectsEach} rectangles of each fabric at ${hrtShortCut.toFixed(2)}" × ${hrtLongCut.toFixed(2)}" (cut generously on purpose — you trim after sewing). Stack one rectangle of each fabric RIGHT SIDES TOGETHER and cut the pair once corner to corner; sewing each cut pair along that long slanted edge gives 2 units. Press toward the darker fabric and trim each unit to ${round2(unit * 2 + SEAM).toFixed(2)}" × ${sqCut.toFixed(2)}", keeping the slant running corner to corner.`,
+        `Long triangles${mirrored ? " (mirrored — slant leans the other way)" : ""} (Fabric ${a} + Fabric ${b}): you need ${units} units, each finishing ${(unit * 2).toFixed(2)}" × ${unit.toFixed(2)}". Cut ${rectsEach} rectangles of each fabric at ${hrtShortCut.toFixed(2)}" × ${hrtLongCut.toFixed(2)}" (cut generously on purpose — you trim after sewing). Stack one rectangle of each fabric RIGHT SIDES TOGETHER and cut the pair once corner to corner, ${diagonal}; sewing each cut pair along that long slanted edge gives 2 units. Press toward the darker fabric and trim each unit to ${round2(unit * 2 + SEAM).toFixed(2)}" × ${sqCut.toFixed(2)}", keeping the slant running corner to corner. If your block uses both leans, cut and label them separately — they are mirror images and are not interchangeable.`,
       );
     }
+
 
     // ---- Split in half -----------------------------------------------------
     const splitLongCut = round2(unit + SEAM);
