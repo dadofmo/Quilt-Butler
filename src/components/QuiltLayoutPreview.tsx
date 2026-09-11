@@ -14,7 +14,7 @@ import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
 import { CustomBlockShapes } from "./CustomBlockSvg";
 import { swapFabrics, type CustomBlockDesign } from "@/lib/custom-block";
-import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock } from "./PatternDiagram";
+import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock } from "./PatternDiagram";
 
 interface Props {
   pattern: PatternId;
@@ -1445,6 +1445,13 @@ function MiniBlock({
       const arrow = swap ? bgFab : arrowFab;
       const bg = swap ? arrowFab : bgFab;
       return <BlazingArrowsBlock size={200} arrow={arrow} bg={bg} />;
+    }
+    case "apple-pie": {
+      const bg = get("bg", "A");
+      const points = get("points", "B");
+      const bar = get("bar", "C");
+      const centre = get("centre", "D");
+      return <ApplePieBlock size={200} bg={bg} points={points} bar={bar} centre={centre} />;
     }
 
   }

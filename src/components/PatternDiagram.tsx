@@ -1202,6 +1202,13 @@ function renderInner(
       const bg = get("bg", "B");
       return <BlazingArrowsBlock size={200} arrow={arrow} bg={bg} />;
     }
+    case "apple-pie": {
+      const bg = get("bg", "A");
+      const points = get("points", "B");
+      const bar = get("bar", "C");
+      const centre = get("centre", "D");
+      return <ApplePieBlock size={200} bg={bg} points={points} bar={bar} centre={centre} />;
+    }
 
 
 
