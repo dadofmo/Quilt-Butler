@@ -73,6 +73,7 @@ export type PatternId =
   | "wishing-ring"
   | "alaska-homestead"
   | "blazing-arrows"
+  | "apple-pie"
   /** The user-designed block from the "Design Your Own Block" editor. */
   | "custom-block";
 

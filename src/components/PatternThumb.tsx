@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock } from "./PatternDiagram";
 
 
 interface Props {
@@ -122,6 +122,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Blazing Arrows quilt block diagram showing four corner half-square triangles, four flying geese forming arrows pointing to the center hourglass, with the top and bottom arrows in the dark fabric and the left and right arrows reversed in the light fabric",
   "alaska-homestead":
     "Alaska Homestead quilt block diagram — a three-fabric 3x3 block with four half-square-triangle corners pointing in toward a plain centre square and four two-patch edge rectangles with a bold accent bar on the outside of each side",
+  "apple-pie":
+    "Apple Pie quilt block diagram — a four-fabric six-unit block with a pair of flying geese pointing inward in every corner, four bar rectangles framing the middle and a large plain centre square",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -1014,6 +1016,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return (
         <svg {...common}>
           <BlazingArrowsBlock size={90} arrow={C.a} bg={C.b} />
+        </svg>
+      );
+    }
+    case "apple-pie": {
+      return (
+        <svg {...common}>
+          <ApplePieBlock size={90} bg={C.a} points={C.b} bar={C.c} centre={C.d} />
         </svg>
       );
     }
