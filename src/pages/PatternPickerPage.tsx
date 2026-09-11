@@ -229,7 +229,7 @@ function PatternPickerInner() {
                 {p.id === "nine-patch" && (
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute right-2 top-2 flex h-7 items-center justify-center rounded-full bg-emerald-600 px-2 text-xs font-bold text-white shadow-md"
+                    className="pointer-events-none absolute right-2 top-2 flex h-7 items-center justify-center rounded-full bg-fabric-b px-2 text-xs font-bold text-foreground shadow-md"
                   >
                     Free
                   </span>
