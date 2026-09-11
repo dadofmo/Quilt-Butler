@@ -2993,3 +2993,61 @@ export function BlazingArrowsBlock({
     </>
   );
 }
+
+/** Shared renderer for Apple Pie — six-unit grid (u = size / 6), laid out as a
+ *  3 × 3 arrangement of 2u × 2u units:
+ *   • 4 CORNER units, each two flying geese finishing 2u × 1u. The geese all
+ *     point IN toward the middle of the block and are arranged as a pinwheel:
+ *     top-left pair points right, top-right pair points down, bottom-right
+ *     pair points left, bottom-left pair points up.
+ *   • 4 EDGE units, each two rectangles finishing 2u × 1u — background on the
+ *     OUTSIDE, bar fabric on the INSIDE, framing the centre.
+ *   • 1 CENTRE square finishing 2u.
+ */
+export function ApplePieBlock({
+  size,
+  bg,
+  points,
+  bar,
+  centre,
+}: {
+  size: number;
+  bg: string;
+  points: string;
+  bar: string;
+  centre: string;
+}) {
+  const u = size / 6;
+  return (
+    <>
+      {/* Background first — it is the sky in every corner goose and the outer
+          half of every edge unit. */}
+      <rect x={0} y={0} width={size} height={size} fill={bg} />
+
+      {/* Top-left corner: two geese pointing RIGHT (1u wide × 2u tall each). */}
+      <polygon points={`0,0 0,${2 * u} ${u},${u}`} fill={points} />
+      <polygon points={`${u},0 ${u},${2 * u} ${2 * u},${u}`} fill={points} />
+
+      {/* Top-right corner: two geese pointing DOWN (2u wide × 1u tall each). */}
+      <polygon points={`${4 * u},0 ${6 * u},0 ${5 * u},${u}`} fill={points} />
+      <polygon points={`${4 * u},${u} ${6 * u},${u} ${5 * u},${2 * u}`} fill={points} />
+
+      {/* Bottom-right corner: two geese pointing LEFT. */}
+      <polygon points={`${6 * u},${4 * u} ${6 * u},${6 * u} ${5 * u},${5 * u}`} fill={points} />
+      <polygon points={`${5 * u},${4 * u} ${5 * u},${6 * u} ${4 * u},${5 * u}`} fill={points} />
+
+      {/* Bottom-left corner: two geese pointing UP. */}
+      <polygon points={`0,${5 * u} ${2 * u},${5 * u} ${u},${4 * u}`} fill={points} />
+      <polygon points={`0,${6 * u} ${2 * u},${6 * u} ${u},${5 * u}`} fill={points} />
+
+      {/* Edge units — bar fabric on the inner half of each side. */}
+      <rect x={2 * u} y={u} width={2 * u} height={u} fill={bar} />
+      <rect x={2 * u} y={4 * u} width={2 * u} height={u} fill={bar} />
+      <rect x={u} y={2 * u} width={u} height={2 * u} fill={bar} />
+      <rect x={4 * u} y={2 * u} width={u} height={2 * u} fill={bar} />
+
+      {/* Centre square. */}
+      <rect x={2 * u} y={2 * u} width={2 * u} height={2 * u} fill={centre} />
+    </>
+  );
+}
