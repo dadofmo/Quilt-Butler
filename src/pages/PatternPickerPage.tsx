@@ -125,9 +125,11 @@ function PatternPickerInner() {
             Design your own block
           </span>
           <span className="text-muted-foreground block text-sm leading-snug">
-            Draw your own block on a 2×2 to 8×8 grid using squares, half-square
-            triangles, quarter-square triangles and flying geese — then get the
-            exact yardage, cutting list and sewing steps.
+            Draw your own block on a 2×2 to 8×8 grid using seven piece shapes —
+            squares, half-square triangles, quarter-square triangles, snipped
+            corners, squares on point, long triangles and split halves. Turn,
+            mirror and alternate blocks, then get the exact yardage, cutting
+            list and sewing steps.
           </span>
         </span>
         {!isUnlocked(CUSTOM_BLOCK_ID) && (
