@@ -1754,6 +1754,46 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "apple-pie",
+    name: "Apple Pie",
+    hasMath: true,
+    intro:
+      "Apple Pie is a four-fabric block drafted on a six-unit grid and set out like a nine-patch of big 2-unit units. Each of the four corners is a pair of flying geese, and all eight geese point IN toward the middle — arranged as a pinwheel so the block spins. Four bar rectangles frame the centre square like a lattice pie crust, and the big open centre is the perfect spot for a feature print. Only two unit types to make: flying geese and plain rectangles.",
+    sections: [
+      {
+        id: "bg",
+        label: "Background fabric (Fabric A)",
+        defaultFabric: "A",
+        hint: "The light fabric behind everything — the sky corners on all eight flying geese and the outer half of each of the four edge units.",
+      },
+      {
+        id: "points",
+        label: "Geese triangles (Fabric B)",
+        defaultFabric: "B",
+        hint: "The fabric that forms the eight big triangles in the corners. Pick something with a clear step up in value from the background so the pinwheel of points reads clearly.",
+      },
+      {
+        id: "bar",
+        label: "Bars around the centre (Fabric C)",
+        defaultFabric: "C",
+        hint: "The four rectangles that frame the centre square on all four sides — your boldest fabric works well here, since these bars are what read as the lattice crust.",
+      },
+      {
+        id: "centre",
+        label: "Centre square (Fabric D)",
+        defaultFabric: "D",
+        hint: "The large square at the heart of the block — a third of the block wide. Ideal for a feature print, a fussy-cut motif or a soft tone that lets the geese take over.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "E",
+        hint: "Optional strips of fabric that separate each Apple Pie block — set sashing to 0\" on the previous step if you want the geese points of neighbouring blocks to meet.",
+      },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
+  {
     id: "custom-block",
     name: "Design Your Own Block",
     hasMath: true,
@@ -1830,6 +1870,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "wishing-ring": { skill: "confident", fabricCount: 2, techniques: ["hst", "squares"] },
   "alaska-homestead": { skill: "confident", fabricCount: 3, techniques: ["hst", "squares"] },
   "blazing-arrows": { skill: "intermediate", fabricCount: 2, techniques: ["hst", "geese"] },
+  "apple-pie": { skill: "intermediate", fabricCount: 4, techniques: ["geese", "squares"] },
   // Metadata for the user-designed block is nominal: the real fabric count and
   // techniques depend on what the user draws, and the tile is surfaced through
   // its own entry point rather than the filterable pattern grid.
