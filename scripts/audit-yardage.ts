@@ -2201,6 +2201,79 @@ console.log("\n=== Blazing Arrows: 50×65, 10\" block, 2\" sashing, 5 blocks (od
   check("Blazing(sash) C strip length", C.pieces[0].w, 10.5);
 }
 
+console.log("\n=== Apple Pie: 48×60, 12\" block, no sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "apple-pie" as const,
+    quiltWidth: 48,
+    quiltHeight: 60,
+    blockSize: 12,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { bg: "A", points: "B", bar: "C", centre: "D" } as Record<string, FabricKey>,
+  };
+  // 4×5 = 20 blocks. u = 12/6 = 2".
+  // Per block: 8 geese (2 no-waste sets) → 2 B squares at 2*2+1.25 = 5.25",
+  // 8 A sky squares at 2+0.875 = 2.875"; 4 A + 4 C rectangles 4.5" × 2.5";
+  // 1 D centre square at 4.5".
+  const r = calculateYardage(s);
+  const A = r.fabrics.find(f => f.fabric === "A")!;
+  const B = r.fabrics.find(f => f.fabric === "B")!;
+  const C = r.fabrics.find(f => f.fabric === "C")!;
+  const D = r.fabrics.find(f => f.fabric === "D")!;
+  const bLarge = B.pieces.find(p => /Large flying-geese/.test(p.label))!;
+  check("ApplePie B goose large count", bLarge.count, 40);
+  check("ApplePie B goose large cut", bLarge.w, 5.25);
+  const aSky = A.pieces.find(p => /sky/.test(p.label))!;
+  check("ApplePie A sky count", aSky.count, 160);
+  check("ApplePie A sky cut", aSky.w, 2.875);
+  const aRect = A.pieces.find(p => /edge rectangles/.test(p.label))!;
+  check("ApplePie A edge rect count", aRect.count, 80);
+  check("ApplePie A edge rect length", aRect.w, 4.5);
+  check("ApplePie A edge rect height", aRect.h, 2.5);
+  const cRect = C.pieces.find(p => /Bar rectangles/.test(p.label))!;
+  check("ApplePie C bar count", cRect.count, 80);
+  check("ApplePie C bar length", cRect.w, 4.5);
+  check("ApplePie C bar height", cRect.h, 2.5);
+  check("ApplePie D centre count", D.pieces[0].count, 20);
+  check("ApplePie D centre cut", D.pieces[0].w, 4.5);
+  check("ApplePie no sashing row", r.fabrics.some(f => f.fabric === "E"), false);
+}
+
+console.log("\n=== Apple Pie: 9\" block, odd block count, with sashing ===");
+{
+  const s = {
+    ...base(),
+    pattern: "apple-pie" as const,
+    quiltWidth: 27,
+    quiltHeight: 9,
+    blockSize: 9,
+    borderWidth: 0,
+    sashingWidth: 2,
+    assignments: { bg: "A", points: "B", bar: "C", centre: "D", sashing: "E" } as Record<string, FabricKey>,
+  };
+  // 3×1 = 3 blocks. u = 1.5" → goose large 4.25", sky 2.375", rects 3.5" × 2",
+  // centre 3.5".
+  const r = calculateYardage(s);
+  const A = r.fabrics.find(f => f.fabric === "A")!;
+  const B = r.fabrics.find(f => f.fabric === "B")!;
+  const E = r.fabrics.find(f => f.fabric === "E")!;
+  check("ApplePie(3) B goose large count", B.pieces[0].count, 6);
+  check("ApplePie(3) B goose large cut", B.pieces[0].w, 4.25);
+  check("ApplePie(3) A sky count", A.pieces.find(p => /sky/.test(p.label))!.count, 24);
+  check("ApplePie(3) A sky cut", A.pieces.find(p => /sky/.test(p.label))!.w, 2.375);
+  const aRect3 = A.pieces.find(p => /edge rectangles/.test(p.label))!;
+  check("ApplePie(3) A edge rect count", aRect3.count, 12);
+  check("ApplePie(3) A edge rect length", aRect3.w, 3.5);
+  check("ApplePie(3) A edge rect height", aRect3.h, 2);
+  // Sashing: vertical = (3-1)*1 = 2, horizontal = 0 → 2 strips at 2.5" × 9.5".
+  check("ApplePie(sash) E strip count", E.pieces[0].count, 2);
+  check("ApplePie(sash) E strip width", E.pieces[0].h, 2.5);
+  check("ApplePie(sash) E strip length", E.pieces[0].w, 9.5);
+}
+
+
 console.log("\n=== Plus Block: alternate (reversed) blocks ===");
 {
   const off = { ...base(), pattern: "plus-block" as const, blockSize: 10, borderWidth: 0, sashingWidth: 0 };

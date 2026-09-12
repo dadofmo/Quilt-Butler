@@ -203,10 +203,11 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isWishingRing = s.pattern === "wishing-ring";
   const isAlaskaHomestead = s.pattern === "alaska-homestead";
   const isBlazingArrows = s.pattern === "blazing-arrows";
+  const isApplePie = s.pattern === "apple-pie";
   const isCustomBlock = s.pattern === "custom-block";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isCustomBlock || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isCustomBlock || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -3972,6 +3973,75 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "apple-pie") {
+    // Apple Pie — four fabrics on a six-unit grid (u = blockSize / 6), set out
+    // as a 3 × 3 arrangement of 2u × 2u units. Per block:
+    //   • 4 CORNER units = 8 flying geese finishing 2u × 1u, Fabric B goose on
+    //     Fabric A sky. Made no-waste four-at-a-time, so 8 geese need exactly
+    //     2 large B squares (2u + 1.25") + 8 small A squares (u + 7/8") — a
+    //     whole number of sets per block, no leftovers.
+    //   • 4 EDGE units, each a Fabric A rectangle (outer) sewn to a Fabric C
+    //     bar rectangle (inner), both finishing 2u × 1u.
+    //   • 1 CENTRE square finishing 2u, Fabric D.
+    const u = s.blockSize / 6;
+    const gooseLargeCut = 2 * u + 1.25;
+    const gooseSmallCut = u + HST_EXTRA;
+    const rectLong = 2 * u + SEAM;
+    const rectShort = u + SEAM;
+    const centreCut = 2 * u + SEAM;
+
+    const bgFab = (s.assignments["bg"] ?? "A") as FabricKey;
+    const pointsFab = (s.assignments["points"] ?? "B") as FabricKey;
+    const barFab = (s.assignments["bar"] ?? "C") as FabricKey;
+    const centreFab = (s.assignments["centre"] ?? "D") as FabricKey;
+
+    const gooseSets = 2 * blockCount;        // each set = 1 large square → 4 geese
+    const gooseSmall = 4 * gooseSets;        // 4 sky squares per set
+    const bgRects = 4 * blockCount;
+    const barRects = 4 * blockCount;
+
+    addSquares(reqs[pointsFab], "Large flying-geese squares", gooseSets, gooseLargeCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Flying-geese sky squares", gooseSmall, gooseSmallCut, s.fabricWidth);
+    addRails(reqs[bgFab], "Background edge rectangles", bgRects, rectLong, rectShort, s.fabricWidth);
+    addRails(reqs[barFab], "Bar rectangles around the centre", barRects, rectLong, rectShort, s.fabricWidth);
+    addSquares(reqs[centreFab], "Centre squares", blockCount, centreCut, s.fabricWidth);
+
+    notes.push(
+      `Each Apple Pie block is drafted on a six-unit grid, so one unit finishes at ${u.toFixed(2)}" and the block is really a nine-patch of nine ${(2 * u).toFixed(2)}" units. Four corner units (a pair of flying geese each), four edge units (two rectangles each) and one plain centre square — just two unit types to make.`,
+    );
+    notes.push(
+      `Cutting for all ${blockCount} blocks (every measurement already includes the 1/4" seam allowance). Fabric ${pointsFab} (geese triangles): ${gooseSets} squares at ${gooseLargeCut.toFixed(2)}". Fabric ${bgFab} (background): ${gooseSmall} squares at ${gooseSmallCut.toFixed(2)}" for the geese sky corners and ${bgRects} rectangles at ${rectShort.toFixed(2)}" × ${rectLong.toFixed(2)}". Fabric ${barFab} (bars): ${barRects} rectangles at ${rectShort.toFixed(2)}" × ${rectLong.toFixed(2)}". Fabric ${centreFab} (centre): ${blockCount} squares at ${centreCut.toFixed(2)}".`,
+    );
+    notes.push(
+      `Flying geese — no-waste, four at a time (2 sets per block, ${gooseSets} sets and ${8 * blockCount} geese in total): take one ${gooseLargeCut.toFixed(2)}" Fabric ${pointsFab} square and four ${gooseSmallCut.toFixed(2)}" Fabric ${bgFab} squares. Draw a diagonal corner to corner on the wrong side of each small square. Place two small squares on opposite corners of the large square, right sides together (RST), with their drawn lines forming one continuous line; sew a scant 1/4" down BOTH sides of that line, cut apart ON the line and press the small triangles out. Place one of the two remaining small squares on the square corner of each resulting unit, sew 1/4" each side, cut on the line and press again. That set gives 4 geese finishing ${(2 * u).toFixed(2)}" × ${u.toFixed(2)}" — trim each to exactly ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}" with the point sitting 1/4" below the raw edge.`,
+    );
+    notes.push(
+      `Make the four corner units (${(2 * u).toFixed(2)}" square finished, 2 geese each). Sew two geese together along their long edges so both points face the SAME way, then turn the pair so the points aim at the middle of the block: TOP-LEFT corner — points face RIGHT. TOP-RIGHT corner — points face DOWN. BOTTOM-RIGHT corner — points face LEFT. BOTTOM-LEFT corner — points face UP. That quarter-turn each time is what gives the block its pinwheel spin, so lay all four corners out before you sew anything else.`,
+    );
+    notes.push(
+      `Make the four edge units (${(2 * u).toFixed(2)}" square finished). Sew one Fabric ${bgFab} rectangle to one Fabric ${barFab} rectangle along a long edge and press toward the bar. In the finished block the Fabric ${barFab} bar always sits on the INSIDE, touching the centre square: on the top edge unit the bar is the lower rectangle, on the bottom edge unit it is the upper one, and on the left and right edge units turn the pair a quarter turn so the bar stands upright against the centre.`,
+    );
+    notes.push(
+      `Assemble the block as a nine-patch of ${(2 * u).toFixed(2)}" units. ROW 1 — top-left corner (geese pointing right), top edge unit (bar at the bottom), top-right corner (geese pointing down). ROW 2 — left edge unit (bar on the right), the ${centreCut.toFixed(2)}" Fabric ${centreFab} centre square, right edge unit (bar on the left). ROW 3 — bottom-left corner (geese pointing up), bottom edge unit (bar at the top), bottom-right corner (geese pointing left). Press rows 1 and 3 toward the corner units and row 2 toward the centre so the seams nest, then join the three rows. Finished block: ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+    notes.push(
+      `Apple Pie tips: (1) The goose points make or break this block — after trimming there must be a full 1/4" of sky above each point, or the tip vanishes into the seam. (2) Every goose edge is bias; starch before cutting and press rather than iron. (3) Chain-piece all ${8 * blockCount} geese and trim them in one sitting before you build a single corner. (4) The big centre square is the place for a feature print — choose it first and pick the bar fabric to suit. (5) Set the blocks edge to edge with no sashing and the geese of four neighbouring blocks meet to make a bonus pinwheel at every intersection.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   } else if (s.pattern === "alaska-homestead") {
     // Alaska Homestead — a three-fabric 3×3 grid block (u = blockSize / 3).
     // Every one of the nine units finishes at u" square:
@@ -4340,6 +4410,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "weathervane" ||
     s.pattern === "alaska-homestead" ||
     s.pattern === "blazing-arrows" ||
+    s.pattern === "apple-pie" ||
     s.pattern === "custom-block";
   // Block-setting note. Rotation-only settings never change piece counts —
   // they only change how the finished blocks are turned when the top is
