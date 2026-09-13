@@ -14,7 +14,7 @@ import {
 } from "@/lib/planner-store";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { FabricSwatchOption } from "@/components/FabricSwatchOption";
-import { distinctRotations, fabricsUsed, isFullyRotationSymmetric } from "@/lib/custom-block";
+import { distinctRotations, fabricsUsed, isFullyRotationSymmetric, resolveSwapPair } from "@/lib/custom-block";
 import { getPattern, fabricsForPattern, getEffectiveBorderDefault, patternHasSashingSection } from "@/lib/patterns";
 
 export default function FabricsStep() {
