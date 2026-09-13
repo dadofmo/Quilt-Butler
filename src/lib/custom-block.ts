@@ -728,6 +728,27 @@ export function swapFabrics(
 }
 
 /**
+ * The fabric pair that the "swap two fabrics on every other block" option
+ * should actually use.
+ *
+ * A saved pair can go stale — the quilter edits the block and stops using a
+ * fabric, or turns Block B off — and a stale key would drag a colour into the
+ * quilt that appears nowhere in the design. So each slot is only honoured when
+ * that fabric is genuinely in play; otherwise it falls back to the first
+ * fabrics of the design. Returns null when there aren't two fabrics to swap.
+ */
+export function resolveSwapPair(
+  pair: [FabricKey, FabricKey] | null | undefined,
+  fabrics: FabricKey[],
+): [FabricKey, FabricKey] | null {
+  if (fabrics.length < 2) return null;
+  const first = pair?.[0] && fabrics.includes(pair[0]) ? pair[0] : fabrics[0];
+  let second = pair?.[1] && fabrics.includes(pair[1]) ? pair[1] : fabrics[1];
+  if (second === first) second = fabrics.find((f) => f !== first)!;
+  return [first, second];
+}
+
+/**
  * Upgrade a design saved by an older version of the editor. Flying geese
  * units were removed from the palette; any saved geese cell becomes an HST
  * using the same two fabrics ([goose, sky] → [triangle 1, triangle 2]) so

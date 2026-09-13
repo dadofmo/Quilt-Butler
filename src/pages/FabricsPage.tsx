@@ -14,7 +14,7 @@ import {
 } from "@/lib/planner-store";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { FabricSwatchOption } from "@/components/FabricSwatchOption";
-import { distinctRotations, fabricsUsed, isFullyRotationSymmetric } from "@/lib/custom-block";
+import { distinctRotations, fabricsUsed, isFullyRotationSymmetric, resolveSwapPair } from "@/lib/custom-block";
 import { getPattern, fabricsForPattern, getEffectiveBorderDefault, patternHasSashingSection } from "@/lib/patterns";
 
 export default function FabricsStep() {
@@ -541,6 +541,9 @@ function CustomVariationControls({
   useBlockB: boolean;
   hasBlockB: boolean;
 }) {
+  // Never offer (or keep) a fabric that isn't in the quilt — a stale saved
+  // pair would otherwise pull an unused colour into the preview.
+  const effectivePair = resolveSwapPair(swapPair, fabrics);
   return (
     <div className="mt-4 space-y-3">
       <div className="rounded-xl border-2 border-input bg-card p-4">
@@ -589,15 +592,12 @@ function CustomVariationControls({
         <label className="mt-4 flex cursor-pointer items-start gap-3">
           <input
             type="checkbox"
-            checked={alternate && !!swapPair}
+            checked={alternate && !!effectivePair}
             disabled={fabrics.length < 2}
             onChange={(e) =>
               setPlanner({
                 alternateBlocks: e.target.checked,
-                customSwapPair:
-                  e.target.checked && !swapPair
-                    ? [fabrics[0], fabrics[1]]
-                    : swapPair,
+                customSwapPair: e.target.checked ? effectivePair : swapPair,
               })
             }
             className="mt-1 h-5 w-5 shrink-0 accent-current disabled:opacity-40"
@@ -613,16 +613,16 @@ function CustomVariationControls({
           </span>
         </label>
 
-        {alternate && fabrics.length >= 2 && (
+        {alternate && effectivePair && (
           <div className="mt-3 flex flex-wrap items-center gap-2 pl-8">
             {[0, 1].map((slot) => (
               <select
                 key={slot}
-                value={(swapPair?.[slot] ?? fabrics[slot]) as string}
+                value={effectivePair[slot] as string}
                 onChange={(e) => {
                   const next: [FabricKey, FabricKey] = [
-                    (swapPair?.[0] ?? fabrics[0]) as FabricKey,
-                    (swapPair?.[1] ?? fabrics[1]) as FabricKey,
+                    effectivePair[0],
+                    effectivePair[1],
                   ];
                   next[slot] = e.target.value as FabricKey;
                   setPlanner({ customSwapPair: next });
