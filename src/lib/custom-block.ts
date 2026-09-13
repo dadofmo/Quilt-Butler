@@ -749,6 +749,30 @@ export function resolveSwapPair(
 }
 
 /**
+ * Which variation a custom block at grid position (row, col) gets.
+ *
+ * Two independent variations can be switched on at once:
+ *  - Block B: alternates with Block A like a checkerboard.
+ *  - Fabric swap: every other block of the SAME kind has two fabrics traded.
+ *
+ * When only the swap is on, it alternates on the plain checkerboard. When
+ * Block B is also on, the checkerboard is already used up by A/B, so the swap
+ * alternates within each kind instead — otherwise every Block A in the quilt
+ * would look identical and the toggle would appear to do nothing.
+ */
+export function customCellVariant(
+  row: number,
+  col: number,
+  useB: boolean,
+  swapping: boolean,
+): { isB: boolean; swapped: boolean } {
+  const odd = (row + col) % 2 === 1;
+  const isB = useB && odd;
+  const swapped = swapping && (useB ? (row + col) % 4 >= 2 : odd);
+  return { isB, swapped };
+}
+
+/**
  * Upgrade a design saved by an older version of the editor. Flying geese
  * units were removed from the palette; any saved geese cell becomes an HST
  * using the same two fabrics ([goose, sky] → [triangle 1, triangle 2]) so

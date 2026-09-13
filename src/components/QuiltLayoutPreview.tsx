@@ -13,7 +13,7 @@ import {
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
 import { CustomBlockShapes } from "./CustomBlockSvg";
-import { swapFabrics, fabricsUsed, resolveSwapPair, type CustomBlockDesign } from "@/lib/custom-block";
+import { swapFabrics, fabricsUsed, resolveSwapPair, customCellVariant, type CustomBlockDesign } from "@/lib/custom-block";
 import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock } from "./PatternDiagram";
 
 interface Props {
@@ -429,9 +429,11 @@ export function QuiltCanvas({
             // on alternating cells. Rotation is handled above like any other
             // pattern, so piece counts never change here.
             let cellDesign: CustomBlockDesign | null = customBlock;
-            if (pattern === "custom-block" && (i + j) % 2 === 1) {
-              if (useBlockB && customBlockB) cellDesign = customBlockB;
-              if (alternateBlocks && cellDesign) {
+            if (pattern === "custom-block") {
+              const usingB = !!(useBlockB && customBlockB);
+              const variant = customCellVariant(i, j, usingB, !!alternateBlocks);
+              if (variant.isB && customBlockB) cellDesign = customBlockB;
+              if (variant.swapped && cellDesign) {
                 // Only ever swap fabrics that are really in the quilt — a
                 // stale saved pair must not introduce a colour the quilter
                 // never painted.
