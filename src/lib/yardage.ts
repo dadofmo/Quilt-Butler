@@ -4144,7 +4144,13 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const unit = s.blockSize / grid;
     const usingB = !!(s.useBlockB && s.customBlockB && s.customBlockB.size === grid);
     const designB = usingB ? s.customBlockB! : null;
-    const pair = s.customSwapPair;
+    // A saved swap pair can go stale (the quilter edited the block, or turned
+    // Block B off), so clamp it to the fabrics actually in the quilt — the
+    // cutting list must never name a fabric the design doesn't use.
+    const inPlayFabrics = [
+      ...new Set([...fabricsUsed(designA), ...(designB ? fabricsUsed(designB) : [])]),
+    ].sort();
+    const pair = resolveSwapPair(s.customSwapPair, inPlayFabrics);
     const swapping = !!(s.alternateBlocks && pair);
 
     // Cells with (row + col) even take the "first" block; odd cells take the
