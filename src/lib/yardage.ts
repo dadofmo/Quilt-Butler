@@ -2,7 +2,9 @@ import { ALL_FABRIC_KEYS, type FabricKey, type PlannerState } from "./planner-st
 import { getPattern, getEffectiveBorderDefault } from "./patterns";
 import { layoutAssemblyNote } from "./block-layouts";
 import {
+  fabricsUsed,
   mergeTallies,
+  resolveSwapPair,
   scaleTally,
   swapFabrics,
   unitTally,
