@@ -431,8 +431,18 @@ export function QuiltCanvas({
             let cellDesign: CustomBlockDesign | null = customBlock;
             if (pattern === "custom-block" && (i + j) % 2 === 1) {
               if (useBlockB && customBlockB) cellDesign = customBlockB;
-              if (alternateBlocks && customSwapPair && cellDesign) {
-                cellDesign = swapFabrics(cellDesign, customSwapPair[0], customSwapPair[1]);
+              if (alternateBlocks && cellDesign) {
+                // Only ever swap fabrics that are really in the quilt — a
+                // stale saved pair must not introduce a colour the quilter
+                // never painted.
+                const inPlay = [
+                  ...new Set([
+                    ...fabricsUsed(customBlock),
+                    ...(useBlockB && customBlockB ? fabricsUsed(customBlockB) : []),
+                  ]),
+                ].sort();
+                const pair = resolveSwapPair(customSwapPair, inPlay);
+                if (pair) cellDesign = swapFabrics(cellDesign, pair[0], pair[1]);
               }
             }
             return (
