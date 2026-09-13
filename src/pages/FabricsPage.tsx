@@ -541,6 +541,9 @@ function CustomVariationControls({
   useBlockB: boolean;
   hasBlockB: boolean;
 }) {
+  // Never offer (or keep) a fabric that isn't in the quilt — a stale saved
+  // pair would otherwise pull an unused colour into the preview.
+  const effectivePair = resolveSwapPair(swapPair, fabrics);
   return (
     <div className="mt-4 space-y-3">
       <div className="rounded-xl border-2 border-input bg-card p-4">
