@@ -592,15 +592,12 @@ function CustomVariationControls({
         <label className="mt-4 flex cursor-pointer items-start gap-3">
           <input
             type="checkbox"
-            checked={alternate && !!swapPair}
+            checked={alternate && !!effectivePair}
             disabled={fabrics.length < 2}
             onChange={(e) =>
               setPlanner({
                 alternateBlocks: e.target.checked,
-                customSwapPair:
-                  e.target.checked && !swapPair
-                    ? [fabrics[0], fabrics[1]]
-                    : swapPair,
+                customSwapPair: e.target.checked ? effectivePair : swapPair,
               })
             }
             className="mt-1 h-5 w-5 shrink-0 accent-current disabled:opacity-40"
