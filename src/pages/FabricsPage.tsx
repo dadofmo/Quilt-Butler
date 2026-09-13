@@ -613,16 +613,16 @@ function CustomVariationControls({
           </span>
         </label>
 
-        {alternate && fabrics.length >= 2 && (
+        {alternate && effectivePair && (
           <div className="mt-3 flex flex-wrap items-center gap-2 pl-8">
             {[0, 1].map((slot) => (
               <select
                 key={slot}
-                value={(swapPair?.[slot] ?? fabrics[slot]) as string}
+                value={effectivePair[slot] as string}
                 onChange={(e) => {
                   const next: [FabricKey, FabricKey] = [
-                    (swapPair?.[0] ?? fabrics[0]) as FabricKey,
-                    (swapPair?.[1] ?? fabrics[1]) as FabricKey,
+                    effectivePair[0],
+                    effectivePair[1],
                   ];
                   next[slot] = e.target.value as FabricKey;
                   setPlanner({ customSwapPair: next });
