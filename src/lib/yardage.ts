@@ -9,6 +9,7 @@ import {
   scaleTally,
   swapFabrics,
   unitTally,
+  type CustomBlockDesign,
 } from "./custom-block";
 
 /** Round an inch measurement to 2dp so cut sizes stay tidy. */
