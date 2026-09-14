@@ -5,9 +5,11 @@ import {
   fabricsUsed,
   mergeTallies,
   resolveSwapPair,
+  customCellVariant,
   scaleTally,
   swapFabrics,
   unitTally,
+  type CustomBlockDesign,
 } from "./custom-block";
 
 /** Round an inch measurement to 2dp so cut sizes stay tidy. */
@@ -4153,19 +4155,30 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const pair = resolveSwapPair(s.customSwapPair, inPlayFabrics);
     const swapping = !!(s.alternateBlocks && pair);
 
-    // Cells with (row + col) even take the "first" block; odd cells take the
-    // variation (Block B and/or the fabric swap). This mirrors exactly what
-    // QuiltLayoutPreview draws.
-    const evenCount = Math.ceil(blockCount / 2);
-    const oddCount = blockCount - evenCount;
+    // Walk the real quilt grid so the counts match exactly what
+    // QuiltLayoutPreview draws: Block B on alternating cells, and the fabric
+    // swap on every other block of the same kind.
+    const counts = { a: 0, aSwap: 0, b: 0, bSwap: 0 };
+    for (let row = 0; row < blocksDown; row++) {
+      for (let col = 0; col < blocksAcross; col++) {
+        const v = customCellVariant(row, col, usingB, swapping);
+        if (v.isB) counts[v.swapped ? "bSwap" : "b"]++;
+        else counts[v.swapped ? "aSwap" : "a"]++;
+      }
+    }
+    const swapOf = (d: CustomBlockDesign) =>
+      pair ? swapFabrics(d, pair[0], pair[1]) : d;
 
-    let oddDesign = designB ?? designA;
-    if (swapping && pair) oddDesign = swapFabrics(oddDesign, pair[0], pair[1]);
+    const evenCount = counts.a + counts.aSwap;
+    const oddCount = counts.b + counts.bSwap;
 
-    const tally = mergeTallies(
-      scaleTally(unitTally(designA), evenCount),
-      oddCount > 0 ? scaleTally(unitTally(oddDesign), oddCount) : scaleTally(unitTally(designA), 0),
-    );
+    let tally = scaleTally(unitTally(designA), counts.a);
+    if (counts.aSwap > 0)
+      tally = mergeTallies(tally, scaleTally(unitTally(swapOf(designA)), counts.aSwap));
+    if (designB && counts.b > 0)
+      tally = mergeTallies(tally, scaleTally(unitTally(designB), counts.b));
+    if (designB && counts.bSwap > 0)
+      tally = mergeTallies(tally, scaleTally(unitTally(swapOf(designB)), counts.bSwap));
 
     const sqCut = round2(unit + SEAM);
     const hstCut = round2(unit + HST_EXTRA);
@@ -4178,10 +4191,17 @@ export function calculateYardage(s: PlannerState): CalcResult {
       notes.push(
         `Two-block set: cut ${evenCount} of Block A and ${oddCount} of Block B, then alternate them across the quilt like a checkerboard (Block A in the top-left corner).`,
       );
-    } else if (swapping && pair) {
-      notes.push(
-        `Alternate blocks: piece ${evenCount} blocks as drawn, and ${oddCount} blocks with Fabric ${pair[0]} and Fabric ${pair[1]} swapped. Set them out checkerboard style, starting with an "as drawn" block in the top-left corner.`,
-      );
+    }
+    if (swapping && pair) {
+      if (usingB) {
+        notes.push(
+          `Swap two fabrics: of your ${evenCount} Block A, piece ${counts.a} as drawn and ${counts.aSwap} with Fabric ${pair[0]} and Fabric ${pair[1]} traded. Do the same with Block B: ${counts.b} as drawn and ${counts.bSwap} traded. Working along each row, the swapped ones fall on every other block of the same kind, starting with an "as drawn" block in the top-left corner.`,
+        );
+      } else {
+        notes.push(
+          `Alternate blocks: piece ${counts.a} blocks as drawn, and ${counts.aSwap} blocks with Fabric ${pair[0]} and Fabric ${pair[1]} swapped. Set them out checkerboard style, starting with an "as drawn" block in the top-left corner.`,
+        );
+      }
     }
 
     // ---- Solid squares -----------------------------------------------------
