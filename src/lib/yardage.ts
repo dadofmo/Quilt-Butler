@@ -4153,19 +4153,30 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const pair = resolveSwapPair(s.customSwapPair, inPlayFabrics);
     const swapping = !!(s.alternateBlocks && pair);
 
-    // Cells with (row + col) even take the "first" block; odd cells take the
-    // variation (Block B and/or the fabric swap). This mirrors exactly what
-    // QuiltLayoutPreview draws.
-    const evenCount = Math.ceil(blockCount / 2);
-    const oddCount = blockCount - evenCount;
+    // Walk the real quilt grid so the counts match exactly what
+    // QuiltLayoutPreview draws: Block B on alternating cells, and the fabric
+    // swap on every other block of the same kind.
+    const counts = { a: 0, aSwap: 0, b: 0, bSwap: 0 };
+    for (let row = 0; row < blocksDown; row++) {
+      for (let col = 0; col < blocksAcross; col++) {
+        const v = customCellVariant(row, col, usingB, swapping);
+        if (v.isB) counts[v.swapped ? "bSwap" : "b"]++;
+        else counts[v.swapped ? "aSwap" : "a"]++;
+      }
+    }
+    const swapOf = (d: CustomBlockDesign) =>
+      pair ? swapFabrics(d, pair[0], pair[1]) : d;
 
-    let oddDesign = designB ?? designA;
-    if (swapping && pair) oddDesign = swapFabrics(oddDesign, pair[0], pair[1]);
+    const evenCount = counts.a + counts.aSwap;
+    const oddCount = counts.b + counts.bSwap;
 
-    const tally = mergeTallies(
-      scaleTally(unitTally(designA), evenCount),
-      oddCount > 0 ? scaleTally(unitTally(oddDesign), oddCount) : scaleTally(unitTally(designA), 0),
-    );
+    let tally = scaleTally(unitTally(designA), counts.a);
+    if (counts.aSwap > 0)
+      tally = mergeTallies(tally, scaleTally(unitTally(swapOf(designA)), counts.aSwap));
+    if (designB && counts.b > 0)
+      tally = mergeTallies(tally, scaleTally(unitTally(designB), counts.b));
+    if (designB && counts.bSwap > 0)
+      tally = mergeTallies(tally, scaleTally(unitTally(swapOf(designB)), counts.bSwap));
 
     const sqCut = round2(unit + SEAM);
     const hstCut = round2(unit + HST_EXTRA);
