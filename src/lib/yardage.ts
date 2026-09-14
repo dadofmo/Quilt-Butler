@@ -4189,10 +4189,17 @@ export function calculateYardage(s: PlannerState): CalcResult {
       notes.push(
         `Two-block set: cut ${evenCount} of Block A and ${oddCount} of Block B, then alternate them across the quilt like a checkerboard (Block A in the top-left corner).`,
       );
-    } else if (swapping && pair) {
-      notes.push(
-        `Alternate blocks: piece ${evenCount} blocks as drawn, and ${oddCount} blocks with Fabric ${pair[0]} and Fabric ${pair[1]} swapped. Set them out checkerboard style, starting with an "as drawn" block in the top-left corner.`,
-      );
+    }
+    if (swapping && pair) {
+      if (usingB) {
+        notes.push(
+          `Swap two fabrics: of your ${evenCount} Block A, piece ${counts.a} as drawn and ${counts.aSwap} with Fabric ${pair[0]} and Fabric ${pair[1]} traded. Do the same with Block B: ${counts.b} as drawn and ${counts.bSwap} traded. Working along each row, the swapped ones fall on every other block of the same kind, starting with an "as drawn" block in the top-left corner.`,
+        );
+      } else {
+        notes.push(
+          `Alternate blocks: piece ${counts.a} blocks as drawn, and ${counts.aSwap} blocks with Fabric ${pair[0]} and Fabric ${pair[1]} swapped. Set them out checkerboard style, starting with an "as drawn" block in the top-left corner.`,
+        );
+      }
     }
 
     // ---- Solid squares -----------------------------------------------------
