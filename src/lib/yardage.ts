@@ -5,6 +5,7 @@ import {
   fabricsUsed,
   mergeTallies,
   resolveSwapPair,
+  customCellVariant,
   scaleTally,
   swapFabrics,
   unitTally,
