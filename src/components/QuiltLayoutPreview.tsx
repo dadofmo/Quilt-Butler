@@ -346,7 +346,10 @@ export function QuiltCanvas({
               // block = 40% of a block). Using "cover" stretched the whole
               // photo across the border rectangle, making prints look
               // gigantic. Repeat + fixed tile matches a real bolt.
-              backgroundSize: `${Math.max(24, Math.round(cellW * 0.4))}px ${Math.max(24, Math.round(cellW * 0.4))}px`,
+              // Keep the floor low (8px): on phone-sized quilt previews
+              // cellW*0.4 is only ~5-12px, and a 24px floor made border
+              // prints render 2-4x larger than the same fabric in blocks.
+              backgroundSize: `${Math.max(8, Math.round(cellW * 0.4))}px ${Math.max(8, Math.round(cellW * 0.4))}px`,
               backgroundRepeat: "repeat",
               backgroundPosition: "top left",
             }
