@@ -771,8 +771,13 @@ export function customCellVariant(
 ): { isB: boolean; swapped: boolean } {
   const odd = (row + col) % 2 === 1;
   const isB = useB && odd;
-  const swapped = swapping && (useB ? (row + col) % 4 < 2 : !odd);
+  // With a two-block set the checkerboard already alternates every other
+  // block, so the fabric swap rides on that same alternation: Block A as
+  // drawn, Block B with the pair traded. Without Block B the swap alternates
+  // on its own, starting swapped in the top-left corner.
+  const swapped = swapping && (useB ? odd : !odd);
   return { isB, swapped };
+
 }
 
 /**
