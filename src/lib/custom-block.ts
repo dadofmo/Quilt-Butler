@@ -759,6 +759,9 @@ export function resolveSwapPair(
  * Block B is also on, the checkerboard is already used up by A/B, so the swap
  * alternates within each kind instead — otherwise every Block A in the quilt
  * would look identical and the toggle would appear to do nothing.
+ *
+ * The phase starts ON at the top-left corner, so ticking the box visibly
+ * changes the first blocks in the quilt rather than leaving them as drawn.
  */
 export function customCellVariant(
   row: number,
@@ -768,7 +771,7 @@ export function customCellVariant(
 ): { isB: boolean; swapped: boolean } {
   const odd = (row + col) % 2 === 1;
   const isB = useB && odd;
-  const swapped = swapping && (useB ? (row + col) % 4 >= 2 : odd);
+  const swapped = swapping && (useB ? (row + col) % 4 < 2 : !odd);
   return { isB, swapped };
 }
 
