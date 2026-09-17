@@ -751,14 +751,13 @@ export function resolveSwapPair(
 /**
  * Which variation a custom block at grid position (row, col) gets.
  *
- * Two independent variations can be switched on at once:
- *  - Block B: alternates with Block A like a checkerboard.
- *  - Fabric swap: every other block of the SAME kind has two fabrics traded.
- *
- * When only the swap is on, it alternates on the plain checkerboard. When
- * Block B is also on, the checkerboard is already used up by A/B, so the swap
- * alternates within each kind instead — otherwise every Block A in the quilt
- * would look identical and the toggle would appear to do nothing.
+ * Two variations can be switched on:
+ *  - Block B alternates with Block A like a checkerboard.
+ *  - With one design, the fabric swap alternates that design checkerboard-style.
+ *  - With two designs already alternating, the selected pair is traded in BOTH
+ *    designs. Otherwise a pair split across the designs (for example Fabric A
+ *    only in Block A and Fabric G only in Block B) changes just one design and
+ *    leaves half the quilt visibly untouched.
  *
  * The phase starts ON at the top-left corner, so ticking the box visibly
  * changes the first blocks in the quilt rather than leaving them as drawn.
@@ -771,11 +770,11 @@ export function customCellVariant(
 ): { isB: boolean; swapped: boolean } {
   const odd = (row + col) % 2 === 1;
   const isB = useB && odd;
-  // With a two-block set the checkerboard already alternates every other
-  // block, so the fabric swap rides on that same alternation: Block A as
-  // drawn, Block B with the pair traded. Without Block B the swap alternates
-  // on its own, starting swapped in the top-left corner.
-  const swapped = swapping && (useB ? odd : !odd);
+  // Block A/B already supplies the every-other-block variation. Apply the
+  // selected colour trade to both designs so checking the option consistently
+  // changes every block that contains either selected fabric. With one design,
+  // retain the ordinary checkerboard swap and start at the top-left.
+  const swapped = swapping && (useB || !odd);
   return { isB, swapped };
 
 }
