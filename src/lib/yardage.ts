@@ -4156,8 +4156,9 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const swapping = !!(s.alternateBlocks && pair);
 
     // Walk the real quilt grid so the counts match exactly what
-    // QuiltLayoutPreview draws: Block B on alternating cells, and the fabric
-    // swap on every other block of the same kind.
+    // QuiltLayoutPreview draws: Block B on alternating cells. With a two-block
+    // set, the selected pair is traded in both designs so neither design is
+    // silently left unchanged; with one design, the trade is checkerboarded.
     const counts = { a: 0, aSwap: 0, b: 0, bSwap: 0 };
     for (let row = 0; row < blocksDown; row++) {
       for (let col = 0; col < blocksAcross; col++) {
@@ -4195,7 +4196,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     if (swapping && pair) {
       if (usingB) {
         notes.push(
-          `Swap two fabrics: piece all ${evenCount} Block A as drawn, and all ${oddCount} Block B with Fabric ${pair[0]} and Fabric ${pair[1]} traded. Because the two blocks already alternate like a checkerboard, every other block in the quilt shows the reversed colours.`,
+          `Swap two fabrics: trade Fabric ${pair[0]} and Fabric ${pair[1]} in both designs — piece ${evenCount} reversed-colour Block A and ${oddCount} reversed-colour Block B. Then alternate Block A and Block B like a checkerboard. This ensures neither block design is accidentally left unchanged when one selected fabric appears only in Block A and the other appears only in Block B.`,
         );
       } else {
         notes.push(

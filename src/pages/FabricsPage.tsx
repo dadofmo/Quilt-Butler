@@ -607,8 +607,9 @@ function CustomVariationControls({
               Swap two fabrics on every other block
             </span>
             <span className="text-muted-foreground block text-xs leading-snug">
-              Pick a pair and they trade places on alternating blocks — the same
-              block, sewn in reversed colours.
+              {useBlockB && hasBlockB
+                ? "Pick a pair and they trade places in both Block A and Block B, so neither design is left unchanged."
+                : "Pick a pair and they trade places on alternating blocks — the same block, sewn in reversed colours."}
             </span>
           </span>
         </label>

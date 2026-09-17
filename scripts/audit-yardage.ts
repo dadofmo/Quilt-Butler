@@ -2634,6 +2634,28 @@ console.log("\n=== Custom block: Block B checkerboard alternation ===");
   check("BlockB no fabric B", r.fabrics.find(f => f.fabric === "B") ? 1 : 0, 0);
 }
 
+console.log("\n=== Custom block: two-block swap changes both designs ===");
+{
+  // Reproduces the reported case: A appears only in Block A and G appears
+  // only in Block B. With the swap on, every A block becomes G and every G
+  // block becomes A; no position is silently left in its original colours.
+  const dA = fullDesign(4, () => ({ kind: "square", rotation: 0, fabrics: ["A"] as FabricKey[] }));
+  const dB = fullDesign(4, () => ({ kind: "square", rotation: 0, fabrics: ["G"] as FabricKey[] }));
+  const s = {
+    ...customBase(dA),
+    customBlockB: dB,
+    useBlockB: true,
+    alternateBlocks: true,
+    customSwapPair: ["A", "G"] as [FabricKey, FabricKey],
+  };
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const g = r.fabrics.find(f => f.fabric === "G")!;
+  check("Two-block swap A count", a.pieces.reduce((n, p) => n + p.count, 0), 128);
+  check("Two-block swap G count", g.pieces.reduce((n, p) => n + p.count, 0), 128);
+  check("Two-block swap note covers both designs", r.notes.some(n => n.includes("both designs")) ? 1 : 0, 1);
+}
+
 console.log("\n=== Custom block: odd block count with swap (rounding safety) ===");
 {
   // 36×36 quilt with 12" block → 9 blocks → 5 as drawn / 4 swapped.

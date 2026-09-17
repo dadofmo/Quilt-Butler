@@ -18,6 +18,7 @@ import {
   blockPolys,
   canPlace,
   cornerFlags,
+  customCellVariant,
 
   migrateDesign,
   rotateDesign,
@@ -359,6 +360,23 @@ describe("custom block — whole-block rotation", () => {
 });
 
 describe("custom block — fabric swap and Block B alternation", () => {
+  it("swaps both Block A and Block B when the two-block layout is active", () => {
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 3; col++) {
+        const variant = customCellVariant(row, col, true, true);
+        expect(variant.isB).toBe((row + col) % 2 === 1);
+        expect(variant.swapped).toBe(true);
+      }
+    }
+  });
+
+  it("keeps the checkerboard swap when only Block A is used", () => {
+    expect(customCellVariant(0, 0, false, true).swapped).toBe(true);
+    expect(customCellVariant(0, 1, false, true).swapped).toBe(false);
+    expect(customCellVariant(1, 0, false, true).swapped).toBe(false);
+    expect(customCellVariant(1, 1, false, true).swapped).toBe(true);
+  });
+
   it("swap A↔B keeps total piece counts identical (inches may differ by strip packing)", () => {
     const d = fillDesign(4, () => unitOfKind("cornered"));
     const on: PlannerState = {
@@ -393,6 +411,24 @@ describe("custom block — fabric swap and Block B alternation", () => {
     const r = calculateYardage(s);
     expect(r.fabrics.map((f) => f.fabric)).toContain("A");
     expect(r.fabrics.map((f) => f.fabric)).toContain("C");
+  });
+
+  it("a pair split across Block A and Block B changes both designs", () => {
+    const dA = fillDesign(4, () => ({ kind: "square" as const, rotation: 0 as Rotation, fabrics: ["A"] as FabricKey[] }));
+    const dB = fillDesign(4, () => ({ kind: "square" as const, rotation: 0 as Rotation, fabrics: ["G"] as FabricKey[] }));
+    const s: PlannerState = {
+      ...baseState(dA),
+      customBlockB: dB,
+      useBlockB: true,
+      alternateBlocks: true,
+      customSwapPair: ["A", "G"],
+    };
+    const r = calculateYardage(s);
+    const a = r.fabrics.find((f) => f.fabric === "A");
+    const g = r.fabrics.find((f) => f.fabric === "G");
+    expect(a?.pieces.reduce((sum, piece) => sum + piece.count, 0)).toBe(128);
+    expect(g?.pieces.reduce((sum, piece) => sum + piece.count, 0)).toBe(128);
+    expect(r.notes?.some((note) => note.includes("both designs"))).toBe(true);
   });
 });
 
