@@ -1209,6 +1209,13 @@ function renderInner(
       const centre = get("centre", "D");
       return <ApplePieBlock size={200} bg={bg} points={points} bar={bar} centre={centre} />;
     }
+    case "album-cross": {
+      const cross = get("cross", "A");
+      const bg = get("bg", "B");
+      const outer = get("outer", "C");
+      const accent = get("accent", "D");
+      return <AlbumCrossBlock size={200} cross={cross} bg={bg} outer={outer} accent={accent} />;
+    }
 
 
 
@@ -3055,6 +3062,64 @@ export function ApplePieBlock({
 
       {/* Centre square. */}
       <rect x={2 * u} y={2 * u} width={2 * u} height={2 * u} fill={centre} />
+    </>
+  );
+}
+
+/**
+ * Shared renderer for Album Cross — a 6×6-unit block arranged as a 3×3
+ * nine-patch of 2u cells. Each corner cell is itself a 2×2 four-patch:
+ * one solid outer square, one solid inner accent square, and two HSTs whose
+ * outer halves match the outer square. Rotating that corner construction four
+ * times creates the broad diagonal corner shapes shown in the source block.
+ */
+export function AlbumCrossBlock({
+  size,
+  cross,
+  bg,
+  outer,
+  accent,
+}: {
+  size: number;
+  cross: string;
+  bg: string;
+  outer: string;
+  accent: string;
+}) {
+  const u = size / 6;
+  const rot = ([x, y]: [number, number], turns: number): [number, number] => {
+    let point: [number, number] = [x, y];
+    for (let i = 0; i < turns; i += 1) point = [6 - point[1], point[0]];
+    return point;
+  };
+  const polygon = (points: [number, number][], turns: number, fill: string, key: string) => (
+    <polygon
+      key={key}
+      points={points.map((point) => rot(point, turns)).map(([x, y]) => `${x * u},${y * u}`).join(" ")}
+      fill={fill}
+    />
+  );
+
+  return (
+    <>
+      <rect x={0} y={0} width={size} height={size} fill={bg} />
+
+      {/* Four solid 2u edge squares form the cross arms. */}
+      <rect x={2 * u} y={0} width={2 * u} height={2 * u} fill={cross} />
+      <rect x={0} y={2 * u} width={2 * u} height={2 * u} fill={cross} />
+      <rect x={4 * u} y={2 * u} width={2 * u} height={2 * u} fill={cross} />
+      <rect x={2 * u} y={4 * u} width={2 * u} height={2 * u} fill={cross} />
+
+      {[0, 1, 2, 3].map((turns) => (
+        <g key={`album-corner-${turns}`}>
+          {/* Top-left source corner: outer square, two matching HST halves,
+              and the accent square nearest the block centre. */}
+          {polygon([[0, 0], [1, 0], [1, 1], [0, 1]], turns, outer, `album-outer-${turns}`)}
+          {polygon([[1, 0], [2, 0], [2, 1]], turns, outer, `album-top-hst-${turns}`)}
+          {polygon([[0, 1], [1, 2], [0, 2]], turns, outer, `album-side-hst-${turns}`)}
+          {polygon([[1, 1], [2, 1], [2, 2], [1, 2]], turns, accent, `album-accent-${turns}`)}
+        </g>
+      ))}
     </>
   );
 }

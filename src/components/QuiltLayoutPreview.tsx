@@ -14,7 +14,7 @@ import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
 import { CustomBlockShapes } from "./CustomBlockSvg";
 import { swapFabrics, fabricsUsed, resolveSwapPair, customCellVariant, type CustomBlockDesign } from "@/lib/custom-block";
-import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock } from "./PatternDiagram";
+import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock } from "./PatternDiagram";
 
 interface Props {
   pattern: PatternId;
@@ -1467,6 +1467,13 @@ function MiniBlock({
       const bar = get("bar", "C");
       const centre = get("centre", "D");
       return <ApplePieBlock size={200} bg={bg} points={points} bar={bar} centre={centre} />;
+    }
+    case "album-cross": {
+      const cross = get("cross", "A");
+      const bg = get("bg", "B");
+      const outer = get("outer", "C");
+      const accent = get("accent", "D");
+      return <AlbumCrossBlock size={200} cross={cross} bg={bg} outer={outer} accent={accent} />;
     }
 
   }
