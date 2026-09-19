@@ -1794,6 +1794,46 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "album-cross",
+    name: "Album Cross",
+    hasMath: true,
+    intro:
+      "Album Cross is a four-fabric nine-patch drafted on a six-unit grid. Four plain edge squares form a bold cross around the centre. Each corner is a four-patch made from one outer square, one inner accent square and two half-square triangles, so the outer fabric sweeps diagonally around the block while the four accent squares frame the centre.",
+    sections: [
+      {
+        id: "cross",
+        label: "Cross squares (Fabric A)",
+        defaultFabric: "A",
+        hint: "The four large plain squares at the top, bottom, left and right. These make the arms of the cross.",
+      },
+      {
+        id: "bg",
+        label: "Centre & corner background (Fabric B)",
+        defaultFabric: "B",
+        hint: "The large centre square and one half of each small corner triangle unit. A calm, lighter fabric keeps the cross easy to see.",
+      },
+      {
+        id: "outer",
+        label: "Outer corner fabric (Fabric C)",
+        defaultFabric: "C",
+        hint: "The four outer corner squares and the matching halves of eight small triangle units, forming a broad diagonal shape in every corner.",
+      },
+      {
+        id: "accent",
+        label: "Inner corner squares (Fabric D)",
+        defaultFabric: "D",
+        hint: "The four small squares nearest the centre. Choose a fabric that stands apart from both corner fabrics.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "E",
+        hint: "Optional strips of fabric that separate each Album Cross block — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
+  {
     id: "custom-block",
     name: "Design Your Own Block",
     hasMath: true,
@@ -1871,6 +1911,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "alaska-homestead": { skill: "confident", fabricCount: 3, techniques: ["hst", "squares"] },
   "blazing-arrows": { skill: "intermediate", fabricCount: 2, techniques: ["hst", "geese"] },
   "apple-pie": { skill: "intermediate", fabricCount: 4, techniques: ["geese", "squares"] },
+  "album-cross": { skill: "confident", fabricCount: 4, techniques: ["hst", "squares"] },
   // Metadata for the user-designed block is nominal: the real fabric count and
   // techniques depend on what the user draws, and the tile is surfaced through
   // its own entry point rather than the filterable pattern grid.

@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock } from "./PatternDiagram";
 
 
 interface Props {
@@ -124,6 +124,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Alaska Homestead quilt block diagram — a three-fabric 3x3 block with four half-square-triangle corners pointing in toward a plain centre square and four two-patch edge rectangles with a bold accent bar on the outside of each side",
   "apple-pie":
     "Apple Pie quilt block diagram — a four-fabric six-unit block with a pair of flying geese pointing inward in every corner, four bar rectangles framing the middle and a large plain centre square",
+  "album-cross":
+    "Album Cross quilt block diagram — four plain squares form a cross around the centre, framed by four rotated corner four-patches made from a solid square, two half-square triangles and an inner accent square",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -1023,6 +1025,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return (
         <svg {...common}>
           <ApplePieBlock size={90} bg={C.a} points={C.b} bar={C.c} centre={C.d} />
+        </svg>
+      );
+    }
+    case "album-cross": {
+      return (
+        <svg {...common}>
+          <AlbumCrossBlock size={90} cross={C.a} bg={C.b} outer={C.c} accent={C.d} />
         </svg>
       );
     }
