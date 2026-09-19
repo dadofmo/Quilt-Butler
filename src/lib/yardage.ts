@@ -208,10 +208,11 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlaskaHomestead = s.pattern === "alaska-homestead";
   const isBlazingArrows = s.pattern === "blazing-arrows";
   const isApplePie = s.pattern === "apple-pie";
+  const isAlbumCross = s.pattern === "album-cross";
   const isCustomBlock = s.pattern === "custom-block";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isCustomBlock || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isCustomBlock || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -4046,6 +4047,70 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "album-cross") {
+    // Album Cross — a 3×3 nine-patch whose macro cells finish 2u square,
+    // drafted on a six-unit grid (u = blockSize / 6). Per block:
+    //   • 4 solid 2u cross-arm squares (Fabric A)
+    //   • 1 solid 2u centre square (Fabric B)
+    //   • 4 corner four-patches, each containing one u Fabric C square, one u
+    //     Fabric D square and two u HSTs made from Fabrics B/C
+    // Eight HSTs need four two-at-a-time pairs per block.
+    const u = s.blockSize / 6;
+    const largeCut = 2 * u + SEAM;
+    const smallCut = u + SEAM;
+    const hstCut = u + HST_EXTRA;
+
+    const crossFab = (s.assignments["cross"] ?? "A") as FabricKey;
+    const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
+    const outerFab = (s.assignments["outer"] ?? "C") as FabricKey;
+    const accentFab = (s.assignments["accent"] ?? "D") as FabricKey;
+
+    const crossSquares = 4 * blockCount;
+    const centreSquares = blockCount;
+    const outerSquares = 4 * blockCount;
+    const accentSquares = 4 * blockCount;
+    const hstStartsPerFabric = 4 * blockCount;
+
+    addSquares(reqs[crossFab], "Cross-arm squares", crossSquares, largeCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Centre squares", centreSquares, largeCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Corner HST starting squares", hstStartsPerFabric, hstCut, s.fabricWidth);
+    addSquares(reqs[outerFab], "Outer corner squares", outerSquares, smallCut, s.fabricWidth);
+    addSquares(reqs[outerFab], "Corner HST starting squares", hstStartsPerFabric, hstCut, s.fabricWidth);
+    addSquares(reqs[accentFab], "Inner accent squares", accentSquares, smallCut, s.fabricWidth);
+
+    notes.push(
+      `Each Album Cross block is a nine-patch drafted on a six-unit grid. One small unit finishes at ${u.toFixed(2)}\"; each of the nine large sections finishes ${(2 * u).toFixed(2)}\" square. The four edge squares and centre are plain. Each corner is a small four-patch made from one outer square, one inner accent square and two half-square-triangle units.`,
+    );
+    notes.push(
+      `Cutting for all ${blockCount} blocks (sizes include the 1/4\" seam allowance): Fabric ${crossFab} — ${crossSquares} cross-arm squares at ${largeCut.toFixed(2)}\". Fabric ${bgFab} — ${centreSquares} centre squares at ${largeCut.toFixed(2)}\" plus ${hstStartsPerFabric} HST starting squares at ${hstCut.toFixed(3)}\". Fabric ${outerFab} — ${outerSquares} plain corner squares at ${smallCut.toFixed(2)}\" plus ${hstStartsPerFabric} HST starting squares at ${hstCut.toFixed(3)}\". Fabric ${accentFab} — ${accentSquares} inner accent squares at ${smallCut.toFixed(2)}\".`,
+    );
+    notes.push(
+      `Half-square triangles — make ${8 * blockCount}. Pair each ${hstCut.toFixed(3)}\" Fabric ${bgFab} square with a matching Fabric ${outerFab} square, right sides together. Draw one diagonal line, sew a scant 1/4\" on BOTH sides, cut apart ON the line, press toward Fabric ${outerFab}, and trim each unit to ${smallCut.toFixed(2)}\" square. Each pair makes 2 units; use 8 units in every block.`,
+    );
+    notes.push(
+      `Corner four-patches — make ${4 * blockCount}. For each one, lay out a 2×2 grid: the plain Fabric ${outerFab} square goes at the OUTER corner and the Fabric ${accentFab} square goes diagonally opposite at the INNER corner. Put one HST in each remaining position, turning both so their Fabric ${outerFab} triangles join the outer square and form one broad diagonal corner shape. Sew the two rows, press their seams in opposite directions, then join and trim to ${largeCut.toFixed(2)}\" square.`,
+    );
+    notes.push(
+      `Assemble each block in 3 rows. Row 1: corner unit with its Fabric ${accentFab} square at bottom-right · Fabric ${crossFab} cross square · corner unit with its accent at bottom-left. Row 2: Fabric ${crossFab} cross square · Fabric ${bgFab} centre square · Fabric ${crossFab} cross square. Row 3: corner unit with its accent at top-right · Fabric ${crossFab} cross square · corner unit with its accent at top-left. Press rows 1 and 3 toward the corners and row 2 toward the centre so the seams nest, then join the rows. Finished block: ${s.blockSize}\".`,
+    );
+    notes.push(
+      `Album Cross tips: (1) Make one complete corner unit first and compare it with the block picture before chain-piecing the rest. (2) The two HSTs in every corner must mirror one another; their Fabric ${outerFab} halves touch the plain outer square. (3) Keep all four Fabric ${accentFab} squares facing the centre when you lay out the block. (4) Trim every HST and corner four-patch before assembly so the nine-patch seams meet cleanly.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}\" × ${sashCutL.toFixed(2)}\" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
+      );
+    }
   } else if (s.pattern === "alaska-homestead") {
     // Alaska Homestead — a three-fabric 3×3 grid block (u = blockSize / 3).
     // Every one of the nine units finishes at u" square:
@@ -4441,6 +4506,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "alaska-homestead" ||
     s.pattern === "blazing-arrows" ||
     s.pattern === "apple-pie" ||
+    s.pattern === "album-cross" ||
     s.pattern === "custom-block";
   // Block-setting note. Rotation-only settings never change piece counts —
   // they only change how the finished blocks are turned when the top is
