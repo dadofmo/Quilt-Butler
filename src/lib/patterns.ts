@@ -1798,7 +1798,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
     name: "Album Cross",
     hasMath: true,
     intro:
-      "Album Cross is a four-fabric nine-patch drafted on a six-unit grid. Four plain edge squares form a bold cross around the centre. Each corner is a four-patch made from one outer square, one inner accent square and two half-square triangles, so the outer fabric sweeps diagonally around the block while the four accent squares frame the centre.",
+      "Album Cross is a four-fabric nine-patch drafted on a six-unit grid. Four plain edge squares form a bold cross around the centre. Each corner is one large half-square triangle with a small accent square added at the inner point of its background half.",
     sections: [
       {
         id: "cross",
@@ -1810,13 +1810,13 @@ const BASE_PATTERNS: PatternDefBase[] = [
         id: "bg",
         label: "Centre & corner background (Fabric B)",
         defaultFabric: "B",
-        hint: "The large centre square and one half of each small corner triangle unit. A calm, lighter fabric keeps the cross easy to see.",
+        hint: "The large centre square and the inner half of each large corner triangle unit. A calm, lighter fabric keeps the cross easy to see.",
       },
       {
         id: "outer",
         label: "Outer corner fabric (Fabric C)",
         defaultFabric: "C",
-        hint: "The four outer corner squares and the matching halves of eight small triangle units, forming a broad diagonal shape in every corner.",
+        hint: "One large, uninterrupted triangle across each outer corner unit.",
       },
       {
         id: "accent",

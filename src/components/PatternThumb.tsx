@@ -125,7 +125,7 @@ const PATTERN_ALT: Record<PatternId, string> = {
   "apple-pie":
     "Apple Pie quilt block diagram — a four-fabric six-unit block with a pair of flying geese pointing inward in every corner, four bar rectangles framing the middle and a large plain centre square",
   "album-cross":
-    "Album Cross quilt block diagram — four plain squares form a cross around the centre, framed by four rotated corner four-patches made from a solid square, two half-square triangles and an inner accent square",
+    "Album Cross quilt block diagram — four plain squares form a cross around the centre, framed by four large half-square-triangle corners with accent squares at their inner points",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
