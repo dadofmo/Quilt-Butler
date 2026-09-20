@@ -3068,10 +3068,8 @@ export function ApplePieBlock({
 
 /**
  * Shared renderer for Album Cross — a 6×6-unit block arranged as a 3×3
- * nine-patch of 2u cells. Each corner cell is itself a 2×2 four-patch:
- * one solid outer square, one solid inner accent square, and two HSTs whose
- * outer halves match the outer square. Rotating that corner construction four
- * times creates the broad diagonal corner shapes shown in the source block.
+ * nine-patch of 2u cells. Each corner is one large outer/background HST with
+ * an accent square added to the background half at the point nearest centre.
  */
 export function AlbumCrossBlock({
   size,
@@ -3112,11 +3110,9 @@ export function AlbumCrossBlock({
 
       {[0, 1, 2, 3].map((turns) => (
         <g key={`album-corner-${turns}`}>
-          {/* Top-left source corner: outer square, two matching HST halves,
-              and the accent square nearest the block centre. */}
-          {polygon([[0, 0], [1, 0], [1, 1], [0, 1]], turns, outer, `album-outer-${turns}`)}
-          {polygon([[1, 0], [2, 0], [2, 1]], turns, outer, `album-top-hst-${turns}`)}
-          {polygon([[0, 1], [1, 2], [0, 2]], turns, outer, `album-side-hst-${turns}`)}
+          {/* Top-left source corner: one uninterrupted outer triangle and an
+              accent square on the inner corner of the background half. */}
+          {polygon([[0, 0], [2, 0], [0, 2]], turns, outer, `album-outer-${turns}`)}
           {polygon([[1, 1], [2, 1], [2, 2], [1, 2]], turns, accent, `album-accent-${turns}`)}
         </g>
       ))}
