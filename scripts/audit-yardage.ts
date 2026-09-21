@@ -2287,7 +2287,7 @@ console.log("\n=== Album Cross: 48×60, 12\" block, no sashing ===");
     assignments: { cross: "A", bg: "B", outer: "C", accent: "D" } as Record<string, FabricKey>,
   };
   // 4×5 = 20 blocks. Six-unit draft gives u=2": large cells cut 4.5",
-  // small squares cut 2.5", and HST starts cut 2.875".
+  // accent squares cut 2.5", background triangle starts cut 2.875", and large outer triangle starts cut 4.875".
   const r = calculateYardage(s);
   const A = r.fabrics.find(f => f.fabric === "A")!;
   const B = r.fabrics.find(f => f.fabric === "B")!;
@@ -2297,11 +2297,10 @@ console.log("\n=== Album Cross: 48×60, 12\" block, no sashing ===");
   check("AlbumCross A cross cut", A.pieces[0].w, 4.5);
   check("AlbumCross B centre count", B.pieces.find(p => /Centre/.test(p.label))!.count, 20);
   check("AlbumCross B centre cut", B.pieces.find(p => /Centre/.test(p.label))!.w, 4.5);
-  check("AlbumCross B HST starts", B.pieces.find(p => /HST/.test(p.label))!.count, 80);
-  check("AlbumCross B HST cut", B.pieces.find(p => /HST/.test(p.label))!.w, 2.875);
-  check("AlbumCross C outer count", C.pieces.find(p => /Outer/.test(p.label))!.count, 80);
-  check("AlbumCross C outer cut", C.pieces.find(p => /Outer/.test(p.label))!.w, 2.5);
-  check("AlbumCross C HST starts", C.pieces.find(p => /HST/.test(p.label))!.count, 80);
+  check("AlbumCross B triangle starts", B.pieces.find(p => /triangle/.test(p.label))!.count, 80);
+  check("AlbumCross B triangle cut", B.pieces.find(p => /triangle/.test(p.label))!.w, 2.875);
+  check("AlbumCross C triangle starts", C.pieces.find(p => /triangle/.test(p.label))!.count, 40);
+  check("AlbumCross C triangle cut", C.pieces.find(p => /triangle/.test(p.label))!.w, 4.875);
   check("AlbumCross D accent count", D.pieces[0].count, 80);
   check("AlbumCross D accent cut", D.pieces[0].w, 2.5);
   check("AlbumCross no sashing row", r.fabrics.some(f => f.fabric === "E"), false);
@@ -2320,7 +2319,7 @@ console.log("\n=== Album Cross: 9\" block, odd block count, with sashing ===");
     assignments: { cross: "A", bg: "B", outer: "C", accent: "D", sashing: "E" } as Record<string, FabricKey>,
   };
   // 3×1 = 3 blocks. u=1.5": large squares 3.5", small squares 2",
-  // HST starts 2.375". Two vertical sashes, each 2.5" × 9.5".
+  // background triangle starts 2.375", large outer starts 3.875". Two vertical sashes, each 2.5" × 9.5".
   const r = calculateYardage(s);
   const A = r.fabrics.find(f => f.fabric === "A")!;
   const B = r.fabrics.find(f => f.fabric === "B")!;
@@ -2329,10 +2328,10 @@ console.log("\n=== Album Cross: 9\" block, odd block count, with sashing ===");
   const E = r.fabrics.find(f => f.fabric === "E")!;
   check("AlbumCross(3) A cross count", A.pieces[0].count, 12);
   check("AlbumCross(3) A cross cut", A.pieces[0].w, 3.5);
-  check("AlbumCross(3) B HST starts", B.pieces.find(p => /HST/.test(p.label))!.count, 12);
-  check("AlbumCross(3) B HST cut", B.pieces.find(p => /HST/.test(p.label))!.w, 2.375);
-  check("AlbumCross(3) C outer count", C.pieces.find(p => /Outer/.test(p.label))!.count, 12);
-  check("AlbumCross(3) C outer cut", C.pieces.find(p => /Outer/.test(p.label))!.w, 2);
+  check("AlbumCross(3) B triangle starts", B.pieces.find(p => /triangle/.test(p.label))!.count, 12);
+  check("AlbumCross(3) B triangle cut", B.pieces.find(p => /triangle/.test(p.label))!.w, 2.375);
+  check("AlbumCross(3) C triangle starts", C.pieces.find(p => /triangle/.test(p.label))!.count, 6);
+  check("AlbumCross(3) C triangle cut", C.pieces.find(p => /triangle/.test(p.label))!.w, 3.875);
   check("AlbumCross(3) D accent count", D.pieces[0].count, 12);
   check("AlbumCross(3) D accent cut", D.pieces[0].w, 2);
   check("AlbumCross(sash) E strip count", E.pieces[0].count, 2);
