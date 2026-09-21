@@ -4048,17 +4048,13 @@ export function calculateYardage(s: PlannerState): CalcResult {
       );
     }
   } else if (s.pattern === "album-cross") {
-    // Album Cross — a 3×3 nine-patch whose macro cells finish 2u square,
-    // drafted on a six-unit grid (u = blockSize / 6). Per block:
-    //   • 4 solid 2u cross-arm squares (Fabric A)
-    //   • 1 solid 2u centre square (Fabric B)
-    //   • 4 corner four-patches, each containing one u Fabric C square, one u
-    //     Fabric D square and two u HSTs made from Fabrics B/C
-    // Eight HSTs need four two-at-a-time pairs per block.
+    // Album Cross — a 3×3 nine-patch drafted on a six-unit grid. Each corner
+    // has one large C triangle and a B/B/D pieced half at the inner point.
     const u = s.blockSize / 6;
     const largeCut = 2 * u + SEAM;
     const smallCut = u + SEAM;
-    const hstCut = u + HST_EXTRA;
+    const smallTriangleCut = u + HST_EXTRA;
+    const largeTriangleCut = 2 * u + HST_EXTRA;
 
     const crossFab = (s.assignments["cross"] ?? "A") as FabricKey;
     const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
@@ -4067,34 +4063,33 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
     const crossSquares = 4 * blockCount;
     const centreSquares = blockCount;
-    const outerSquares = 4 * blockCount;
     const accentSquares = 4 * blockCount;
-    const hstStartsPerFabric = 4 * blockCount;
+    const bgTriangleStarts = 4 * blockCount;
+    const outerTriangleStarts = 2 * blockCount;
 
     addSquares(reqs[crossFab], "Cross-arm squares", crossSquares, largeCut, s.fabricWidth);
     addSquares(reqs[bgFab], "Centre squares", centreSquares, largeCut, s.fabricWidth);
-    addSquares(reqs[bgFab], "Corner HST starting squares", hstStartsPerFabric, hstCut, s.fabricWidth);
-    addSquares(reqs[outerFab], "Outer corner squares", outerSquares, smallCut, s.fabricWidth);
-    addSquares(reqs[outerFab], "Corner HST starting squares", hstStartsPerFabric, hstCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Background triangle starting squares — cut each once diagonally", bgTriangleStarts, smallTriangleCut, s.fabricWidth);
+    addSquares(reqs[outerFab], "Large outer triangle starting squares — cut each once diagonally", outerTriangleStarts, largeTriangleCut, s.fabricWidth);
     addSquares(reqs[accentFab], "Inner accent squares", accentSquares, smallCut, s.fabricWidth);
 
     notes.push(
-      `Each Album Cross block is a nine-patch drafted on a six-unit grid. One small unit finishes at ${u.toFixed(2)}\"; each of the nine large sections finishes ${(2 * u).toFixed(2)}\" square. The four edge squares and centre are plain. Each corner is a small four-patch made from one outer square, one inner accent square and two half-square-triangle units.`,
+      `Each Album Cross block is a nine-patch drafted on a six-unit grid. One small unit finishes at ${u.toFixed(2)}"; each of the nine large sections finishes ${(2 * u).toFixed(2)}" square. The four edge squares and centre are plain. Each corner has one uninterrupted large outer triangle; its background half is pieced from two small triangles around one inner accent square.`,
     );
     notes.push(
-      `Cutting for all ${blockCount} blocks (sizes include the 1/4\" seam allowance): Fabric ${crossFab} — ${crossSquares} cross-arm squares at ${largeCut.toFixed(2)}\". Fabric ${bgFab} — ${centreSquares} centre squares at ${largeCut.toFixed(2)}\" plus ${hstStartsPerFabric} HST starting squares at ${hstCut.toFixed(3)}\". Fabric ${outerFab} — ${outerSquares} plain corner squares at ${smallCut.toFixed(2)}\" plus ${hstStartsPerFabric} HST starting squares at ${hstCut.toFixed(3)}\". Fabric ${accentFab} — ${accentSquares} inner accent squares at ${smallCut.toFixed(2)}\".`,
+      `Cutting for all ${blockCount} blocks (sizes include the 1/4" seam allowance): Fabric ${crossFab} — ${crossSquares} cross-arm squares at ${largeCut.toFixed(2)}". Fabric ${bgFab} — ${centreSquares} centre squares at ${largeCut.toFixed(2)}" plus ${bgTriangleStarts} squares at ${smallTriangleCut.toFixed(3)}", then cut each once diagonally to make ${2 * bgTriangleStarts} small background triangles. Fabric ${outerFab} — ${outerTriangleStarts} squares at ${largeTriangleCut.toFixed(3)}", then cut each once diagonally to make ${2 * outerTriangleStarts} large outer triangles. Fabric ${accentFab} — ${accentSquares} inner accent squares at ${smallCut.toFixed(2)}".`,
     );
     notes.push(
-      `Half-square triangles — make ${8 * blockCount}. Pair each ${hstCut.toFixed(3)}\" Fabric ${bgFab} square with a matching Fabric ${outerFab} square, right sides together. Draw one diagonal line, sew a scant 1/4\" on BOTH sides, cut apart ON the line, press toward Fabric ${outerFab}, and trim each unit to ${smallCut.toFixed(2)}\" square. Each pair makes 2 units; use 8 units in every block.`,
+      `Background halves — for each corner, sew one small Fabric ${bgFab} triangle to the TOP edge of a ${smallCut.toFixed(2)}" Fabric ${accentFab} square and one to its OUTER edge. Press toward Fabric ${bgFab}. The three pieces form the background half of the corner unit, with the Fabric ${accentFab} square at the point nearest the block centre.`,
     );
     notes.push(
-      `Corner four-patches — make ${4 * blockCount}. For each one, lay out a 2×2 grid: the plain Fabric ${outerFab} square goes at the OUTER corner and the Fabric ${accentFab} square goes diagonally opposite at the INNER corner. Put one HST in each remaining position, turning both so their Fabric ${outerFab} triangles join the outer square and form one broad diagonal corner shape. Sew the two rows, press their seams in opposite directions, then join and trim to ${largeCut.toFixed(2)}\" square.`,
+      `Complete the ${4 * blockCount} corner units by sewing one large Fabric ${outerFab} triangle to the long diagonal edge of each pieced background half. Press toward Fabric ${outerFab}, then trim each corner unit to ${largeCut.toFixed(2)}" square. The Fabric ${outerFab} triangle must remain one continuous piece.`,
     );
     notes.push(
-      `Assemble each block in 3 rows. Row 1: corner unit with its Fabric ${accentFab} square at bottom-right · Fabric ${crossFab} cross square · corner unit with its accent at bottom-left. Row 2: Fabric ${crossFab} cross square · Fabric ${bgFab} centre square · Fabric ${crossFab} cross square. Row 3: corner unit with its accent at top-right · Fabric ${crossFab} cross square · corner unit with its accent at top-left. Press rows 1 and 3 toward the corners and row 2 toward the centre so the seams nest, then join the rows. Finished block: ${s.blockSize}\".`,
+      `Assemble each block in 3 rows. Row 1: corner unit with its Fabric ${accentFab} square at bottom-right · Fabric ${crossFab} cross square · corner unit with its accent at bottom-left. Row 2: Fabric ${crossFab} cross square · Fabric ${bgFab} centre square · Fabric ${crossFab} cross square. Row 3: corner unit with its accent at top-right · Fabric ${crossFab} cross square · corner unit with its accent at top-left. Press rows 1 and 3 toward the corners and row 2 toward the centre so the seams nest, then join the rows. Finished block: ${s.blockSize}".`,
     );
     notes.push(
-      `Album Cross tips: (1) Make one complete corner unit first and compare it with the block picture before chain-piecing the rest. (2) The two HSTs in every corner must mirror one another; their Fabric ${outerFab} halves touch the plain outer square. (3) Keep all four Fabric ${accentFab} squares facing the centre when you lay out the block. (4) Trim every HST and corner four-patch before assembly so the nine-patch seams meet cleanly.`,
+      `Album Cross tips: (1) Make one complete corner unit first and compare it with the block picture before chain-piecing the rest. (2) Each Fabric ${outerFab} area must remain one continuous large triangle—do not divide it into smaller pieces. (3) Keep all four Fabric ${accentFab} squares facing the centre when you lay out the block. (4) Trim every corner unit before assembly so the nine-patch seams meet cleanly.`,
     );
 
     if (sashWidth > 0) {
