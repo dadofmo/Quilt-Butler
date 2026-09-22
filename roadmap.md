@@ -6,3 +6,6 @@
 - [x] Verify math, tests, build, and the live planner.
 - [x] Correct Album Cross corner architecture to match the supplied construction image.
 - [x] Reverify its cutting math, instructions, previews, and results.
+- [ ] Add Double Pinwheel to every planner view using the supplied 4×4 HST layout.
+- [ ] Add exact two-fabric cutting math and beginner-friendly sewing instructions.
+- [ ] Add hand-calculated audit coverage and verify the live planner.
