@@ -14,6 +14,7 @@ export const PATTERN_DIFFICULTY: Record<PatternId, 1 | 2 | 3 | 4 | 5> = {
   hst: 3,
   "flying-geese": 3,
   pinwheel: 3,
+  "double-pinwheel": 3,
   "disappearing-nine-patch": 4,
   "ohio-star": 4,
   "log-cabin": 5,

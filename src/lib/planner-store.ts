@@ -33,6 +33,7 @@ export type PatternId =
   | "squares-on-point"
   | "plus-block"
   | "pinwheel"
+  | "double-pinwheel"
   | "churn-dash"
   | "bear-paw"
   | "irish-chain"

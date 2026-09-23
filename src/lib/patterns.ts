@@ -290,6 +290,34 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "double-pinwheel",
+    name: "Double Pinwheel",
+    hasMath: true,
+    intro:
+      "Double Pinwheel is made from 16 Half Square Triangle units arranged in a 4×4 grid. The carefully turned triangles create a small pinwheel at the centre and a second, larger turning design around it. Choose two fabrics with a clear contrast so both spinning shapes are easy to see. Optional sashing can separate the finished blocks.",
+    sections: [
+      {
+        id: "pinwheel",
+        label: "Pinwheel fabric (Fabric A)",
+        defaultFabric: "A",
+        hint: "The coloured half of every triangle unit. A medium or dark fabric makes both pinwheels easy to see.",
+      },
+      {
+        id: "bg",
+        label: "Background fabric (Fabric B)",
+        defaultFabric: "B",
+        hint: "The other half of every triangle unit. Choose a fabric with strong contrast against the pinwheel fabric.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "C",
+        hint: "Optional strips between Double Pinwheel blocks — set sashing to 0\" on the previous step if you don't want any.",
+      },
+      borderSection,
+    ],
+  },
+  {
     id: "plus-block",
     name: "Plus Block",
     hasMath: true,
@@ -1869,6 +1897,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "disappearing-nine-patch": { skill: "confident", fabricCount: 2, techniques: ["squares", "strips"] },
   "squares-on-point": { skill: "confident", fabricCount: 2, techniques: ["onpoint", "flip"] },
   "pinwheel": { skill: "beginner", fabricCount: 2, techniques: ["hst"] },
+  "double-pinwheel": { skill: "confident", fabricCount: 2, techniques: ["hst"] },
   "plus-block": { skill: "beginner", fabricCount: 2, techniques: ["squares"] },
   "churn-dash": { skill: "confident", fabricCount: 2, techniques: ["hst", "squares"] },
   "bear-paw": { skill: "intermediate", fabricCount: 4, techniques: ["hst", "squares"] },
