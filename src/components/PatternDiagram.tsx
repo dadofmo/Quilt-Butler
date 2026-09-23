@@ -1216,6 +1216,11 @@ function renderInner(
       const accent = get("accent", "D");
       return <AlbumCrossBlock size={200} cross={cross} bg={bg} outer={outer} accent={accent} />;
     }
+    case "double-pinwheel": {
+      const pinwheel = get("pinwheel", "A");
+      const bg = get("bg", "B");
+      return <DoublePinwheelBlock size={200} pinwheel={pinwheel} bg={bg} />;
+    }
 
 
 
@@ -2672,6 +2677,50 @@ export function TippecanoeBlock({
             </g>
           );
         }),
+      )}
+    </>
+  );
+}
+
+/**
+ * Double Pinwheel — the exact 4×4 HST orientation map from the reference.
+ * Each entry names the corner occupied by the pinwheel fabric. Keeping this
+ * renderer shared prevents the picker, block view and quilt view from drifting.
+ */
+export function DoublePinwheelBlock({
+  size,
+  pinwheel,
+  bg,
+}: {
+  size: number;
+  pinwheel: string;
+  bg: string;
+}) {
+  type Corner = "NW" | "NE" | "SE" | "SW";
+  const corners: Corner[][] = [
+    ["NE", "NE", "SE", "SE"],
+    ["NE", "SW", "NW", "SE"],
+    ["NW", "SE", "NE", "SW"],
+    ["NW", "NW", "SW", "SW"],
+  ];
+  const u = size / 4;
+  const pointsFor = (corner: Corner, x: number, y: number) => {
+    if (corner === "NW") return `${x},${y} ${x + u},${y} ${x},${y + u}`;
+    if (corner === "NE") return `${x},${y} ${x + u},${y} ${x + u},${y + u}`;
+    if (corner === "SE") return `${x + u},${y} ${x + u},${y + u} ${x},${y + u}`;
+    return `${x},${y} ${x},${y + u} ${x + u},${y + u}`;
+  };
+  return (
+    <>
+      <rect x={0} y={0} width={size} height={size} fill={bg} />
+      {corners.flatMap((row, r) =>
+        row.map((corner, c) => (
+          <polygon
+            key={`double-pinwheel-${r}-${c}`}
+            points={pointsFor(corner, c * u, r * u)}
+            fill={pinwheel}
+          />
+        )),
       )}
     </>
   );

@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock } from "./PatternDiagram";
 
 
 interface Props {
@@ -42,6 +42,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Plus Block quilt block diagram showing cross shaped block layout",
   pinwheel:
     "Pinwheel quilt block diagram showing four half square triangle units arranged with blades spinning clockwise around the center",
+  "double-pinwheel":
+    "Double Pinwheel quilt block diagram showing sixteen half square triangle units forming a small centre pinwheel and a larger turning design",
   "churn-dash":
     "Churn Dash quilt block diagram showing 3x3 layout with four corner half square triangles, four side rectangular bar units, and a solid center square",
   "bear-paw":
@@ -1032,6 +1034,13 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return (
         <svg {...common}>
           <AlbumCrossBlock size={90} cross={C.a} bg={C.b} outer={C.c} accent={C.d} />
+        </svg>
+      );
+    }
+    case "double-pinwheel": {
+      return (
+        <svg {...common}>
+          <DoublePinwheelBlock size={90} pinwheel={C.a} bg={C.b} />
         </svg>
       );
     }
