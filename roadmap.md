@@ -8,4 +8,4 @@
 - [x] Reverify its cutting math, instructions, previews, and results.
 - [x] Add Double Pinwheel to every planner view using the supplied 4×4 HST layout.
 - [x] Add exact two-fabric cutting math and beginner-friendly sewing instructions.
-- [ ] Add hand-calculated audit coverage and verify the live planner.
+- [x] Add hand-calculated audit coverage and verify the live planner.
