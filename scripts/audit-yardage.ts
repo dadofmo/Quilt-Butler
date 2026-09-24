@@ -453,6 +453,41 @@ console.log("\n=== Pinwheel: 50×65, 12\" block, no border, 2\" sashing ===");
 }
 
 // =========================================================================
+// DOUBLE PINWHEEL
+// =========================================================================
+console.log("\n=== Double Pinwheel: 48×60, 12\" block, no sashing ===");
+{
+  const s = { ...base(), pattern: "double-pinwheel" as const, quiltWidth: 48, quiltHeight: 60, blockSize: 12, borderWidth: 0, sashingWidth: 0 };
+  // 4×5 = 20 blocks. 16 HSTs/block = 320 HSTs. Two-at-a-time means
+  // 160 starting squares per fabric. Unit finishes 3", so cut size is 3.875".
+  // floor(42.5/3.875)=10 per strip; 160 squares need 16 strips = 62".
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const b = r.fabrics.find(f => f.fabric === "B")!;
+  check("DoublePW A starting squares", a.pieces[0].count, 160);
+  check("DoublePW A cut size", a.pieces[0].w, 3.875);
+  check("DoublePW A strips", a.strips[0].count, 16);
+  check("DoublePW A inches", a.totalInches, 62);
+  check("DoublePW B mirrors A", b.totalInches, 62);
+  check("DoublePW basics glossary attached", r.basics?.length ?? 0, 5);
+}
+
+console.log("\n=== Double Pinwheel: 27×9, 9\" block, 2\" sashing ===");
+{
+  const s = { ...base(), pattern: "double-pinwheel" as const, quiltWidth: 27, quiltHeight: 9, blockSize: 9, borderWidth: 0, sashingWidth: 2 };
+  // 3×1 = 3 blocks. 24 starting squares per fabric at 3.125".
+  // Two vertical sashes at 2.5" × 9.5".
+  const r = calculateYardage(s);
+  const a = r.fabrics.find(f => f.fabric === "A")!;
+  const c = r.fabrics.find(f => f.fabric === "C")!;
+  check("DoublePW(3) A starting squares", a.pieces[0].count, 24);
+  check("DoublePW(3) A cut size", a.pieces[0].w, 3.125);
+  check("DoublePW(sash) C count", c.pieces[0].count, 2);
+  check("DoublePW(sash) C width", c.pieces[0].h, 2.5);
+  check("DoublePW(sash) C length", c.pieces[0].w, 9.5);
+}
+
+// =========================================================================
 // DISAPPEARING NINE PATCH
 // =========================================================================
 console.log("\n=== Disappearing Nine Patch: 50×65, 12\" finished block, no border ===");

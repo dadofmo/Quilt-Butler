@@ -169,6 +169,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isD9P = s.pattern === "disappearing-nine-patch";
   const isSquaresOnPoint = s.pattern === "squares-on-point";
   const isPinwheel = s.pattern === "pinwheel";
+  const isDoublePinwheel = s.pattern === "double-pinwheel";
   const isPlusBlock = s.pattern === "plus-block";
   const isChurnDash = s.pattern === "churn-dash";
   const isSawtoothStar = s.pattern === "sawtooth-star";
@@ -212,7 +213,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isCustomBlock = s.pattern === "custom-block";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isCustomBlock || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isCustomBlock || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -441,6 +442,39 @@ export function calculateYardage(s: PlannerState): CalcResult {
       );
       notes.push(
         `Pinwheel Assembly Tip — full quilt: STAGE 1 (block). Make all ${blockCount} pinwheel blocks following the HST steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid, all rotated so the blades spin the same direction (clockwise). Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the blocks without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+      );
+    }
+  } else if (s.pattern === "double-pinwheel") {
+    // Double Pinwheel = 4×4 grid of 16 equal HSTs. Two-at-a-time HST
+    // construction needs 8 matched square pairs per block.
+    const unitFinished = s.blockSize / 4;
+    const cut = unitFinished + HST_EXTRA;
+    const hstUnits = blockCount * 16;
+    const squaresEach = blockCount * 8;
+    const pinwheel = (s.assignments["pinwheel"] ?? "A") as FabricKey;
+    const bg = (s.assignments["bg"] ?? "B") as FabricKey;
+    addSquares(reqs[pinwheel], "Pinwheel HST starting squares", squaresEach, cut, s.fabricWidth);
+    addSquares(reqs[bg], "Background HST starting squares", squaresEach, cut, s.fabricWidth);
+    notes.push(
+      `Each Double Pinwheel block contains 16 Half Square Triangle units in a 4 × 4 grid. Across all ${blockCount} blocks you will make ${hstUnits} HST units.`,
+      `Cut ${squaresEach} squares of Fabric ${pinwheel} (pinwheel) and ${squaresEach} squares of Fabric ${bg} (background), all ${cut.toFixed(3)}\" × ${cut.toFixed(3)}\". Each unit finishes at ${unitFinished.toFixed(3)}\"; the extra 7/8\" allows for the diagonal seams.`,
+      `Make the HSTs two at a time: pair one Fabric ${pinwheel} square with one Fabric ${bg} square, right sides together. Draw one diagonal line, sew 1/4\" on both sides of it, then cut on the drawn line. Open and press toward the darker fabric. Each pair makes 2 HSTs.`,
+      `Trim every HST to ${(unitFinished + SEAM).toFixed(3)}\" square. Make sure the diagonal runs exactly from corner to corner before assembling the block.`,
+      `Lay out 16 HSTs in four rows before sewing. Using the Fabric ${pinwheel} triangle as the pointer, place its right-angle corner as follows: Row 1 — top right, top right, bottom right, bottom right. Row 2 — top right, bottom left, top left, bottom right. Row 3 — top left, bottom right, top right, bottom left. Row 4 — top left, top left, bottom left, bottom left.`,
+      `Sew four HSTs into each row. Press the seams in Rows 1 and 3 to the right and Rows 2 and 4 to the left so the seams nest. Join the four rows, pinning at every intersection so the centre pinwheel and the larger surrounding pinwheel stay sharp. Press the row seams open, then square the block to ${(s.blockSize + SEAM).toFixed(2)}\" unfinished.`,
+    );
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}\" × ${sashCutL.toFixed(2)}\" from Fabric ${sashFab} — ${vSash} vertical and ${hSash} horizontal. Sew strips only between blocks, then add the optional outer border last.`,
       );
     }
   } else if (s.pattern === "rail-fence") {
@@ -4460,6 +4494,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "disappearing-nine-patch" ||
     s.pattern === "squares-on-point" ||
     s.pattern === "pinwheel" ||
+    s.pattern === "double-pinwheel" ||
     s.pattern === "plus-block" ||
     s.pattern === "churn-dash" ||
     s.pattern === "bear-paw" ||
