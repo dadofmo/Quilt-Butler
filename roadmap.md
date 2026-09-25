@@ -11,4 +11,4 @@
 - [x] Add hand-calculated audit coverage and verify the live planner.
 - [x] Restore Streak of Lightning's same-direction zigzag layout.
 - [x] Prevent saved rotation choices from changing patterns that do not offer them.
-- [ ] Verify rotation safeguards and the live Streak of Lightning preview.
+- [x] Verify rotation safeguards and the live Streak of Lightning preview.
