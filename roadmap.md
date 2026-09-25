@@ -9,3 +9,6 @@
 - [x] Add Double Pinwheel to every planner view using the supplied 4×4 HST layout.
 - [x] Add exact two-fabric cutting math and beginner-friendly sewing instructions.
 - [x] Add hand-calculated audit coverage and verify the live planner.
+- [x] Restore Streak of Lightning's same-direction zigzag layout.
+- [x] Prevent saved rotation choices from changing patterns that do not offer them.
+- [ ] Verify rotation safeguards and the live Streak of Lightning preview.
