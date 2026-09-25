@@ -1,4 +1,5 @@
 import type { BlockLayout, PatternId } from "./planner-store";
+import { getPattern } from "./patterns";
 
 /**
  * Block-setting (layout) helpers.
@@ -57,6 +58,20 @@ export function rotationFor(
   blocksDown = 1,
 ): number {
   if (hasIntrinsicRotation(pattern)) return (row + col) % 2 === 1 ? 90 : 0;
+
+  // blockLayout is shared planner state, so a choice made for one pattern can
+  // still be present after the user chooses another. Never apply that stale
+  // choice unless the current pattern explicitly offers it. Custom blocks are
+  // the exception because their valid layouts depend on the user's design and
+  // are determined dynamically rather than declared in patterns.ts.
+  if (
+    layout !== "straight" &&
+    pattern !== "custom-block" &&
+    !getPattern(pattern)?.layouts?.includes(layout)
+  ) {
+    return 0;
+  }
+
   switch (layout) {
     case "alternating":
       return (row + col) % 2 === 1 ? 90 : 0;
