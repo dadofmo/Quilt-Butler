@@ -67,7 +67,7 @@ export function rotationFor(
   if (
     layout !== "straight" &&
     pattern !== "custom-block" &&
-    !getPattern(pattern).layouts?.includes(layout)
+    !getPattern(pattern)?.layouts?.includes(layout)
   ) {
     return 0;
   }
