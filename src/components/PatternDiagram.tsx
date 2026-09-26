@@ -48,7 +48,7 @@ export function PatternDiagram({ pattern, assignments, hasBorder, size = 280, ph
       style={{
         ...(hasBorder
           ? fabricTileBackgroundStyle(borderKey, borderTilePx, photos)
-          : { backgroundColor: "transparent", backgroundImage: "none" }),
+          : { background: "transparent" }),
         width: size,
         height: size,
       }}
