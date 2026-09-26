@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { PatternId, SectionAssignments, FabricKey, BlockLayout } from "@/lib/planner-store";
 import { rotationFor } from "@/lib/block-layouts";
 import { FABRIC_COLORS } from "@/lib/planner-store";
-import { fabricFill } from "@/lib/fabric-fill";
+import { fabricFill, fabricTileBackgroundStyle } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
 import {
   Dialog,
@@ -327,33 +327,19 @@ export function QuiltCanvas({
   const sashingFill = fabricFill(sashingFabric, photos);
   const cornerFill = cornerstoneFabric ? fabricFill(cornerstoneFabric, photos) : null;
 
-  const borderPhoto = hasBorder ? photos?.[borderFabric] : undefined;
-  const borderColor = hasBorder ? FABRIC_COLORS[borderFabric] : "transparent";
+  const borderTilePx = Math.max(8, Math.round(cellW * 0.4));
 
   return (
     <div
       className="rounded-md shadow-sm overflow-hidden"
+      data-testid="quilt-border-frame"
       style={{
         width: thumbW,
         height: thumbH,
-        background: borderColor,
         padding: `${borderPxY}px ${borderPxX}px`,
-        ...(borderPhoto
-          ? {
-              backgroundImage: `url(${borderPhoto})`,
-              // Tile the fabric photo at the SAME visual scale as inside
-              // the blocks (FabricPatternDefs uses ~80 units per 200-unit
-              // block = 40% of a block). Using "cover" stretched the whole
-              // photo across the border rectangle, making prints look
-              // gigantic. Repeat + fixed tile matches a real bolt.
-              // Keep the floor low (8px): on phone-sized quilt previews
-              // cellW*0.4 is only ~5-12px, and a 24px floor made border
-              // prints render 2-4x larger than the same fabric in blocks.
-              backgroundSize: `${Math.max(8, Math.round(cellW * 0.4))}px ${Math.max(8, Math.round(cellW * 0.4))}px`,
-              backgroundRepeat: "repeat",
-              backgroundPosition: "top left",
-            }
-          : {}),
+        ...(hasBorder
+          ? fabricTileBackgroundStyle(borderFabric, borderTilePx, photos)
+          : { backgroundColor: "transparent", backgroundImage: "none" }),
       }}
     >
       <svg

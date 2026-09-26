@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import type { FabricKey, PatternId, SectionAssignments } from "@/lib/planner-store";
-import { fabricFill } from "@/lib/fabric-fill";
+import { fabricFill, fabricTileBackgroundStyle } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
@@ -40,27 +40,17 @@ export function PatternDiagram({ pattern, assignments, hasBorder, size = 280, ph
   const def = getPattern(pattern);
   const borderDefault = (def?.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey;
   const borderKey = (assignments["border"] ?? borderDefault) as FabricKey;
-  const borderHasPhoto = hasBorder && !!photos?.[borderKey];
-  const borderColor = hasBorder
-    ? borderHasPhoto
-      ? "transparent"
-      : fabricFill(borderKey, photos)
-    : "transparent";
+  const borderTilePx = Math.max(8, Math.round(size * 0.4));
 
   return (
     <div
       className="relative inline-block rounded-lg p-5 overflow-hidden"
       style={{
-        background: borderColor,
+        ...(hasBorder
+          ? fabricTileBackgroundStyle(borderKey, borderTilePx, photos)
+          : { background: "transparent" }),
         width: size,
         height: size,
-        ...(borderHasPhoto
-          ? {
-              backgroundImage: `url(${photos![borderKey]})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }
-          : {}),
       }}
     >
       <div className="bg-card flex h-full w-full items-center justify-center rounded">

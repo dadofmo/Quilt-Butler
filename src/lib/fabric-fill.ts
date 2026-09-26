@@ -35,3 +35,22 @@ export function fabricBackgroundStyle(
   }
   return { background: FABRIC_COLORS[key] };
 }
+
+/**
+ * Repeat a fabric photo without letting a later colour update reset its size.
+ * Height-only sizing also preserves the proportions of non-square photos.
+ */
+export function fabricTileBackgroundStyle(
+  key: FabricKey,
+  tilePx: number,
+  photos?: Partial<Record<FabricKey, string>>,
+): React.CSSProperties {
+  const url = photos?.[key];
+  return {
+    backgroundColor: FABRIC_COLORS[key],
+    backgroundImage: url ? `url(${url})` : "none",
+    backgroundRepeat: "repeat",
+    backgroundSize: url ? `auto ${tilePx}px` : "auto",
+    backgroundPosition: "0 0",
+  };
+}

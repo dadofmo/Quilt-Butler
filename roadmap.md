@@ -12,3 +12,5 @@
 - [x] Restore Streak of Lightning's same-direction zigzag layout.
 - [x] Prevent saved rotation choices from changing patterns that do not offer them.
 - [x] Verify rotation safeguards and the live Streak of Lightning preview.
+- [x] Keep border fabric photo scale stable after switching fabrics across all patterns and custom blocks.
+- [x] Verify border switching in automated tests and the live phone-sized preview.

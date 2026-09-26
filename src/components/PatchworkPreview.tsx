@@ -4,6 +4,7 @@ import {
   FABRIC_COLORS,
   type FabricKey,
 } from "@/lib/planner-store";
+import { fabricTileBackgroundStyle } from "@/lib/fabric-fill";
 
 /**
  * Fabric tiling for the HTML patchwork preview. Mirrors the behavior of
@@ -15,33 +16,6 @@ import {
  * in dynamically (derived from the measured block pixel size) so the
  * motif scales with the preview instead of overflowing tiny cells.
  */
-function fabricTileStyle(
-  key: FabricKey,
-  tilePx: number,
-  photos?: Partial<Record<FabricKey, string>>,
-): React.CSSProperties {
-  const url = photos?.[key];
-  if (url) {
-    return {
-      backgroundColor: FABRIC_COLORS[key],
-      backgroundImage: `url(${url})`,
-      backgroundRepeat: "repeat",
-      backgroundSize: `${tilePx}px ${tilePx}px`,
-      backgroundPosition: "0 0",
-    };
-  }
-  // Explicitly clear image-related properties so React style diffing
-  // never leaves a stale `background-size: auto` from a previous photo
-  // render on this element (which would show one giant zoomed tile).
-  return {
-    backgroundColor: FABRIC_COLORS[key],
-    backgroundImage: "none",
-    backgroundRepeat: "repeat",
-    backgroundSize: "auto",
-    backgroundPosition: "0 0",
-  };
-}
-
 interface Props {
   /** Number of distinct fabrics to cycle through (2–12). */
   fabricCount: number;
@@ -187,7 +161,7 @@ export function PatchworkPreview({
           aspectRatio: `${outerW} / ${outerH}`,
           padding: showBorder ? `${borderPct}%` : 0,
           ...(showBorder && borderFabric
-            ? fabricTileStyle(borderFabric, tilePx, photos)
+            ? fabricTileBackgroundStyle(borderFabric, tilePx, photos)
             : {}),
         }}
         role="group"
@@ -199,7 +173,7 @@ export function PatchworkPreview({
             gridTemplateColumns: colTracks.join(" "),
             gridTemplateRows: rowTracks.join(" "),
             ...(showSash && sashingFabric
-              ? fabricTileStyle(sashingFabric, tilePx, photos)
+              ? fabricTileBackgroundStyle(sashingFabric, tilePx, photos)
               : {}),
           }}
           role="grid"
@@ -221,7 +195,7 @@ export function PatchworkPreview({
                   style={{
                     gridColumn: `${colTrack} / span 1`,
                     gridRow: `${rowTrack} / span 1`,
-                    ...fabricTileStyle(fab, tilePx, photos),
+                    ...fabricTileBackgroundStyle(fab, tilePx, photos),
                   }}
                 />
               );
