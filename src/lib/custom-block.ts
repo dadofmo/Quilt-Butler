@@ -665,6 +665,22 @@ export function unitTally(design: CustomBlockDesign): UnitTally {
   return tally;
 }
 
+/**
+ * Plain-square map of a design for the grid optimizer: a square unit's
+ * fabric, or null for any other unit (HSTs etc. are never merged).
+ */
+export function plainSquareGrid(design: CustomBlockDesign): (FabricKey | null)[][] {
+  const g: (FabricKey | null)[][] = Array.from({ length: design.size }, () =>
+    Array.from({ length: design.size }, () => null),
+  );
+  for (const [k, cell] of Object.entries(design.cells)) {
+    if (cell.kind !== "square") continue;
+    const [r, c] = parseKey(k);
+    if (r < design.size && c < design.size) g[r][c] = (cell.fabrics[0] ?? "A") as FabricKey;
+  }
+  return g;
+}
+
 /** Sum tallies from several blocks (weighted by how many of each are needed). */
 export function scaleTally(tally: UnitTally, factor: number): UnitTally {
   const scaleRec = (rec: Record<string, number>) => {

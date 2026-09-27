@@ -2730,8 +2730,8 @@ console.log("\n=== Custom block: Block B checkerboard alternation ===");
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
   const c = r.fabrics.find(f => f.fabric === "C")!;
-  check("BlockB A square count", a.pieces[0].count, 128);
-  check("BlockB C square count", c.pieces[0].count, 128);
+  check("BlockB A square count", a.pieces[0].count, 8);  // grid-optimized: one 12.5" square per solid block (37.5" vs 38.5" as 3.5" squares)
+  check("BlockB C square count", c.pieces[0].count, 8);  // grid-optimized: one 12.5" square per solid block (37.5" vs 38.5" as 3.5" squares)
   check("BlockB no fabric B", r.fabrics.find(f => f.fabric === "B") ? 1 : 0, 0);
 }
 
@@ -2752,8 +2752,8 @@ console.log("\n=== Custom block: two-block swap changes both designs ===");
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
   const g = r.fabrics.find(f => f.fabric === "G")!;
-  check("Two-block swap A count", a.pieces.reduce((n, p) => n + p.count, 0), 128);
-  check("Two-block swap G count", g.pieces.reduce((n, p) => n + p.count, 0), 128);
+  check("Two-block swap A count", a.pieces.reduce((n, p) => n + p.count * ((p.w - 0.5) * (p.h - 0.5)) / 9, 0), 128);
+  check("Two-block swap G count", g.pieces.reduce((n, p) => n + p.count * ((p.w - 0.5) * (p.h - 0.5)) / 9, 0), 128);
   check("Two-block swap note covers both designs", r.notes.some(n => n.includes("both designs")) ? 1 : 0, 1);
 }
 
