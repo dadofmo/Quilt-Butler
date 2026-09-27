@@ -4325,6 +4325,24 @@ export function calculateYardage(s: PlannerState): CalcResult {
         else pooledSq.set(key, { ...p, cutW: round2(p.cutW), cutH: round2(p.cutH), count: p.count * n });
       }
     }
+    // Yardage-safe: merging can occasionally pack worse on the bolt (a big
+    // square wastes more of each strip). Per fabric, keep the merged cuts only
+    // if they need no more fabric than cutting every grid square separately.
+    const scratch = () =>
+      ({ fabric: "A", pieces: [], strips: [], totalInches: 0, yards: 0 }) as FabricRequirement;
+    const byFab = new Map<FabricKey, GridPiece[]>();
+    for (const p of pooledSq.values()) byFab.set(p.fabric, [...(byFab.get(p.fabric) ?? []), p]);
+    for (const [fab, list] of byFab) {
+      const cells = list.reduce((n, p) => n + p.count * p.cellsW * p.cellsH, 0);
+      const merged = scratch();
+      addOptimizedGridPieces({ [fab]: merged } as Record<FabricKey, FabricRequirement>, list, 1, s.fabricWidth, () => "");
+      const single = scratch();
+      addSquares(single, "", cells, sqCut, s.fabricWidth);
+      if (merged.totalInches > single.totalInches + 1e-9) {
+        for (const p of list) pooledSq.delete(`${p.fabric}|${p.cellsW}|${p.cellsH}`);
+        pooledSq.set(`${fab}|1|1`, { fabric: fab, cellsW: 1, cellsH: 1, cutW: sqCut, cutH: sqCut, count: cells });
+      }
+    }
     const sqPieces = [...pooledSq.values()].sort((x, y) =>
       x.fabric === y.fabric ? x.cellsW * x.cellsH - y.cellsW * y.cellsH : x.fabric < y.fabric ? -1 : 1,
     );

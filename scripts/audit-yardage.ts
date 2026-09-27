@@ -2730,8 +2730,8 @@ console.log("\n=== Custom block: Block B checkerboard alternation ===");
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
   const c = r.fabrics.find(f => f.fabric === "C")!;
-  check("BlockB A square count", a.pieces[0].count, 128);
-  check("BlockB C square count", c.pieces[0].count, 128);
+  check("BlockB A square count", a.pieces[0].count, 8);  // grid-optimized: one 12.5" square per solid block (37.5" vs 38.5" as 3.5" squares)
+  check("BlockB C square count", c.pieces[0].count, 8);  // grid-optimized: one 12.5" square per solid block (37.5" vs 38.5" as 3.5" squares)
   check("BlockB no fabric B", r.fabrics.find(f => f.fabric === "B") ? 1 : 0, 0);
 }
 
