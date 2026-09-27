@@ -11,6 +11,7 @@ import {
   unitTally,
   type CustomBlockDesign,
 } from "./custom-block";
+import { optimizeGrid, type GridPiece } from "./grid-optimizer";
 
 /** Round an inch measurement to 2dp so cut sizes stay tidy. */
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -1917,51 +1918,55 @@ export function calculateYardage(s: PlannerState): CalcResult {
       );
     }
   } else if (s.pattern === "autumn-tints") {
-    // Autumn Tints: 4×4 grid of 16 equal plain squares per block.
-    //   Per block:
-    //     Fabric A (dominant): 8 squares — two solid 2×2 groups (TL + BR corners)
-    //     Fabric B (background): 4 squares
-    //     Fabric C (accent 1): 2 squares
-    //     Fabric D (accent 2): 2 squares
-    // Every square is (blockSize/4) finished, cut at (blockSize/4 + 0.5)".
-    // Piece pooling by fabric letter — matches four-patch behavior — so
-    // two roles sharing a fabric share one labeled pile.
+    // Autumn Tints: 4×4 grid of plain cells (u = blockSize/4). Layout:
+    //   dom dom bg  a2
+    //   dom dom a1  bg
+    //   bg  a1  dom dom
+    //   a2  bg  dom dom
+    // The grid optimizer merges each solid 2×2 dominant corner into ONE
+    // square cut at (2u + 0.5)", saving internal seams and fabric. If the
+    // user assigns the same fabric to neighbouring roles, it merges those too.
     const u = s.blockSize / 4;
     const cut = u + SEAM;
     const domFab = (s.assignments["dominant"] ?? "A") as FabricKey;
     const bgFab = (s.assignments["background"] ?? "B") as FabricKey;
     const acc1Fab = (s.assignments["accent1"] ?? "C") as FabricKey;
     const acc2Fab = (s.assignments["accent2"] ?? "D") as FabricKey;
-    const perRole: Array<[FabricKey, string, number]> = [
-      [domFab, "dominant", 8],
-      [bgFab, "background", 4],
-      [acc1Fab, "first accent", 2],
-      [acc2Fab, "second accent", 2],
+    const grid: FabricKey[][] = [
+      [domFab, domFab, bgFab, acc2Fab],
+      [domFab, domFab, acc1Fab, bgFab],
+      [bgFab, acc1Fab, domFab, domFab],
+      [acc2Fab, bgFab, domFab, domFab],
     ];
-    const pooled: Partial<Record<FabricKey, { roles: string[]; count: number }>> = {};
-    for (const [fab, role, per] of perRole) {
-      const entry = (pooled[fab] ??= { roles: [], count: 0 });
-      entry.roles.push(role);
-      entry.count += per * blockCount;
+    const gridPieces = optimizeGrid(grid, u);
+    const roleName: Partial<Record<FabricKey, string>> = {};
+    for (const [fab, role] of [
+      [domFab, "dominant"],
+      [bgFab, "background"],
+      [acc1Fab, "first accent"],
+      [acc2Fab, "second accent"],
+    ] as Array<[FabricKey, string]>) {
+      roleName[fab] = roleName[fab] ? `${roleName[fab]} & ${role}` : role;
     }
-    for (const fab of ALL_FABRIC_KEYS) {
-      const entry = pooled[fab];
-      if (!entry || entry.count <= 0) continue;
-      const label = `${entry.roles.join(" & ")} squares`;
-      addSquares(reqs[fab], label.charAt(0).toUpperCase() + label.slice(1), entry.count, cut, s.fabricWidth);
-    }
+    const labelFor = (p: GridPiece) => {
+      const role = roleName[p.fabric] ?? "";
+      const cap = role.charAt(0).toUpperCase() + role.slice(1);
+      if (p.cellsW === 1 && p.cellsH === 1) return `${cap} squares`;
+      if (p.cellsW === p.cellsH) return `${cap} large squares (${p.cellsW}×${p.cellsH} cells)`;
+      return `${cap} rectangles (${p.cellsW}×${p.cellsH} cells)`;
+    };
+    addOptimizedGridPieces(reqs, gridPieces, blockCount, s.fabricWidth, labelFor);
 
     notes.push(
-      `Each block is a 4×4 grid of 16 equal squares — every square finishes at ${u.toFixed(2)}" and is cut at ${cut.toFixed(2)}" × ${cut.toFixed(2)}". No triangles, no diagonals.`,
+      `Each block is a 4×4 grid finishing at ${u.toFixed(2)}" per cell. Small squares are cut at ${cut.toFixed(2)}" × ${cut.toFixed(2)}". Fabric ${domFab}'s two solid 2×2 corners are each cut as ONE large square at ${(2 * u + SEAM).toFixed(2)}" × ${(2 * u + SEAM).toFixed(2)}" — fewer seams and less fabric than four small squares. No triangles, no diagonals.`,
     );
-    const breakdown = perRole.map(
-      ([fab, role, per]) => `${per * blockCount} ${role} squares of Fabric ${fab}`,
-    );
+    const breakdown = gridPieces.map((p) => {
+      const n = p.count * blockCount;
+      return `${n} Fabric ${p.fabric} piece${n === 1 ? "" : "s"} at ${p.cutW.toFixed(2)}" × ${p.cutH.toFixed(2)}"`;
+    });
+    notes.push(`Across all ${blockCount} blocks: ${breakdown.join(", ")}.`);
     notes.push(
-      `Across all ${blockCount} blocks: ${breakdown.join(", ")}. Fabric ${domFab} forms two solid 2×2 corner groups (top-left + bottom-right) in every block.`,
-    );
-    notes.push(
-      `Autumn Tints Assembly Tip: for each block, arrange 16 squares in the 4×4 grid shown in the diagram — Fabric ${domFab} in a solid 2×2 at the top-left and again at the bottom-right, Fabric ${bgFab} in 4 squares, Fabric ${acc1Fab} in 2 squares, and Fabric ${acc2Fab} in 2 squares (see diagram for exact placement — the block has 180° rotational symmetry). Sew each row of 4 squares together with a scant 1/4" seam, pressing seams in alternating directions row by row so they nest. Then join the 4 rows. When laying out the finished quilt, keep every block in the same orientation — the rotational symmetry of the block itself creates the diagonal chain of Fabric ${domFab} corners that runs across the whole quilt.`,
+      `Autumn Tints Assembly Tip: sew the block as two halves. Top half: sew the small squares into a 2×2 four-patch (Fabric ${bgFab}, ${acc2Fab} over ${acc1Fab}, ${bgFab} — see diagram), then sew it to the right side of the large Fabric ${domFab} square. Bottom half: make the mirror four-patch (${bgFab}, ${acc1Fab} over ${acc2Fab}, ${bgFab}) and sew it to the left side of the second large Fabric ${domFab} square. Join the two halves. Press seams toward the large squares so they nest. Keep every block in the same orientation — the block's 180° rotational symmetry creates the diagonal chain of Fabric ${domFab} across the quilt.`,
     );
 
     if (sashWidth > 0) {
@@ -4705,6 +4710,26 @@ function addRails(
     pieces: [{ w: cutLength, h: cutHeight, count }],
   });
   req.totalInches += stripCount * cutHeight;
+}
+
+/**
+ * Route grid-optimizer output (see grid-optimizer.ts) through addSquares /
+ * addRails. `multiplier` is usually the block count. Rectangles are cut with
+ * the long side along the strip so strips stay as narrow as possible.
+ */
+export function addOptimizedGridPieces(
+  reqs: Record<FabricKey, FabricRequirement>,
+  pieces: GridPiece[],
+  multiplier: number,
+  fabricWidth: number,
+  labelFor: (p: GridPiece) => string,
+) {
+  for (const p of pieces) {
+    const count = p.count * multiplier;
+    if (count <= 0) continue;
+    if (p.cellsW === p.cellsH) addSquares(reqs[p.fabric], labelFor(p), count, p.cutW, fabricWidth);
+    else addRails(reqs[p.fabric], labelFor(p), count, p.cutW, p.cutH, fabricWidth);
+  }
 }
 
 // ============================================================================
