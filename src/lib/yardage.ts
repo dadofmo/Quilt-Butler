@@ -9,6 +9,7 @@ import {
   scaleTally,
   swapFabrics,
   unitTally,
+  plainSquareGrid,
   type CustomBlockDesign,
 } from "./custom-block";
 import { optimizeGrid, type GridPiece } from "./grid-optimizer";
@@ -4305,14 +4306,46 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
     }
 
-    // ---- Solid squares -----------------------------------------------------
-    for (const [fab, count] of Object.entries(tally.squares)) {
-      if (count <= 0) continue;
-      const f = fab as FabricKey;
-      addSquares(reqs[f], "Plain squares", count, sqCut, s.fabricWidth);
-      notes.push(
-        `Plain squares: cut ${count} squares of Fabric ${f} at ${sqCut.toFixed(2)}" (finishes ${unit.toFixed(2)}").`,
-      );
+    // ---- Solid squares (grid-optimized) ------------------------------------
+    // Adjacent plain squares of the same fabric are merged into strips or
+    // larger squares (rectangles only) so no needless cross-cuts or seams.
+    const pooledSq = new Map<string, GridPiece>();
+    const variants: Array<[CustomBlockDesign | null, number]> = [
+      [designA, counts.a],
+      [swapOf(designA), counts.aSwap],
+      [designB, counts.b],
+      [designB ? swapOf(designB) : null, counts.bSwap],
+    ];
+    for (const [d, n] of variants) {
+      if (!d || n <= 0) continue;
+      for (const p of optimizeGrid(plainSquareGrid(d), unit)) {
+        const key = `${p.fabric}|${p.cellsW}|${p.cellsH}`;
+        const ex = pooledSq.get(key);
+        if (ex) ex.count += p.count * n;
+        else pooledSq.set(key, { ...p, cutW: round2(p.cutW), cutH: round2(p.cutH), count: p.count * n });
+      }
+    }
+    const sqPieces = [...pooledSq.values()].sort((x, y) =>
+      x.fabric === y.fabric ? x.cellsW * x.cellsH - y.cellsW * y.cellsH : x.fabric < y.fabric ? -1 : 1,
+    );
+    addOptimizedGridPieces(reqs, sqPieces, 1, s.fabricWidth, (p) =>
+      p.cellsW === 1 && p.cellsH === 1
+        ? "Plain squares"
+        : p.cellsW === p.cellsH
+          ? `Large plain squares (${p.cellsW}×${p.cellsH} grid squares)`
+          : `Plain strips (${p.cellsW}×${p.cellsH} grid squares)`,
+    );
+    for (const p of sqPieces) {
+      if (p.cellsW === 1 && p.cellsH === 1) {
+        notes.push(
+          `Plain squares: cut ${p.count} squares of Fabric ${p.fabric} at ${sqCut.toFixed(2)}" (finishes ${unit.toFixed(2)}").`,
+        );
+      } else {
+        const shape = p.cellsW === p.cellsH ? "large squares" : "strips";
+        notes.push(
+          `Merged plain ${shape}: cut ${p.count} ${shape} of Fabric ${p.fabric} at ${p.cutW.toFixed(2)}" × ${p.cutH.toFixed(2)}" — each replaces a ${p.cellsW}×${p.cellsH} patch of matching grid squares in your design, so there are no seams to sew inside it.`,
+        );
+      }
     }
 
     // ---- Half-square triangles (2-at-a-time) -------------------------------
