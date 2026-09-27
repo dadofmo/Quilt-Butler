@@ -1334,13 +1334,14 @@ console.log("\n=== Autumn Tints: 50×65, 12\" block, no border, no sashing ===")
     sashingWidth: 0,
   };
   // 4×5 = 20 blocks. u = 3, cut = 3.5. Per strip floor(42.5/3.5) = 12.
-  // A: 8*20=160 squares → strips=ceil(160/12)=14 → inches=14*3.5=49.
+  // A (grid-optimized): two 2×2 corners per block → 2*20=40 large squares
+  //   cut 2*3+0.5=6.5". perStrip floor(42.5/6.5)=6 → strips=7 → inches=45.5.
   // B: 4*20=80  squares → strips=ceil(80/12)=7   → inches=7*3.5=24.5.
   // C: 2*20=40  squares → strips=ceil(40/12)=4   → inches=4*3.5=14.
   // D: 2*20=40  squares → strips=ceil(40/12)=4   → inches=4*3.5=14.
   const r = calculateYardage(s);
   const expect: Record<string, [number, number, number]> = {
-    A: [160, 14, 49],
+    A: [40, 7, 45.5],
     B: [80, 7, 24.5],
     C: [40, 4, 14],
     D: [40, 4, 14],
@@ -1349,7 +1350,7 @@ console.log("\n=== Autumn Tints: 50×65, 12\" block, no border, no sashing ===")
     const f = r.fabrics.find((x) => x.fabric === fab)!;
     const [count, strips, inches] = expect[fab];
     check(`AT ${fab} count`, f.pieces[0].count, count);
-    check(`AT ${fab} cut`, f.pieces[0].w, 3.5);
+    check(`AT ${fab} cut`, f.pieces[0].w, fab === "A" ? 6.5 : 3.5);
     check(`AT ${fab} strips`, f.strips[0].count, strips);
     check(`AT ${fab} inches`, f.totalInches, inches);
   }
