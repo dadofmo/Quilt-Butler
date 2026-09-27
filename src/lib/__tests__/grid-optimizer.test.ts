@@ -46,3 +46,48 @@ describe("Autumn Tints uses optimized cuts", () => {
     expect(a.pieces[0].count).toBe(40);
   });
 });
+
+describe("Custom blocks use optimized plain-square cuts", () => {
+  const sq = (f: FabricKey) => ({ kind: "square" as const, rotation: 0 as const, fabrics: [f] });
+  const hst = (a: FabricKey, b: FabricKey) => ({ kind: "hst" as const, rotation: 0 as const, fabrics: [a, b] });
+  const run = (cells: Record<string, unknown>, size = 2) =>
+    calculateYardage({
+      pattern: "custom-block", quiltWidth: 48, quiltHeight: 48, sizePreset: "custom",
+      fabricWidth: 42, blockSize: 12, borderWidth: 0, sashingWidth: 0,
+      assignments: {}, safetyBuffer: false, customBlock: { size, cells },
+      customBlockB: null, useBlockB: false, alternateBlocks: false, customSwapPair: null,
+      blockLayout: "straight",
+    } as never);
+
+  it("merges a solid 2×2 block into one large square per block", () => {
+    const r = run({ "0,0": sq("A"), "0,1": sq("A"), "1,0": sq("A"), "1,1": sq("A") });
+    const a = r.fabrics.find((f) => f.fabric === "A")!;
+    expect(a.pieces).toHaveLength(1);
+    expect(a.pieces[0].w).toBe(12.5);
+    expect(a.pieces[0].count).toBe(16); // 4×4 blocks
+    // 16 at 12.5": 3 per strip → 6 strips → 75" (vs 64 small 6.5" squares → 11 strips → 71.5"? compare seams)
+    expect(a.totalInches).toBe(75);
+  });
+
+  it("merges a row into a strip and leaves HSTs as units", () => {
+    // 3×3 block, u=4: top row A A A → one 12.5"×4.5" strip; rest HSTs/B squares.
+    const r = run(
+      {
+        "0,0": sq("A"), "0,1": sq("A"), "0,2": sq("A"),
+        "1,0": hst("A", "B"), "1,1": sq("B"), "1,2": hst("A", "B"),
+        "2,0": sq("C"), "2,1": sq("B"), "2,2": sq("C"),
+      },
+      3,
+    );
+    const a = r.fabrics.find((f) => f.fabric === "A")!;
+    const strip = a.pieces.find((p) => p.w === 12.5 && p.h === 4.5)!;
+    expect(strip.count).toBe(16);
+    expect(a.pieces.some((p) => p.label.includes("HST"))).toBe(true);
+    const b = r.fabrics.find((f) => f.fabric === "B")!;
+    const bStrip = b.pieces.find((p) => p.label.startsWith("Plain strips"))!;
+    expect([bStrip.w, bStrip.h]).toEqual([8.5, 4.5]); // vertical 2-cell B strip
+    const c = r.fabrics.find((f) => f.fabric === "C")!;
+    expect(c.pieces[0].w).toBe(4.5); // non-adjacent C squares stay separate
+    expect(c.pieces[0].count).toBe(32);
+  });
+});
