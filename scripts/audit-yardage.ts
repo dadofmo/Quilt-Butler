@@ -2752,8 +2752,8 @@ console.log("\n=== Custom block: two-block swap changes both designs ===");
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
   const g = r.fabrics.find(f => f.fabric === "G")!;
-  check("Two-block swap A count", a.pieces.reduce((n, p) => n + p.count, 0), 128);
-  check("Two-block swap G count", g.pieces.reduce((n, p) => n + p.count, 0), 128);
+  check("Two-block swap A count", a.pieces.reduce((n, p) => n + p.count * ((p.w - 0.5) * (p.h - 0.5)) / 9, 0), 128);
+  check("Two-block swap G count", g.pieces.reduce((n, p) => n + p.count * ((p.w - 0.5) * (p.h - 0.5)) / 9, 0), 128);
   check("Two-block swap note covers both designs", r.notes.some(n => n.includes("both designs")) ? 1 : 0, 1);
 }
 

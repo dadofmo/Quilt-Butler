@@ -62,10 +62,22 @@ describe("Custom blocks use optimized plain-square cuts", () => {
   it("merges a solid 2×2 block into one large square per block", () => {
     const r = run({ "0,0": sq("A"), "0,1": sq("A"), "1,0": sq("A"), "1,1": sq("A") });
     const a = r.fabrics.find((f) => f.fabric === "A")!;
+    // 16 blocks. Merged: 16 at 12.5", 3/strip → 6 strips = 75". Separate:
+    // 64 at 6.5", 6/strip → 11 strips = 71.5". Merging would cost MORE fabric
+    // here, so the yardage-safe rule keeps the separate squares.
+    expect(a.pieces).toHaveLength(1);
+    expect(a.pieces[0].w).toBe(6.5);
+    expect(a.totalInches).toBe(71.5);
+  });
+
+  it("merges a solid 4×4 block when that saves fabric", () => {
+    const cells: Record<string, unknown> = {};
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) cells[`${r},${c}`] = sq("A");
+    // 16 at 12.5" → 6 strips = 75" vs 256 at 3.5" (12/strip) → 22 strips = 77".
+    const a = run(cells, 4).fabrics.find((f) => f.fabric === "A")!;
     expect(a.pieces).toHaveLength(1);
     expect(a.pieces[0].w).toBe(12.5);
-    expect(a.pieces[0].count).toBe(16); // 4×4 blocks
-    // 16 at 12.5": 3 per strip → 6 strips → 75" (vs 64 small 6.5" squares → 11 strips → 71.5"? compare seams)
+    expect(a.pieces[0].count).toBe(16);
     expect(a.totalInches).toBe(75);
   });
 

@@ -426,8 +426,8 @@ describe("custom block — fabric swap and Block B alternation", () => {
     const r = calculateYardage(s);
     const a = r.fabrics.find((f) => f.fabric === "A");
     const g = r.fabrics.find((f) => f.fabric === "G");
-    expect(a?.pieces.reduce((sum, piece) => sum + piece.count, 0)).toBe(128);
-    expect(g?.pieces.reduce((sum, piece) => sum + piece.count, 0)).toBe(128);
+    expect(a?.pieces.reduce((sum, piece) => sum + piece.count * ((piece.w - 0.5) * (piece.h - 0.5)) / 9, 0)).toBe(128);
+    expect(g?.pieces.reduce((sum, piece) => sum + piece.count * ((piece.w - 0.5) * (piece.h - 0.5)) / 9, 0)).toBe(128);
     expect(r.notes?.some((note) => note.includes("both designs"))).toBe(true);
   });
 });
