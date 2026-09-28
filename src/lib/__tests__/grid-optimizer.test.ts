@@ -103,3 +103,40 @@ describe("Custom blocks use optimized plain-square cuts", () => {
     expect(c.pieces[0].count).toBe(32);
   });
 });
+
+describe("Custom blocks merge split-in-half runs", () => {
+  const split = (a: FabricKey, b: FabricKey, rotation: 0 | 90 | 180 | 270 = 0) =>
+    ({ kind: "split" as const, rotation, fabrics: [a, b] });
+  const run = (cells: Record<string, unknown>, size: number, q = 30) =>
+    calculateYardage({
+      pattern: "custom-block", quiltWidth: q, quiltHeight: q, sizePreset: "custom",
+      fabricWidth: 42, blockSize: 10, borderWidth: 0, sashingWidth: 0,
+      assignments: {}, safetyBuffer: false, customBlock: { size, cells },
+      customBlockB: null, useBlockB: false, alternateBlocks: false, customSwapPair: null,
+      blockLayout: "straight",
+    } as never);
+
+  it("a row of 4 horizontal splits on a 10\" 4×4 block cuts two 10.5\" strips", () => {
+    const cells: Record<string, unknown> = {};
+    for (let c = 0; c < 4; c++) cells[`0,${c}`] = split("A", "B");
+    const r = run(cells, 4);
+    for (const fab of ["A", "B"]) {
+      const f = r.fabrics.find((x) => x.fabric === fab)!;
+      const halves = f.pieces.filter((p) => p.label.startsWith("Half-cell"));
+      expect(halves).toHaveLength(1);
+      expect(Math.max(halves[0].w, halves[0].h)).toBe(10.5);
+      expect(Math.min(halves[0].w, halves[0].h)).toBe(1.75);
+      expect(halves[0].count).toBe(9); // one per block, 9 blocks
+    }
+  });
+
+  it("vertical splits merge down a column; mismatched or rotated halves stay separate", () => {
+    const cells = { "0,0": split("A", "B", 270), "1,0": split("A", "B", 270), "0,2": split("A", "B", 0), "1,2": split("B", "A", 0) };
+    const r = run(cells, 4, 10);
+    const a = r.fabrics.find((x) => x.fabric === "A")!;
+    const long = a.pieces.find((p) => Math.max(p.w, p.h) === 5.5)!;
+    expect(long.count).toBe(1);
+    const short = a.pieces.find((p) => Math.max(p.w, p.h) === 3)!;
+    expect(short.count).toBe(2);
+  });
+});

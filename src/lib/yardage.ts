@@ -10,6 +10,7 @@ import {
   swapFabrics,
   unitTally,
   plainSquareGrid,
+  splitHalfRuns,
   type CustomBlockDesign,
 } from "./custom-block";
 import { optimizeGrid, type GridPiece } from "./grid-optimizer";
