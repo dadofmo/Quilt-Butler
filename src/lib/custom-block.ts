@@ -815,3 +815,46 @@ export function migrateDesign(design: CustomBlockDesign | null): CustomBlockDesi
   }
   return changed ? { size: design.size, cells } : design;
 }
+
+/**
+ * Runs of "split in half" halves that can be cut as one continuous strip.
+ * Horizontal splits (rotation 0/180) merge along a row, per half (top/bottom);
+ * vertical splits (90/270) merge down a column, per half (left/right).
+ * Each run is `cells` long (1 = a lone half) in a single fabric.
+ */
+export function splitHalfRuns(design: CustomBlockDesign): { fabric: FabricKey; cells: number }[] {
+  const n = design.size;
+  // halves[r][c] = [firstSideFabric, secondSideFabric, orient] where first is top/left.
+  const at = (r: number, c: number): { o: "h" | "v"; a: FabricKey; b: FabricKey } | null => {
+    const cell = design.cells[`${r},${c}`];
+    if (!cell || cell.kind !== "split") return null;
+    const f0 = (cell.fabrics[0] ?? "A") as FabricKey;
+    const f1 = (cell.fabrics[1] ?? "A") as FabricKey;
+    switch (cell.rotation) {
+      case 0: return { o: "h", a: f0, b: f1 };
+      case 180: return { o: "h", a: f1, b: f0 };
+      case 90: return { o: "v", a: f1, b: f0 }; // first half ends up on the right
+      default: return { o: "v", a: f0, b: f1 };
+    }
+  };
+  const runs: { fabric: FabricKey; cells: number }[] = [];
+  const scan = (o: "h" | "v") => {
+    for (let line = 0; line < n; line++) {
+      for (const side of ["a", "b"] as const) {
+        let cur: FabricKey | null = null;
+        let len = 0;
+        const flush = () => { if (cur && len) runs.push({ fabric: cur, cells: len }); cur = null; len = 0; };
+        for (let i = 0; i < n; i++) {
+          const u = o === "h" ? at(line, i) : at(i, line);
+          const f = u && u.o === o ? u[side] : null;
+          if (f && f === cur) len++;
+          else { flush(); if (f) { cur = f; len = 1; } }
+        }
+        flush();
+      }
+    }
+  };
+  scan("h");
+  scan("v");
+  return runs;
+}
