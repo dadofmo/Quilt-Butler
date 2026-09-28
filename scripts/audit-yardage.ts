@@ -2663,14 +2663,16 @@ console.log("\n=== Custom block: Long triangles, both leans in one block ===");
 
 console.log("\n=== Custom block: Split in half ===");
 {
-  // 16 halves of each fabric per block → 256 each at (u+0.5)=3.5" × (u/2+0.5)=2".
-  // Per strip floor(42.5/3.5)=12. Strips=ceil(256/12)=22. In = 22×2 = 44.
+  // Every row is 4 matching horizontal splits, so each row's top (and bottom)
+  // halves merge into one strip: 4 per block → 64 at (4u+0.5)=12.5" × 2".
+  // Per strip floor(42.5/12.5)=3. Strips=ceil(64/3)=22. In = 44 — the same as
+  // 256 separate 3.5" halves (12/strip → 22 strips), so the merged cut is kept.
   const d = fullDesign(4, () => ({ kind: "split", rotation: 0, fabrics: ["A", "B"] as FabricKey[] }));
   const r = calculateYardage(customBase(d));
   const a = r.fabrics.find(f => f.fabric === "A")!;
   const b = r.fabrics.find(f => f.fabric === "B")!;
-  check("Split A half count", a.pieces[0].count, 256);
-  check("Split A length", a.pieces[0].w, 3.5);
+  check("Split A half count", a.pieces[0].count, 64);
+  check("Split A length", a.pieces[0].w, 12.5);
   check("Split A height", a.pieces[0].h, 2);
   check("Split A strips", a.strips[0].count, 22);
   check("Split A inches", a.totalInches, 44);

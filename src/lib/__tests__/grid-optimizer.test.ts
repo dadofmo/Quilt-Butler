@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { optimizeGrid } from "../grid-optimizer";
 import { calculateYardage } from "../yardage";
+import { splitHalfRuns } from "../custom-block";
 import type { FabricKey } from "../planner-store";
 
 const unitInches = (count: number, cutLen: number, cutH: number, width = 42) => {
@@ -101,5 +102,53 @@ describe("Custom blocks use optimized plain-square cuts", () => {
     const c = r.fabrics.find((f) => f.fabric === "C")!;
     expect(c.pieces[0].w).toBe(4.5); // non-adjacent C squares stay separate
     expect(c.pieces[0].count).toBe(32);
+  });
+});
+
+describe("Custom blocks merge split-in-half runs", () => {
+  const split = (a: FabricKey, b: FabricKey, rotation: 0 | 90 | 180 | 270 = 0) =>
+    ({ kind: "split" as const, rotation, fabrics: [a, b] });
+  const run = (cells: Record<string, unknown>, size: number, q = 30) =>
+    calculateYardage({
+      pattern: "custom-block", quiltWidth: q, quiltHeight: q, sizePreset: "custom",
+      fabricWidth: 42, blockSize: 10, borderWidth: 0, sashingWidth: 0,
+      assignments: {}, safetyBuffer: false, customBlock: { size, cells },
+      customBlockB: null, useBlockB: false, alternateBlocks: false, customSwapPair: null,
+      blockLayout: "straight",
+    } as never);
+
+  it("a row of 4 horizontal splits on a 10\" 4×4 block cuts two 10.5\" strips", () => {
+    const cells: Record<string, unknown> = {};
+    for (let c = 0; c < 4; c++) cells[`0,${c}`] = split("A", "B");
+    const r = run(cells, 4);
+    for (const fab of ["A", "B"]) {
+      const f = r.fabrics.find((x) => x.fabric === fab)!;
+      const halves = f.pieces.filter((p) => p.label.startsWith("Half-cell"));
+      expect(halves).toHaveLength(1);
+      expect(Math.max(halves[0].w, halves[0].h)).toBe(10.5);
+      expect(Math.min(halves[0].w, halves[0].h)).toBe(1.75);
+      expect(halves[0].count).toBe(9); // one per block, 9 blocks
+    }
+  });
+
+  it("vertical splits merge down a column", () => {
+    const cells: Record<string, unknown> = {};
+    for (let r = 0; r < 4; r++) cells[`${r},0`] = split("A", "B", 270);
+    const a = run(cells, 4).fabrics.find((x) => x.fabric === "A")!;
+    expect(a.pieces).toHaveLength(1);
+    expect(Math.max(a.pieces[0].w, a.pieces[0].h)).toBe(10.5);
+  });
+
+  it("mismatched, rotated or non-adjacent halves stay separate", () => {
+    const runs = splitHalfRuns({
+      size: 4,
+      cells: {
+        "0,0": split("A", "B", 0), "0,1": split("B", "A", 0), // different fabric on top
+        "0,2": split("A", "B", 90), // vertical next to horizontal
+        "1,0": split("A", "B", 0), "1,2": split("A", "B", 0), // gap between
+      },
+    } as never);
+    expect(runs.every((r) => r.cells === 1)).toBe(true);
+    expect(runs).toHaveLength(10);
   });
 });
