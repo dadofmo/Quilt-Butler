@@ -323,13 +323,13 @@ const BASE_PATTERNS: PatternDefBase[] = [
     hasMath: true,
     supportsAlternate: true,
     intro:
-      "Each block is a 3×3 grid where the center column + center row form a bold '+' on a background. The 5 plus squares (center + 4 around it) use one fabric; the 4 corner squares use a contrasting background fabric. Turn on \"Reverse the fabrics on every other block\" on the next step to trade the plus and background fabrics on alternating blocks — the plus signs then read as a positive/negative checkerboard. Optionally add plain sashing strips between blocks for a framed look.",
+      "Each block is assembled in 3 columns so the center of the bold '+' is one continuous strip with no unnecessary cross-seams. The plus fabric uses 1 center strip and 2 arm squares; the contrasting background uses 4 corner squares. Turn on \"Reverse the fabrics on every other block\" on the next step to trade the plus and background fabrics on alternating blocks — the plus signs then read as a positive/negative checkerboard. Optionally add plain sashing strips between blocks for a framed look.",
     sections: [
       {
         id: "plus",
-        label: "Plus squares (5 per block)",
+        label: "Plus strip and arms",
         defaultFabric: "A",
-        hint: "The 5 squares forming the '+': center + the 4 squares directly above, below, left, and right of it. Usually the boldest fabric so the plus reads clearly.",
+        hint: "One continuous center-column strip and 2 side-arm squares form the '+'. Usually the boldest fabric so the plus reads clearly.",
       },
       {
         id: "bg",
