@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { optimizeGrid } from "../grid-optimizer";
 import { calculateYardage } from "../yardage";
+import { splitHalfRuns } from "../custom-block";
 import type { FabricKey } from "../planner-store";
 
 const unitInches = (count: number, cutLen: number, cutH: number, width = 42) => {
@@ -130,13 +131,24 @@ describe("Custom blocks merge split-in-half runs", () => {
     }
   });
 
-  it("vertical splits merge down a column; mismatched or rotated halves stay separate", () => {
-    const cells = { "0,0": split("A", "B", 270), "1,0": split("A", "B", 270), "0,2": split("A", "B", 0), "1,2": split("B", "A", 0) };
-    const r = run(cells, 4, 10);
-    const a = r.fabrics.find((x) => x.fabric === "A")!;
-    const long = a.pieces.find((p) => Math.max(p.w, p.h) === 5.5)!;
-    expect(long.count).toBe(1);
-    const short = a.pieces.find((p) => Math.max(p.w, p.h) === 3)!;
-    expect(short.count).toBe(2);
+  it("vertical splits merge down a column", () => {
+    const cells: Record<string, unknown> = {};
+    for (let r = 0; r < 4; r++) cells[`${r},0`] = split("A", "B", 270);
+    const a = run(cells, 4).fabrics.find((x) => x.fabric === "A")!;
+    expect(a.pieces).toHaveLength(1);
+    expect(Math.max(a.pieces[0].w, a.pieces[0].h)).toBe(10.5);
+  });
+
+  it("mismatched, rotated or non-adjacent halves stay separate", () => {
+    const runs = splitHalfRuns({
+      size: 4,
+      cells: {
+        "0,0": split("A", "B", 0), "0,1": split("B", "A", 0), // different fabric on top
+        "0,2": split("A", "B", 90), // vertical next to horizontal
+        "1,0": split("A", "B", 0), "1,2": split("A", "B", 0), // gap between
+      },
+    } as never);
+    expect(runs.every((r) => r.cells === 1)).toBe(true);
+    expect(runs).toHaveLength(10);
   });
 });
