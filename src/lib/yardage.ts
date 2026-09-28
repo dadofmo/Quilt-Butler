@@ -4466,16 +4466,50 @@ export function calculateYardage(s: PlannerState): CalcResult {
     }
 
 
-    // ---- Split in half -----------------------------------------------------
+    // ---- Split in half (run-optimized) --------------------------------------
+    // Matching halves side by side along a row (horizontal splits) or down a
+    // column (vertical splits) are cut as one continuous strip. Per fabric,
+    // keep the merged strips only if they need no more fabric than separate.
     const splitLongCut = round2(unit + SEAM);
     const splitShortCut = round2(unit / 2 + SEAM);
-    for (const [fab, count] of Object.entries(tally.splitHalves)) {
-      if (count <= 0) continue;
+    const runPool = new Map<string, number>(); // `${fab}|${cells}` → count
+    for (const [d, n] of variants) {
+      if (!d || n <= 0) continue;
+      for (const r of splitHalfRuns(d)) {
+        const k = `${r.fabric}|${r.cells}`;
+        runPool.set(k, (runPool.get(k) ?? 0) + n);
+      }
+    }
+    const runsByFab = new Map<FabricKey, Array<[number, number]>>();
+    for (const [k, count] of runPool) {
+      const [fab, cells] = k.split("|");
       const f = fab as FabricKey;
-      addRails(reqs[f], "Half-cell strips", count, splitLongCut, splitShortCut, s.fabricWidth);
-      notes.push(
-        `Split in half (Fabric ${f}): cut ${count} strips at ${splitShortCut.toFixed(2)}" × ${splitLongCut.toFixed(2)}". Sew two halves together along their long edges and press — the finished piece is ${unit.toFixed(2)}" square.`,
-      );
+      runsByFab.set(f, [...(runsByFab.get(f) ?? []), [Number(cells), count]]);
+    }
+    for (const [f, list] of [...runsByFab].sort((x, y) => (x[0] < y[0] ? -1 : 1))) {
+      list.sort((x, y) => x[0] - y[0]);
+      const halves = list.reduce((t, [c, n]) => t + c * n, 0);
+      const merged = scratch();
+      for (const [c, n] of list) addRails(merged, "", n, round2(c * unit + SEAM), splitShortCut, s.fabricWidth);
+      const single = scratch();
+      addRails(single, "", halves, splitLongCut, splitShortCut, s.fabricWidth);
+      const useMerged = list.some(([c]) => c > 1) && merged.totalInches <= single.totalInches + 1e-9;
+      if (!useMerged) {
+        addRails(reqs[f], "Half-cell strips", halves, splitLongCut, splitShortCut, s.fabricWidth);
+        notes.push(
+          `Split in half (Fabric ${f}): cut ${halves} strips at ${splitShortCut.toFixed(2)}" × ${splitLongCut.toFixed(2)}". Sew two halves together along their long edges and press — the finished piece is ${unit.toFixed(2)}" square.`,
+        );
+        continue;
+      }
+      for (const [c, n] of list) {
+        const len = round2(c * unit + SEAM);
+        addRails(reqs[f], c === 1 ? "Half-cell strips" : `Half-cell strips (${c} grid squares long)`, n, len, splitShortCut, s.fabricWidth);
+        notes.push(
+          c === 1
+            ? `Split in half (Fabric ${f}): cut ${n} strips at ${splitShortCut.toFixed(2)}" × ${len.toFixed(2)}".`
+            : `Split in half (Fabric ${f}): cut ${n} long strips at ${splitShortCut.toFixed(2)}" × ${len.toFixed(2)}" — one strip covers ${c} side-by-side split squares, so there's no seam between them. Sew it to its matching partner strip along the long edge and press.`,
+        );
+      }
     }
 
 
