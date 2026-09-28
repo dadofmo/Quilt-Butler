@@ -48,6 +48,47 @@ describe("Autumn Tints uses optimized cuts", () => {
   });
 });
 
+describe("Plus Block uses three-column construction", () => {
+  const run = (alternateBlocks = false, assignments = {}) =>
+    calculateYardage({
+      pattern: "plus-block", quiltWidth: 24, quiltHeight: 24, sizePreset: "custom",
+      fabricWidth: 44, blockSize: 12, borderWidth: 0, sashingWidth: 0,
+      assignments, safetyBuffer: false, alternateBlocks,
+    } as never);
+
+  it("cuts one continuous center strip and six squares per block", () => {
+    const result = run();
+    const plus = result.fabrics.find((fabric) => fabric.fabric === "A");
+    const background = result.fabrics.find((fabric) => fabric.fabric === "B");
+    expect(plus?.pieces).toEqual([
+      expect.objectContaining({ count: 4, w: 12.5, h: 4.5 }),
+      expect.objectContaining({ count: 8, w: 4.5, h: 4.5 }),
+    ]);
+    expect(background?.pieces).toEqual([
+      expect.objectContaining({ count: 16, w: 4.5, h: 4.5 }),
+    ]);
+  });
+
+  it("preserves center strips and square roles when alternate blocks reverse", () => {
+    const result = run(true);
+    for (const fabricKey of ["A", "B"] as const) {
+      const fabric = result.fabrics.find((item) => item.fabric === fabricKey);
+      expect(fabric?.pieces.reduce((sum, piece) => sum + piece.count, 0)).toBe(14);
+      expect(fabric?.pieces.some((piece) => piece.w === 12.5 && piece.h === 4.5 && piece.count === 2)).toBe(true);
+      expect(fabric?.pieces.filter((piece) => piece.w === 4.5).reduce((sum, piece) => sum + piece.count, 0)).toBe(12);
+    }
+  });
+
+  it("pools all six same-fabric squares without merging the center strips", () => {
+    const result = run(false, { plus: "A", bg: "A" });
+    const fabric = result.fabrics.find((item) => item.fabric === "A");
+    expect(fabric?.pieces).toEqual([
+      expect.objectContaining({ count: 4, w: 12.5, h: 4.5 }),
+      expect.objectContaining({ count: 24, w: 4.5, h: 4.5 }),
+    ]);
+  });
+});
+
 describe("Custom blocks use optimized plain-square cuts", () => {
   const sq = (f: FabricKey) => ({ kind: "square" as const, rotation: 0 as const, fabrics: [f] });
   const hst = (a: FabricKey, b: FabricKey) => ({ kind: "hst" as const, rotation: 0 as const, fabrics: [a, b] });

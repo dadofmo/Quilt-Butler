@@ -14,3 +14,5 @@
 - [x] Verify rotation safeguards and the live Streak of Lightning preview.
 - [x] Keep border fabric photo scale stable after switching fabrics across all patterns and custom blocks.
 - [x] Verify border switching in automated tests and the live phone-sized preview.
+- [ ] Change Plus Block cutting to one continuous center strip plus six individual squares per block.
+- [ ] Verify standard, reversed, shared-fabric, and sashed Plus Block calculations.

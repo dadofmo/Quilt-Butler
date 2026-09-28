@@ -658,9 +658,11 @@ console.log("\n=== Plus Block: 50×65, 12\" block, no border ===");
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
   const b = r.fabrics.find(f => f.fabric === "B")!;
-  check("PB A plus count", a.pieces[0].count, 100);
-  check("PB A cut size", a.pieces[0].w, 4.5);
-  check("PB A strips", a.strips[0].count, 12);
+  check("PB A center strip count", a.pieces[0].count, 20);
+  check("PB A center strip length", a.pieces[0].w, 12.5);
+  check("PB A center strip width", a.pieces[0].h, 4.5);
+  check("PB A arm square count", a.pieces[1].count, 40);
+  check("PB A arm cut size", a.pieces[1].w, 4.5);
   check("PB A inches", a.totalInches, 54);
   check("PB B bg count", b.pieces[0].count, 80);
   check("PB B strips", b.strips[0].count, 9);
@@ -674,16 +676,17 @@ console.log("\n=== Plus Block: plus & bg share fabric A — pooled into 1 bucket
     ...base(), pattern: "plus-block" as const, blockSize: 12, borderWidth: 0,
     assignments: { plus: "A" as FabricKey, bg: "A" as FabricKey },
   };
-  // 9 squares × 20 blocks = 180 squares total, pooled into ONE 4.5" bucket
-  // (same fabric plays both roles): per strip floor(42.5/4.5)=9 →
-  // strips = ceil(180/9) = 20, inches = 20 × 4.5 = 90.
+  // Same fabric: 20 center strips + 120 arm/corner squares.
+  // Center strips need 7 WOF strips; squares need 14: 21 × 4.5 = 94.5".
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
   const totalPieces = a.pieces.reduce((acc, p) => acc + p.count, 0);
-  check("PB shared A total pieces", totalPieces, 180);
+  check("PB shared A total pieces", totalPieces, 140);
+  check("PB shared A center strips", a.pieces[0].count, 20);
+  check("PB shared A remaining squares", a.pieces[1].count, 120);
   const totalStrips = a.strips.reduce((acc, sp) => acc + sp.count, 0);
-  check("PB shared A total strips", totalStrips, 20);
-  check("PB shared A inches", a.totalInches, 20 * 4.5);
+  check("PB shared A total strips", totalStrips, 21);
+  check("PB shared A inches", a.totalInches, 21 * 4.5);
 }
 
 console.log("\n=== Plus Block: 9\" block ===");
@@ -695,8 +698,9 @@ console.log("\n=== Plus Block: 9\" block ===");
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
   const b = r.fabrics.find(f => f.fabric === "B")!;
-  check("PB 9\" A count", a.pieces[0].count, 60);
-  check("PB 9\" A strips", a.strips[0].count, 5);
+  check("PB 9\" A center count", a.pieces[0].count, 12);
+  check("PB 9\" A center length", a.pieces[0].w, 9.5);
+  check("PB 9\" A arm count", a.pieces[1].count, 24);
   check("PB 9\" A inches", a.totalInches, 17.5);
   check("PB 9\" B count", b.pieces[0].count, 48);
   check("PB 9\" B strips", b.strips[0].count, 4);
@@ -709,7 +713,8 @@ console.log("\n=== Plus Block: 50×65, 12\" block, no border, 2\" sashing ===");
   // 4×5 = 20 blocks. Sashing C (default): vSash=15, hSash=16, total=31 strips at 2.5"×12.5".
   const r = calculateYardage(s);
   const a = r.fabrics.find(f => f.fabric === "A")!;
-  check("PB(sash) A plus count", a.pieces[0].count, 100);
+  check("PB(sash) A center strip count", a.pieces[0].count, 20);
+  check("PB(sash) A arm square count", a.pieces[1].count, 40);
   const c = r.fabrics.find(f => f.fabric === "C")!;
   check("PB(sash) C sashing strip count", c.pieces[0].count, 31);
   check("PB(sash) C strip width", c.pieces[0].h, 2.5);
@@ -2382,7 +2387,8 @@ console.log("\n=== Plus Block: alternate (reversed) blocks ===");
   const r0 = calculateYardage(off);
   const a0 = r0.fabrics.find(f => f.fabric === "A")!;
   const b0 = r0.fabrics.find(f => f.fabric === "B")!;
-  check("Plus(off) A plus squares", a0.pieces[0].count, 150);
+  check("Plus(off) A center strips", a0.pieces[0].count, 30);
+  check("Plus(off) A arm squares", a0.pieces[1].count, 60);
   check("Plus(off) B corner squares", b0.pieces[0].count, 120);
 
   const on = { ...off, alternateBlocks: true };
@@ -2391,14 +2397,17 @@ console.log("\n=== Plus Block: alternate (reversed) blocks ===");
   const b1 = r1.fabrics.find(f => f.fabric === "B")!;
   const aTot = a1.pieces.reduce((n, p) => n + p.count, 0);
   const bTot = b1.pieces.reduce((n, p) => n + p.count, 0);
-  check("Plus(alt) A plus squares", a1.pieces[0].count, 75);   // 5 × 15
-  check("Plus(alt) A corner squares", a1.pieces[1].count, 60); // 4 × 15
+  check("Plus(alt) A center strips", a1.pieces[0].count, 15);
+  check("Plus(alt) A arm squares", a1.pieces[1].count, 30);
+  check("Plus(alt) A corner squares", a1.pieces[2].count, 60);
   check("Plus(alt) B corner squares", b1.pieces[0].count, 60);
-  check("Plus(alt) B plus squares", b1.pieces[1].count, 75);
-  check("Plus(alt) A total squares", aTot, 135);
-  check("Plus(alt) B total squares", bTot, 135);
-  check("Plus(alt) total squares unchanged (9 × 30)", aTot + bTot, 270);
-  check("Plus(alt) cut size unchanged", a1.pieces[0].w, 10 / 3 + 0.5);
+  check("Plus(alt) B center strips", b1.pieces[1].count, 15);
+  check("Plus(alt) B arm squares", b1.pieces[2].count, 30);
+  check("Plus(alt) A total cut pieces", aTot, 105);
+  check("Plus(alt) B total cut pieces", bTot, 105);
+  check("Plus(alt) total pieces (7 × 30)", aTot + bTot, 210);
+  check("Plus(alt) square cut size", a1.pieces[1].w, 10 / 3 + 0.5);
+  check("Plus(alt) center strip length", a1.pieces[0].w, 10.5);
 }
 
 console.log("\n=== Pinwheel: alternate blocks leaves cut counts unchanged ===");

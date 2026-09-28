@@ -1014,13 +1014,15 @@ export function calculateYardage(s: PlannerState): CalcResult {
     }
   } else if (s.pattern === "plus-block") {
     // Plus Block construction:
-    //   3×3 grid of equal squares. Center column + center row = the "+" (5
-    //   squares), the 4 corners = background. Same cut math as Nine Patch:
+    //   Three columns avoid inset seams: the center column is one continuous
+    //   1×3 strip; each outer column is background + plus arm + background.
     //     unitFinished = blockSize / 3
-    //     cut = unitFinished + 0.5"
-    //   Per block: 5 plus squares + 4 background corner squares.
+    //     squareCut = unitFinished + 0.5"
+    //     centerStripCut = squareCut × (blockSize + 0.5")
+    //   Per block: 1 plus strip + 2 plus-arm squares + 4 background squares.
     const unitFinished = s.blockSize / 3;
-    const cut = unitFinished + SEAM;
+    const squareCut = unitFinished + SEAM;
+    const centerStripCut = s.blockSize + SEAM;
     const plusFab = (s.assignments["plus"] ?? "A") as FabricKey;
     const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
 
@@ -1041,53 +1043,58 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const primaryPlusBlocks = plusAlt ? plusEven : blockCount;
     const flippedPlusBlocks = plusAlt ? plusOdd : 0;
 
-    // Fabric totals: each fabric plays "plus" on its blocks and "background"
-    // on the flipped ones.
-    const plusFab_plus = 5 * primaryPlusBlocks;
+    // Fabric totals: a fabric playing the plus role needs one center strip and
+    // two arm squares per block; the background role needs four corner squares.
+    const plusFab_strips = primaryPlusBlocks;
+    const plusFab_arms = 2 * primaryPlusBlocks;
     const plusFab_corners = 4 * flippedPlusBlocks;
     const bgFab_corners = 4 * primaryPlusBlocks;
-    const bgFab_plus = 5 * flippedPlusBlocks;
-
-    const plusCount = plusFab_plus + bgFab_plus;
-    const bgCount = plusFab_corners + bgFab_corners;
+    const bgFab_strips = flippedPlusBlocks;
+    const bgFab_arms = 2 * flippedPlusBlocks;
 
     if (plusFab === bgFab) {
-      // Same fabric plays both roles — pool into one pile.
-      addSquares(reqs[plusFab], "Block squares", plusCount + bgCount, cut, s.fabricWidth);
+      // Keep the rectangular center strips distinct, but pool all same-size
+      // arm and corner squares into one cutting entry.
+      addRails(reqs[plusFab], "Continuous center-column strips", blockCount, centerStripCut, squareCut, s.fabricWidth);
+      addSquares(reqs[plusFab], "Arm and corner squares", 6 * blockCount, squareCut, s.fabricWidth);
     } else {
-      if (plusFab_plus > 0)
-        addSquares(reqs[plusFab], "Plus squares", plusFab_plus, cut, s.fabricWidth);
+      if (plusFab_strips > 0)
+        addRails(reqs[plusFab], "Continuous center-column strips", plusFab_strips, centerStripCut, squareCut, s.fabricWidth);
+      if (plusFab_arms > 0)
+        addSquares(reqs[plusFab], "Cross-arm squares", plusFab_arms, squareCut, s.fabricWidth);
       if (plusFab_corners > 0)
-        addSquares(reqs[plusFab], "Background corner squares (reversed blocks)", plusFab_corners, cut, s.fabricWidth);
+        addSquares(reqs[plusFab], "Background corner squares (reversed blocks)", plusFab_corners, squareCut, s.fabricWidth);
       if (bgFab_corners > 0)
-        addSquares(reqs[bgFab], "Background corner squares", bgFab_corners, cut, s.fabricWidth);
-      if (bgFab_plus > 0)
-        addSquares(reqs[bgFab], "Plus squares (reversed blocks)", bgFab_plus, cut, s.fabricWidth);
+        addSquares(reqs[bgFab], "Background corner squares", bgFab_corners, squareCut, s.fabricWidth);
+      if (bgFab_strips > 0)
+        addRails(reqs[bgFab], "Continuous center-column strips (reversed blocks)", bgFab_strips, centerStripCut, squareCut, s.fabricWidth);
+      if (bgFab_arms > 0)
+        addSquares(reqs[bgFab], "Cross-arm squares (reversed blocks)", bgFab_arms, squareCut, s.fabricWidth);
     }
 
     notes.push(
-      `Each block = 3×3 grid of ${unitFinished.toFixed(2)}"-finished squares (cut at ${cut.toFixed(2)}"). The center square + the 4 squares directly above, below, left, and right of it form the "+" — that's 5 plus squares per block. The 4 corner squares are background.`,
+      `Each block is sewn as 3 columns with no inset seams. Cut ONE continuous center-column strip from the plus fabric at ${squareCut.toFixed(2)}" wide × ${centerStripCut.toFixed(2)}" long. Also cut 2 plus-fabric arm squares and 4 background corner squares at ${squareCut.toFixed(2)}" × ${squareCut.toFixed(2)}".`,
     );
     if (plusAlt) {
       notes.push(
         `Reversed blocks are ON: ${primaryPlusBlocks} blocks have a Fabric ${plusFab} "+" on Fabric ${bgFab} corners, and ${flippedPlusBlocks} blocks are the reverse (Fabric ${bgFab} "+" on Fabric ${plusFab} corners). Lay them out in a checkerboard so no two touching blocks match — alternating side-to-side across every row AND up-and-down every column. Start the top-left block with the Fabric ${plusFab} "+".`,
       );
       notes.push(
-        `Across all ${blockCount} blocks: Fabric ${plusFab} — ${plusFab_plus} plus squares + ${plusFab_corners} corner squares (${plusFab_plus + plusFab_corners} total); Fabric ${bgFab} — ${bgFab_corners} corner squares + ${bgFab_plus} plus squares (${bgFab_corners + bgFab_plus} total). Every square is cut at the same ${cut.toFixed(2)}" size, so you can cut them all from one strip set per fabric.`,
+        `Across all ${blockCount} blocks: Fabric ${plusFab} — ${plusFab_strips} center strips + ${plusFab_arms} arm squares + ${plusFab_corners} corner squares; Fabric ${bgFab} — ${bgFab_strips} center strips + ${bgFab_arms} arm squares + ${bgFab_corners} corner squares.`,
       );
     } else {
       notes.push(
-        `Across all ${blockCount} blocks: ${plusCount} squares of Fabric ${plusFab} (5 × ${blockCount}, the "+") and ${bgCount} squares of Fabric ${bgFab} (4 × ${blockCount}, the corners).`,
+        `Across all ${blockCount} blocks: ${blockCount} center strips and ${2 * blockCount} arm squares of Fabric ${plusFab}, plus ${4 * blockCount} corner squares of Fabric ${bgFab}.`,
       );
     }
     notes.push(
-      `How to sew ONE block (3 rows of 3 squares): lay out the 9 squares for one block in front of you in a 3×3 grid — Row 1: background corner, plus, background corner. Row 2: plus, plus (center), plus. Row 3: background corner, plus, background corner. The 5 plus squares should form a clear "+" with the 4 background squares in the corners.`,
+      `How to sew ONE block: lay out 3 columns. Column 1 is background corner, plus arm, background corner. Column 2 is the single continuous plus-fabric strip. Column 3 is background corner, plus arm, background corner.`,
     );
     notes.push(
-      `Sew Row 1 first: place the background corner and the plus square right sides together (RST), line up the right edge, sew a 1/4" seam. Unfold and press the seam toward the darker fabric. Now place the second background corner on the right side of the plus square RST, line up the right edge, sew, unfold, press. You now have one row of 3 squares. Repeat for Row 2 and Row 3.`,
+      `Build each outer column first: sew one background corner to the top of one plus-arm square RST with a 1/4" seam, then sew the second background corner below it. Press both seams toward the background. Repeat for the other outer column.`,
     );
     notes.push(
-      `Now sew the 3 rows together: place Row 1 on top of Row 2 RST, lining up the bottom edge of Row 1 with the top edge of Row 2 — make sure the vertical seams between squares match up exactly (a pin through each seam intersection helps). Sew a 1/4" seam across the whole edge, unfold, and press. Add Row 3 to the bottom of Row 2 the same way. The "+" should now read clearly across the finished block.`,
+      `Sew Column 1 to one long edge of the continuous center strip RST, then sew Column 3 to the other long edge. Match each arm square's top and bottom seams to the one-third marks on the center strip so the cross stays square. Press the long seams toward the center strip, then square the block to ${centerStripCut.toFixed(2)}" unfinished.`,
     );
     notes.push(
       plusAlt
@@ -1110,7 +1117,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
       notes.push(
-        `Plus Block Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} plus blocks following the 3×3 grid steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the blocks without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
+        `Plus Block Assembly Tip — full quilt: STAGE 1 (block). Sew all ${blockCount} plus blocks following the three-column steps above. STAGE 2 (quilt top). Lay your blocks out in the ${blocksAcross} × ${blocksDown} grid. Sew vertical sashing strips between blocks within each row, then sew horizontal sashing rows between the finished block rows. This separates the blocks without adding a sashing frame around the outside edge; add the outer border last if you're using one.`,
       );
     }
   } else if (s.pattern === "churn-dash") {
