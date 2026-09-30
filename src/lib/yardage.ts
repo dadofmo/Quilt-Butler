@@ -2218,37 +2218,62 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const crossFab = (s.assignments["cross"] ?? "C") as FabricKey;
     const centerFab = (s.assignments["center"] ?? "D") as FabricKey;
 
-    // Pool by fabric letter so shared letters collapse into one pile per shape.
-    type Bucket = { squares: number; rects: number };
-    const buckets: Partial<Record<FabricKey, Bucket>> = {};
-    const add = (fab: FabricKey, squares: number, rects: number) => {
-      const b = (buckets[fab] ??= { squares: 0, rects: 0 });
-      b.squares += squares;
-      b.rects += rects;
+    // Pool by fabric letter and shape so shared assignments pack together
+    // without losing the real construction role of each piece.
+    type Bucket = {
+      bgSquares: number;
+      accentSquares: number;
+      centerSquares: number;
+      bgRects: number;
+      crossRects: number;
     };
-    add(bgFab, 4 * blockCount, 4 * blockCount);
-    add(accFab, 4 * blockCount, 0);
-    add(crossFab, 0, 4 * blockCount);
-    add(centerFab, 1 * blockCount, 0);
+    const buckets: Partial<Record<FabricKey, Bucket>> = {};
+    const add = (fab: FabricKey, values: Partial<Bucket>) => {
+      const b = (buckets[fab] ??= {
+        bgSquares: 0,
+        accentSquares: 0,
+        centerSquares: 0,
+        bgRects: 0,
+        crossRects: 0,
+      });
+      for (const key of Object.keys(values) as Array<keyof Bucket>) {
+        b[key] += values[key] ?? 0;
+      }
+    };
+    add(bgFab, { bgSquares: 4 * blockCount, bgRects: 4 * blockCount });
+    add(accFab, { accentSquares: 4 * blockCount });
+    add(crossFab, { crossRects: 4 * blockCount });
+    add(centerFab, { centerSquares: blockCount });
     for (const fab of ALL_FABRIC_KEYS) {
       const b = buckets[fab];
       if (!b) continue;
-      if (b.squares > 0) {
-        addSquares(reqs[fab], `Small squares (${u.toFixed(2)}" finished)`, b.squares, sqCut, s.fabricWidth);
+      const squareCount = b.bgSquares + b.accentSquares + b.centerSquares;
+      const rectCount = b.bgRects + b.crossRects;
+      const squareRoles = [
+        b.bgSquares > 0 ? "corner background" : "",
+        b.accentSquares > 0 ? "corner accent" : "",
+        b.centerSquares > 0 ? "center" : "",
+      ].filter(Boolean).join(" + ");
+      const rectRoles = [
+        b.bgRects > 0 ? "corner background runs" : "",
+        b.crossRects > 0 ? "cross arms" : "",
+      ].filter(Boolean).join(" + ");
+      if (squareCount > 0) {
+        addSquares(reqs[fab], `${squareRoles} squares (${u.toFixed(2)}" finished)`, squareCount, sqCut, s.fabricWidth);
       }
-      if (b.rects > 0) {
-        addRails(reqs[fab], `Rectangles (${(2 * u).toFixed(2)}" × ${u.toFixed(2)}" finished)`, b.rects, rectLong, rectShort, s.fabricWidth);
+      if (rectCount > 0) {
+        addRails(reqs[fab], `Continuous 1×2 ${rectRoles} (${(2 * u).toFixed(2)}" × ${u.toFixed(2)}" finished)`, rectCount, rectLong, rectShort, s.fabricWidth);
       }
     }
 
     notes.push(
-      `Each block is a 5×5 unit grid where each unit finishes at ${u.toFixed(2)}". The block uses only rectangles and squares — no triangles. Per block cut: 4 background rectangles at ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}" (Fabric ${bgFab}); 4 background squares at ${sqCut.toFixed(2)}" × ${sqCut.toFixed(2)}" (Fabric ${bgFab}); 4 accent squares at ${sqCut.toFixed(2)}" × ${sqCut.toFixed(2)}" (Fabric ${accFab}); 4 cross-arm rectangles at ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}" (Fabric ${crossFab}); 1 center square at ${sqCut.toFixed(2)}" × ${sqCut.toFixed(2)}" (Fabric ${centerFab}).`,
+      `Each block is based on a 5×5 grid where each unit finishes at ${u.toFixed(2)}". Cut 4 continuous 1×2 background rectangles at ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}" (Fabric ${bgFab}), 4 separate background squares at ${sqCut.toFixed(2)}" × ${sqCut.toFixed(2)}" (Fabric ${bgFab}), 4 accent squares at ${sqCut.toFixed(2)}" × ${sqCut.toFixed(2)}" (Fabric ${accFab}), 4 continuous 1×2 cross-arm rectangles at ${rectLong.toFixed(2)}" × ${rectShort.toFixed(2)}" (Fabric ${crossFab}), and 1 separate center square at ${sqCut.toFixed(2)}" × ${sqCut.toFixed(2)}" (Fabric ${centerFab}). Do not sub-cut either type of 1×2 rectangle into unit squares.`,
     );
     notes.push(
       `Across all ${blockCount} blocks: Fabric ${bgFab} = ${4 * blockCount} rectangles + ${4 * blockCount} squares; Fabric ${accFab} = ${4 * blockCount} squares; Fabric ${crossFab} = ${4 * blockCount} rectangles; Fabric ${centerFab} = ${blockCount} squares.`,
     );
     notes.push(
-      `Star & Cross Assembly Tip: build each block as 5 rows of pieces, top to bottom. Row 1: background rect | cross rect (rotated so the ${(2 * u).toFixed(2)}" edge is vertical, i.e. cut u×2u — or sew the two matching short-arm halves together) | background rect. Row 2: background sq | accent sq | cross rect (vertical) | accent sq | background sq. Row 3: cross rect (horizontal) | cross rect (horizontal — the two center squares of the middle row are the two horizontal arms) | center sq | cross rect (horizontal) | cross rect (horizontal). Row 4 mirrors row 2 vertically. Row 5 mirrors row 1. In practice the easiest construction is a 3×3 macro layout: 4 corner units (each = 1 rect + 2 squares), 4 arm rects, and 1 center square — assemble each corner unit first, then join corners + arms + center as a 3×3 grid. The accent square in every corner unit must sit adjacent to the cross (nearest the center of the block).`,
+      `Star & Cross Assembly Tip: make 4 corner units first. For each corner, sew 1 background square to 1 accent square, keeping the accent toward the block center; then sew that pair to the long edge of 1 continuous background rectangle. The rectangle forms the corner unit's outer row, so all 4 corner units use the same horizontal-pair construction and require only straight seams. Arrange the finished units as a 3×3 layout: top row = corner | vertical cross arm | corner; middle row = horizontal cross arm | center square | horizontal cross arm; bottom row = corner | vertical cross arm | corner. Rotate the corner units so every accent square points inward, then join the 3 sections. Keep every cross arm as one continuous rectangle—do not piece it from two squares.`,
     );
 
     if (sashWidth > 0) {
