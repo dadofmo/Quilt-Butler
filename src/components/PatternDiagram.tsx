@@ -1027,15 +1027,6 @@ function renderInner(
           <rect x={3 * U} y={2 * U} width={2 * U} height={U} fill={cross} />
           {/* Center square */}
           <rect x={2 * U} y={2 * U} width={U} height={U} fill={center} />
-          {/* Subtle 5×5 grid lines so beginners can see construction */}
-          <g stroke="white" strokeWidth={0.75} opacity={0.35}>
-            {[1, 2, 3, 4].map((k) => (
-              <g key={k}>
-                <line x1={k * U} y1={0} x2={k * U} y2={200} />
-                <line x1={0} y1={k * U} x2={200} y2={k * U} />
-              </g>
-            ))}
-          </g>
         </>
       );
     }

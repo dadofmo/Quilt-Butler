@@ -883,13 +883,13 @@ const BASE_PATTERNS: PatternDefBase[] = [
     name: "Star & Cross",
     hasMath: true,
     intro:
-      "Star & Cross is a beginner-friendly 4-fabric block built entirely from rectangles and squares — no triangles anywhere. Each block is a 5×5 grid: a bold plus/cross of Fabric C runs through the center horizontal and vertical rows, with a small Fabric D square where the arms meet. The four 2×2 corner units each show a Fabric A background rectangle across the top and, beneath it, one Fabric A background square and one Fabric B accent square — the accent square always sits next to the cross, nearest the center of the block.",
+      "Star & Cross is a beginner-friendly 4-fabric block built entirely from rectangles and squares — no triangles anywhere. Four continuous 1×2 Fabric C rectangles form the cross arms around a separate Fabric D center square. Each 2×2 corner uses one continuous 1×2 Fabric A background rectangle plus separate Fabric A background and Fabric B accent squares, with the accent always nearest the center.",
     sections: [
       {
         id: "bg",
         label: "Background (Fabric A)",
         defaultFabric: "A",
-        hint: "Fills the four large corner rectangles and one small square in each corner unit — 4 large rectangles + 4 small squares per block. Usually a calm/light fabric so the cross and accents pop.",
+        hint: "Makes one continuous 1×2 outer-row rectangle and one separate square in each corner unit — 4 rectangles + 4 squares per block. Usually a calm/light fabric so the cross and accents pop.",
       },
       {
         id: "accent",
@@ -901,7 +901,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
         id: "cross",
         label: "Cross arms (Fabric C)",
         defaultFabric: "C",
-        hint: "The 4 solid rectangles forming the plus/cross through the block — top, bottom, left, right arms. Usually your boldest fabric so the cross reads clearly.",
+        hint: "The 4 continuous 1×2 rectangles forming the top, bottom, left, and right cross arms. Keep each arm whole rather than piecing it from two squares.",
       },
       {
         id: "center",

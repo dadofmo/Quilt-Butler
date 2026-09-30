@@ -89,6 +89,49 @@ describe("Plus Block uses three-column construction", () => {
   });
 });
 
+describe("Star & Cross uses straight-seam continuous rectangles", () => {
+  const run = (assignments = {}, sashingWidth = 0) =>
+    calculateYardage({
+      pattern: "star-and-cross", quiltWidth: 10, quiltHeight: 10, sizePreset: "custom",
+      fabricWidth: 44, blockSize: 10, borderWidth: 0, sashingWidth,
+      assignments, safetyBuffer: false,
+    } as never);
+
+  it("cuts four background runs, four cross arms, and separate squares per block", () => {
+    const result = run();
+    expect(result.fabrics.find((fabric) => fabric.fabric === "A")?.pieces).toEqual([
+      expect.objectContaining({ count: 4, w: 2.5, h: 2.5 }),
+      expect.objectContaining({ count: 4, w: 4.5, h: 2.5 }),
+    ]);
+    expect(result.fabrics.find((fabric) => fabric.fabric === "B")?.pieces).toEqual([
+      expect.objectContaining({ count: 4, w: 2.5, h: 2.5 }),
+    ]);
+    expect(result.fabrics.find((fabric) => fabric.fabric === "C")?.pieces).toEqual([
+      expect.objectContaining({ count: 4, w: 4.5, h: 2.5 }),
+    ]);
+    expect(result.fabrics.find((fabric) => fabric.fabric === "D")?.pieces).toEqual([
+      expect.objectContaining({ count: 1, w: 2.5, h: 2.5 }),
+    ]);
+  });
+
+  it("pools shared fabrics by shape without changing construction", () => {
+    const fabric = run({ bg: "A", accent: "A", cross: "A", center: "A" })
+      .fabrics.find((item) => item.fabric === "A");
+    expect(fabric?.pieces).toEqual([
+      expect.objectContaining({ count: 9, w: 2.5, h: 2.5 }),
+      expect.objectContaining({ count: 8, w: 4.5, h: 2.5 }),
+    ]);
+  });
+
+  it("keeps the four cross arms continuous when sashing is present", () => {
+    const result = run({ sashing: "E" }, 2);
+    const cross = result.fabrics.find((fabric) => fabric.fabric === "C");
+    expect(cross?.pieces).toEqual([
+      expect.objectContaining({ count: 4, w: 4.5, h: 2.5 }),
+    ]);
+  });
+});
+
 describe("Custom blocks use optimized plain-square cuts", () => {
   const sq = (f: FabricKey) => ({ kind: "square" as const, rotation: 0 as const, fabrics: [f] });
   const hst = (a: FabricKey, b: FabricKey) => ({ kind: "hst" as const, rotation: 0 as const, fabrics: [a, b] });

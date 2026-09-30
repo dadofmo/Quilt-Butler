@@ -1915,6 +1915,9 @@ console.log("\n=== Star & Cross: 50×65, 10\" block, no border, no sashing ===")
   check("S&C A rects count", A.pieces[1].count, 120);
   check("S&C A rects long", A.pieces[1].w, 4.5);
   check("S&C A rects short", A.pieces[1].h, 2.5);
+  // 120 squares: 17 per 2.5" strip = 8 strips (20").
+  // 120 rectangles: 9 per 2.5" strip = 14 strips (35").
+  check("S&C A total inches", A.totalInches, 55);
   const B = r.fabrics.find(f => f.fabric === "B")!;
   check("S&C B buckets", B.pieces.length, 1);
   check("S&C B squares count", B.pieces[0].count, 120);
@@ -1923,10 +1926,31 @@ console.log("\n=== Star & Cross: 50×65, 10\" block, no border, no sashing ===")
   check("S&C C buckets", C.pieces.length, 1);
   check("S&C C rects count", C.pieces[0].count, 120);
   check("S&C C rects long", C.pieces[0].w, 4.5);
+  check("S&C C total inches", C.totalInches, 35);
   const D = r.fabrics.find(f => f.fabric === "D")!;
   check("S&C D buckets", D.pieces.length, 1);
   check("S&C D center count", D.pieces[0].count, 30);
   check("S&C D center cut", D.pieces[0].w, 2.5);
+}
+
+console.log("\n=== Star & Cross: one 10\" block, all roles share Fabric A ===");
+{
+  const r = calculateYardage({
+    ...base(),
+    pattern: "star-and-cross" as const,
+    quiltWidth: 10,
+    quiltHeight: 10,
+    blockSize: 10,
+    borderWidth: 0,
+    sashingWidth: 0,
+    assignments: { bg: "A", accent: "A", cross: "A", center: "A" } as Record<string, FabricKey>,
+  });
+  const A = r.fabrics.find(f => f.fabric === "A")!;
+  check("S&C shared A buckets", A.pieces.length, 2);
+  check("S&C shared A square count", A.pieces[0].count, 9);
+  check("S&C shared A rectangle count", A.pieces[1].count, 8);
+  check("S&C shared A rectangle long", A.pieces[1].w, 4.5);
+  check("S&C shared A rectangle short", A.pieces[1].h, 2.5);
 }
 
 console.log("\n=== Star & Cross: 50×65, 10\" block, 2\" sashing ===");
