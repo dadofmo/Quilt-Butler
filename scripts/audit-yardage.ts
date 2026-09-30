@@ -1915,7 +1915,9 @@ console.log("\n=== Star & Cross: 50×65, 10\" block, no border, no sashing ===")
   check("S&C A rects count", A.pieces[1].count, 120);
   check("S&C A rects long", A.pieces[1].w, 4.5);
   check("S&C A rects short", A.pieces[1].h, 2.5);
-  check("S&C A total inches", A.totalInches, 32.5);
+  // 120 squares: 17 per 2.5" strip = 8 strips (20").
+  // 120 rectangles: 9 per 2.5" strip = 14 strips (35").
+  check("S&C A total inches", A.totalInches, 55);
   const B = r.fabrics.find(f => f.fabric === "B")!;
   check("S&C B buckets", B.pieces.length, 1);
   check("S&C B squares count", B.pieces[0].count, 120);
