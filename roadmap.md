@@ -17,4 +17,4 @@
 - [x] Change Plus Block cutting to one continuous center strip plus six individual squares per block.
 - [x] Verify standard, reversed, shared-fabric, and sashed Plus Block calculations.
 - [x] Clarify Star & Cross as four continuous cross arms, four construction-valid corner runs, and separate squares.
-- [ ] Verify Star & Cross cutting math, diagrams, instructions, and live results.
+- [x] Verify Star & Cross cutting math, diagrams, instructions, and live results.
