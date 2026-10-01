@@ -4794,6 +4794,7 @@ function addSquares(
     stripWidth,
     count: stripCount,
     pieces: [{ w: cutSize, h: cutSize, count }],
+    label,
   });
   req.totalInches += stripCount * cutSize;
 }
