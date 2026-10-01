@@ -1014,7 +1014,9 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   const tag = gLabel0 ? `${gLabel0} — ` : "";
                   const shortLabel = r.isBorder
                     ? `Border (full width)`
-                    : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"${gSuffix0 ? `, ${gSuffix0}` : ""}`;
+                    : r.segments
+                      ? `${tag}cut ${r.segments.map((s) => `${s.count} @ ${s.w.toFixed(2)}"`).join(" + ")}`
+                      : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"${gSuffix0 ? `, ${gSuffix0}` : ""}`;
                   const labelOverflows = shortLabel.length * 5 > usedW - 30;
                   return (
                     <>
