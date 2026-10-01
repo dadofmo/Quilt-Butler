@@ -1057,8 +1057,34 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                     opacity={0.45}
                   />
                 )}
+                {/* Sub-cut dashed lines on a shared strip (mixed cut sizes) */}
+                {r.segments
+                  ? (() => {
+                      const xs: number[] = [];
+                      let acc = 0;
+                      for (const s of r.segments)
+                        for (let k = 0; k < s.count; k++) {
+                          acc += s.w;
+                          xs.push(acc);
+                        }
+                      xs.pop();
+                      return xs.map((inches, k) => (
+                        <line
+                          key={k}
+                          x1={cuttableX + inches * SCALE}
+                          y1={ry + 2}
+                          x2={cuttableX + inches * SCALE}
+                          y2={ry + rh - 2}
+                          stroke={fabricColor}
+                          strokeWidth={1}
+                          strokeDasharray="3 3"
+                          opacity={0.8}
+                        />
+                      ));
+                    })()
+                  : null}
                 {/* Sub-cut dashed lines between squares */}
-                {!r.isBorder && r.subCutWidth && r.subCutCount
+                {!r.segments && !r.isBorder && r.subCutWidth && r.subCutCount
                   ? Array.from({ length: r.subCutCount - 1 }).map((_, k) => {
                       const x = cuttableX + (k + 1) * r.subCutWidth! * SCALE;
                       return (
