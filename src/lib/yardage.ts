@@ -4838,9 +4838,68 @@ function addRails(
 }
 
 /**
+ * Pieces of DIFFERENT lengths that share the same strip height come off the
+ * SAME cut across the bolt — a quilter cutting a 6.5" strip gets both a 24.5"
+ * border strip and a 12.5" side strip out of it (24.5 + 12.5 = 37 <= 42.5
+ * usable). Counting each length in its own strip group massively overstates
+ * waste, which used to make continuous framed cuts look more expensive than
+ * chopping everything into little squares.
+ *
+ * First-fit-decreasing bin packing across the usable width; bins with the same
+ * composition collapse into one strip group so the cutting diagram stays
+ * readable.
+ */
+function addSharedStrips(
+  req: FabricRequirement,
+  items: { len: number; count: number; label: string }[],
+  stripHeight: number,
+  fabricWidth: number,
+) {
+  const usable = fabricWidth - SELVAGE_TRIM;
+  const units: { len: number; idx: number }[] = [];
+  items.forEach((it, i) => {
+    for (let k = 0; k < it.count; k++) units.push({ len: it.len, idx: i });
+  });
+  units.sort((a, b) => b.len - a.len);
+  const bins: { rem: number; counts: number[] }[] = [];
+  for (const u of units) {
+    let bin = bins.find((b) => b.rem >= u.len - 1e-9);
+    if (!bin) {
+      bin = { rem: usable, counts: items.map(() => 0) };
+      bins.push(bin);
+    }
+    bin.rem = Math.max(0, bin.rem - u.len);
+    bin.counts[u.idx]++;
+  }
+  for (const it of items) {
+    req.pieces.push({ label: it.label, count: it.count, w: it.len, h: stripHeight });
+  }
+  // Collapse identical bins.
+  const byShape = new Map<string, { counts: number[]; strips: number }>();
+  for (const b of bins) {
+    const key = b.counts.join(",");
+    const ex = byShape.get(key);
+    if (ex) ex.strips++;
+    else byShape.set(key, { counts: [...b.counts], strips: 1 });
+  }
+  for (const shape of byShape.values()) {
+    const parts = shape.counts
+      .map((n, i) => (n > 0 ? { w: items[i].len, h: stripHeight, count: n * shape.strips } : null))
+      .filter(Boolean) as { w: number; h: number; count: number }[];
+    const label = shape.counts
+      .map((n, i) => (n > 0 ? items[i].label : null))
+      .filter(Boolean)
+      .join(" + ");
+    req.strips.push({ stripWidth: stripHeight, count: shape.strips, pieces: parts, label });
+  }
+  req.totalInches += bins.length * stripHeight;
+}
+
+/**
  * Route grid-optimizer output (see grid-optimizer.ts) through addSquares /
  * addRails. `multiplier` is usually the block count. Rectangles are cut with
- * the long side along the strip so strips stay as narrow as possible.
+ * the long side along the strip so strips stay as narrow as possible, and
+ * every piece sharing a strip height is co-cut from the same strips.
  */
 export function addOptimizedGridPieces(
   reqs: Record<FabricKey, FabricRequirement>,
@@ -4849,11 +4908,29 @@ export function addOptimizedGridPieces(
   fabricWidth: number,
   labelFor: (p: GridPiece) => string,
 ) {
+  const groups = new Map<
+    string,
+    { fabric: FabricKey; h: number; items: { len: number; count: number; label: string }[] }
+  >();
   for (const p of pieces) {
     const count = p.count * multiplier;
     if (count <= 0) continue;
-    if (p.cellsW === p.cellsH) addSquares(reqs[p.fabric], labelFor(p), count, p.cutW, fabricWidth);
-    else addRails(reqs[p.fabric], labelFor(p), count, p.cutW, p.cutH, fabricWidth);
+    const key = `${p.fabric}|${round2(p.cutH)}`;
+    const g = groups.get(key) ?? { fabric: p.fabric, h: p.cutH, items: [] };
+    g.items.push({ len: p.cutW, count, label: labelFor(p) });
+    groups.set(key, g);
+  }
+  for (const g of groups.values()) {
+    const total = g.items.reduce((n, it) => n + it.count, 0);
+    if (g.items.length === 1 || total > 4000) {
+      for (const it of g.items) {
+        if (Math.abs(it.len - g.h) < 0.01)
+          addSquares(reqs[g.fabric], it.label, it.count, it.len, fabricWidth);
+        else addRails(reqs[g.fabric], it.label, it.count, it.len, g.h, fabricWidth);
+      }
+      continue;
+    }
+    addSharedStrips(reqs[g.fabric], g.items, g.h, fabricWidth);
   }
 }
 
