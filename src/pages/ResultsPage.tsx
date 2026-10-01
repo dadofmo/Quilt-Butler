@@ -761,9 +761,11 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
   type Row = {
     yIn: number; // top in inches
     hIn: number; // height in inches
-    subCutWidth?: number; // inches per sub-piece
+    subCutWidth?: number; // inches per sub-piece (single-size strips)
     subCutCount?: number; // squares actually cut from THIS strip
     perStripMax?: number; // max squares this strip could fit
+    /** Mixed strips: each distinct cut size sharing this one strip. */
+    segments?: { w: number; count: number }[];
     isBorder: boolean;
     stripIndex: number; // 1-based across all strips
     groupLabel?: string; // piece-group label (e.g. "Sashing", "Cornerstone squares")
@@ -775,10 +777,27 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
   req.strips.forEach((strip, gi) => {
     const piece = strip.pieces[0];
     const isBorder = piece?.w === fabricWidth;
+    const groupLabel = strip.label ?? req.pieces[gi]?.label;
+    // Co-cut strip: several cut sizes share one strip across the bolt.
+    if (!isBorder && strip.pieces.length > 1 && strip.count > 0) {
+      const per = strip.pieces.map((p) => ({ w: p.w, count: p.count / strip.count }));
+      for (let i = 0; i < strip.count; i++) {
+        stripIdx += 1;
+        rows.push({
+          yIn: y,
+          hIn: strip.stripWidth,
+          segments: per,
+          isBorder: false,
+          stripIndex: stripIdx,
+          groupLabel,
+        });
+        y += strip.stripWidth;
+      }
+      return;
+    }
     const perStripMax = piece && !isBorder ? piecesPerStrip(piece.w, fabricWidth) : undefined;
     const totalNeeded = piece && !isBorder ? piece.count : 0;
     let cutSoFar = 0;
-    const groupLabel = req.pieces[gi]?.label;
     for (let i = 0; i < strip.count; i++) {
       stripIdx += 1;
       const remaining = totalNeeded - cutSoFar;
