@@ -4833,6 +4833,7 @@ function addRails(
     stripWidth: cutHeight,
     count: stripCount,
     pieces: [{ w: cutLength, h: cutHeight, count }],
+    label,
   });
   req.totalInches += stripCount * cutHeight;
 }
