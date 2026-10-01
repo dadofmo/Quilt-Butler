@@ -961,8 +961,12 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
             const ry = PAD_TOP + r.yIn * SCALE;
             const rh = r.hIn * SCALE;
             const usableW = usableFabricWidth(fabricWidth);
-            const usedWidthIn =
-              !r.isBorder && r.subCutWidth && r.subCutCount
+            const segTotalIn = r.segments
+              ? r.segments.reduce((n, s) => n + s.w * s.count, 0)
+              : 0;
+            const usedWidthIn = r.segments
+              ? Math.min(usableW, segTotalIn)
+              : !r.isBorder && r.subCutWidth && r.subCutCount
                 ? r.subCutCount * r.subCutWidth
                 : usableW;
             const usedW = usedWidthIn * SCALE;
