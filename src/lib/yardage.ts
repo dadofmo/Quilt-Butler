@@ -22,7 +22,13 @@ export interface FabricRequirement {
   fabric: FabricKey;
   pieces: { label: string; count: number; w: number; h: number }[];
   // Strips to cut from a fabric-width bolt
-  strips: { stripWidth: number; count: number; pieces: { w: number; h: number; count: number }[] }[];
+  strips: {
+    stripWidth: number;
+    count: number;
+    pieces: { w: number; h: number; count: number }[];
+    /** Caption for this strip group (falls back to the matching pieces entry). */
+    label?: string;
+  }[];
   totalInches: number; // length down the bolt
   yards: number; // rounded up to 0.25
 }
