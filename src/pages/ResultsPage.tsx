@@ -761,9 +761,11 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
   type Row = {
     yIn: number; // top in inches
     hIn: number; // height in inches
-    subCutWidth?: number; // inches per sub-piece
+    subCutWidth?: number; // inches per sub-piece (single-size strips)
     subCutCount?: number; // squares actually cut from THIS strip
     perStripMax?: number; // max squares this strip could fit
+    /** Mixed strips: each distinct cut size sharing this one strip. */
+    segments?: { w: number; count: number }[];
     isBorder: boolean;
     stripIndex: number; // 1-based across all strips
     groupLabel?: string; // piece-group label (e.g. "Sashing", "Cornerstone squares")
@@ -775,10 +777,27 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
   req.strips.forEach((strip, gi) => {
     const piece = strip.pieces[0];
     const isBorder = piece?.w === fabricWidth;
+    const groupLabel = strip.label ?? req.pieces[gi]?.label;
+    // Co-cut strip: several cut sizes share one strip across the bolt.
+    if (!isBorder && strip.pieces.length > 1 && strip.count > 0) {
+      const per = strip.pieces.map((p) => ({ w: p.w, count: p.count / strip.count }));
+      for (let i = 0; i < strip.count; i++) {
+        stripIdx += 1;
+        rows.push({
+          yIn: y,
+          hIn: strip.stripWidth,
+          segments: per,
+          isBorder: false,
+          stripIndex: stripIdx,
+          groupLabel,
+        });
+        y += strip.stripWidth;
+      }
+      return;
+    }
     const perStripMax = piece && !isBorder ? piecesPerStrip(piece.w, fabricWidth) : undefined;
     const totalNeeded = piece && !isBorder ? piece.count : 0;
     let cutSoFar = 0;
-    const groupLabel = req.pieces[gi]?.label;
     for (let i = 0; i < strip.count; i++) {
       stripIdx += 1;
       const remaining = totalNeeded - cutSoFar;
@@ -942,8 +961,12 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
             const ry = PAD_TOP + r.yIn * SCALE;
             const rh = r.hIn * SCALE;
             const usableW = usableFabricWidth(fabricWidth);
-            const usedWidthIn =
-              !r.isBorder && r.subCutWidth && r.subCutCount
+            const segTotalIn = r.segments
+              ? r.segments.reduce((n, s) => n + s.w * s.count, 0)
+              : 0;
+            const usedWidthIn = r.segments
+              ? Math.min(usableW, segTotalIn)
+              : !r.isBorder && r.subCutWidth && r.subCutCount
                 ? r.subCutCount * r.subCutWidth
                 : usableW;
             const usedW = usedWidthIn * SCALE;
@@ -991,7 +1014,9 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   const tag = gLabel0 ? `${gLabel0} — ` : "";
                   const shortLabel = r.isBorder
                     ? `Border (full width)`
-                    : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"${gSuffix0 ? `, ${gSuffix0}` : ""}`;
+                    : r.segments
+                      ? `${tag}cut ${r.segments.map((s) => `${s.count} @ ${s.w.toFixed(2)}"`).join(" + ")}`
+                      : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"${gSuffix0 ? `, ${gSuffix0}` : ""}`;
                   const labelOverflows = shortLabel.length * 5 > usedW - 30;
                   return (
                     <>
@@ -1032,8 +1057,34 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                     opacity={0.45}
                   />
                 )}
+                {/* Sub-cut dashed lines on a shared strip (mixed cut sizes) */}
+                {r.segments
+                  ? (() => {
+                      const xs: number[] = [];
+                      let acc = 0;
+                      for (const s of r.segments)
+                        for (let k = 0; k < s.count; k++) {
+                          acc += s.w;
+                          xs.push(acc);
+                        }
+                      xs.pop();
+                      return xs.map((inches, k) => (
+                        <line
+                          key={k}
+                          x1={cuttableX + inches * SCALE}
+                          y1={ry + 2}
+                          x2={cuttableX + inches * SCALE}
+                          y2={ry + rh - 2}
+                          stroke={fabricColor}
+                          strokeWidth={1}
+                          strokeDasharray="3 3"
+                          opacity={0.8}
+                        />
+                      ));
+                    })()
+                  : null}
                 {/* Sub-cut dashed lines between squares */}
-                {!r.isBorder && r.subCutWidth && r.subCutCount
+                {!r.segments && !r.isBorder && r.subCutWidth && r.subCutCount
                   ? Array.from({ length: r.subCutCount - 1 }).map((_, k) => {
                       const x = cuttableX + (k + 1) * r.subCutWidth! * SCALE;
                       return (
