@@ -860,7 +860,8 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
         </li>
         {totalSquares > 0 && (() => {
           const sq = firstSubCut;
-          const sizeLabel = sq ? shape.sizeLabel : "";
+          const mixedSizes = new Set(subCutPieces.map((p) => `${p.w}x${p.h}`)).size > 1;
+          const sizeLabel = sq && !mixedSizes ? shape.sizeLabel : "";
           return (
             <li>
               Sub-cut along the <span className="text-muted-foreground">dashed lines</span> to get
