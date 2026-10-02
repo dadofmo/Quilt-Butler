@@ -4494,7 +4494,6 @@ export function calculateYardage(s: PlannerState): CalcResult {
     // Matching halves side by side along a row (horizontal splits) or down a
     // column (vertical splits) are cut as one continuous strip. Per fabric,
     // keep the merged strips only if they need no more fabric than separate.
-    const splitLongCut = round2(unit + SEAM);
     const splitShortCut = round2(unit / 2 + SEAM);
     const runPool = new Map<string, number>(); // `${fab}|${cells}` → count
     for (const [d, n] of variants) {
