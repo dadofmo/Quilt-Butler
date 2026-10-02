@@ -4364,24 +4364,9 @@ export function calculateYardage(s: PlannerState): CalcResult {
         else pooledSq.set(key, { ...p, cutW: round2(p.cutW), cutH: round2(p.cutH), count: p.count * n });
       }
     }
-    // Yardage-safe: merging can occasionally pack worse on the bolt (a big
-    // square wastes more of each strip). Per fabric, keep the merged cuts only
-    // if they need no more fabric than cutting every grid square separately.
-    const scratch = () =>
-      ({ fabric: "A", pieces: [], strips: [], totalInches: 0, yards: 0 }) as FabricRequirement;
-    const byFab = new Map<FabricKey, GridPiece[]>();
-    for (const p of pooledSq.values()) byFab.set(p.fabric, [...(byFab.get(p.fabric) ?? []), p]);
-    for (const [fab, list] of byFab) {
-      const cells = list.reduce((n, p) => n + p.count * p.cellsW * p.cellsH, 0);
-      const merged = scratch();
-      addOptimizedGridPieces({ [fab]: merged } as Record<FabricKey, FabricRequirement>, list, 1, s.fabricWidth, () => "");
-      const single = scratch();
-      addSquares(single, "", cells, sqCut, s.fabricWidth);
-      if (merged.totalInches > single.totalInches + 1e-9) {
-        for (const p of list) pooledSq.delete(`${p.fabric}|${p.cellsW}|${p.cellsH}`);
-        pooledSq.set(`${fab}|1|1`, { fabric: fab, cellsW: 1, cellsH: 1, cutW: sqCut, cutH: sqCut, count: cells });
-      }
-    }
+    // Quality first: a quilter never pieces identical fabric back together, so
+    // merged cuts are always kept. Shared-strip packing in
+    // addOptimizedGridPieces keeps the yardage honest.
     const sqPieces = [...pooledSq.values()].sort((x, y) =>
       x.fabric === y.fabric ? x.cellsW * x.cellsH - y.cellsW * y.cellsH : x.fabric < y.fabric ? -1 : 1,
     );
@@ -4527,25 +4512,17 @@ export function calculateYardage(s: PlannerState): CalcResult {
     }
     for (const [f, list] of [...runsByFab].sort((x, y) => (x[0] < y[0] ? -1 : 1))) {
       list.sort((x, y) => x[0] - y[0]);
-      const halves = list.reduce((t, [c, n]) => t + c * n, 0);
-      const merged = scratch();
-      for (const [c, n] of list) addRails(merged, "", n, round2(c * unit + SEAM), splitShortCut, s.fabricWidth);
-      const single = scratch();
-      addRails(single, "", halves, splitLongCut, splitShortCut, s.fabricWidth);
-      const useMerged = list.some(([c]) => c > 1) && merged.totalInches <= single.totalInches + 1e-9;
-      if (!useMerged) {
-        addRails(reqs[f], "Half-cell strips", halves, splitLongCut, splitShortCut, s.fabricWidth);
-        notes.push(
-          `Split in half (Fabric ${f}): cut ${halves} strips at ${splitShortCut.toFixed(2)}" × ${splitLongCut.toFixed(2)}". Sew two halves together along their long edges and press — the finished piece is ${unit.toFixed(2)}" square.`,
-        );
-        continue;
-      }
+      const runPieces: GridPiece[] = list.map(([c, n]) => ({
+        fabric: f, cellsW: c, cellsH: 1, cutW: round2(c * unit + SEAM), cutH: splitShortCut, count: n,
+      }));
+      addOptimizedGridPieces(reqs, runPieces, 1, s.fabricWidth, (p) =>
+        p.cellsW === 1 ? "Half-cell strips" : `Half-cell strips (${p.cellsW} grid squares long)`,
+      );
       for (const [c, n] of list) {
         const len = round2(c * unit + SEAM);
-        addRails(reqs[f], c === 1 ? "Half-cell strips" : `Half-cell strips (${c} grid squares long)`, n, len, splitShortCut, s.fabricWidth);
         notes.push(
           c === 1
-            ? `Split in half (Fabric ${f}): cut ${n} strips at ${splitShortCut.toFixed(2)}" × ${len.toFixed(2)}".`
+            ? `Split in half (Fabric ${f}): cut ${n} strips at ${splitShortCut.toFixed(2)}" × ${len.toFixed(2)}". Sew two halves together along their long edges and press — the finished piece is ${unit.toFixed(2)}" square.`
             : `Split in half (Fabric ${f}): cut ${n} long strips at ${splitShortCut.toFixed(2)}" × ${len.toFixed(2)}" — one strip covers ${c} side-by-side split squares, so there's no seam between them. Sew it to its matching partner strip along the long edge and press.`,
         );
       }
