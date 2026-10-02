@@ -32,6 +32,35 @@ describe("optimizeGrid", () => {
   it("skips null (non-plain) cells", () => {
     expect(optimizeGrid([["A", null, "A"]], 2)[0].count).toBe(2);
   });
+  it("cuts a ring as a symmetrical frame: two full-width and two side strips", () => {
+    const g = [
+      ["A", "A", "A", "A"],
+      ["A", "B", "B", "A"],
+      ["A", "B", "B", "A"],
+      ["A", "A", "A", "A"],
+    ] as FabricKey[][];
+    const p = optimizeGrid(g, 6);
+    expect(p).toEqual(
+      expect.arrayContaining([
+        { fabric: "A", cellsW: 4, cellsH: 1, cutW: 24.5, cutH: 6.5, count: 2 },
+        { fabric: "A", cellsW: 2, cellsH: 1, cutW: 12.5, cutH: 6.5, count: 2 },
+        { fabric: "B", cellsW: 2, cellsH: 2, cutW: 12.5, cutH: 12.5, count: 1 },
+      ]),
+    );
+    expect(p).toHaveLength(3);
+  });
+  it("handles a 5×5 frame around a 3×3 center", () => {
+    const g = Array.from({ length: 5 }, (_, r) =>
+      Array.from({ length: 5 }, (_, c) => (r === 0 || r === 4 || c === 0 || c === 4 ? "A" : "B")),
+    ) as FabricKey[][];
+    const a = optimizeGrid(g, 2).filter((x) => x.fabric === "A");
+    expect(a).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ cellsW: 5, cellsH: 1, count: 2 }),
+        expect.objectContaining({ cellsW: 3, cellsH: 1, count: 2 }),
+      ]),
+    );
+  });
 });
 
 describe("Autumn Tints uses optimized cuts", () => {
@@ -144,15 +173,40 @@ describe("Custom blocks use optimized plain-square cuts", () => {
       blockLayout: "straight",
     } as never);
 
-  it("merges a solid 2×2 block into one large square per block", () => {
+  it("merges a solid 2×2 block into one large square per block (quality first)", () => {
     const r = run({ "0,0": sq("A"), "0,1": sq("A"), "1,0": sq("A"), "1,1": sq("A") });
     const a = r.fabrics.find((f) => f.fabric === "A")!;
-    // 16 blocks. Merged: 16 at 12.5", 3/strip → 6 strips = 75". Separate:
-    // 64 at 6.5", 6/strip → 11 strips = 71.5". Merging would cost MORE fabric
-    // here, so the yardage-safe rule keeps the separate squares.
+    // 16 blocks at 12.5", 3/strip → 6 strips = 75". A quilter never sews four
+    // identical squares back together, so the whole square is always kept.
     expect(a.pieces).toHaveLength(1);
-    expect(a.pieces[0].w).toBe(6.5);
-    expect(a.totalInches).toBe(71.5);
+    expect(a.pieces[0].w).toBe(12.5);
+    expect(a.totalInches).toBe(75);
+  });
+
+  it("cuts a framed square as matching border strips co-cut from shared strips", () => {
+    const cells: Record<string, unknown> = {};
+    for (let r = 0; r < 4; r++)
+      for (let c = 0; c < 4; c++)
+        cells[`${r},${c}`] = sq(r === 0 || r === 3 || c === 0 || c === 3 ? "A" : "B");
+    const res = calculateYardage({
+      pattern: "custom-block", quiltWidth: 48, quiltHeight: 48, sizePreset: "custom",
+      fabricWidth: 44, blockSize: 24, borderWidth: 0, sashingWidth: 0,
+      assignments: {}, safetyBuffer: false, customBlock: { size: 4, cells },
+      customBlockB: null, useBlockB: false, alternateBlocks: false, customSwapPair: null,
+      blockLayout: "straight",
+    } as never);
+    const a = res.fabrics.find((f) => f.fabric === "A")!;
+    // 4 blocks: 8 × 24.5" and 8 × 12.5" (each 6.5" tall). One of each fits on
+    // a 42.5" usable strip → 8 strips = 52" (vs 71.5" as loose squares).
+    expect(a.pieces).toEqual([
+      expect.objectContaining({ count: 8, w: 12.5, h: 6.5 }),
+      expect.objectContaining({ count: 8, w: 24.5, h: 6.5 }),
+    ]);
+    expect(a.totalInches).toBe(52);
+    expect(a.strips).toHaveLength(1);
+    expect(a.strips[0].pieces).toHaveLength(2);
+    const b = res.fabrics.find((f) => f.fabric === "B")!;
+    expect(b.pieces).toEqual([expect.objectContaining({ count: 4, w: 12.5, h: 12.5 })]);
   });
 
   it("merges a solid 4×4 block when that saves fabric", () => {
