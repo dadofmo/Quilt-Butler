@@ -4536,8 +4536,11 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Framed block (Fabric ${frameFabrics.join(", ")}): build it from the inside out, the way you add a border. First piece the center. Sew the two shorter frame strips to opposite sides of the center and press toward the frame. Then sew the two full-width strips across the remaining two sides and press. Opposite strips are always the same length, so the block stays square and flat — no seams to match inside the frame.`,
       );
     }
+    const sizeCheck = `Every finished block should measure ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`;
     notes.push(
-      `Block assembly: sew the units of each row together left to right, press the seams in opposite directions row to row, then join the ${grid} rows. Every finished block should measure ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+      frameFabrics.length
+        ? `Block check: ${sizeCheck}`
+        : `Block assembly: sew the units of each row together left to right, press the seams in opposite directions row to row, then join the ${grid} rows. ${sizeCheck}`,
     );
 
     if (sashWidth > 0) {
