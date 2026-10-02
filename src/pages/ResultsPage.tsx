@@ -860,7 +860,8 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
         </li>
         {totalSquares > 0 && (() => {
           const sq = firstSubCut;
-          const sizeLabel = sq ? shape.sizeLabel : "";
+          const mixedSizes = new Set(subCutPieces.map((p) => `${p.w}x${p.h}`)).size > 1;
+          const sizeLabel = sq && !mixedSizes ? shape.sizeLabel : "";
           return (
             <li>
               Sub-cut along the <span className="text-muted-foreground">dashed lines</span> to get
@@ -1153,15 +1154,27 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   const [gLabel, gSuffix] = (r.groupLabel ?? "").split("||");
                   const tag = gLabel ? `${gLabel} — ` : "";
                   const suf = gSuffix ? `, ${gSuffix}` : "";
+                  const segText = r.segments
+                    ? r.segments.map((s) => `${s.count} × ${r.hIn.toFixed(2)}" × ${s.w.toFixed(2)}"`).join(" + ")
+                    : "";
+                  const segShort = r.segments
+                    ? r.segments.map((s) => `${s.count} @ ${s.w.toFixed(2)}"`).join(" + ")
+                    : "";
                   const fullLabel = r.isBorder
                     ? `Border strip — ${fabricWidth}" wide (full fabric width), no sub-cuts`
-                    : `${tag}sub-cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${r.subCutWidth?.toFixed(2)}" → finished piece ${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}"${suf}`;
+                    : r.segments
+                      ? `${tag}cut ${segText} from this one strip`
+                      : `${tag}sub-cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${r.subCutWidth?.toFixed(2)}" → finished piece ${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}"${suf}`;
                   const midLabel = r.isBorder
                     ? `Border — full ${fabricWidth}" width`
-                    : `${tag}sub-cut ${r.subCutCount} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")${suf}`;
+                    : r.segments
+                      ? `${tag}cut ${segText}`
+                      : `${tag}sub-cut ${r.subCutCount} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")${suf}`;
                   const shortLabel = r.isBorder
                     ? `Border (full width)`
-                    : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"${suf}`;
+                    : r.segments
+                      ? `cut ${segShort}`
+                      : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"${suf}`;
                   const CHAR_W = 5; // ~5px per char at 10px font
                   // Prefer in-strip fit at 10px; otherwise allow overflow.
                   let label = shortLabel;
