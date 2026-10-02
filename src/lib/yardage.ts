@@ -13,7 +13,7 @@ import {
   splitHalfRuns,
   type CustomBlockDesign,
 } from "./custom-block";
-import { optimizeGrid, type GridPiece } from "./grid-optimizer";
+import { optimizeGrid, detectFrames, type GridPiece } from "./grid-optimizer";
 
 /** Round an inch measurement to 2dp so cut sizes stay tidy. */
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -4528,6 +4528,14 @@ export function calculateYardage(s: PlannerState): CalcResult {
     }
 
 
+    const frameFabrics = [...new Set(
+      [designA, designB].flatMap((d) => (d ? detectFrames(plainSquareGrid(d)) : [])),
+    )];
+    if (frameFabrics.length) {
+      notes.push(
+        `Framed block (Fabric ${frameFabrics.join(", ")}): build it from the inside out, the way you add a border. First piece the center. Sew the two shorter frame strips to opposite sides of the center and press toward the frame. Then sew the two full-width strips across the remaining two sides and press. Opposite strips are always the same length, so the block stays square and flat — no seams to match inside the frame.`,
+      );
+    }
     notes.push(
       `Block assembly: sew the units of each row together left to right, press the seams in opposite directions row to row, then join the ${grid} rows. Every finished block should measure ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
     );

@@ -225,3 +225,20 @@ function asRing(
   if (hr0 <= r0 || hr1 >= r1 || hc0 <= c0 || hc1 >= c1) return null; // open on a side
   return { r0, r1, c0, c1, hr0, hr1, hc0, hc1 };
 }
+
+/** Fabrics that form a closed frame around an inner rectangle in this grid. */
+export function detectFrames(grid: GridCell[][]): FabricKey[] {
+  const rows = grid.length;
+  const cols = rows ? grid[0].length : 0;
+  const used = grid.map((r) => r.map(() => false));
+  const out: FabricKey[] = [];
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++) {
+      const f = grid[r][c];
+      if (f == null || used[r][c]) continue;
+      const comp = floodFill(grid, used, r, c, f);
+      for (const [cr, cc] of comp) used[cr][cc] = true;
+      if (asRing(comp, grid, f)) out.push(f);
+    }
+  return out;
+}
