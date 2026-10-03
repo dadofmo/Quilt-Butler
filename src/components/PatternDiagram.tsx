@@ -1197,6 +1197,8 @@ function renderInner(
       const accent = get("accent", "D");
       return <AlbumCrossBlock size={200} cross={cross} bg={bg} outer={outer} accent={accent} />;
     }
+    case "butlers-trellis":
+      return <ButlersTrellisBlock size={200} {...butlersTrellisFills(get)} />;
     case "double-pinwheel": {
       const pinwheel = get("pinwheel", "A");
       const bg = get("bg", "B");
@@ -3146,6 +3148,90 @@ export function AlbumCrossBlock({
           {polygon([[1, 1], [2, 1], [2, 2], [1, 2]], turns, accent, `album-accent-${turns}`)}
         </g>
       ))}
+    </>
+  );
+}
+
+export interface ButlersTrellisFills {
+  bg: string;
+  corners: string;
+  bars: string;
+  ringLight: string;
+  ringDark: string;
+  inner: string;
+  center: string;
+}
+
+/** Resolve Butler's Trellis section fills through a renderer's `get` helper. */
+export function butlersTrellisFills(get: (k: string, fb: FabricKey) => string): ButlersTrellisFills {
+  return {
+    bg: get("bg", "A"),
+    corners: get("corners", "B"),
+    bars: get("bars", "C"),
+    ringLight: get("ringLight", "D"),
+    ringDark: get("ringDark", "E"),
+    inner: get("inner", "F"),
+    center: get("center", "G"),
+  };
+}
+
+/**
+ * Shared renderer for Butler's Trellis — an 8×8 grid assembled as a 3×3
+ * layout of macro units (3 + 2 + 3 cells). Each piece is drawn exactly as it
+ * is cut: continuous 1×2 bars and background rectangles, one 2×2 centre, and
+ * 20 two-triangle squares forming the diamond band. Top-left quadrant:
+ *   B  A  A  C
+ *   A  A  h1 h2
+ *   A  h1 h2 F
+ *   C  h2 F  G
+ * h1 = light top-left / dark bottom-right, h2 = dark top-left / light
+ * bottom-right; the other quadrants are mirror images.
+ */
+export function ButlersTrellisBlock({ size, bg, corners, bars, ringLight, ringDark, inner, center }: { size: number } & ButlersTrellisFills) {
+  const u = size / 8;
+  const rect = (key: string, x: number, y: number, w: number, h: number, fill: string) => (
+    <rect key={key} x={x * u} y={y * u} width={w * u} height={h * u} fill={fill} />
+  );
+  const quads: Array<[boolean, boolean]> = [[false, false], [true, false], [false, true], [true, true]];
+  const mx = (x: number, f: boolean) => (f ? 8 - x : x);
+  const poly = (key: string, pts: [number, number][], fx: boolean, fy: boolean, fill: string) => (
+    <polygon key={key} points={pts.map(([x, y]) => `${mx(x, fx) * u},${mx(y, fy) * u}`).join(" ")} fill={fill} />
+  );
+  // Rect in NW coords mirrored into a quadrant.
+  const qRect = (key: string, x: number, y: number, w: number, h: number, fx: boolean, fy: boolean, fill: string) =>
+    rect(key, fx ? 8 - x - w : x, fy ? 8 - y - h : y, w, h, fill);
+  const hsts: Array<[number, number, boolean]> = [
+    [2, 1, true], [1, 2, true], [3, 1, false], [2, 2, false], [1, 3, false],
+  ];
+  return (
+    <>
+      {quads.map(([fx, fy], qi) => (
+        <g key={`q${qi}`}>
+          {qRect(`c${qi}`, 0, 0, 1, 1, fx, fy, corners)}
+          {qRect(`r1${qi}`, 1, 0, 2, 1, fx, fy, bg)}
+          {qRect(`r2${qi}`, 0, 1, 2, 1, fx, fy, bg)}
+          {qRect(`s${qi}`, 0, 2, 1, 1, fx, fy, bg)}
+          {hsts.map(([x, y, h1], hi) => {
+            const tl: [number, number][] = [[x, y], [x + 1, y], [x, y + 1]];
+            const br: [number, number][] = [[x + 1, y], [x + 1, y + 1], [x, y + 1]];
+            return (
+              <g key={`h${qi}-${hi}`}>
+                {poly(`tl${qi}-${hi}`, tl, fx, fy, h1 ? ringLight : ringDark)}
+                {poly(`br${qi}-${hi}`, br, fx, fy, h1 ? ringDark : ringLight)}
+              </g>
+            );
+          })}
+        </g>
+      ))}
+      {rect("bt", 3, 0, 2, 1, bars)}
+      {rect("bb", 3, 7, 2, 1, bars)}
+      {rect("bl", 0, 3, 1, 2, bars)}
+      {rect("br", 7, 3, 1, 2, bars)}
+      {rect("it", 3, 2, 2, 1, inner)}
+      {rect("ib", 3, 5, 2, 1, inner)}
+      {rect("il", 2, 3, 1, 2, inner)}
+      {rect("ir", 5, 3, 1, 2, inner)}
+      {rect("ctr", 3, 3, 2, 2, center)}
     </>
   );
 }

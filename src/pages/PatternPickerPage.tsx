@@ -236,6 +236,14 @@ function PatternPickerInner() {
                     Free
                   </span>
                 )}
+                {p.id === "butlers-trellis" && (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute left-2 top-2 flex h-6 items-center justify-center rounded-full bg-foreground px-2 text-[10px] font-bold uppercase tracking-wide text-background shadow-md"
+                  >
+                    Studio Pick
+                  </span>
+                )}
               </button>
             </div>
           );

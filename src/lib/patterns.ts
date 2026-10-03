@@ -1862,6 +1862,64 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "butlers-trellis",
+    name: "Butler's Trellis",
+    hasMath: true,
+    intro:
+      "Originally created in QuiltButler's Custom Block Studio. We loved the way the outer lattice and cornerstone frames emerged across the quilt top so much that we turned it into a permanent built-in pattern for everyone.",
+    sections: [
+      {
+        id: "bg",
+        label: "Lattice background (Fabric A)",
+        defaultFabric: "A",
+        hint: "The outer lattice around each block — cut as continuous 1×2 rectangles plus one square in every corner unit. Blocks join so this reads as a trellis across the whole quilt.",
+      },
+      {
+        id: "corners",
+        label: "Corner squares (Fabric B)",
+        defaultFabric: "B",
+        hint: "One small square in each outer corner. Four blocks meet to make a larger 2×2 cornerstone.",
+      },
+      {
+        id: "bars",
+        label: "Outer bars (Fabric C)",
+        defaultFabric: "C",
+        hint: "The four 1×2 bars in the middle of each block edge. Neighbouring blocks join them into a longer bar.",
+      },
+      {
+        id: "ringLight",
+        label: "Diamond light (Fabric D)",
+        defaultFabric: "D",
+        hint: "The light half of the 20 two-triangle squares — forms the diamond around the centre and the small outer points.",
+      },
+      {
+        id: "ringDark",
+        label: "Diamond band (Fabric E)",
+        defaultFabric: "E",
+        hint: "The dark half of the two-triangle squares — the narrow band that outlines the diamond.",
+      },
+      {
+        id: "inner",
+        label: "Inner bars (Fabric F)",
+        defaultFabric: "F",
+        hint: "The four 1×2 bars hugging the centre square on all four sides.",
+      },
+      {
+        id: "center",
+        label: "Centre square (Fabric G)",
+        defaultFabric: "G",
+        hint: "One large 2×2 focal square in the middle of every block.",
+      },
+      {
+        id: "sashing",
+        label: "Sashing between blocks",
+        defaultFabric: "H",
+        hint: "Optional strips that separate each block — set sashing to 0\" on the previous step to let the lattice join up across the quilt.",
+      },
+      { ...borderSection, defaultFabric: "I" },
+    ],
+  },
+  {
     id: "custom-block",
     name: "Design Your Own Block",
     hasMath: true,
@@ -1941,6 +1999,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "blazing-arrows": { skill: "intermediate", fabricCount: 2, techniques: ["hst", "geese"] },
   "apple-pie": { skill: "intermediate", fabricCount: 4, techniques: ["geese", "squares"] },
   "album-cross": { skill: "confident", fabricCount: 4, techniques: ["hst", "squares"] },
+  "butlers-trellis": { skill: "intermediate", fabricCount: 7, techniques: ["hst", "squares"] },
   // Metadata for the user-designed block is nominal: the real fabric count and
   // techniques depend on what the user draws, and the tile is surfaced through
   // its own entry point rather than the filterable pattern grid.

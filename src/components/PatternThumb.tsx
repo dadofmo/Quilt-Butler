@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
 
 
 interface Props {
@@ -128,6 +128,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Apple Pie quilt block diagram — a four-fabric six-unit block with a pair of flying geese pointing inward in every corner, four bar rectangles framing the middle and a large plain centre square",
   "album-cross":
     "Album Cross quilt block diagram — four plain squares form a cross around the centre, framed by four large half-square-triangle corners with accent squares at their inner points",
+  "butlers-trellis":
+    "Butler's Trellis quilt block diagram — an 8x8 block with a large centre square framed by four inner bars, a diamond band of half-square triangles, outer bars on each edge, a background lattice and small corner squares",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -1034,6 +1036,22 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return (
         <svg {...common}>
           <AlbumCrossBlock size={90} cross={C.a} bg={C.b} outer={C.c} accent={C.d} />
+        </svg>
+      );
+    }
+    case "butlers-trellis": {
+      return (
+        <svg {...common}>
+          <ButlersTrellisBlock
+            size={90}
+            bg={C.a}
+            corners={C.b}
+            bars={C.c}
+            ringLight={C.d}
+            ringDark={C.e}
+            inner="var(--fabric-f)"
+            center="var(--fabric-g)"
+          />
         </svg>
       );
     }
