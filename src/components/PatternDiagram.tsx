@@ -1197,6 +1197,8 @@ function renderInner(
       const accent = get("accent", "D");
       return <AlbumCrossBlock size={200} cross={cross} bg={bg} outer={outer} accent={accent} />;
     }
+    case "butlers-trellis":
+      return <ButlersTrellisBlock size={200} {...butlersTrellisFills(get)} />;
     case "double-pinwheel": {
       const pinwheel = get("pinwheel", "A");
       const bg = get("bg", "B");
