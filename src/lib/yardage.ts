@@ -219,10 +219,11 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isBlazingArrows = s.pattern === "blazing-arrows";
   const isApplePie = s.pattern === "apple-pie";
   const isAlbumCross = s.pattern === "album-cross";
+  const isButlersTrellis = s.pattern === "butlers-trellis";
   const isCustomBlock = s.pattern === "custom-block";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isCustomBlock || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isCustomBlock || isButlersTrellis || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -4185,6 +4186,80 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}\" × ${sashCutL.toFixed(2)}\" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );
     }
+  } else if (s.pattern === "butlers-trellis") {
+    // Butler's Trellis — 8×8 grid (u = blockSize / 8) assembled as a 3×3
+    // layout of macro units 3 + 2 + 3 cells wide, so every seam is straight:
+    //   4 corner units (3×3): row 1 = corner square + 1×2 bg rect;
+    //     row 2 = 1×2 bg rect + HST; row 3 = bg square + HST + HST.
+    //   4 edge units (2×3): 1×2 outer bar / two HSTs / 1×2 inner bar.
+    //   1 centre: one 2×2 square.
+    // 20 light/dark HSTs per block, made two at a time (10 pairs).
+    const u = s.blockSize / 8;
+    const sqCut = round2(u + SEAM);
+    const longCut = round2(2 * u + SEAM);
+    const hstCut = round2(u + HST_EXTRA);
+    const f = (k: string, d: FabricKey) => (s.assignments[k] ?? d) as FabricKey;
+    const bgFab = f("bg", "A");
+    const cornerFab = f("corners", "B");
+    const barFab = f("bars", "C");
+    const lightFab = f("ringLight", "D");
+    const darkFab = f("ringDark", "E");
+    const innerFab = f("inner", "F");
+    const centerFab = f("center", "G");
+    const bgRects = 8 * blockCount;
+    const bgSquares = 4 * blockCount;
+    const cornerSquares = 4 * blockCount;
+    const barRects = 4 * blockCount;
+    const innerRects = 4 * blockCount;
+    const centres = blockCount;
+    const totalHsts = 20 * blockCount;
+    const hstPairs = Math.ceil(totalHsts / 2);
+
+    addRails(reqs[bgFab], "Lattice background rectangles (1×2)", bgRects, longCut, sqCut, s.fabricWidth);
+    addSquares(reqs[bgFab], "Lattice background squares", bgSquares, sqCut, s.fabricWidth);
+    addSquares(reqs[cornerFab], "Corner squares", cornerSquares, sqCut, s.fabricWidth);
+    addRails(reqs[barFab], "Outer bars (1×2)", barRects, longCut, sqCut, s.fabricWidth);
+    addSquares(reqs[lightFab], "Diamond HST starting squares (light)", hstPairs, hstCut, s.fabricWidth);
+    addSquares(reqs[darkFab], "Diamond HST starting squares (band)", hstPairs, hstCut, s.fabricWidth);
+    addRails(reqs[innerFab], "Inner bars (1×2)", innerRects, longCut, sqCut, s.fabricWidth);
+    addSquares(reqs[centerFab], "Centre squares (2×2)", centres, longCut, s.fabricWidth);
+
+    notes.push(
+      `Each Butler's Trellis block is an 8×8 grid, so one grid square finishes at ${u.toFixed(2)}". It is sewn as 9 big sections in 3 rows: 4 corner units (3 squares wide), 4 edge units (2 wide × 3 tall) and 1 centre square. Every bar and background run is one continuous piece — no triangle is ever set in, and every seam is straight.`,
+    );
+    notes.push(
+      `Cutting for all ${blockCount} blocks (sizes include seam allowance): Fabric ${bgFab} — ${bgRects} rectangles ${longCut.toFixed(2)}" × ${sqCut.toFixed(2)}" and ${bgSquares} squares at ${sqCut.toFixed(2)}". Fabric ${cornerFab} — ${cornerSquares} squares at ${sqCut.toFixed(2)}". Fabric ${barFab} — ${barRects} rectangles ${longCut.toFixed(2)}" × ${sqCut.toFixed(2)}". Fabric ${innerFab} — ${innerRects} rectangles ${longCut.toFixed(2)}" × ${sqCut.toFixed(2)}". Fabric ${centerFab} — ${centres} squares at ${longCut.toFixed(2)}". Fabrics ${lightFab} and ${darkFab} — ${hstPairs} squares each at ${hstCut.toFixed(3)}" for the two-triangle squares.`,
+    );
+    notes.push(
+      `Make the ${totalHsts} two-triangle squares (20 per block). Pair one Fabric ${lightFab} square with one Fabric ${darkFab} square right sides together, draw a corner-to-corner line on the lighter one, sew 1/4" on both sides of the line, then cut on the line — each pair makes 2. Press toward Fabric ${darkFab} and trim every one to ${sqCut.toFixed(2)}" square.`,
+    );
+    notes.push(
+      `Corner units (4 per block). Row 1: Fabric ${cornerFab} corner square + one Fabric ${bgFab} rectangle. Row 2: one Fabric ${bgFab} rectangle + a two-triangle square with its Fabric ${darkFab} half toward the block centre. Row 3: Fabric ${bgFab} square + two two-triangle squares — the first with Fabric ${darkFab} toward the centre, the second with Fabric ${lightFab} toward the centre. Sew each row, then join the 3 rows. The Fabric ${darkFab} halves should line up into one diagonal band. Unit measures ${round2(3 * u + SEAM).toFixed(2)}" square.`,
+    );
+    notes.push(
+      `Edge units (4 per block). Sew two two-triangle squares side by side so their Fabric ${lightFab} halves meet and make a point aimed at the block edge. Sew one Fabric ${barFab} bar to the outer side and one Fabric ${innerFab} bar to the inner side. Unit measures ${longCut.toFixed(2)}" × ${round2(3 * u + SEAM).toFixed(2)}".`,
+    );
+    notes.push(
+      `Assemble the block in 3 rows. Row 1: corner unit · edge unit (bar at the top) · corner unit. Row 2: edge unit (bar on the left, turned on its side) · Fabric ${centerFab} centre square · edge unit (bar on the right). Row 3: corner unit · edge unit (bar at the bottom) · corner unit. Turn each corner unit so its Fabric ${cornerFab} square sits in the outer corner. Press rows 1 and 3 toward the corners and row 2 toward the centre so the seams nest, then join the rows. Finished block: ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+    notes.push(
+      `Butler's Trellis tips: (1) Build one corner unit and one edge unit first and compare them with the block picture before chain-piecing the rest. (2) Keep every bar and background rectangle whole — never piece them from two squares. (3) Set the blocks edge to edge with no sashing: the outer bars join into longer bars, the corner squares join into 2×2 cornerstones, and the background becomes a trellis across the quilt.`,
+    );
+
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "H") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) {
+        addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      }
+      notes.push(
+        `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical and ${hSash} horizontal. Strips run only between blocks — not around the outer edge. Note: sashing separates the blocks, so the lattice and cornerstones won't join up.`,
+      );
+    }
   } else if (s.pattern === "alaska-homestead") {
     // Alaska Homestead — a three-fabric 3×3 grid block (u = blockSize / 3).
     // Every one of the nine units finishes at u" square:
@@ -4653,6 +4728,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "blazing-arrows" ||
     s.pattern === "apple-pie" ||
     s.pattern === "album-cross" ||
+    s.pattern === "butlers-trellis" ||
     s.pattern === "custom-block";
   // Block-setting note. Rotation-only settings never change piece counts —
   // they only change how the finished blocks are turned when the top is
