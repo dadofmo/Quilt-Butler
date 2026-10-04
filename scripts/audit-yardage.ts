@@ -2809,6 +2809,26 @@ console.log("\n=== Custom block: odd block count with swap (rounding safety) ===
   check("HST(alt odd) A cut", a.pieces[0].w, 3.88); // round2(3 + 0.875)
 }
 
+console.log("\n=== Butler's Trellis: 32×32, 16\" block (4 blocks) ===");
+{
+  // u = 2. Per block: A 8 rects 4.5×2.5 + 4 sq; B 4 sq; C 4 rects; F 4 rects;
+  // G 1 sq 4.5; 20 HSTs → 10 starting squares each of D and E at 2.875 → 2.88.
+  const r = calculateYardage({
+    ...base(),
+    pattern: "butlers-trellis" as const,
+    quiltWidth: 32, quiltHeight: 32, blockSize: 16, borderWidth: 0, sashingWidth: 0,
+  });
+  const g = (k: string) => r.fabrics.find(f => f.fabric === k)!;
+  check("BT A rects", g("A").pieces[0].count, 32);
+  check("BT A squares", g("A").pieces[1].count, 16);
+  check("BT B squares", g("B").pieces[0].count, 16);
+  check("BT C bars", g("C").pieces[0].count, 16);
+  check("BT D HST starts", g("D").pieces[0].count, 40);
+  check("BT E HST cut", g("E").pieces[0].w, 2.88);
+  check("BT F bars", g("F").pieces[0].count, 16);
+  check("BT G centre cut", g("G").pieces[0].w, 4.5);
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {

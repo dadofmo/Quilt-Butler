@@ -290,3 +290,43 @@ describe("Custom blocks merge split-in-half runs", () => {
     expect(runs).toHaveLength(10);
   });
 });
+
+describe("Butler's Trellis cuts real-world construction pieces", () => {
+  const run = (assignments = {}, sashingWidth = 0) =>
+    calculateYardage({
+      pattern: "butlers-trellis", quiltWidth: 32, quiltHeight: 32, sizePreset: "custom",
+      fabricWidth: 44, blockSize: 16, borderWidth: 0, sashingWidth,
+      assignments, safetyBuffer: false,
+    } as never);
+  const find = (r: ReturnType<typeof run>, k: string) => r.fabrics.find((f) => f.fabric === k)!;
+
+  it("cuts per-block pieces for 4 blocks (2\" grid squares)", () => {
+    const r = run();
+    expect(find(r, "A").pieces).toEqual([
+      expect.objectContaining({ count: 32, w: 4.5, h: 2.5 }),
+      expect.objectContaining({ count: 16, w: 2.5, h: 2.5 }),
+    ]);
+    expect(find(r, "B").pieces).toEqual([expect.objectContaining({ count: 16, w: 2.5 })]);
+    expect(find(r, "C").pieces).toEqual([expect.objectContaining({ count: 16, w: 4.5, h: 2.5 })]);
+    expect(find(r, "D").pieces).toEqual([expect.objectContaining({ count: 40, w: 2.88 })]);
+    expect(find(r, "E").pieces).toEqual([expect.objectContaining({ count: 40, w: 2.88 })]);
+    expect(find(r, "F").pieces).toEqual([expect.objectContaining({ count: 16, w: 4.5, h: 2.5 })]);
+    expect(find(r, "G").pieces).toEqual([expect.objectContaining({ count: 4, w: 4.5, h: 4.5 })]);
+  });
+
+  it("covers all 64 grid squares per block", () => {
+    const r = run();
+    const cells = r.fabrics.reduce((n, f) => n + f.pieces.reduce((m, p) => {
+      if (p.w === 2.88) return m + p.count; // one light + one dark square make 2 HST cells
+      return m + p.count * ((p.w - 0.5) * (p.h - 0.5)) / 4;
+    }, 0), 0);
+    expect(cells).toBe(64 * 4);
+  });
+
+  it("adds sashing strips and sewing steps without set-in seams", () => {
+    const r = run({}, 2);
+    expect(find(r, "H").pieces[0]).toEqual(expect.objectContaining({ count: 4, w: 16.5, h: 2.5 }));
+    expect(r.notes.some((n) => n.includes("Corner units"))).toBe(true);
+    expect(r.notes.some((n) => n.includes("Edge units"))).toBe(true);
+  });
+});
