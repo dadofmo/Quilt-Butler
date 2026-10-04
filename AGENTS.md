@@ -7,3 +7,6 @@
 
 ## Star & Cross construction
 - Cut four continuous 1×2 cross arms plus a separate center square; each 2×2 corner uses one horizontal outer-row background rectangle plus separate background/accent squares. Why: this preserves straight-seam 3×3 macro-unit assembly and never creates an L-piece or Y-seam.
+
+## Butler's Trellis construction
+- Assemble the 8×8 block as a 3×3 macro layout (3+2+3 cells): corner units sewn row-wise from a corner square, two continuous 1×2 background rectangles, one background square and three HSTs; edge units are outer bar / HST pair / inner bar; one 2×2 centre. Why: straight seams only, no set-in seams, no needless piecing of same-fabric runs.
