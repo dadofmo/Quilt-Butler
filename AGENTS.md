@@ -10,3 +10,6 @@
 
 ## Butler's Trellis construction
 - Assemble the 8×8 block as a 3×3 macro layout (3+2+3 cells): corner units sewn row-wise from a corner square, two continuous 1×2 background rectangles, one background square and three HSTs; edge units are outer bar / HST pair / inner bar; one 2×2 centre. Why: straight seams only, no set-in seams, no needless piecing of same-fabric runs.
+
+## Arkansas Crossroads construction
+- Cut all 16 cells as separate units (12 plain squares + 4 HSTs made two at a time) and assemble as four 2×2 quadrants; offer only rotation layouts (alternating turn), never merged strips. Why: no matching same-fabric cells share a sewn unit, and rotation changes the look without changing cuts.
