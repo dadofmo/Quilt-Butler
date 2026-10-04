@@ -453,6 +453,30 @@ console.log("\n=== Pinwheel: 50×65, 12\" block, no border, 2\" sashing ===");
 }
 
 // =========================================================================
+// ARKANSAS CROSSROADS
+// =========================================================================
+console.log("\n=== Arkansas Crossroads: 48×48, 12\" block ===");
+{
+  const s = { ...base(), pattern: "arkansas-crossroads" as const, quiltWidth: 48, quiltHeight: 48, blockSize: 12, borderWidth: 0, sashingWidth: 0 };
+  // 16 blocks. Unit 3" → squares 3.5", 12/strip; 64 squares → 6 strips = 21".
+  // HSTs: 2 starting squares/block/fabric = 32 at 3.875", 10/strip → 4 strips = 15.5".
+  const r = calculateYardage(s);
+  const f = (k: string) => r.fabrics.find(x => x.fabric === k)!;
+  for (const k of ["A", "B", "C"]) {
+    check(`AC ${k} squares`, f(k).pieces[0].count, 64);
+    check(`AC ${k} size`, f(k).pieces[0].w, 3.5);
+    check(`AC ${k} inches`, f(k).totalInches, 21);
+  }
+  for (const k of ["D", "E"]) {
+    check(`AC ${k} HST squares`, f(k).pieces[0].count, 32);
+    check(`AC ${k} HST size`, f(k).pieces[0].w, 3.875);
+    check(`AC ${k} inches`, f(k).totalInches, 15.5);
+  }
+  const alt = calculateYardage({ ...s, blockLayout: "alternating" as const });
+  check("AC alternating same yardage", alt.fabrics.find(x => x.fabric === "A")!.totalInches, 21);
+}
+
+// =========================================================================
 // DOUBLE PINWHEEL
 // =========================================================================
 console.log("\n=== Double Pinwheel: 48×60, 12\" block, no sashing ===");

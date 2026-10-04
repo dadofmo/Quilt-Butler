@@ -1199,6 +1199,8 @@ function renderInner(
     }
     case "butlers-trellis":
       return <ButlersTrellisBlock size={200} {...butlersTrellisFills(get)} />;
+    case "arkansas-crossroads":
+      return <ArkansasCrossroadsBlock size={200} diag={get("diag", "A")} light={get("patchLight", "B")} dark={get("patchDark", "C")} point={get("point", "D")} hstBg={get("hstBg", "E")} />;
     case "double-pinwheel": {
       const pinwheel = get("pinwheel", "A");
       const bg = get("bg", "B");
@@ -3232,6 +3234,44 @@ export function ButlersTrellisBlock({ size, bg, corners, bars, ringLight, ringDa
       {rect("il", 2, 3, 1, 2, inner)}
       {rect("ir", 5, 3, 1, 2, inner)}
       {rect("ctr", 3, 3, 2, 2, center)}
+    </>
+  );
+}
+
+/**
+ * Arkansas Crossroads — 4×4 grid. All HST seams run top-left → bottom-right.
+ * Cell codes: a/b/c plain squares; "tr" = HST with point fabric top-right,
+ * "bl" = HST with point fabric bottom-left (hstBg fills the other half).
+ */
+export function ArkansasCrossroadsBlock({
+  size, diag, light, dark, point, hstBg,
+}: { size: number; diag: string; light: string; dark: string; point: string; hstBg: string }) {
+  const map = [
+    ["a", "tr", "b", "c"],
+    ["bl", "a", "c", "b"],
+    ["b", "c", "a", "tr"],
+    ["c", "b", "bl", "a"],
+  ];
+  const fills: Record<string, string> = { a: diag, b: light, c: dark };
+  const u = size / 4;
+  return (
+    <>
+      {map.flatMap((row, r) =>
+        row.map((cell, c) => {
+          const x = c * u, y = r * u, k = `ac-${r}-${c}`;
+          if (cell === "tr" || cell === "bl") {
+            const tr = `${x},${y} ${x + u},${y} ${x + u},${y + u}`;
+            const bl = `${x},${y} ${x},${y + u} ${x + u},${y + u}`;
+            return (
+              <g key={k}>
+                <polygon points={tr} fill={cell === "tr" ? point : hstBg} />
+                <polygon points={bl} fill={cell === "bl" ? point : hstBg} />
+              </g>
+            );
+          }
+          return <rect key={k} x={x} y={y} width={u} height={u} fill={fills[cell]} />;
+        }),
+      )}
     </>
   );
 }

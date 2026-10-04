@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ArkansasCrossroadsBlock, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
 
 
 interface Props {
@@ -130,6 +130,8 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Album Cross quilt block diagram — four plain squares form a cross around the centre, framed by four large half-square-triangle corners with accent squares at their inner points",
   "butlers-trellis":
     "Butler's Trellis quilt block diagram — an 8x8 block with a large centre square framed by four inner bars, a diamond band of half-square triangles, outer bars on each edge, a background lattice and small corner squares",
+  "arkansas-crossroads":
+    "Arkansas Crossroads quilt block diagram — a 4x4 block with two diagonal quadrants of solid squares and half-square triangles and two four-patch quadrants of alternating squares",
 };
 
 export function PatternThumb({ pattern, size = 96 }: Props) {
@@ -1055,6 +1057,12 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "arkansas-crossroads":
+      return (
+        <svg {...common}>
+          <ArkansasCrossroadsBlock size={90} diag={C.a} light={C.b} dark={C.c} point={C.d} hstBg={C.e} />
+        </svg>
+      );
     case "double-pinwheel": {
       return (
         <svg {...common}>

@@ -77,6 +77,7 @@ export type PatternId =
   | "apple-pie"
   | "album-cross"
   | "butlers-trellis"
+  | "arkansas-crossroads"
   /** The user-designed block from the "Design Your Own Block" editor. */
   | "custom-block";
 

@@ -1862,6 +1862,26 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "arkansas-crossroads",
+    name: "Arkansas Crossroads",
+    hasMath: true,
+    // Rotation-only setting: the alternating quarter turn makes the triangle
+    // corners meet as secondary stars and a chain/checkerboard. Piece counts
+    // never change between settings.
+    layouts: ["alternating"],
+    intro:
+      "Arkansas Crossroads is a 4×4 block built from four 2×2 quadrants: two four-patches of alternating squares and two quadrants of solid squares paired with half-square triangles. Keep every block facing the same way for diagonal chains across the quilt, or pick the alternating turn to rotate every other block a quarter turn — a secondary star and checkerboard appear where the blocks meet. Optional sashing can separate the blocks.",
+    sections: [
+      { id: "diag", label: "Diagonal squares (Fabric A)", defaultFabric: "A", hint: "The 4 solid squares running corner to corner through the two triangle quadrants." },
+      { id: "patchLight", label: "Four-patch light squares (Fabric B)", defaultFabric: "B", hint: "2 squares in each four-patch quadrant (4 per block)." },
+      { id: "patchDark", label: "Four-patch dark squares (Fabric C)", defaultFabric: "C", hint: "The other 2 squares in each four-patch quadrant (4 per block)." },
+      { id: "point", label: "Triangle points (Fabric D)", defaultFabric: "D", hint: "The coloured half of the 4 half-square triangles." },
+      { id: "hstBg", label: "Triangle background (Fabric E)", defaultFabric: "E", hint: "The light half of the 4 half-square triangles — it sits next to the diagonal squares." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "F", hint: "Optional strips between blocks — set sashing to 0\" on the previous step if you don't want any." },
+      borderSection,
+    ],
+  },
+  {
     id: "butlers-trellis",
     name: "Butler's Trellis",
     hasMath: true,
@@ -2000,6 +2020,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "apple-pie": { skill: "intermediate", fabricCount: 4, techniques: ["geese", "squares"] },
   "album-cross": { skill: "confident", fabricCount: 4, techniques: ["hst", "squares"] },
   "butlers-trellis": { skill: "intermediate", fabricCount: 7, techniques: ["hst", "squares"] },
+  "arkansas-crossroads": { skill: "confident", fabricCount: 5, techniques: ["hst", "squares"] },
   // Metadata for the user-designed block is nominal: the real fabric count and
   // techniques depend on what the user draws, and the tile is surfaced through
   // its own entry point rather than the filterable pattern grid.
