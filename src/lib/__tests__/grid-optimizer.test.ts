@@ -317,7 +317,7 @@ describe("Butler's Trellis cuts real-world construction pieces", () => {
   it("covers all 64 grid squares per block", () => {
     const r = run();
     const cells = r.fabrics.reduce((n, f) => n + f.pieces.reduce((m, p) => {
-      if (p.w === 2.88) return m + p.count / 2; // each pair half-covers 2 cells
+      if (p.w === 2.88) return m + p.count; // one light + one dark square make 2 HST cells
       return m + p.count * ((p.w - 0.5) * (p.h - 0.5)) / 4;
     }, 0), 0);
     expect(cells).toBe(64 * 4);
