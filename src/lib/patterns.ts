@@ -1882,6 +1882,23 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "domino-chicken-foot",
+    name: "Domino Chicken Foot",
+    hasMath: true,
+    // Rotation-only: an alternating quarter turn links the teal claws and plum
+    // arches into secondary medallions. Piece counts never change.
+    layouts: ["alternating"],
+    intro:
+      "Domino Chicken Foot is a 5×5 block with a plum ring around a cream centre, cream squares at the middle of each edge, and teal triangle claws reaching out from the corners like domino chicken-foot tiles. Keep every block straight for an even lattice, or pick the alternating turn to rotate every other block a quarter turn so the claws and arches link into new medallions. Optional sashing can separate the blocks.",
+    sections: [
+      { id: "bg", label: "Background (Fabric A)", defaultFabric: "A", hint: "The centre square, the 4 edge-centre squares and the light half of 8 triangles." },
+      { id: "primary", label: "Ring & arches (Fabric B)", defaultFabric: "B", hint: "The ring around the centre (two continuous bars plus two squares) and half of 8 triangles." },
+      { id: "accent", label: "Claws (Fabric C)", defaultFabric: "C", hint: "The triangle points at the corners and sides that reach outward." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "D", hint: "Optional strips between blocks — set sashing to 0\" on the previous step if you don't want any." },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+  {
     id: "butlers-trellis",
     name: "Butler's Trellis",
     hasMath: true,
@@ -2021,6 +2038,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "album-cross": { skill: "confident", fabricCount: 4, techniques: ["hst", "squares"] },
   "butlers-trellis": { skill: "intermediate", fabricCount: 7, techniques: ["hst", "squares"] },
   "arkansas-crossroads": { skill: "confident", fabricCount: 5, techniques: ["hst", "squares"] },
+  "domino-chicken-foot": { skill: "confident", fabricCount: 3, techniques: ["hst", "squares"] },
   // Metadata for the user-designed block is nominal: the real fabric count and
   // techniques depend on what the user draws, and the tile is surfaced through
   // its own entry point rather than the filterable pattern grid.

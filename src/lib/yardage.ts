@@ -221,10 +221,11 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
+  const isDominoChickenFoot = s.pattern === "domino-chicken-foot";
   const isCustomBlock = s.pattern === "custom-block";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isCustomBlock || isButlersTrellis || isArkansasCrossroads || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -528,6 +529,48 @@ export function calculateYardage(s: PlannerState): CalcResult {
       const totalSash = vSash + hSash;
       if (totalSash > 0) addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
       notes.push(`Sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" from Fabric ${sashFab} — ${vSash} vertical and ${hSash} horizontal. Sew strips only between blocks; add the optional border last. Leave sashing at 0" if you want the secondary star to form where blocks meet.`);
+    }
+  } else if (s.pattern === "domino-chicken-foot") {
+    // 5×5 grid: 12 HSTs (4 A/B, 4 A/C, 4 B/C, all two at a time), 5 plain A
+    // squares, and a B ring around the centre. Rows 1 and 3 hold three B cells
+    // side by side, so each is cut as one continuous 1×3 strip (fewer seams,
+    // flatter block); row 2 keeps its two B squares.
+    const unitFinished = s.blockSize / 5;
+    const sqCut = unitFinished + SEAM;
+    const barCut = 3 * unitFinished + SEAM;
+    const hstCut = unitFinished + HST_EXTRA;
+    const fa = (s.assignments["bg"] ?? "A") as FabricKey;
+    const fb = (s.assignments["primary"] ?? "B") as FabricKey;
+    const fc = (s.assignments["accent"] ?? "C") as FabricKey;
+    const sq: Partial<Record<FabricKey, number>> = {};
+    sq[fa] = (sq[fa] ?? 0) + blockCount * 5;
+    sq[fb] = (sq[fb] ?? 0) + blockCount * 2;
+    for (const f of ALL_FABRIC_KEYS) {
+      if (sq[f]) addSquares(reqs[f], "Plain squares", sq[f]!, sqCut, s.fabricWidth);
+    }
+    addRails(reqs[fb], "Ring bars (continuous 1×3)", blockCount * 2, barCut, sqCut, s.fabricWidth);
+    const hst: Partial<Record<FabricKey, number>> = {};
+    for (const f of [fa, fb, fc]) hst[f] = (hst[f] ?? 0) + blockCount * 4;
+    for (const f of ALL_FABRIC_KEYS) {
+      if (hst[f]) addSquares(reqs[f], "HST starting squares", hst[f]!, hstCut, s.fabricWidth);
+    }
+    const sz = sqCut.toFixed(2);
+    notes.push(
+      `Each Domino Chicken Foot block is a 5 × 5 grid of ${unitFinished.toFixed(2)}" finished units: a Fabric ${fb} ring around a Fabric ${fa} centre, Fabric ${fa} squares at the middle of each edge, and 12 half-square triangles around the outside.`,
+      `Cutting per block: 5 Fabric ${fa} squares and 2 Fabric ${fb} squares at ${sz}" × ${sz}"; 2 Fabric ${fb} bars at ${sz}" × ${barCut.toFixed(2)}" (keep these in one piece — do not cut them into squares); and 4 triangle starting squares each of Fabrics ${fa}, ${fb} and ${fc} at ${hstCut.toFixed(3)}".`,
+      `Half-square triangles (12 per block, made two at a time): pair the starting squares right sides together as 2 × Fabric ${fa}/${fb}, 2 × Fabric ${fa}/${fc} and 2 × Fabric ${fb}/${fc}. Draw a diagonal on the lighter square, sew 1/4" on both sides, cut on the line, press toward the darker fabric and trim each to ${sz}" square. You get 4 triangles of each pairing.`,
+      `Lay out the rows (Fabric ${fc} always points out toward the block edges). Top row: ${fb}/${fc} corner, ${fa}/${fb} triangle, ${fa} square, ${fa}/${fb} triangle, ${fb}/${fc} corner — the ${fb} halves of the two middle triangles sit next to the bar below. Row 2: ${fa}/${fc} triangle, ${fb} bar, ${fa}/${fc} triangle. Row 3: ${fa}, ${fb}, ${fa}, ${fb}, ${fa} squares. Rows 4 and 5 mirror rows 2 and 1 (turn the layout of the top half upside down).`,
+      `Sew each row, pressing rows 1, 3 and 5 to the right and rows 2 and 4 to the left so the seams nest, then join the rows pinning at each seam. Every finished block should measure ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`,
+    );
+    if (sashWidth > 0) {
+      const sashFab = (s.assignments["sashing"] ?? "D") as FabricKey;
+      const sashCutW = sashWidth + SEAM;
+      const sashCutL = s.blockSize + SEAM;
+      const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
+      const hSash = Math.max(0, blocksDown - 1) * blocksAcross;
+      const totalSash = vSash + hSash;
+      if (totalSash > 0) addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
+      notes.push(`Sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" from Fabric ${sashFab} — ${vSash} vertical and ${hSash} horizontal. Sew strips only between blocks; add the optional border last.`);
     }
   } else if (s.pattern === "rail-fence") {
     // Each block = 3 rails. Each rail finishes at (blockSize/3) tall × blockSize wide.
@@ -4772,6 +4815,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "album-cross" ||
     s.pattern === "butlers-trellis" ||
     s.pattern === "arkansas-crossroads" ||
+    s.pattern === "domino-chicken-foot" ||
     s.pattern === "custom-block";
   // Block-setting note. Rotation-only settings never change piece counts —
   // they only change how the finished blocks are turned when the top is

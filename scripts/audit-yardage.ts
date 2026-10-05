@@ -477,6 +477,33 @@ console.log("\n=== Arkansas Crossroads: 48×48, 12\" block ===");
 }
 
 // =========================================================================
+// DOMINO CHICKEN FOOT
+// =========================================================================
+console.log("\n=== Domino Chicken Foot: 45×45, 15\" block ===");
+{
+  const s = { ...base(), pattern: "domino-chicken-foot" as const, quiltWidth: 45, quiltHeight: 45, blockSize: 15, borderWidth: 0, sashingWidth: 0 };
+  // 9 blocks, unit 3". A: 45 squares @3.5 (12/strip → 4 strips = 14") +
+  // 36 HST @3.875 (10/strip → 4 strips = 15.5") = 29.5".
+  // B: 18 squares (2 strips = 7") + 18 bars 9.5×3.5 (4/strip → 5 strips = 17.5") + 36 HST (15.5") = 40".
+  // C: 36 HST = 15.5".
+  const r = calculateYardage(s);
+  const f = (k: string) => r.fabrics.find(x => x.fabric === k)!;
+  const pc = (k: string, label: string) => f(k).pieces.find(p => p.label.startsWith(label))!;
+  check("DCF A squares", pc("A", "Plain").count, 45);
+  check("DCF A HST", pc("A", "HST").count, 36);
+  check("DCF A inches", f("A").totalInches, 29.5);
+  check("DCF B squares", pc("B", "Plain").count, 18);
+  check("DCF B bars", pc("B", "Ring").count, 18);
+  check("DCF B bar length", Math.max(pc("B", "Ring").w, pc("B", "Ring").h), 9.5);
+  check("DCF B inches", f("B").totalInches, 40);
+  check("DCF C HST", pc("C", "HST").count, 36);
+  check("DCF C HST size", pc("C", "HST").w, 3.875);
+  check("DCF C inches", f("C").totalInches, 15.5);
+  const alt = calculateYardage({ ...s, blockLayout: "alternating" as const });
+  check("DCF alternating same yardage", alt.fabrics.find(x => x.fabric === "B")!.totalInches, 40);
+}
+
+// =========================================================================
 // DOUBLE PINWHEEL
 // =========================================================================
 console.log("\n=== Double Pinwheel: 48×60, 12\" block, no sashing ===");
