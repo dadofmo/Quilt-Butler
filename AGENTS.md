@@ -13,3 +13,6 @@
 
 ## Arkansas Crossroads construction
 - Cut all 16 cells as separate units (12 plain squares + 4 HSTs made two at a time) and assemble as four 2×2 quadrants; offer only rotation layouts (alternating turn), never merged strips. Why: no matching same-fabric cells share a sewn unit, and rotation changes the look without changing cuts.
+
+## Domino Chicken Foot construction
+- 5x5 row-by-row: 12 HSTs made two at a time (A/B, A/C, B/C), rows 2 and 4 centre B cells cut as one continuous 1x3 bar, other cells plain squares; rotation layouts only. Why: fewer seams without breaking straight-row assembly.

@@ -62,6 +62,7 @@ export const PATTERN_DIFFICULTY: Record<PatternId, 1 | 2 | 3 | 4 | 5> = {
   "album-cross": 2,
   "butlers-trellis": 3,
   "arkansas-crossroads": 2,
+  "domino-chicken-foot": 2,
 };
 
 interface Props {

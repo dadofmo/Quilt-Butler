@@ -1199,6 +1199,8 @@ function renderInner(
     }
     case "butlers-trellis":
       return <ButlersTrellisBlock size={200} {...butlersTrellisFills(get)} />;
+    case "domino-chicken-foot":
+      return <DominoChickenFootBlock size={200} bg={get("bg", "A")} primary={get("primary", "B")} accent={get("accent", "C")} />;
     case "arkansas-crossroads":
       return <ArkansasCrossroadsBlock size={200} diag={get("diag", "A")} light={get("patchLight", "B")} dark={get("patchDark", "C")} point={get("point", "D")} hstBg={get("hstBg", "E")} />;
     case "double-pinwheel": {
@@ -3270,6 +3272,51 @@ export function ArkansasCrossroadsBlock({
             );
           }
           return <rect key={k} x={x} y={y} width={u} height={u} fill={fills[cell]} />;
+        }),
+      )}
+    </>
+  );
+}
+
+/**
+ * Domino Chicken Foot — 5×5 grid. HST cells: [dir, first, second] where for
+ * "\\" first = top-right half, second = bottom-left; for "/" first = top-left,
+ * second = bottom-right. a = background, b = primary, c = accent.
+ */
+type DcfCell = string | [string, string, string];
+const DCF_MAP: DcfCell[][] = [
+  [["\\", "b", "c"], ["\\", "a", "b"], "a", ["/", "a", "b"], ["/", "b", "c"]],
+  [["\\", "c", "a"], "b", "b", "b", ["/", "c", "a"]],
+  ["a", "b", "a", "b", "a"],
+  [["/", "a", "c"], "b", "b", "b", ["\\", "a", "c"]],
+  [["/", "c", "b"], ["/", "b", "a"], "a", ["\\", "b", "a"], ["\\", "c", "b"]],
+];
+export function DominoChickenFootBlock({
+  size, bg, primary, accent,
+}: { size: number; bg: string; primary: string; accent: string }) {
+  const fills: Record<string, string> = { a: bg, b: primary, c: accent };
+  const u = size / 5;
+  return (
+    <>
+      {DCF_MAP.flatMap((row, r) =>
+        row.map((cell, c) => {
+          const x = c * u, y = r * u, k = `dcf-${r}-${c}`;
+          if (typeof cell === "string") {
+            return <rect key={k} x={x} y={y} width={u} height={u} fill={fills[cell]} />;
+          }
+          const [dir, first, second] = cell;
+          const p1 = dir === "/"
+            ? `${x},${y} ${x + u},${y} ${x},${y + u}`
+            : `${x},${y} ${x + u},${y} ${x + u},${y + u}`;
+          const p2 = dir === "/"
+            ? `${x + u},${y} ${x + u},${y + u} ${x},${y + u}`
+            : `${x},${y} ${x},${y + u} ${x + u},${y + u}`;
+          return (
+            <g key={k}>
+              <polygon points={p1} fill={fills[first]} />
+              <polygon points={p2} fill={fills[second]} />
+            </g>
+          );
         }),
       )}
     </>
