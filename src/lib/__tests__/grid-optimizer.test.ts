@@ -326,7 +326,7 @@ describe("Butler's Trellis cuts real-world construction pieces", () => {
   it("adds sashing strips and sewing steps without set-in seams", () => {
     const r = run({}, 2);
     expect(find(r, "H").pieces[0]).toEqual(expect.objectContaining({ count: 4, w: 16.5, h: 2.5 }));
-    expect(r.notes.some((n) => n.includes("Corner units"))).toBe(true);
-    expect(r.notes.some((n) => n.includes("Edge units"))).toBe(true);
+    expect((r.notes ?? []).some((n) => n.includes("Corner units"))).toBe(true);
+    expect((r.notes ?? []).some((n) => n.includes("Edge units"))).toBe(true);
   });
 });
