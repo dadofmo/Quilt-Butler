@@ -34,7 +34,10 @@ export function FabricPatternDefs({ photos, tileSize, idSuffix = "" }: Props) {
   // just like a real bolt of fabric. Each shape is a "window" onto the
   // same continuously-tiled fabric. We use `tileSize` if provided, else a
   // sensible default (~80 SVG units, roughly 40% of a 200-unit block).
-  const tile = typeof tileSize === "number" && tileSize > 0 ? tileSize : 80;
+  // Default = 200 (one full block in the shared 200×200 viewBox) so a tile
+  // boundary never lands inside a cell — an 80-unit repeat used to draw a
+  // fake "seam" through some squares but not their same-fabric neighbours.
+  const tile = typeof tileSize === "number" && tileSize > 0 ? tileSize : 200;
   return (
     <defs>
       {entries.map((k) => (
