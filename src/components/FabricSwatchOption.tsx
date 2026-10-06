@@ -30,6 +30,7 @@ export function FabricSwatchOption({
   onClear,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   const swatchStyle = photo
     ? {
