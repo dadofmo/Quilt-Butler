@@ -30,6 +30,7 @@ export function FabricSwatchOption({
   onClear,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   const swatchStyle = photo
     ? {
@@ -77,6 +78,22 @@ export function FabricSwatchOption({
         }}
       />
 
+      {/* Opens the device camera directly (mobile) so users at a fabric
+          store can snap the bolt without leaving the app. On desktop this
+          falls back to a normal file picker. */}
+      <input
+        ref={cameraRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onUpload(f);
+          e.target.value = "";
+        }}
+      />
+
       {photo ? (
         <div className="flex items-center justify-between gap-1 text-[11px]">
           <button
@@ -95,13 +112,22 @@ export function FabricSwatchOption({
           </button>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="text-primary text-[11px] font-medium underline-offset-2 hover:underline"
-        >
-          Upload photo
-        </button>
+        <div className="flex items-center justify-between gap-1 text-[11px]">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="text-primary font-medium underline-offset-2 hover:underline"
+          >
+            Upload photo
+          </button>
+          <button
+            type="button"
+            onClick={() => cameraRef.current?.click()}
+            className="text-primary font-medium underline-offset-2 hover:underline"
+          >
+            Take photo
+          </button>
+        </div>
       )}
     </div>
   );
