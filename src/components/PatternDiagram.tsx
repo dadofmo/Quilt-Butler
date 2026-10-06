@@ -55,11 +55,7 @@ export function PatternDiagram({ pattern, assignments, hasBorder, size = 280, ph
     >
       <div className="bg-card flex h-full w-full items-center justify-center rounded">
         <svg width={size - 40} height={size - 40} viewBox="0 0 200 200">
-          {/* No tileSize: each shape gets its OWN copy of the fabric photo
-              scaled to fit its bounds (objectBoundingBox). This mirrors how
-              a quilter cuts each strip independently from the bolt — every
-              log shows the fabric, and the same strip looks identical in
-              every block of the full quilt. */}
+          {/* Each shape receives its own centered crop of the fabric photo. */}
           <FabricPatternDefs photos={photos} />
           {pattern === "custom-block"
             ? customBlock && <CustomBlockShapes design={customBlock} photos={photos} />

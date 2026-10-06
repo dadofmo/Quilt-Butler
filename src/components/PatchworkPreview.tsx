@@ -4,17 +4,12 @@ import {
   FABRIC_COLORS,
   type FabricKey,
 } from "@/lib/planner-store";
-import { fabricTileBackgroundStyle } from "@/lib/fabric-fill";
+import { fabricBackgroundStyle, fabricTileBackgroundStyle } from "@/lib/fabric-fill";
 
 /**
- * Fabric tiling for the HTML patchwork preview. Mirrors the behavior of
- * `FabricPatternDefs` (used by SVG diagrams): the photo tiles at ~40% of
- * a block and repeats — so the motif is the same physical size in the
- * border, sashing, and every square, just like cutting from a real bolt
- * of fabric. Never use `background-size: cover` here — it stretches the
- * photo and produces blown-up/distorted motifs. The tile size is passed
- * in dynamically (derived from the measured block pixel size) so the
- * motif scales with the preview instead of overflowing tiny cells.
+ * Fabric photos in quilt cells are individually centered and cropped so a
+ * camera image cannot spread across neighboring blocks. Border and sashing
+ * remain repeated lengths of fabric.
  */
 interface Props {
   /** Number of distinct fabrics to cycle through (2–12). */
@@ -195,7 +190,7 @@ export function PatchworkPreview({
                   style={{
                     gridColumn: `${colTrack} / span 1`,
                     gridRow: `${rowTrack} / span 1`,
-                    ...fabricTileBackgroundStyle(fab, tilePx, photos),
+                    ...fabricBackgroundStyle(fab, photos),
                   }}
                 />
               );

@@ -350,10 +350,7 @@ export function QuiltCanvas({
         role="img"
         aria-label="QuiltButler quilt visualizer showing fabric color preview of finished quilt layout"
       >
-        {/* No tileSize: each shape independently shows the fabric photo
-            scaled to its bounds — the same way a quilter cuts each strip
-            from the bolt. Every block looks identical and matches the
-            "1 block" preview. */}
+        {/* Each shape receives its own centered crop of the fabric photo. */}
         <FabricPatternDefs photos={photos} />
         {/* Sashing background fills the inner rectangle so all gaps
             between blocks (and around the inside edge) show the sashing

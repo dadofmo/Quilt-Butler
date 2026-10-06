@@ -16,3 +16,6 @@
 
 ## Domino Chicken Foot construction
 - 5x5 row-by-row: 12 HSTs made two at a time (A/B, A/C, B/C), rows 2 and 4 centre B cells cut as one continuous 1x3 bar, other cells plain squares; rotation layouts only. Why: fewer seams without breaking straight-row assembly.
+
+## Fabric photo rendering
+- Render uploaded and camera-taken fabric photos as a centered crop local to each SVG piece or HTML quilt cell; never use one block-wide photo across separate pieces. Why: each assigned piece must show that fabric photo independently.
