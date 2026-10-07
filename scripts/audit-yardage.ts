@@ -455,6 +455,34 @@ console.log("\n=== Pinwheel: 50×65, 12\" block, no border, 2\" sashing ===");
 // =========================================================================
 // ARKANSAS CROSSROADS
 // =========================================================================
+console.log("\n=== Attic Window: 48×48, 12\" block ===");
+{
+  const s = { ...base(), pattern: "attic-window" as const, quiltWidth: 48, quiltHeight: 48, blockSize: 12, sashingWidth: 0 };
+  // 16 panes @8.5: five/strip, four strips =34 inches.
+  // Each shadow: 16 rectangles @8.5×4.5, five/strip, four strips =18 inches;
+  // eight HST starting squares @4.875, eight/strip, one strip =4.875 inches.
+  const r = calculateYardage(s);
+  const pane = r.fabrics.find(f => f.fabric === "A");
+  check("AW pane count", pane?.pieces[0].count ?? 0, 16);
+  check("AW pane size", pane?.pieces[0].w ?? 0, 8.5);
+  check("AW pane inches", pane?.totalInches ?? 0, 34);
+  for (const key of ["B", "C"]) {
+    const f = r.fabrics.find(f => f.fabric === key);
+    check(`AW ${key} continuous shadows`, f?.pieces[0].count ?? 0, 16);
+    check(`AW ${key} shadow length`, f?.pieces[0].w ?? 0, 8.5);
+    check(`AW ${key} shadow width`, f?.pieces[0].h ?? 0, 4.5);
+    check(`AW ${key} miter starting squares`, f?.pieces[1].count ?? 0, 8);
+    check(`AW ${key} miter size`, f?.pieces[1].w ?? 0, 4.875);
+    check(`AW ${key} inches`, f?.totalInches ?? 0, 22.875);
+  }
+  // 50-inch top with 2-inch sashing: floor(52/14)=3 per side, nine blocks,
+  // six vertical + six horizontal sashing pieces; five HST pairs (one spare).
+  const sash = calculateYardage({ ...s, quiltWidth: 50, quiltHeight: 50, sashingWidth: 2 });
+  check("AW sashed pane count", sash.fabrics.find(f => f.fabric === "A")?.pieces[0].count ?? 0, 9);
+  check("AW odd miter pairs", sash.fabrics.find(f => f.fabric === "B")?.pieces[1].count ?? 0, 5);
+  check("AW sashing pieces", sash.fabrics.find(f => f.fabric === "D")?.pieces[0].count ?? 0, 12);
+}
+
 console.log("\n=== Arkansas Crossroads: 48×48, 12\" block ===");
 {
   const s = { ...base(), pattern: "arkansas-crossroads" as const, quiltWidth: 48, quiltHeight: 48, blockSize: 12, borderWidth: 0, sashingWidth: 0 };
