@@ -1,6 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ArkansasCrossroadsBlock, DominoChickenFootBlock, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
+import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ArkansasCrossroadsBlock, DominoChickenFootBlock, AtticWindowBlock, atticWindowFills, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
 
 
 interface Props {
@@ -130,6 +130,7 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Album Cross quilt block diagram — four plain squares form a cross around the centre, framed by four large half-square-triangle corners with accent squares at their inner points",
   "butlers-trellis":
     "Butler's Trellis quilt block diagram — an 8x8 block with a large centre square framed by four inner bars, a diamond band of half-square triangles, outer bars on each edge, a background lattice and small corner squares",
+  "attic-window": "Attic Window quilt block with a large top-right pane, left casing and bottom sill meeting at a diagonal miter",
   "domino-chicken-foot":
     "Domino Chicken Foot quilt block diagram — a 5x5 block with a ring of squares around a light centre and half-square-triangle claws reaching out from the corners and sides",
   "arkansas-crossroads":
@@ -1059,6 +1060,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
+    case "attic-window":
+      return <svg {...common}><AtticWindowBlock size={90} {...atticWindowFills({})} /></svg>;
     case "domino-chicken-foot":
       return (
         <svg {...common}>

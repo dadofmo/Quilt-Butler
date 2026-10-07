@@ -19,3 +19,6 @@
 
 ## Fabric photo rendering
 - Render uploaded and camera-taken fabric photos as a centered crop local to each SVG piece or HTML quilt cell; never use one block-wide photo across separate pieces. Why: each assigned piece must show that fabric photo independently.
+
+## Attic Window construction
+- Use one shared Attic Window renderer across thumbnails, diagrams, and quilt previews; cut a pane, two continuous shadow rectangles, and a two-at-a-time miter HST assembled in two rows. Why: matches the reference without Y-seams and keeps calculations and all views consistent.
