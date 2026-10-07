@@ -59,6 +59,7 @@ describe("Attic Window reference construction", () => {
   it("keeps block cuts unchanged when a border is added around the same inner grid", () => {
     const result = calculateYardage({ ...base, quiltWidth: 52, quiltHeight: 52, borderWidth: 2 });
     expect(result.fabrics.find(f => f.fabric === "A")?.pieces[0].count).toBe(16);
-    expect(result.fabrics.some(f => f.fabric === "E")).toBe(true);
+    // With sashing inactive, the shared border chooser uses the next free slot D.
+    expect(result.fabrics.find(f => f.fabric === "D")?.pieces[0].label).toBe("Border strips");
   });
 });
