@@ -1195,6 +1195,8 @@ function renderInner(
     }
     case "butlers-trellis":
       return <ButlersTrellisBlock size={200} {...butlersTrellisFills(get)} />;
+    case "attic-window":
+      return <AtticWindowBlock size={200} {...atticWindowFills(assignments, photos)} />;
     case "domino-chicken-foot":
       return <DominoChickenFootBlock size={200} bg={get("bg", "A")} primary={get("primary", "B")} accent={get("accent", "C")} />;
     case "arkansas-crossroads":
@@ -3317,4 +3319,32 @@ export function DominoChickenFootBlock({
       )}
     </>
   );
+}
+
+/** Reference construction: pane and casing above a miter HST and sill.
+ * Separate shapes reflect the actual straight-seam pieces, including photos.
+ */
+export function AtticWindowBlock({ size, pane, casing, sill }: {
+  size: number; pane: string; casing: string; sill: string;
+}) {
+  const u = size / 3;
+  const p = 2 * u;
+  return (
+    <>
+      <rect x={u} y={0} width={p} height={p} fill={pane} />
+      <rect x={0} y={0} width={u} height={p} fill={casing} />
+      <polygon points={`0,${p} ${u},${p} 0,${size}`} fill={casing} />
+      <polygon points={`${u},${p} ${u},${size} 0,${size}`} fill={sill} />
+      <rect x={u} y={p} width={p} height={u} fill={sill} />
+    </>
+  );
+}
+
+/** Resolve every default from the registry, shared by all three previews. */
+export function atticWindowFills(assignments: SectionAssignments, photos?: Partial<Record<FabricKey, string>>) {
+  const fill = (id: string) => {
+    const section = getPattern("attic-window")?.sections.find(s => s.id === id);
+    return section ? fabricFill(assignments[id] ?? section.defaultFabric, photos) : "none";
+  };
+  return { pane: fill("pane"), casing: fill("casing"), sill: fill("sill") };
 }

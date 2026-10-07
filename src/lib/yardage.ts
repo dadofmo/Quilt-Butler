@@ -221,11 +221,12 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
+  const isAtticWindow = s.pattern === "attic-window";
   const isDominoChickenFoot = s.pattern === "domino-chicken-foot";
   const isCustomBlock = s.pattern === "custom-block";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -529,6 +530,39 @@ export function calculateYardage(s: PlannerState): CalcResult {
       const totalSash = vSash + hSash;
       if (totalSash > 0) addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
       notes.push(`Sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" from Fabric ${sashFab} — ${vSash} vertical and ${hSash} horizontal. Sew strips only between blocks; add the optional border last. Leave sashing at 0" if you want the secondary star to form where blocks meet.`);
+    }
+  } else if (s.pattern === "attic-window") {
+    // Reference exploded view: upper pane/casing row, lower HST/sill row.
+    // Odd block counts need one extra two-at-a-time HST, never half a square.
+    const u = s.blockSize / 3;
+    const paneCut = 2 * u + SEAM;
+    const shadowCut = u + SEAM;
+    const hstCut = u + HST_EXTRA;
+    const pairs = Math.ceil(blockCount / 2);
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Attic Window section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const pane = fabric("pane"), casing = fabric("casing"), sill = fabric("sill");
+    addSquares(reqs[pane], "Pane squares", blockCount, paneCut, s.fabricWidth);
+    addRails(reqs[casing], "Left casing rectangles", blockCount, paneCut, shadowCut, s.fabricWidth);
+    addRails(reqs[sill], "Bottom sill rectangles", blockCount, paneCut, shadowCut, s.fabricWidth);
+    addSquares(reqs[casing], "Miter HST starting squares", pairs, hstCut, s.fabricWidth);
+    addSquares(reqs[sill], "Miter HST starting squares", pairs, hstCut, s.fabricWidth);
+    notes.push(
+      `Each Attic Window block has one pane square, one left casing rectangle, one bottom sill rectangle and one half-square-triangle miter. The pane finishes at ${(2 * u).toFixed(2)}\" square; the shadows finish ${(u).toFixed(2)}\" wide. This matches the reference using straight seams, with no Y-seams.`,
+      `Cutting per block: one Fabric ${pane} pane square at ${paneCut.toFixed(2)}\"; one Fabric ${casing} casing and one Fabric ${sill} sill rectangle, each ${shadowCut.toFixed(2)}\" × ${paneCut.toFixed(2)}\". Keep each rectangle continuous — do not sub-cut it into smaller squares.`,
+      `Miter corners: cut ${pairs} starting squares each of Fabrics ${casing} and ${sill} at ${hstCut.toFixed(3)}\". Pair one of each right sides together, mark a diagonal, sew 1/4\" on both sides, then cut on the marked line. Open, press toward the darker fabric and trim to ${shadowCut.toFixed(2)}\" square. Make ${pairs * 2} HSTs; use ${blockCount}${blockCount % 2 ? " and set aside the one spare" : ""}.`,
+      `Upper row: place the casing rectangle vertically to the LEFT of the pane square. Sew their matching ${paneCut.toFixed(2)}\" edges with a 1/4\" seam and press toward the casing. The row measures ${(s.blockSize + SEAM).toFixed(2)}\" wide × ${paneCut.toFixed(2)}\" tall.`,
+      `Lower row: orient the miter HST with Fabric ${casing} in its upper-left triangle and Fabric ${sill} in its lower-right triangle, so its diagonal rises from the block's bottom-left toward the pane. Sew the HST to the LEFT end of the horizontal sill rectangle. Press toward the sill.`,
+      `Join the lower row beneath the upper row. Pin where the pane/casing seam meets the HST/sill seam; the two shadow fabrics should meet cleanly at the pane corner. Press the joining seam open and square the block to ${(s.blockSize + SEAM).toFixed(2)}\" unfinished (${s.blockSize}\" finished). Keep all blocks facing the same way, with panes top-right.`,
+      `Quilt layout: ${sashWidth > 0 ? "place sashing only between windows" : "sew the windows edge to edge for the repeating shadowbox effect"}. Add the optional outer border last.`,
+    );
+    if (sashWidth > 0) {
+      const totalSash = Math.max(0, blocksAcross - 1) * blocksDown + Math.max(0, blocksDown - 1) * blocksAcross;
+      if (totalSash > 0) addRails(reqs[fabric("sashing")], "Sashing strips between blocks", totalSash, s.blockSize + SEAM, sashWidth + SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${totalSash} rectangles of Fabric ${fabric("sashing")} at ${(sashWidth + SEAM).toFixed(2)}\" × ${(s.blockSize + SEAM).toFixed(2)}\". Sew vertical strips between blocks in each row; join horizontal strips into rows with seams aligned to block edges, then sew them between block rows. No outer sashing frame.`);
     }
   } else if (s.pattern === "domino-chicken-foot") {
     // 5×5 grid: 12 HSTs (4 A/B, 4 A/C, 4 B/C, all two at a time), 5 plain A
@@ -4815,6 +4849,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "album-cross" ||
     s.pattern === "butlers-trellis" ||
     s.pattern === "arkansas-crossroads" ||
+    s.pattern === "attic-window" ||
     s.pattern === "domino-chicken-foot" ||
     s.pattern === "custom-block";
   // Block-setting note. Rotation-only settings never change piece counts —

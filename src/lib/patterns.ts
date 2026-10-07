@@ -1882,6 +1882,19 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "attic-window",
+    name: "Attic Window",
+    hasMath: true,
+    intro: "A large square pane sits above a bottom sill and beside a left casing. Choose contrasting light and dark fabrics for the casing and sill to create depth. A half-square triangle at the bottom-left gives the appearance of a 45° miter using straight seams — no set-in seams. Add sashing to separate the windows, or leave it at 0\" for an edge-to-edge shadowbox quilt.",
+    sections: [
+      { id: "pane", label: "Pane", defaultFabric: "A", hint: "The large top-right square — ideal for a favourite print. It finishes at two-thirds of the block size." },
+      { id: "casing", label: "Left casing", defaultFabric: "B", hint: "The vertical shadow and upper-left half of the miter. Contrast it with the sill for a dimensional effect." },
+      { id: "sill", label: "Bottom sill", defaultFabric: "C", hint: "The horizontal shadow and lower-right half of the miter. Choose a lighter or darker fabric than the casing." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "D", hint: "Optional separation between windows. Set sashing to 0\" for the edge-to-edge shadowbox effect." },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+  {
     id: "domino-chicken-foot",
     name: "Domino Chicken Foot",
     hasMath: true,
@@ -2038,6 +2051,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "album-cross": { skill: "confident", fabricCount: 4, techniques: ["hst", "squares"] },
   "butlers-trellis": { skill: "intermediate", fabricCount: 7, techniques: ["hst", "squares"] },
   "arkansas-crossroads": { skill: "confident", fabricCount: 5, techniques: ["hst", "squares"] },
+  "attic-window": { skill: "confident", fabricCount: 3, techniques: ["squares", "strips", "hst"] },
   "domino-chicken-foot": { skill: "confident", fabricCount: 3, techniques: ["hst", "squares"] },
   // Metadata for the user-designed block is nominal: the real fabric count and
   // techniques depend on what the user draws, and the tile is surfaced through

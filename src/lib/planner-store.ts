@@ -78,6 +78,7 @@ export type PatternId =
   | "album-cross"
   | "butlers-trellis"
   | "arkansas-crossroads"
+  | "attic-window"
   | "domino-chicken-foot"
   /** The user-designed block from the "Design Your Own Block" editor. */
   | "custom-block";
