@@ -1196,7 +1196,7 @@ function renderInner(
     case "butlers-trellis":
       return <ButlersTrellisBlock size={200} {...butlersTrellisFills(get)} />;
     case "attic-window":
-      return <AtticWindowBlock size={200} {...atticWindowFills(assignments, photos)} />;
+      return <AtticWindowBlock size={200} {...atticWindowFills(a, photos)} />;
     case "domino-chicken-foot":
       return <DominoChickenFootBlock size={200} bg={get("bg", "A")} primary={get("primary", "B")} accent={get("accent", "C")} />;
     case "arkansas-crossroads":

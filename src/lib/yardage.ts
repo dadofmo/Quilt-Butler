@@ -232,8 +232,11 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isSashed = sashWidth > 0;
   const innerW = s.quiltWidth - 2 * s.borderWidth;
   const innerH = s.quiltHeight - 2 * s.borderWidth;
-  const blocksAcross = Math.max(1, Math.floor(innerW / s.blockSize));
-  const blocksDown = Math.max(1, Math.floor(innerH / s.blockSize));
+  // Attic Window fits optional between-block sashing inside the requested top,
+  // matching the shared Size, Fabrics, and Results page grid calculation.
+  const windowSash = isAtticWindow ? sashWidth : 0;
+  const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (s.blockSize + windowSash)));
+  const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (s.blockSize + windowSash)));
   const blockCount = blocksAcross * blocksDown;
   const notes: string[] = [
     `${blocksAcross} × ${blocksDown} = ${blockCount} blocks (${s.blockSize}" finished)`,
