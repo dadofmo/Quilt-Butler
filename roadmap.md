@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Add Attic Window to the pattern library, all previews, and fabric assignments.
+- [ ] Add straight-seam Attic Window cutting, sewing, and optional sashing.
+- [ ] Verify Attic Window math, tests, and live planner.
+
 - [x] Add Album Cross to every planner view.
 - [x] Add exact cutting math and sewing instructions.
 - [x] Add hand-calculated audit coverage.
