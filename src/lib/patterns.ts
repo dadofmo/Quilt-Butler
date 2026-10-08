@@ -1895,6 +1895,19 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "fifty-four-forty-or-fight",
+    name: "54-40 or Fight",
+    hasMath: true,
+    intro: "A historic 3×3 star block featuring 5 four-patches and 4 triangle-in-a-square (V-block) units that create sharp star points and a secondary lattice design.",
+    sections: [
+      { id: "points", label: "Star Points (8 per block)", defaultFabric: "A", hint: "Four mirror-image pairs of narrow side triangles. These are not ordinary half-square triangles." },
+      { id: "accent", label: "Four-Patch Contrast (10 squares per block)", defaultFabric: "B" },
+      { id: "background", label: "Background (4 center triangles + 10 squares)", defaultFabric: "C" },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "D", hint: "Optional strips; leave at 0 for the secondary lattice." },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+  {
     id: "domino-chicken-foot",
     name: "Domino Chicken Foot",
     hasMath: true,
@@ -2052,6 +2065,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "butlers-trellis": { skill: "intermediate", fabricCount: 7, techniques: ["hst", "squares"] },
   "arkansas-crossroads": { skill: "confident", fabricCount: 5, techniques: ["hst", "squares"] },
   "attic-window": { skill: "confident", fabricCount: 3, techniques: ["squares", "strips", "hst"] },
+  "fifty-four-forty-or-fight": { skill: "intermediate", fabricCount: 3, techniques: ["squares", "hst"] },
   "domino-chicken-foot": { skill: "confident", fabricCount: 3, techniques: ["hst", "squares"] },
   // Metadata for the user-designed block is nominal: the real fabric count and
   // techniques depend on what the user draws, and the tile is surfaced through

@@ -246,7 +246,7 @@ function FabricsStepInner() {
             const sashing = isSashed ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
-            const windowSash = pattern.id === "attic-window" ? sashing : 0;
+            const windowSash = (pattern.id === "attic-window" || pattern.id === "fifty-four-forty-or-fight") ? sashing : 0;
             const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (planner.blockSize + windowSash)));
             const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (planner.blockSize + windowSash)));
             const hasCornerstones = isBearPaw && sashing > 0;

@@ -222,11 +222,12 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
+  const isFiftyFourForty = s.pattern === "fifty-four-forty-or-fight";
   const isDominoChickenFoot = s.pattern === "domino-chicken-foot";
   const isCustomBlock = s.pattern === "custom-block";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -234,7 +235,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const innerH = s.quiltHeight - 2 * s.borderWidth;
   // Attic Window fits optional between-block sashing inside the requested top,
   // matching the shared Size, Fabrics, and Results page grid calculation.
-  const windowSash = isAtticWindow ? sashWidth : 0;
+  const windowSash = (isAtticWindow || isFiftyFourForty) ? Math.max(0, s.sashingWidth || 0) : 0;
   const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (s.blockSize + windowSash)));
   const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (s.blockSize + windowSash)));
   const blockCount = blocksAcross * blocksDown;
@@ -534,6 +535,34 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (totalSash > 0) addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
       notes.push(`Sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" from Fabric ${sashFab} — ${vSash} vertical and ${hSash} horizontal. Sew strips only between blocks; add the optional border last. Leave sashing at 0" if you want the secondary star to form where blocks meet.`);
     }
+  } else if (s.pattern === "fifty-four-forty-or-fight") {
+    const u = s.blockSize / 3;
+    const patch = s.blockSize / 6 + SEAM;
+    const blank = u + 1;
+    const sideWidth = u / 2 + 1;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing 54-40 or Fight section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const points = fabric("points"), accent = fabric("accent"), background = fabric("background");
+    addSquares(reqs[accent], "Four-patch contrast squares", 10 * blockCount, patch, s.fabricWidth);
+    addSquares(reqs[background], "Four-patch background squares", 10 * blockCount, patch, s.fabricWidth);
+    addSquares(reqs[background], "V-block center template blanks", 4 * blockCount, blank, s.fabricWidth);
+    addRails(reqs[points], "V-block side template blanks", 8 * blockCount, blank, sideWidth, s.fabricWidth);
+    notes.push(
+      `Each 54-40 or Fight block uses five four-patches and four triangle-in-a-square (V-block) units. These narrow triangles are NOT HSTs: do not use the two-at-a-time HST method or cut the side blanks corner to corner.`,
+      `Cut ten Fabric ${accent} and ten Fabric ${background} squares per block at ${patch.toFixed(3)}". Cut four Fabric ${background} center blanks at ${blank.toFixed(3)}" square and eight Fabric ${points} side blanks at ${sideWidth.toFixed(3)}" × ${blank.toFixed(3)}" per block. Each blank yields ONE template triangle; yardage includes the offcuts.`,
+      `Download the full-size V-block templates below. Print at 100% / Actual size, never Fit to page, and verify the 1" test square. Templates include 1/4" seam allowances and clipped dog ears. A finished V-block is ${u.toFixed(3)}" square; trim assembled units to ${(u + SEAM).toFixed(3)}" unfinished.`,
+      `Cut center triangles with the base on straight grain. Stack side blanks in pairs right sides together and cut with ONE side template to obtain mirrored left and right triangles; or cut four of each handed template per block. Match template seam-line endpoints, not raw tips. Sew the first side to the center with a 1/4" seam, press toward the side, then sew and press the second side. Preserve 1/4" beyond the center point when trimming.`,
+      `Make five four-patches from two contrast and two background squares each. Sew pairs, press toward contrast, then join pairs with seams nested. Each unit measures ${(u + SEAM).toFixed(3)}" unfinished. In the top-left, center and bottom-right units, background occupies the top-left and bottom-right squares; reverse this in the top-right and bottom-left units.`,
+      `Arrange three rows: four-patch / V-block / four-patch; V-block / four-patch / V-block; four-patch / V-block / four-patch. Rotate the V-blocks so the background triangle tips all point toward the center four-patch. Join units into rows, then join rows with a 1/4" seam, pinning intersections and protecting triangle points. Square to ${(s.blockSize + SEAM).toFixed(3)}" unfinished. Keep every block in the same orientation for the secondary lattice.`,
+    );
+    if (windowSash > 0) {
+      const count = Math.max(0, blocksAcross - 1) * blocksDown + Math.max(0, blocksDown - 1) * blocksAcross;
+      if (count) addRails(reqs[fabric("sashing")], "Sashing strips between blocks", count, s.blockSize + SEAM, windowSash + SEAM, s.fabricWidth);
+      notes.push(`Sew Fabric ${fabric("sashing")} strips between blocks, then piece the horizontal sashing runs from the same block-length strips and join rows. No outer sashing frame. Add the optional border last.`);
+    } else notes.push("Join blocks edge to edge for the secondary lattice; add the optional outer border last.");
   } else if (s.pattern === "attic-window") {
     // Reference exploded view: upper pane/casing row, lower HST/sill row.
     // Odd block counts need one extra two-at-a-time HST, never half a square.
@@ -4853,6 +4882,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "butlers-trellis" ||
     s.pattern === "arkansas-crossroads" ||
     s.pattern === "attic-window" ||
+    s.pattern === "fifty-four-forty-or-fight" ||
     s.pattern === "domino-chicken-foot" ||
     s.pattern === "custom-block";
   // Block-setting note. Rotation-only settings never change piece counts —
