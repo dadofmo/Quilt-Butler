@@ -22,3 +22,6 @@
 
 ## Attic Window construction
 - Use one shared Attic Window renderer across thumbnails, diagrams, and quilt previews; cut a pane, two continuous shadow rectangles, and a two-at-a-time miter HST assembled in two rows. Why: matches the reference without Y-seams and keeps calculations and all views consistent.
+
+## 54-40 or Fight construction
+- Use a shared renderer for the five four-patches and four V-blocks; use seam-offset templates cut from conservative blanks for the center and mirrored side triangles, never HST starting-square formulas. Why: the star's narrow points require non-45-degree seams and honest template cutting allowances.

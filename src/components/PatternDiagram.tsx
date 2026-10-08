@@ -4,6 +4,7 @@ import { fabricFill, fabricTileBackgroundStyle } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
+import { FiftyFourFortyBlock, fiftyFourFortyFills } from "./FiftyFourFortyBlock";
 import { CustomBlockShapes } from "./CustomBlockSvg";
 import type { CustomBlockDesign } from "@/lib/custom-block";
 
@@ -1197,6 +1198,8 @@ function renderInner(
       return <ButlersTrellisBlock size={200} {...butlersTrellisFills(get)} />;
     case "attic-window":
       return <AtticWindowBlock size={200} {...atticWindowFills(a, photos)} />;
+    case "fifty-four-forty-or-fight":
+      return <FiftyFourFortyBlock size={200} {...fiftyFourFortyFills(a, photos)} />;
     case "domino-chicken-foot":
       return <DominoChickenFootBlock size={200} bg={get("bg", "A")} primary={get("primary", "B")} accent={get("accent", "C")} />;
     case "arkansas-crossroads":

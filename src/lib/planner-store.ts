@@ -79,6 +79,7 @@ export type PatternId =
   | "butlers-trellis"
   | "arkansas-crossroads"
   | "attic-window"
+  | "fifty-four-forty-or-fight"
   | "domino-chicken-foot"
   /** The user-designed block from the "Design Your Own Block" editor. */
   | "custom-block";
