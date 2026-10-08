@@ -457,6 +457,18 @@ console.log("\n=== Pinwheel: 50×65, 12\" block, no border, 2\" sashing ===");
 // =========================================================================
 console.log("\n=== Attic Window: 48×48, 12\" block ===");
 {
+  const s = { ...base(), pattern: "fifty-four-forty-or-fight" as const, quiltWidth: 48, quiltHeight: 48, blockSize: 12, sashingWidth: 0, safetyBuffer: false };
+  const r = calculateYardage(s);
+  // 16 blocks: 160 2.5-inch squares (17 per strip => 10 strips),
+  // 64 5-inch center blanks (8 per strip => 8 strips),
+  // 128 5x3-inch side blanks (8 per strip => 16 strips).
+  check("54-40 contrast square count", r.fabrics.find(f => f.fabric === "B")?.pieces[0].count ?? 0, 160);
+  check("54-40 contrast inches", r.fabrics.find(f => f.fabric === "B")?.totalInches ?? 0, 25);
+  check("54-40 background inches", r.fabrics.find(f => f.fabric === "C")?.totalInches ?? 0, 65);
+  check("54-40 point blank count", r.fabrics.find(f => f.fabric === "A")?.pieces[0].count ?? 0, 128);
+  check("54-40 point inches", r.fabrics.find(f => f.fabric === "A")?.totalInches ?? 0, 48);
+}
+{
   const s = { ...base(), pattern: "attic-window" as const, quiltWidth: 48, quiltHeight: 48, blockSize: 12, sashingWidth: 0 };
   // 16 panes @8.5: five/strip, four strips =34 inches.
   // Each shadow: 16 rectangles @8.5×4.5, five/strip, four strips =18 inches;
