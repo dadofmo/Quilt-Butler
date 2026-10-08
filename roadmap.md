@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Add 54-40 or Fight to all built-in pattern views with reference geometry.
+- [ ] Add V-block cutting and straight-seam assembly instructions.
+- [ ] Verify new pattern counts, dimensions, existing tests, math audit and live previews.
+
 - [x] Add Attic Window to the pattern library, all previews, and fabric assignments.
 - [x] Add straight-seam Attic Window cutting, sewing, and optional sashing.
 - [x] Verify Attic Window math, tests, and live planner.
