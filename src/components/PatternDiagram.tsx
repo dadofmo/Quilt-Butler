@@ -55,7 +55,7 @@ export function PatternDiagram({ pattern, assignments, hasBorder, size = 280, ph
     >
       <div className="bg-card flex h-full w-full items-center justify-center rounded">
         <svg width={size - 40} height={size - 40} viewBox="0 0 200 200">
-          {/* Each shape receives its own centered crop of the fabric photo. */}
+          {/* Fabric photos share one fixed scale across every piece. */}
           <FabricPatternDefs photos={photos} />
           {pattern === "custom-block"
             ? customBlock && <CustomBlockShapes design={customBlock} photos={photos} />

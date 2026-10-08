@@ -355,7 +355,7 @@ export function QuiltCanvas({
         role="img"
         aria-label="QuiltButler quilt visualizer showing fabric color preview of finished quilt layout"
       >
-        {/* Each shape receives its own centered crop of the fabric photo. */}
+        {/* Fabric photos share one fixed scale across every piece. */}
         <FabricPatternDefs photos={photos} />
         <FabricPatternDefs photos={photos} idSuffix="-sash" tileSize={sashTile} />
         {/* Sashing background fills the inner rectangle so all gaps
