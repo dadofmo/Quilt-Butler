@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { FabricPatternDefs } from "./FabricPatternDefs";
+import { FabricPatternDefs, FABRIC_TILE_UNITS } from "./FabricPatternDefs";
 import { CustomBlockShapes } from "./CustomBlockSvg";
 import { swapFabrics, fabricsUsed, resolveSwapPair, customCellVariant, type CustomBlockDesign } from "@/lib/custom-block";
 import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ArkansasCrossroadsBlock, DominoChickenFootBlock, AtticWindowBlock, atticWindowFills, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
@@ -324,8 +324,13 @@ export function QuiltCanvas({
   const cellW = (innerW - sashCols * sashPxX) / Math.max(1, blocksAcross);
   const cellH = (innerH - sashRows * sashPxY) / Math.max(1, blocksDown);
 
-  const sashingFill = fabricFill(sashingFabric, photos);
-  const cornerFill = cornerstoneFabric ? fabricFill(cornerstoneFabric, photos) : null;
+  // Sashing/cornerstones live in quilt-pixel space, so they get their own
+  // photo pattern scaled to match the block pieces (64 of 200 block units).
+  const sashTile = (cellW * FABRIC_TILE_UNITS) / 200;
+  const sashFillFor = (k: FabricKey) =>
+    photos?.[k] ? `url(#fabric-${k}-sash)` : fabricFill(k, photos);
+  const sashingFill = sashFillFor(sashingFabric);
+  const cornerFill = cornerstoneFabric ? sashFillFor(cornerstoneFabric) : null;
 
   const borderTilePx = Math.max(8, Math.round(cellW * 0.4));
 
@@ -350,8 +355,9 @@ export function QuiltCanvas({
         role="img"
         aria-label="QuiltButler quilt visualizer showing fabric color preview of finished quilt layout"
       >
-        {/* Each shape receives its own centered crop of the fabric photo. */}
+        {/* Fabric photos share one fixed scale across every piece. */}
         <FabricPatternDefs photos={photos} />
+        <FabricPatternDefs photos={photos} idSuffix="-sash" tileSize={sashTile} />
         {/* Sashing background fills the inner rectangle so all gaps
             between blocks (and around the inside edge) show the sashing
             fabric color. The block tiles draw on top, leaving sashing
