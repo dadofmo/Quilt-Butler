@@ -11,7 +11,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
-import { FabricPatternDefs } from "./FabricPatternDefs";
+import { FabricPatternDefs, FABRIC_TILE_UNITS } from "./FabricPatternDefs";
 import { CustomBlockShapes } from "./CustomBlockSvg";
 import { swapFabrics, fabricsUsed, resolveSwapPair, customCellVariant, type CustomBlockDesign } from "@/lib/custom-block";
 import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ArkansasCrossroadsBlock, DominoChickenFootBlock, AtticWindowBlock, atticWindowFills, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
