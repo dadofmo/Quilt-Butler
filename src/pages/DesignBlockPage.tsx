@@ -497,7 +497,7 @@ function DesignBlockInner() {
                     className={`border transition-colors ${
                       fits ? "hover:bg-primary/20" : "cursor-not-allowed"
                     } ${
-                      filled ? "border-border/40" : "border-dashed border-primary/60 bg-muted/40"
+                      filled ? "border-transparent" : "border-dashed border-primary/60 bg-muted/40"
                     }`}
                   />
                 );

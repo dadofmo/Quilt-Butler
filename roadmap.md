@@ -1,5 +1,8 @@
 # Roadmap
 
+- [x] Update fabric swatch helper text to the requested photo/gallery wording.
+- [x] Correct fabric photo joins and verify aligned print across adjoining block pieces.
+
 - [x] Add 54-40 or Fight to all built-in pattern views with reference geometry.
 - [x] Add V-block cutting and straight-seam assembly instructions.
 - [x] Verify new pattern counts, dimensions, existing tests, math audit and live previews.
