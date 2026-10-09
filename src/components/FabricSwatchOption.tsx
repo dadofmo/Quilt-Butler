@@ -62,8 +62,7 @@ export function FabricSwatchOption({
       </button>
 
       <p className="text-muted-foreground text-[10px] leading-tight">
-        If you have the actual fabric, take a photo and upload it from your
-        gallery.
+        Snap a photo or pick from your gallery to bring your fabric into the design.
       </p>
 
       <input
