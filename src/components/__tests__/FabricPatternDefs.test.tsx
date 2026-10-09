@@ -11,9 +11,9 @@ describe("FabricPatternDefs", () => {
     );
     expect(markup).toContain('patternUnits="userSpaceOnUse"');
     expect(markup).not.toContain("objectBoundingBox");
-    expect(markup).toContain(`width="${2 * FABRIC_TILE_UNITS}"`);
-    // Mirrored 2x2 repeat hides tile edges (no false seams).
-    expect(markup.match(/<image/g)?.length).toBe(4);
+    expect(markup).toContain(`width="${FABRIC_TILE_UNITS}"`);
+    // One orientation avoids reflected motif folds inside pieces.
+    expect(markup.match(/<image/g)?.length).toBe(1);
   });
 
   it("honours a custom tile size for sashing scaled to quilt pixels", () => {
@@ -23,6 +23,6 @@ describe("FabricPatternDefs", () => {
       </svg>,
     );
     expect(markup).toMatch(/id="[^"]+-fabric-B"/);
-    expect(markup).toContain('width="40"');
+    expect(markup).toContain('width="20"');
   });
 });

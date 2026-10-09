@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Diagnose and correct remaining photographed-fabric artifacts across custom piece shapes; verify in the browser.
+
 - [x] Update fabric swatch helper text to the requested photo/gallery wording.
 - [x] Correct fabric photo joins and verify aligned print across adjoining block pieces.
 

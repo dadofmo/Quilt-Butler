@@ -6,6 +6,7 @@ import {
 } from "@/lib/planner-store";
 import { fabricTileBackgroundStyle } from "@/lib/fabric-fill";
 import { FABRIC_TILE_UNITS } from "./FabricPatternDefs";
+import { useFabricTextures } from "@/hooks/use-fabric-textures";
 
 /**
  * Fabric photos share a repeat scale and origin across adjoining cells.
@@ -73,6 +74,7 @@ export function PatchworkPreview({
   sashingWidth = 0,
   sashingFabric,
 }: Props) {
+  const textures = useFabricTextures(photos);
   const { rows, cols } = useMemo(
     () => computeGridShape(quiltWidth, quiltHeight, blockSize, borderWidth),
     [quiltWidth, quiltHeight, blockSize, borderWidth],
@@ -156,7 +158,7 @@ export function PatchworkPreview({
           aspectRatio: `${outerW} / ${outerH}`,
           padding: showBorder ? `${borderPct}%` : 0,
           ...(showBorder && borderFabric
-            ? fabricTileBackgroundStyle(borderFabric, tilePx, photos)
+            ? fabricTileBackgroundStyle(borderFabric, tilePx, textures)
             : {}),
         }}
         role="group"
@@ -168,7 +170,7 @@ export function PatchworkPreview({
             gridTemplateColumns: colTracks.join(" "),
             gridTemplateRows: rowTracks.join(" "),
             ...(showSash && sashingFabric
-              ? fabricTileBackgroundStyle(sashingFabric, tilePx, photos)
+              ? fabricTileBackgroundStyle(sashingFabric, tilePx, textures)
               : {}),
           }}
           role="grid"
@@ -190,7 +192,7 @@ export function PatchworkPreview({
                   style={{
                     gridColumn: `${colTrack} / span 1`,
                     gridRow: `${rowTrack} / span 1`,
-                    ...fabricTileBackgroundStyle(fab, tilePx, photos),
+                    ...fabricTileBackgroundStyle(fab, tilePx, textures),
                     backgroundPosition: `${-c * (blockPx + sashPx)}px ${-r * (blockPx + sashPx)}px`,
                   }}
                 />

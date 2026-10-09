@@ -18,7 +18,7 @@
 - 5x5 row-by-row: 12 HSTs made two at a time (A/B, A/C, B/C), rows 2 and 4 centre B cells cut as one continuous 1x3 bar, other cells plain squares; rotation layouts only. Why: fewer seams without breaking straight-row assembly.
 
 ## Fabric photo rendering
-- Fabric photos use user-space SVG patterns at one fixed scale (FABRIC_TILE_UNITS per 200-unit block) with a mirrored 2x2 repeat; quilt sashing/cornerstones get a pixel-scaled copy. Why: identical print size across strips, squares and triangles without false seams.
+- Fabric photos use cached edge-matched square textures without mirrored repeats, at one fixed user-space scale; HTML quilt surfaces use the same prepared textures and pixel-scaled repeat. Why: preserves print orientation and scale without reflected motif bands inside pieces.
 - FabricPatternDefs scopes photo IDs and cancels shape-to-root transforms before paint so adjoining translated or rotated units sample one continuous fabric plane; quilt patterns use the pixel-scaled tile size. Why: local SVG transforms and duplicate IDs otherwise restart or distort prints at piece edges.
 
 ## Attic Window construction

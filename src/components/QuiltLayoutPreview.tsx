@@ -3,6 +3,7 @@ import type { PatternId, SectionAssignments, FabricKey, BlockLayout } from "@/li
 import { rotationFor } from "@/lib/block-layouts";
 import { FABRIC_COLORS } from "@/lib/planner-store";
 import { fabricFill, fabricTileBackgroundStyle } from "@/lib/fabric-fill";
+import { useFabricTextures } from "@/hooks/use-fabric-textures";
 import { getPattern } from "@/lib/patterns";
 import {
   Dialog,
@@ -309,6 +310,7 @@ export function QuiltCanvas({
   customSwapPair = null,
   maxSize,
 }: CanvasProps & { maxSize: number }) {
+  const textures = useFabricTextures(photos);
   const MAX = maxSize;
   const aspect = quiltWidth / quiltHeight;
   const thumbW = aspect >= 1 ? MAX : Math.round(MAX * aspect);
@@ -333,7 +335,7 @@ export function QuiltCanvas({
   const sashingFill = sashFillFor(sashingFabric);
   const cornerFill = cornerstoneFabric ? sashFillFor(cornerstoneFabric) : null;
 
-  const borderTilePx = Math.max(8, Math.round(cellW * 0.4));
+  const borderTilePx = sashTile;
 
   return (
     <div
@@ -344,7 +346,7 @@ export function QuiltCanvas({
         height: thumbH,
         padding: `${borderPxY}px ${borderPxX}px`,
         ...(hasBorder
-          ? fabricTileBackgroundStyle(borderFabric, borderTilePx, photos)
+          ? fabricTileBackgroundStyle(borderFabric, borderTilePx, textures)
           : { backgroundColor: "transparent", backgroundImage: "none" }),
       }}
     >
