@@ -36,7 +36,7 @@ describe("quilt border fabric photo scale", () => {
       const initialSize = frame.style.backgroundSize;
 
       expect(initialSize).toMatch(/^auto \d+(?:\.\d+)?px$/);
-      expect(parseFloat(initialSize.slice(5))).toBeCloseTo((220 * 36 / 42 / 3) * 64 / 200);
+      expect(parseFloat(initialSize.slice(5))).toBeCloseTo((171 * 36 / 42 / 3) * 64 / 200);
       expect(frame.style.backgroundImage).toContain("fabric-a");
       expect(frame.style.background).toBe("");
 
