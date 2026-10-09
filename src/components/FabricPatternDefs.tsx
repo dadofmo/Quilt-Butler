@@ -54,6 +54,8 @@ export function FabricPatternDefs({ photos, idSuffix = "", tileSize = FABRIC_TIL
       }
       defs.appendChild(pattern);
       shape.setAttribute('fill', `url(#${id})`);
+      // Shared edges must not blend with the canvas and appear as pale seams.
+      shape.setAttribute('shape-rendering', 'crispEdges');
     });
   });
   if (!photos) return null;
