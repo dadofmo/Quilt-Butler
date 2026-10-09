@@ -4,12 +4,11 @@ import {
   FABRIC_COLORS,
   type FabricKey,
 } from "@/lib/planner-store";
-import { fabricBackgroundStyle, fabricTileBackgroundStyle } from "@/lib/fabric-fill";
+import { fabricTileBackgroundStyle } from "@/lib/fabric-fill";
+import { FABRIC_TILE_UNITS } from "./FabricPatternDefs";
 
 /**
- * Fabric photos in quilt cells are individually centered and cropped so a
- * camera image cannot spread across neighboring blocks. Border and sashing
- * remain repeated lengths of fabric.
+ * Fabric photos share a repeat scale and origin across adjoining cells.
  */
 interface Props {
   /** Number of distinct fabrics to cycle through (2–12). */
@@ -132,7 +131,8 @@ export function PatchworkPreview({
   const borderPxRendered = showBorder ? (borderPct / 100) * containerPx : 0;
   const innerPxRendered = Math.max(1, containerPx - 2 * borderPxRendered);
   const blockPx = innerW > 0 ? (innerPxRendered / innerW) * blockSize : 32;
-  const tilePx = Math.max(12, Math.round(blockPx * 0.4));
+  const tilePx = blockPx * FABRIC_TILE_UNITS / 200;
+  const sashPx = showSash ? innerPxRendered * sashingWidth / innerW : 0;
 
   // Build column/row template tracks: alternating block | sashing | block ...
   const colTracks: string[] = [];
@@ -190,7 +190,8 @@ export function PatchworkPreview({
                   style={{
                     gridColumn: `${colTrack} / span 1`,
                     gridRow: `${rowTrack} / span 1`,
-                    ...fabricBackgroundStyle(fab, photos),
+                    ...fabricTileBackgroundStyle(fab, tilePx, photos),
+                    backgroundPosition: `${-c * (blockPx + sashPx)}px ${-r * (blockPx + sashPx)}px`,
                   }}
                 />
               );

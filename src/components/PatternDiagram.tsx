@@ -1306,9 +1306,6 @@ function IdahoBeautyBlock({
       <Diamond k="ib-diamond-bottom" x={p2} y={p3} />
       <rect x={p3} y={p3} width={core} height={core} fill={solid} />
 
-      {showGrid && (
-        
-      )}
     </>
   );
 }
