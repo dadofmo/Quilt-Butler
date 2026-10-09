@@ -1,5 +1,6 @@
 import { useId, useLayoutEffect, useRef } from "react";
 import { ALL_FABRIC_KEYS, type FabricKey } from "@/lib/planner-store";
+import { useFabricTextures } from "@/hooks/use-fabric-textures";
 
 /** Photo repeat size in the shared 200-unit block space (~one third of a block). */
 export const FABRIC_TILE_UNITS = 64;
@@ -17,13 +18,14 @@ interface Props {
  * The photo is laid out in user space at ONE fixed scale, so a strip, a
  * square and a triangle cut from the same fabric show motifs at the same
  * size and flow continuously across neighbouring pieces — like a real bolt.
- * Each repeat is mirrored (2×2 flip) so tile edges always match and never
- * draw a false seam through a piece.
+ * Photo edges are blended once before repeating, without reflecting motifs
+ * into pinched dots or stripe-like folds inside a piece.
  *
  * Place this as the FIRST child inside the root <svg> of any diagram
  * that wants to render uploaded fabric photos.
  */
 export function FabricPatternDefs({ photos, idSuffix = "", tileSize = FABRIC_TILE_UNITS }: Props) {
+  const textures = useFabricTextures(photos);
   const scope = useId().replace(/:/g, "");
   const defsRef = useRef<SVGDefsElement>(null);
   // A user-space pattern normally follows each shape's local transform.
@@ -65,9 +67,9 @@ export function FabricPatternDefs({ photos, idSuffix = "", tileSize = FABRIC_TIL
   return (
     <defs ref={defsRef}>
       {entries.map((k) => {
-        const href = photos[k];
+        const href = textures?.[k];
         if (!href) return null;
-        const img = (transform?: string) => (
+        const img = () => (
           <image
             href={href}
             xlinkHref={href}
@@ -76,7 +78,6 @@ export function FabricPatternDefs({ photos, idSuffix = "", tileSize = FABRIC_TIL
             width={t}
             height={t}
             preserveAspectRatio="xMidYMid slice"
-            transform={transform}
           />
         );
         return (
@@ -84,15 +85,12 @@ export function FabricPatternDefs({ photos, idSuffix = "", tileSize = FABRIC_TIL
             key={k}
             id={`${scope}-fabric-${k}`}
             patternUnits="userSpaceOnUse"
-            width={2 * t}
-            height={2 * t}
+            width={t}
+            height={t}
             x={0}
             y={0}
           >
             {img()}
-            {img(`translate(${2 * t} 0) scale(-1 1)`)}
-            {img(`translate(0 ${2 * t}) scale(1 -1)`)}
-            {img(`translate(${2 * t} ${2 * t}) scale(-1 -1)`)}
           </pattern>
         );
       })}
