@@ -240,12 +240,7 @@ function renderInner(
           {/* Center square */}
           <rect x={u} y={u} width={u} height={u} fill={center} />
           {/* Subtle 3×3 unit grid lines so beginners can see the construction */}
-          <g stroke="white" strokeWidth={1} opacity={0.6}>
-            <line x1={u} y1={0} x2={u} y2={200} />
-            <line x1={2 * u} y1={0} x2={2 * u} y2={200} />
-            <line x1={0} y1={u} x2={200} y2={u} />
-            <line x1={0} y1={2 * u} x2={200} y2={2 * u} />
-          </g>
+          
         </>
       );
     }
@@ -292,10 +287,7 @@ function renderInner(
           <rect x={0} y={5 * u} width={u} height={u} fill={center} />
           <rect x={5 * u} y={5 * u} width={u} height={u} fill={center} />
           {/* Subtle grid lines marking the slice points (original 9-patch cuts) */}
-          <g stroke="white" strokeWidth={1.5} opacity={0.7}>
-            <line x1={3 * u} y1={0} x2={3 * u} y2={200} />
-            <line x1={0} y1={3 * u} x2={200} y2={3 * u} />
-          </g>
+          
         </>
       );
     }
@@ -312,9 +304,7 @@ function renderInner(
           <polygon points="100,0 200,100 100,200 0,100" fill={sq} />
           {/* Subtle guide lines along the diamond edges so beginners can see
               the corner triangles as separate pieces. */}
-          <g stroke="white" strokeWidth={1.5} opacity={0.6} fill="none">
-            <polygon points="100,0 200,100 100,200 0,100" />
-          </g>
+          
         </>
       );
     }
@@ -341,12 +331,7 @@ function renderInner(
           )}
           {/* Subtle 3×3 grid lines so beginners can see each square as a
               separate cut piece. */}
-          <g stroke="white" strokeWidth={1} opacity={0.6}>
-            <line x1={u} y1={0} x2={u} y2={200} />
-            <line x1={2 * u} y1={0} x2={2 * u} y2={200} />
-            <line x1={0} y1={u} x2={200} y2={u} />
-            <line x1={0} y1={2 * u} x2={200} y2={2 * u} />
-          </g>
+          
         </>
       );
     }
@@ -430,12 +415,7 @@ function renderInner(
           {/* Center */}
           <rect x={u} y={u} width={u} height={u} fill={center} />
           {/* Subtle 3×3 grid lines */}
-          <g stroke="white" strokeWidth={1} opacity={0.6}>
-            <line x1={u} y1={0} x2={u} y2={200} />
-            <line x1={2 * u} y1={0} x2={2 * u} y2={200} />
-            <line x1={0} y1={u} x2={200} y2={u} />
-            <line x1={0} y1={2 * u} x2={200} y2={2 * u} />
-          </g>
+          
         </>
       );
     }
@@ -466,12 +446,7 @@ function renderInner(
               />
             )),
           )}
-          <g stroke="white" strokeWidth={1} opacity={0.6}>
-            <line x1={u} y1={0} x2={u} y2={200} />
-            <line x1={2 * u} y1={0} x2={2 * u} y2={200} />
-            <line x1={0} y1={u} x2={200} y2={u} />
-            <line x1={0} y1={2 * u} x2={200} y2={2 * u} />
-          </g>
+          
         </>
       );
     }
@@ -505,14 +480,7 @@ function renderInner(
             </g>
           ))}
           {/* Subtle 4×4 grid lines so beginners can see the construction */}
-          <g stroke="white" strokeWidth={1} opacity={0.5}>
-            {[1, 2, 3].map((k) => (
-              <g key={k}>
-                <line x1={k * u} y1={0} x2={k * u} y2={200} />
-                <line x1={0} y1={k * u} x2={200} y2={k * u} />
-              </g>
-            ))}
-          </g>
+          
         </>
       );
     }
@@ -545,14 +513,7 @@ function renderInner(
             </g>
           ))}
           {/* Subtle 3×3 grid lines so beginners can see the construction */}
-          <g stroke="white" strokeWidth={1} opacity={0.5}>
-            {[1, 2].map((k) => (
-              <g key={k}>
-                <line x1={k * u} y1={0} x2={k * u} y2={200} />
-                <line x1={0} y1={k * u} x2={200} y2={k * u} />
-              </g>
-            ))}
-          </g>
+          
         </>
       );
     }
@@ -597,10 +558,7 @@ function renderInner(
           <rect x={100} y={0} width={100} height={100} fill={tr} />
           <rect x={0} y={100} width={100} height={100} fill={bl} />
           <rect x={100} y={100} width={100} height={100} fill={br} />
-          <g stroke="white" strokeWidth={1.5} opacity={0.6}>
-            <line x1={100} y1={0} x2={100} y2={200} />
-            <line x1={0} y1={100} x2={200} y2={100} />
-          </g>
+          
         </>
       );
     }
@@ -644,10 +602,7 @@ function renderInner(
           <rect x={0} y={100} width={100} height={100} fill={b} />
           <rect x={100} y={100} width={100} height={100} fill={a} />
           {/* Subtle 2×2 grid lines so beginners can see the patch seams */}
-          <g stroke="white" strokeWidth={1.5} opacity={0.6}>
-            <line x1={100} y1={0} x2={100} y2={200} />
-            <line x1={0} y1={100} x2={200} y2={100} />
-          </g>
+          
           {/* On-point knot: diagonal = 50% of block. Corners at midpoints of
               the inner patch edges → (100,50), (150,100), (100,150), (50,100). */}
           <polygon points="100,50 150,100 100,150 50,100" fill={knot} stroke="white" strokeWidth={1} />
@@ -688,14 +643,7 @@ function renderInner(
             </g>
           ))}
           {/* Subtle 3×3 grid lines so beginners can see the construction */}
-          <g stroke="white" strokeWidth={1} opacity={0.5}>
-            {[1, 2].map((k) => (
-              <g key={k}>
-                <line x1={k * u} y1={0} x2={k * u} y2={200} />
-                <line x1={0} y1={k * u} x2={200} y2={k * u} />
-              </g>
-            ))}
-          </g>
+          
         </>
       );
     }
@@ -739,21 +687,9 @@ function renderInner(
         <>
           {nodes}
           {/* Subtle 6×6 grid lines so beginners can see the construction */}
-          <g stroke="white" strokeWidth={1} opacity={0.35}>
-            {[1, 2, 3, 4, 5].map((k) => (
-              <g key={k}>
-                <line x1={k * u} y1={0} x2={k * u} y2={200} />
-                <line x1={0} y1={k * u} x2={200} y2={k * u} />
-              </g>
-            ))}
-          </g>
+          
           {/* Slightly stronger sub-block boundaries (2u grid) */}
-          <g stroke="white" strokeWidth={2} opacity={0.7}>
-            <line x1={2 * u} y1={0} x2={2 * u} y2={200} />
-            <line x1={4 * u} y1={0} x2={4 * u} y2={200} />
-            <line x1={0} y1={2 * u} x2={200} y2={2 * u} />
-            <line x1={0} y1={4 * u} x2={200} y2={4 * u} />
-          </g>
+          
         </>
       );
     }
@@ -792,14 +728,7 @@ function renderInner(
               />
             )),
           )}
-          <g stroke="white" strokeWidth={1} opacity={0.5}>
-            {[1, 2, 3].map((k) => (
-              <g key={k}>
-                <line x1={k * u} y1={0} x2={k * u} y2={200} />
-                <line x1={0} y1={k * u} x2={200} y2={k * u} />
-              </g>
-            ))}
-          </g>
+          
         </>
       );
     }
@@ -845,14 +774,7 @@ function renderInner(
             ));
           })}
           {/* Subtle 3×3 grid lines to help beginners see the construction */}
-          <g stroke="white" strokeWidth={1} opacity={0.35}>
-            {[1, 2].map((k) => (
-              <g key={k}>
-                <line x1={k * U} y1={0} x2={k * U} y2={200} />
-                <line x1={0} y1={k * U} x2={200} y2={k * U} />
-              </g>
-            ))}
-          </g>
+          
         </>
       );
     }
@@ -909,14 +831,7 @@ function renderInner(
             }),
           )}
           {/* Subtle 4×4 grid lines so beginners can see the construction */}
-          <g stroke="white" strokeWidth={1} opacity={0.5}>
-            {[1, 2, 3].map((k) => (
-              <g key={k}>
-                <line x1={k * u} y1={0} x2={k * u} y2={200} />
-                <line x1={0} y1={k * u} x2={200} y2={k * u} />
-              </g>
-            ))}
-          </g>
+          
         </>
       );
     }
@@ -976,14 +891,7 @@ function renderInner(
             ));
           })}
           {/* Subtle 3×3 grid lines so beginners can see the construction */}
-          <g stroke="white" strokeWidth={1} opacity={0.45}>
-            {[1, 2].map((k) => (
-              <g key={k}>
-                <line x1={k * U} y1={0} x2={k * U} y2={200} />
-                <line x1={0} y1={k * U} x2={200} y2={k * U} />
-              </g>
-            ))}
-          </g>
+          
         </>
       );
     }
@@ -1399,28 +1307,7 @@ function IdahoBeautyBlock({
       <rect x={p3} y={p3} width={core} height={core} fill={solid} />
 
       {showGrid && (
-        <g stroke="white" strokeWidth={0.75} opacity={0.35} fill="none">
-          {grid.map((pos) => (
-            <g key={pos}>
-              <line x1={pos} y1={0} x2={pos} y2={size} />
-              <line x1={0} y1={pos} x2={size} y2={pos} />
-            </g>
-          ))}
-          {[
-            [p1 + core / 2, p0, p1 + core / 2, p1],
-            [p3 + core / 2, p0, p3 + core / 2, p1],
-            [p1 + core / 2, p4, p1 + core / 2, p5],
-            [p3 + core / 2, p4, p3 + core / 2, p5],
-            [p0, p1 + core / 2, p1, p1 + core / 2],
-            [p0, p3 + core / 2, p1, p3 + core / 2],
-            [p4, p1 + core / 2, p5, p1 + core / 2],
-            [p4, p3 + core / 2, p5, p3 + core / 2],
-          ].map(([x1, y1, x2, y2], k) => (
-            <g key={k}>
-              <line x1={x1} y1={y1} x2={x2} y2={y2} />
-            </g>
-          ))}
-        </g>
+        
       )}
     </>
   );
