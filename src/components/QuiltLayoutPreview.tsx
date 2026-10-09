@@ -357,7 +357,7 @@ export function QuiltCanvas({
         aria-label="QuiltButler quilt visualizer showing fabric color preview of finished quilt layout"
       >
         {/* Fabric photos share one fixed scale across every piece. */}
-        <FabricPatternDefs photos={photos} />
+        <FabricPatternDefs photos={photos} tileSize={sashTile} />
         <FabricPatternDefs photos={photos} idSuffix="-sash" tileSize={sashTile} />
         {/* Sashing background fills the inner rectangle so all gaps
             between blocks (and around the inside edge) show the sashing

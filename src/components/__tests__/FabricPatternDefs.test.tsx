@@ -22,7 +22,7 @@ describe("FabricPatternDefs", () => {
         <FabricPatternDefs photos={{ B: "x" }} idSuffix="-sash" tileSize={20} />
       </svg>,
     );
-    expect(markup).toContain('id="fabric-B-sash"');
+    expect(markup).toMatch(/id="[^"]+-fabric-B"/);
     expect(markup).toContain('width="40"');
   });
 });

@@ -19,6 +19,7 @@
 
 ## Fabric photo rendering
 - Fabric photos use user-space SVG patterns at one fixed scale (FABRIC_TILE_UNITS per 200-unit block) with a mirrored 2x2 repeat; quilt sashing/cornerstones get a pixel-scaled copy. Why: identical print size across strips, squares and triangles without false seams.
+- FabricPatternDefs scopes photo IDs and cancels shape-to-root transforms before paint so adjoining translated or rotated units sample one continuous fabric plane; quilt patterns use the pixel-scaled tile size. Why: local SVG transforms and duplicate IDs otherwise restart or distort prints at piece edges.
 
 ## Attic Window construction
 - Use one shared Attic Window renderer across thumbnails, diagrams, and quilt previews; cut a pane, two continuous shadow rectangles, and a two-at-a-time miter HST assembled in two rows. Why: matches the reference without Y-seams and keeps calculations and all views consistent.
