@@ -34,3 +34,4 @@
 - [x] Clarify Star & Cross as four continuous cross arms, four construction-valid corner runs, and separate squares.
 - [x] Verify Star & Cross cutting math, diagrams, instructions, and live results.- [x] Remove the row-by-row sewing step for framed custom blocks.
 - [x] Add Butler's Trellis (8×8 studio pattern) with previews, Studio Pick tile, cutting math, sewing steps, and tests.
+- [x] Remove repeat bands from camera fabric photos (print-repeat crop + lighting flattening).
