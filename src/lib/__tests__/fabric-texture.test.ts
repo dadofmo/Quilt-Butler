@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { seamlessFabricPixels } from "../fabric-texture";
+import { detectPrintRepeat, seamlessFabricPixels } from "../fabric-texture";
 
 describe("photographed fabric repeats", () => {
   const width = 64;
@@ -34,5 +34,29 @@ describe("photographed fabric repeats", () => {
       expect(pixel(output, x, y)[0] - pixel(output, x + 1, y)[0]).toBeGreaterThanOrEqual(38);
       expect(pixel(output, x, y)[3]).toBe(255);
     }
+  });
+});
+describe("print repeat detection", () => {
+  const side = 128;
+  const dots = (period: number) => Float64Array.from({ length: side * side }, (_, i) => {
+    const x = i % side, y = Math.floor(i / side);
+    const dx = ((x % period) + period) % period - period / 2;
+    const dy = ((y % period) + period) % period - period / 2;
+    return 80 + x * 0.3 + (dx * dx + dy * dy < (period / 4) ** 2 ? 120 : 0);
+  });
+  it("finds a whole number of polka-dot repeats on both axes", () => {
+    const repeat = detectPrintRepeat(dots(10), side);
+    expect(repeat.x).not.toBeNull();
+    expect(repeat.y).not.toBeNull();
+    expect(Math.abs(repeat.x! / 10 - Math.round(repeat.x! / 10))).toBeLessThan(0.05);
+    expect(Math.abs(repeat.y! / 10 - Math.round(repeat.y! / 10))).toBeLessThan(0.05);
+  });
+  it("finds no repeat in an irregular print", () => {
+    let seed = 7;
+    const noise = Float64Array.from({ length: side * side }, () => {
+      seed = (seed * 1103515245 + 12345) % 2147483648;
+      return seed / 2147483648 * 255;
+    });
+    expect(detectPrintRepeat(noise, side)).toEqual({ x: null, y: null });
   });
 });
