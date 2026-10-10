@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Correct the remaining pale repeat bands in fabric photos and verify custom-block rendering.
+
 - [x] Diagnose and correct remaining photographed-fabric artifacts across custom piece shapes; verify in the browser.
 
 - [x] Update fabric swatch helper text to the requested photo/gallery wording.
