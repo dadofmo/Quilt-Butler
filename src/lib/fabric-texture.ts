@@ -108,6 +108,35 @@ export function detectPrintRepeat(gray: Float64Array, side: number): { x: number
   return { x: axis(true), y: axis(false) };
 }
 
+/**
+ * Photographed lighting gain per pixel: average brightness divided by a wide
+ * box-blurred brightness. Wide enough to span many motifs, so it evens out
+ * shadows and lamp falloff without flattening the print itself.
+ */
+export function lightingGain(gray: Float64Array, side: number, radius = Math.max(4, side >> 3)) {
+  const stride = side + 1;
+  const sum = new Float64Array(stride * stride);
+  let total = 0;
+  for (let y = 0; y < side; y++) {
+    let row = 0;
+    for (let x = 0; x < side; x++) {
+      row += gray[y * side + x];
+      sum[(y + 1) * stride + x + 1] = sum[y * stride + x + 1] + row;
+    }
+    total += row;
+  }
+  const mean = total / (side * side);
+  const gain = new Float64Array(side * side);
+  for (let y = 0; y < side; y++) for (let x = 0; x < side; x++) {
+    const x0 = Math.max(0, x - radius), x1 = Math.min(side, x + radius + 1);
+    const y0 = Math.max(0, y - radius), y1 = Math.min(side, y + radius + 1);
+    const local = (sum[y1 * stride + x1] - sum[y0 * stride + x1] - sum[y1 * stride + x0] + sum[y0 * stride + x0]) /
+      ((x1 - x0) * (y1 - y0));
+    gain[y * side + x] = local > 1 ? Math.min(2.5, mean / local) : 1;
+  }
+  return gain;
+}
+
 const textures = new Map<string, Promise<string>>();
 
 /** Prepare one lighting-corrected square repeat per photo, not per piece. */
@@ -136,26 +165,43 @@ export function fabricTexture(url: string): Promise<string> {
         const gray = new Float64Array(side * side);
         for (let i = 0; i < side * side; i++)
           gray[i] = 0.299 * sample[4 * i] + 0.587 * sample[4 * i + 1] + 0.114 * sample[4 * i + 2];
-        const repeat = detectPrintRepeat(gray, side);
-        if (repeat.x || repeat.y) {
-          const scale = crop / side;
-          const lagX = repeat.x ?? side;
-          const lagY = repeat.y ?? side;
-          const copiesX = Math.max(1, Math.round(side / lagX));
-          const copiesY = Math.max(1, Math.round(side / lagY));
-          const sourceWidth = lagX * scale;
-          const sourceHeight = lagY * scale;
-          const sourceLeft = left + (crop - sourceWidth) / 2;
-          const sourceTop = top + (crop - sourceHeight) / 2;
-          context.clearRect(0, 0, side, side);
-          for (let row = 0; row < copiesY; row++) for (let column = 0; column < copiesX; column++) {
-            const x0 = Math.round(column * side / copiesX);
-            const x1 = Math.round((column + 1) * side / copiesX);
-            const y0 = Math.round(row * side / copiesY);
-            const y1 = Math.round((row + 1) * side / copiesY);
-            context.drawImage(image, sourceLeft, sourceTop, sourceWidth, sourceHeight, x0, y0, x1 - x0, y1 - y0);
+        // Even out camera lighting first; otherwise each repeated copy keeps
+        // its own bright-to-dark ramp and the quilt shows soft stripes.
+        const gain = lightingGain(gray, side);
+        const flat = new Float64Array(side * side);
+        for (let i = 0; i < side * side; i++) flat[i] = gray[i] * gain[i];
+        const repeat = detectPrintRepeat(flat, side);
+        const lagX = repeat.x ?? side;
+        const lagY = repeat.y ?? side;
+        const copiesX = Math.max(1, Math.round(side / lagX));
+        const copiesY = Math.max(1, Math.round(side / lagY));
+        const scale = crop / side;
+        const startX = (side - lagX) / 2;
+        const startY = (side - lagY) / 2;
+        context.clearRect(0, 0, side, side);
+        for (let row = 0; row < copiesY; row++) for (let column = 0; column < copiesX; column++) {
+          const x0 = Math.round(column * side / copiesX);
+          const x1 = Math.round((column + 1) * side / copiesX);
+          const y0 = Math.round(row * side / copiesY);
+          const y1 = Math.round((row + 1) * side / copiesY);
+          context.drawImage(image, left + startX * scale, top + startY * scale, lagX * scale, lagY * scale,
+            x0, y0, x1 - x0, y1 - y0);
+        }
+        const drawn = context.getImageData(0, 0, side, side);
+        for (let y = 0; y < side; y++) {
+          const copyY = Math.min(copiesY - 1, Math.floor(y * copiesY / side));
+          const y0 = Math.round(copyY * side / copiesY), y1 = Math.round((copyY + 1) * side / copiesY);
+          const sy = Math.min(side - 1, Math.max(0, Math.round(startY + (y - y0 + 0.5) / (y1 - y0) * lagY)));
+          for (let x = 0; x < side; x++) {
+            const copyX = Math.min(copiesX - 1, Math.floor(x * copiesX / side));
+            const x0 = Math.round(copyX * side / copiesX), x1 = Math.round((copyX + 1) * side / copiesX);
+            const sx = Math.min(side - 1, Math.max(0, Math.round(startX + (x - x0 + 0.5) / (x1 - x0) * lagX)));
+            const g = gain[sy * side + sx];
+            const i = 4 * (y * side + x);
+            drawn.data[i] *= g; drawn.data[i + 1] *= g; drawn.data[i + 2] *= g;
           }
         }
+        context.putImageData(drawn, 0, 0);
         const pixels = context.getImageData(0, 0, side, side);
         pixels.data.set(seamlessFabricPixels(pixels.data, side, side));
         context.putImageData(pixels, 0, 0);
