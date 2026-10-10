@@ -18,8 +18,8 @@ interface Props {
  * The photo is laid out in user space at ONE fixed scale, so a strip, a
  * square and a triangle cut from the same fabric show motifs at the same
  * size and flow continuously across neighbouring pieces — like a real bolt.
- * Photo edges are blended once before repeating, without reflecting motifs
- * into pinched dots or stripe-like folds inside a piece.
+ * Smooth lighting differences are removed before repeating; motifs are never
+ * mirrored or crossfaded into ghost dots or stripe-like folds inside a piece.
  *
  * Place this as the FIRST child inside the root <svg> of any diagram
  * that wants to render uploaded fabric photos.
