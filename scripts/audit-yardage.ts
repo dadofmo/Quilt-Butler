@@ -2920,6 +2920,33 @@ console.log("\n=== Butler's Trellis: 32×32, 16\" block (4 blocks) ===");
   check("BT G centre cut", g("G").pieces[0].w, 4.5);
 }
 
+console.log("\n=== Chocolate Cake: whole diamonds, four-at-a-time geese, continuous bars ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "chocolate-cake", quiltWidth: 48, quiltHeight: 48 });
+  const frame = r.fabrics.find(f => f.fabric === "A");
+  const points = r.fabrics.find(f => f.fabric === "B");
+  const center = r.fabrics.find(f => f.fabric === "C");
+  const bg = r.fabrics.find(f => f.fabric === "D");
+  if (!frame || !points || !center || !bg) throw new Error("Chocolate Cake fabric missing");
+  // 16 blocks; 64 diamonds at 3.328427..., 64 bars at 4.5×2.5.
+  // Diamond strips: ceil(64/12)=6. Bar strips: ceil(64/9)=8.
+  check("Cake diamond count", frame.pieces[0].count, 64);
+  check("Cake diamond size", frame.pieces[0].w, 3.32842712474619);
+  check("Cake continuous bar count", frame.pieces[1].count, 64);
+  check("Cake frame inches", frame.totalInches, 39.97056274847714);
+  check("Cake goose large squares", points.pieces[0].count, 16);
+  check("Cake goose cut", points.pieces[0].w, 5.25);
+  check("Cake points inches", points.totalInches, 10.5);
+  check("Cake centre count", center.pieces[0].count, 16);
+  check("Cake centre inches", center.totalInches, 9);
+  check("Cake triangle squares", bg.pieces[0].count, 128);
+  check("Cake wing squares", bg.pieces[1].count, 64);
+  check("Cake background inches", bg.totalInches, 43.125);
+  const sashed = calculateYardage({ ...base(), pattern: "chocolate-cake", quiltWidth: 50, quiltHeight: 50, sashingWidth: 2 });
+  check("Cake sashed centre count", sashed.fabrics.find(f => f.fabric === "C")?.pieces[0].count ?? -1, 9);
+  check("Cake between-block sashing", sashed.fabrics.find(f => f.fabric === "E")?.pieces[0].count ?? -1, 12);
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {

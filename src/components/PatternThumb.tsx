@@ -1,6 +1,7 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FiftyFourFortyBlock, fiftyFourFortyFills } from "./FiftyFourFortyBlock";
+import { ChocolateCakeBlock, chocolateCakeFills } from "./ChocolateCakeBlock";
 import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ArkansasCrossroadsBlock, DominoChickenFootBlock, AtticWindowBlock, atticWindowFills, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
 
 
@@ -133,6 +134,7 @@ const PATTERN_ALT: Record<PatternId, string> = {
     "Butler's Trellis quilt block diagram — an 8x8 block with a large centre square framed by four inner bars, a diamond band of half-square triangles, outer bars on each edge, a background lattice and small corner squares",
   "attic-window": "Attic Window quilt block with a large top-right pane, left casing and bottom sill meeting at a diagonal miter",
   "fifty-four-forty-or-fight": "54-40 or Fight star block with five four-patches and four triangle-in-a-square units",
+  "chocolate-cake": "Chocolate Cake block with four corner diamonds, a framed centre square and four outward flying-geese points",
   "domino-chicken-foot":
     "Domino Chicken Foot quilt block diagram — a 5x5 block with a ring of squares around a light centre and half-square-triangle claws reaching out from the corners and sides",
   "arkansas-crossroads":
@@ -1066,6 +1068,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return <svg {...common}><AtticWindowBlock size={90} {...atticWindowFills({})} /></svg>;
     case "fifty-four-forty-or-fight":
       return <svg {...common}><FiftyFourFortyBlock size={90} {...fiftyFourFortyFills({})} /></svg>;
+    case "chocolate-cake":
+      return <svg {...common}><ChocolateCakeBlock size={90} {...chocolateCakeFills({})} /></svg>;
     case "domino-chicken-foot":
       return (
         <svg {...common}>

@@ -1895,6 +1895,20 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "chocolate-cake",
+    name: "Chocolate Cake",
+    hasMath: true,
+    intro: "Four on-point corner diamonds surround a framed centre square, with flying-geese points facing outward on each side. Choose four contrasting fabrics to highlight the diamonds, continuous framing bars, centre and background. Optional sashing separates the blocks; without it, the corner diamonds and points link across the quilt.",
+    sections: [
+      { id: "frame", label: "Corner diamonds & framing bars", defaultFabric: "A", hint: "Four dark diamonds and four continuous bars around the centre." },
+      { id: "points", label: "Outward triangle points", defaultFabric: "B", hint: "Four flying-geese triangles facing the block edges." },
+      { id: "center", label: "Centre square", defaultFabric: "C", hint: "One unpieced square in the middle." },
+      { id: "background", label: "Background", defaultFabric: "D", hint: "The triangles around the diamonds and flying-geese wings." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "E", hint: "Optional separation; set to 0 for an edge-to-edge quilt." },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
+  {
     id: "fifty-four-forty-or-fight",
     name: "54-40 or Fight",
     hasMath: true,
@@ -2065,6 +2079,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "butlers-trellis": { skill: "intermediate", fabricCount: 7, techniques: ["hst", "squares"] },
   "arkansas-crossroads": { skill: "confident", fabricCount: 5, techniques: ["hst", "squares"] },
   "attic-window": { skill: "confident", fabricCount: 3, techniques: ["squares", "strips", "hst"] },
+  "chocolate-cake": { skill: "intermediate", fabricCount: 4, techniques: ["squares", "geese", "onpoint"] },
   "fifty-four-forty-or-fight": { skill: "intermediate", fabricCount: 3, techniques: ["squares", "hst"] },
   "domino-chicken-foot": { skill: "confident", fabricCount: 3, techniques: ["hst", "squares"] },
   // Metadata for the user-designed block is nominal: the real fabric count and

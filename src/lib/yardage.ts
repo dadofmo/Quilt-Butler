@@ -223,11 +223,12 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
   const isFiftyFourForty = s.pattern === "fifty-four-forty-or-fight";
+  const isChocolateCake = s.pattern === "chocolate-cake";
   const isDominoChickenFoot = s.pattern === "domino-chicken-foot";
   const isCustomBlock = s.pattern === "custom-block";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -235,7 +236,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const innerH = s.quiltHeight - 2 * s.borderWidth;
   // Attic Window fits optional between-block sashing inside the requested top,
   // matching the shared Size, Fabrics, and Results page grid calculation.
-  const windowSash = (isAtticWindow || isFiftyFourForty) ? Math.max(0, s.sashingWidth || 0) : 0;
+  const windowSash = (isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
   const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (s.blockSize + windowSash)));
   const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (s.blockSize + windowSash)));
   const blockCount = blocksAcross * blocksDown;
@@ -535,6 +536,39 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (totalSash > 0) addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
       notes.push(`Sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" from Fabric ${sashFab} — ${vSash} vertical and ${hSash} horizontal. Sew strips only between blocks; add the optional border last. Leave sashing at 0" if you want the secondary star to form where blocks meet.`);
     }
+  } else if (s.pattern === "chocolate-cake") {
+    const u = s.blockSize / 6;
+    const unitCut = 2 * u + SEAM;
+    const railHeight = u + SEAM;
+    const diamondCut = 2 * u / Math.SQRT2 + SEAM;
+    const triangleCut = u + HST_EXTRA;
+    const gooseLarge = 2 * u + 1.25;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Chocolate Cake section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const frame = fabric("frame"), points = fabric("points"), center = fabric("center"), bg = fabric("background");
+    addSquares(reqs[center], "Centre squares", blockCount, unitCut, s.fabricWidth);
+    addSquares(reqs[frame], "Corner diamond squares", 4 * blockCount, diamondCut, s.fabricWidth);
+    addRails(reqs[frame], "Continuous framing bars", 4 * blockCount, unitCut, railHeight, s.fabricWidth);
+    addSquares(reqs[bg], "Diamond corner triangle squares||cut each ONCE diagonally to yield two triangles", 8 * blockCount, triangleCut, s.fabricWidth);
+    addSquares(reqs[points], "Four-at-a-time flying-geese large squares", blockCount, gooseLarge, s.fabricWidth);
+    addSquares(reqs[bg], "Four-at-a-time flying-geese wing squares", 4 * blockCount, triangleCut, s.fabricWidth);
+    notes.push(
+      `Chocolate Cake uses a 6×6 design assembled as nine square units: four square-in-a-square corners, four flying-geese-and-bar side units, and one centre square. Each unit finishes ${(2 * u).toFixed(3)}" square. Keep the diamonds and framing bars unpieced; no Y-seams are needed.`,
+      `Per block, cut one Fabric ${center} centre square at ${unitCut.toFixed(3)}"; four Fabric ${frame} diamond squares at ${diamondCut.toFixed(3)}" and four continuous bars at ${railHeight.toFixed(3)}" × ${unitCut.toFixed(3)}". The diamond square size is (block size ÷ 3 ÷ √2) + 1/2"; keep this precision rather than rounding down.`,
+      `Corner units: cut eight Fabric ${bg} squares per block at ${triangleCut.toFixed(3)}" and cut each ONCE diagonally to make sixteen triangles. Mark midpoints of the diamond square edges and triangle long edges. Match midpoints right sides together; sew triangles to two opposite sides with 1/4" seams, press outward, then add the other two. Do not stretch the bias edges. Trim each of the four units to ${unitCut.toFixed(3)}" square, keeping 1/4" beyond all four diamond tips.`,
+      `Flying geese — four at a time with no discarded stitch-and-flip corners: use one Fabric ${points} large square at ${gooseLarge.toFixed(3)}" and four Fabric ${bg} small squares at ${triangleCut.toFixed(3)}" per block. Draw one diagonal on every small square. Place two on opposite corners of the large square, right sides together, with the marked lines aligned and small squares overlapping at the middle. Sew 1/4" on each side of the line, cut on the line and press the wings outward.`,
+      `Place one remaining small square on the unfilled corner of each resulting unit. Sew 1/4" on both sides of its diagonal, cut on the line and press outward. This yields four geese. Remove dog ears and check each measures ${unitCut.toFixed(3)}" × ${railHeight.toFixed(3)}", with 1/4" beyond the triangle tip. These standard starting sizes require accurate scant 1/4" seams; check one set before chain-piecing the rest.`,
+      `Side units: sew the long base of each goose to one continuous framing bar, with the triangle pointing AWAY from the bar. Press toward the bar. Each side unit measures ${unitCut.toFixed(3)}" square unfinished.`,
+      `Arrange three rows: diamond corner / top side unit / diamond corner; left side unit / centre square / right side unit; diamond corner / bottom side unit / diamond corner. Rotate side units so all geese point toward the OUTSIDE block edges and all bars face the centre. Sew units into rows, press the top and bottom row seams toward the corners and the middle row seams toward the centre, then nest and pin intersections before joining rows. Press row seams open to reduce bulk. Check the block measures ${(s.blockSize + SEAM).toFixed(3)}" square unfinished.`,
+    );
+    if (windowSash > 0) {
+      const count = Math.max(0, blocksAcross - 1) * blocksDown + Math.max(0, blocksDown - 1) * blocksAcross;
+      if (count) addRails(reqs[fabric("sashing")], "Sashing strips between blocks", count, s.blockSize + SEAM, windowSash + SEAM, s.fabricWidth);
+      notes.push(`Join blocks with Fabric ${fabric("sashing")} sashing only between blocks. Piece horizontal sashing runs from the listed block-length strips; there is no outer sashing frame. Add the optional border last.`);
+    } else notes.push("Join Chocolate Cake blocks edge to edge in the same orientation, protecting the diamond and goose points. Add the optional border last.");
   } else if (s.pattern === "fifty-four-forty-or-fight") {
     const u = s.blockSize / 3;
     const patch = s.blockSize / 6 + SEAM;
@@ -4883,6 +4917,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "arkansas-crossroads" ||
     s.pattern === "attic-window" ||
     s.pattern === "fifty-four-forty-or-fight" ||
+    s.pattern === "chocolate-cake" ||
     s.pattern === "domino-chicken-foot" ||
     s.pattern === "custom-block";
   // Block-setting note. Rotation-only settings never change piece counts —

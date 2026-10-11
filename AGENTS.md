@@ -27,3 +27,6 @@
 ## 54-40 or Fight construction
 - Use a shared renderer for the five four-patches and four V-blocks; use seam-offset templates cut from conservative blanks for the center and mirrored side triangles, never HST starting-square formulas. Why: the star's narrow points require non-45-degree seams and honest template cutting allowances.
 - Generate actual-size cutting PDFs on demand with a lazy-loaded PDF library and a one-inch calibration square. Why: users need correct non-45-degree templates without guessing cutting angles or slowing the initial pattern picker.
+
+## Chocolate Cake construction
+- Use one shared block renderer for all previews; assemble four square-in-a-square corners, four four-at-a-time flying-geese-and-continuous-bar side units, and one centre as a three-row macro layout. Why: preserves the reference diamonds and straight seams without splitting diamonds or wasting stitch-and-flip offcuts.
