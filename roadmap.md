@@ -1,5 +1,9 @@
 # Roadmap
 
+- [ ] Add Chocolate Cake with reference-matching shared previews and fabric choices.
+- [ ] Add construction-aware cuts, sewing instructions, and concrete math tests.
+- [ ] Verify the math audit, tests, and live planner.
+
 - [x] Correct fabric D’s gingham border rendering and verify against the supplied screenshot.
 
 - [x] Correct the remaining pale repeat bands in fabric photos and verify custom-block rendering.
