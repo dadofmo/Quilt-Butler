@@ -34,6 +34,7 @@ export type PatternId =
   | "plus-block"
   | "pinwheel"
   | "double-pinwheel"
+  | "chocolate-cake"
   | "churn-dash"
   | "bear-paw"
   | "irish-chain"

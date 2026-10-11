@@ -64,6 +64,7 @@ export const PATTERN_DIFFICULTY: Record<PatternId, 1 | 2 | 3 | 4 | 5> = {
   "arkansas-crossroads": 2,
   "domino-chicken-foot": 2,
   "attic-window": 2,
+  "chocolate-cake": 3,
   "fifty-four-forty-or-fight": 3,
 };
 
