@@ -46,10 +46,18 @@ describe("print repeat detection", () => {
   });
   it("finds a whole number of polka-dot repeats on both axes", () => {
     const repeat = detectPrintRepeat(dots(10), side);
-    expect(repeat.x).not.toBeNull();
-    expect(repeat.y).not.toBeNull();
-    expect(Math.abs(repeat.x! / 10 - Math.round(repeat.x! / 10))).toBeLessThan(0.05);
-    expect(Math.abs(repeat.y! / 10 - Math.round(repeat.y! / 10))).toBeLessThan(0.05);
+    if (repeat.x === null || repeat.y === null) throw new Error("Missing dot repeat");
+    expect(Math.abs(repeat.x / 10 - Math.round(repeat.x / 10))).toBeLessThan(0.05);
+    expect(Math.abs(repeat.y / 10 - Math.round(repeat.y / 10))).toBeLessThan(0.05);
+  });
+  it("uses the small full gingham repeat instead of a patch-sized multiple", () => {
+    const checks = Float64Array.from({ length: side * side }, (_, i) => {
+      const x = i % side, y = Math.floor(i / side);
+      return 100 + 45 * Math.cos(2 * Math.PI * x / 8) + 45 * Math.cos(2 * Math.PI * y / 8);
+    });
+    const repeat = detectPrintRepeat(checks, side);
+    expect(repeat.x).toBeCloseTo(8, 1);
+    expect(repeat.y).toBeCloseTo(8, 1);
   });
   it("finds no repeat in an irregular print", () => {
     let seed = 7;
