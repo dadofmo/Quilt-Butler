@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Correct fabric D’s gingham border rendering and verify against the supplied screenshot.
+- [x] Correct fabric D’s gingham border rendering and verify against the supplied screenshot.
 
 - [x] Correct the remaining pale repeat bands in fabric photos and verify custom-block rendering.
 
