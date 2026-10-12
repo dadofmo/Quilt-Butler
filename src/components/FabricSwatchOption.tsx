@@ -1,4 +1,7 @@
-import { useRef } from "react";
+import { Check, useRef } from "react";
+import {
+  Check as CheckIcon,
+} from "lucide-react";
 import {
   FABRIC_COLORS,
   FABRIC_LABELS,
@@ -42,16 +45,21 @@ export function FabricSwatchOption({
 
   return (
     <div
-      className={`flex flex-col items-stretch gap-1.5 rounded-lg border-2 p-2 transition-all ${
+      className={`relative flex flex-col items-stretch gap-1.5 rounded-lg border-2 p-2 transition-all ${
         selected
-          ? "border-primary ring-primary/20 ring-2"
-          : "border-border hover:border-muted-foreground"
+          ? "border-primary ring-primary ring-offset-background ring-2 ring-offset-2"
+          : "border-border opacity-70 hover:border-muted-foreground hover:opacity-100"
       }`}
     >
+      {selected && (
+        <span className="bg-primary text-primary-foreground absolute -top-2 -right-2 z-10 flex h-5 w-5 items-center justify-center rounded-full">
+          <Check className="h-3.5 w-3.5" aria-hidden />
+        </span>
+      )}
       <button
         type="button"
         onClick={onSelect}
-        aria-label={FABRIC_LABELS[fabricKey]}
+        aria-label={`${FABRIC_LABELS[fabricKey]}${selected ? " (selected)" : ""}`}
         className="flex flex-col items-center gap-1 text-sm font-medium"
       >
         <span
