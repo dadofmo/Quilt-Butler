@@ -67,4 +67,13 @@ describe("print repeat detection", () => {
     });
     expect(detectPrintRepeat(noise, side)).toEqual({ x: null, y: null });
   });
+  it("does not mistake smooth floral motifs for a two-pixel repeat", () => {
+    const flowers = Float64Array.from({ length: side * side }, (_, i) => {
+      const x = i % side, y = Math.floor(i / side);
+      return 180 - 60 * Math.exp(-((x - 23) ** 2 + (y - 37) ** 2) / 180)
+        - 45 * Math.exp(-((x - 85) ** 2 + (y - 91) ** 2) / 290)
+        - 35 * Math.exp(-((x - 101) ** 2 + (y - 19) ** 2) / 100);
+    });
+    expect(detectPrintRepeat(flowers, side)).toEqual({ x: null, y: null });
+  });
 });

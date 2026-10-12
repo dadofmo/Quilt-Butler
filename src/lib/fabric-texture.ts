@@ -97,14 +97,25 @@ export function detectPrintRepeat(gray: Float64Array, side: number): { x: number
     const r = (lag: number) => output[2 * lag] / (side - lag) / zero;
     const low = 2;
     const high = Math.floor(side * 0.65);
+    // Neighbouring pixels in a flower are similar, but that is NOT a print
+    // repeat. Require correlation to fall into a valley and rise to a real
+    // interior peak before allowing a crop (never crop a descending shoulder).
+    const isRepeatPeak = (lag: number) => {
+      if (r(lag) <= r(lag - 1) || r(lag) < r(lag + 1)) return false;
+      let valley = r(1);
+      for (let i = 2; i < lag; i++) valley = Math.min(valley, r(i));
+      return r(lag) - valley >= 0.15;
+    };
     let best = -1;
-    for (let lag = low; lag <= high; lag++) if (best < 0 || r(lag) > r(best)) best = lag;
+    for (let lag = low; lag < high; lag++) {
+      if (isRepeatPeak(lag) && (best < 0 || r(lag) > r(best))) best = lag;
+    }
     if (best < low || best >= high || r(best) < 0.45) return null;
     // Prefer the fundamental repeat over a large multiple. Large crops keep
     // small phase/lighting differences that become patchwork bands on gingham.
     const threshold = Math.max(0.65, r(best) * 0.9);
     for (let lag = low; lag < best; lag++) {
-      if (r(lag) >= threshold && r(lag) > r(lag - 1) && r(lag) >= r(lag + 1)) {
+      if (r(lag) >= threshold && isRepeatPeak(lag)) {
         best = lag;
         break;
       }

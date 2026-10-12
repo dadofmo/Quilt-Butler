@@ -18,7 +18,7 @@
 - 5x5 row-by-row: 12 HSTs made two at a time (A/B, A/C, B/C), rows 2 and 4 centre B cells cut as one continuous 1x3 bar, other cells plain squares; rotation layouts only. Why: fewer seams without breaking straight-row assembly.
 
 ## Fabric photo rendering
-- Fabric photos use cached square textures: correct source lighting before resampling, crop regular prints to their shortest reliable full repeat (including dense gingham), then periodic-plus-smooth correction; no edge crossfades or mirrored repeats, one fixed user-space scale; HTML quilt surfaces use the same prepared textures. Why: large repeat multiples retain phase differences and separately resampled gain maps add patch-like bands.
+- Fabric photos use cached square textures: correct source lighting before resampling, crop regular prints only at genuine correlation peaks with a preceding valley, choosing the shortest reliable full repeat, then periodic-plus-smooth correction; no edge crossfades or mirrored repeats, one fixed user-space scale; HTML quilt surfaces use the same prepared textures. Why: adjacent-pixel similarity in florals is not a repeat and can crop away motifs; large repeat multiples and separately resampled gain maps add patch-like bands.
 - FabricPatternDefs scopes photo IDs and cancels shape-to-root transforms before paint so adjoining translated or rotated units sample one continuous fabric plane; quilt patterns use the pixel-scaled tile size. Why: local SVG transforms and duplicate IDs otherwise restart or distort prints at piece edges.
 
 ## Attic Window construction
