@@ -1,7 +1,5 @@
-import { Check, useRef } from "react";
-import {
-  Check as CheckIcon,
-} from "lucide-react";
+import { useRef } from "react";
+import { Check } from "lucide-react";
 import {
   FABRIC_COLORS,
   FABRIC_LABELS,
