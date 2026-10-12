@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { FlipHorizontal2, RotateCw, Undo2 } from "lucide-react";
+import { Check, FlipHorizontal2, RotateCw, Undo2 } from "lucide-react";
 import { StepShell } from "@/components/StepShell";
 import { CustomBlockSvg } from "@/components/CustomBlockSvg";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
@@ -428,25 +428,35 @@ function DesignBlockInner() {
             <div key={label}>
               <div className="text-foreground mb-1 text-sm font-medium">{label}</div>
               <div className="flex flex-wrap gap-2">
-                {BLOCK_FABRICS.map((f) => (
-                  <button
-                    key={f}
-                    type="button"
-                    onClick={() => {
-                      const next = [...regionFabrics];
-                      next[i] = f;
-                      setRegionFabrics(next);
-                    }}
-                    aria-pressed={regionFabrics[i] === f}
-                    aria-label={`${label}: Fabric ${f}`}
-                    className={`flex h-9 w-9 items-center justify-center rounded-md border-2 text-xs font-bold ${
-                      regionFabrics[i] === f ? "border-primary" : "border-border"
-                    }`}
-                    style={fabricBackgroundStyle(f, planner.fabricPhotos)}
-                  >
-                    <span className="rounded bg-background/80 px-1">{f}</span>
-                  </button>
-                ))}
+                {BLOCK_FABRICS.map((f) => {
+                  const chipSelected = regionFabrics[i] === f;
+                  return (
+                    <button
+                      key={f}
+                      type="button"
+                      onClick={() => {
+                        const next = [...regionFabrics];
+                        next[i] = f;
+                        setRegionFabrics(next);
+                      }}
+                      aria-pressed={chipSelected}
+                      aria-label={`${label}: Fabric ${f}${chipSelected ? " (selected)" : ""}`}
+                      className={`relative flex h-10 w-10 items-center justify-center rounded-md border-2 text-xs font-bold transition-all ${
+                        chipSelected
+                          ? "border-primary ring-primary ring-offset-background scale-105 ring-2 ring-offset-2"
+                          : "border-border opacity-60 hover:opacity-100"
+                      }`}
+                      style={fabricBackgroundStyle(f, planner.fabricPhotos)}
+                    >
+                      <span className="rounded bg-background/80 px-1">{f}</span>
+                      {chipSelected && (
+                        <span className="bg-primary text-primary-foreground absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full">
+                          <Check className="h-3 w-3" aria-hidden />
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ))}
