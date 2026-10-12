@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Prevent false print-repeat crops from removing floral motifs; verify fabric B in the browser and repeat tests.
+- [x] Prevent false print-repeat crops from removing floral motifs; verified fabric B in the Chocolate Cake block, repeat tests, and all 1,011 tests.
 
 - [x] Add Chocolate Cake with reference-matching shared previews and fabric choices.
 - [x] Add construction-aware cuts, sewing instructions, and concrete math tests.
