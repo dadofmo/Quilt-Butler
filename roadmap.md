@@ -44,3 +44,4 @@
 - [x] Add Butler's Trellis (8×8 studio pattern) with previews, Studio Pick tile, cutting math, sewing steps, and tests.
 - [x] Remove repeat bands from camera fabric photos (print-repeat crop + lighting flattening).
 - [x] Raise the advertised pattern count from 50+ to 60+ across site metadata, llms.txt, and the glossary, and guard it with a test.
+- [x] Stop fine-weave fabric photos (gray knit) smearing into flat light/dark bands.

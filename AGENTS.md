@@ -19,6 +19,7 @@
 
 ## Fabric photo rendering
 - Fabric photos use cached square textures: correct source lighting before resampling, crop regular prints only at genuine correlation peaks with a preceding valley, choosing the shortest reliable full repeat, then periodic-plus-smooth correction; no edge crossfades or mirrored repeats, one fixed user-space scale; HTML quilt surfaces use the same prepared textures. Why: adjacent-pixel similarity in florals is not a repeat and can crop away motifs; large repeat multiples and separately resampled gain maps add patch-like bands.
+- Build textures via `repeatTilePixels`: widen tiny repeats to a whole multiple of at least side/16, make ONE repeat seamless, then lay copies by wrap-around sampling. Why: fine weaves report 2–6 px repeats that smear into flat bands, and seam-correcting only the outer tile leaves steps at every internal copy join.
 - FabricPatternDefs scopes photo IDs and cancels shape-to-root transforms before paint so adjoining translated or rotated units sample one continuous fabric plane; quilt patterns use the pixel-scaled tile size. Why: local SVG transforms and duplicate IDs otherwise restart or distort prints at piece edges.
 
 ## Attic Window construction
