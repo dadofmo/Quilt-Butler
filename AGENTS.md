@@ -18,8 +18,8 @@
 - 5x5 row-by-row: 12 HSTs made two at a time (A/B, A/C, B/C), rows 2 and 4 centre B cells cut as one continuous 1x3 bar, other cells plain squares; rotation layouts only. Why: fewer seams without breaking straight-row assembly.
 
 ## Fabric photo rendering
-- Fabric photos use cached square textures: correct source lighting before resampling, crop regular prints only at genuine correlation peaks with a preceding valley, choosing the shortest reliable full repeat, then periodic-plus-smooth correction; no edge crossfades or mirrored repeats, one fixed user-space scale; HTML quilt surfaces use the same prepared textures. Why: adjacent-pixel similarity in florals is not a repeat and can crop away motifs; large repeat multiples and separately resampled gain maps add patch-like bands.
-- Build textures via `repeatTilePixels`: widen tiny repeats to a whole multiple of at least side/16, make ONE repeat seamless, then lay copies by wrap-around sampling. Why: fine weaves report 2–6 px repeats that smear into flat bands, and seam-correcting only the outer tile leaves steps at every internal copy join.
+- Uploads/camera shots go through `prepareFabricPhoto` (downscaled JPEG) before storage. Why: raw phone photos overflow saved planner storage and alias fine weaves.
+- `buildFabricTile` evens lighting with a quadratic fit, builds candidate tiles (exact-edge seamless, averaged-edge seamless, detected print-repeat crop), measures each with `tileArtifacts`, and keeps the cleanest faithful one; never trust one method for every print. Delivered tiles are box-halved to at most 256 px. Why: every single-method fix failed on some fabric (dots, gingham, florals, knits); the battery test in fabric-tile-battery.test.ts must pass for all fabric types, lights and framings.
 - FabricPatternDefs scopes photo IDs and cancels shape-to-root transforms before paint so adjoining translated or rotated units sample one continuous fabric plane; quilt patterns use the pixel-scaled tile size. Why: local SVG transforms and duplicate IDs otherwise restart or distort prints at piece edges.
 
 ## Attic Window construction

@@ -6,7 +6,7 @@ import FFT from "fft.js";
  * The correction is harmonic inside the image, so it cannot add an edge band.
  * Dimensions must be powers of two (the prepared canvas guarantees this).
  */
-export function seamlessFabricPixels(source: Uint8ClampedArray, width: number, height: number) {
+export function seamlessFabricPixels(source: Uint8ClampedArray, width: number, height: number, averagedEdges = false) {
   const output = new Uint8ClampedArray(source);
   if (width < 2 || height < 2 || (width & (width - 1)) || (height & (height - 1))) return output;
   const horizontal = new FFT(width);
@@ -42,13 +42,23 @@ export function seamlessFabricPixels(source: Uint8ClampedArray, width: number, h
   for (let channel = 0; channel < 3; channel++) {
     field.fill(0);
     const at = (x: number, y: number) => source[(y * width + x) * 4 + channel];
+    // Exact mode matches edge pixels (best for smooth prints). Averaged mode
+    // measures each jump from a few pixels, extrapolated to the edge, so a
+    // fine weave whose rib phase differs at the two edges is NOT mistaken for
+    // a lighting jump (that would paint a light-to-dark ramp across each tile).
+    const jumpAcross = (n: number, sample: (i: number) => number) => {
+      const k = averagedEdges ? Math.max(1, Math.min(8, n >> 3)) : 1;
+      let first = 0, last = 0;
+      for (let i = 0; i < k; i++) { first += sample(i); last += sample(n - 1 - i); }
+      return (last - first) / k * (n - 1) / (n - k);
+    };
     for (let x = 0; x < width; x++) {
-      const jump = at(x, height - 1) - at(x, 0);
+      const jump = jumpAcross(height, y => at(x, y));
       field[2 * x] += jump;
       field[2 * ((height - 1) * width + x)] -= jump;
     }
     for (let y = 0; y < height; y++) {
-      const jump = at(width - 1, y) - at(0, y);
+      const jump = jumpAcross(width, x => at(x, y));
       field[2 * y * width] += jump;
       field[2 * (y * width + width - 1)] -= jump;
     }
@@ -129,30 +139,47 @@ export function detectPrintRepeat(gray: Float64Array, side: number): { x: number
 }
 
 /**
- * Photographed lighting gain per pixel: average brightness divided by a wide
- * box-blurred brightness. Wide enough to span many motifs, so it evens out
- * shadows and lamp falloff without flattening the print itself.
+ * Photographed lighting gain per pixel. A low-order (quadratic) surface is
+ * fitted to log brightness and divided out: it follows lamp falloff, shadows
+ * and vignetting across the photo, but is far too smooth to follow motifs, so
+ * a large dark flower or a wide stripe is never "corrected" away.
  */
-export function lightingGain(gray: Float64Array, side: number, radius = Math.max(4, side >> 3)) {
-  const stride = side + 1;
-  const sum = new Float64Array(stride * stride);
-  let total = 0;
-  for (let y = 0; y < side; y++) {
-    let row = 0;
-    for (let x = 0; x < side; x++) {
-      row += gray[y * side + x];
-      sum[(y + 1) * stride + x + 1] = sum[y * stride + x + 1] + row;
+export function lightingGain(gray: Float64Array, side: number) {
+  const gain = new Float64Array(side * side).fill(1);
+  const terms = (u: number, v: number) => [1, u, v, u * u, u * v, v * v];
+  const m = Array.from({ length: 6 }, () => new Float64Array(7));
+  const step = Math.max(1, side >> 6);
+  let logSum = 0, count = 0;
+  for (let y = 0; y < side; y += step) for (let x = 0; x < side; x += step) {
+    const value = gray[y * side + x];
+    if (!(value > 1)) continue;
+    const l = Math.log(value);
+    const t = terms(2 * (x + 0.5) / side - 1, 2 * (y + 0.5) / side - 1);
+    for (let r = 0; r < 6; r++) {
+      for (let c = 0; c < 6; c++) m[r][c] += t[r] * t[c];
+      m[r][6] += t[r] * l;
     }
-    total += row;
+    logSum += l;
+    count++;
   }
-  const mean = total / (side * side);
-  const gain = new Float64Array(side * side);
+  if (count < 12) return gain;
+  for (let col = 0; col < 6; col++) {
+    let pivot = col;
+    for (let r = col + 1; r < 6; r++) if (Math.abs(m[r][col]) > Math.abs(m[pivot][col])) pivot = r;
+    if (Math.abs(m[pivot][col]) < 1e-9) return gain;
+    [m[col], m[pivot]] = [m[pivot], m[col]];
+    for (let r = 0; r < 6; r++) if (r !== col) {
+      const f = m[r][col] / m[col][col];
+      for (let c = col; c < 7; c++) m[r][c] -= f * m[col][c];
+    }
+  }
+  const coef = m.map((row, i) => row[6] / row[i]);
+  const mean = logSum / count;
   for (let y = 0; y < side; y++) for (let x = 0; x < side; x++) {
-    const x0 = Math.max(0, x - radius), x1 = Math.min(side, x + radius + 1);
-    const y0 = Math.max(0, y - radius), y1 = Math.min(side, y + radius + 1);
-    const local = (sum[y1 * stride + x1] - sum[y0 * stride + x1] - sum[y1 * stride + x0] + sum[y0 * stride + x0]) /
-      ((x1 - x0) * (y1 - y0));
-    gain[y * side + x] = local > 1 ? Math.min(2.5, mean / local) : 1;
+    const t = terms(2 * (x + 0.5) / side - 1, 2 * (y + 0.5) / side - 1);
+    let fit = 0;
+    for (let i = 0; i < 6; i++) fit += coef[i] * t[i];
+    gain[y * side + x] = Math.min(1.7, Math.max(0.6, Math.exp(mean - fit)));
   }
   return gain;
 }
@@ -205,9 +232,149 @@ export function repeatTilePixels(source: Uint8ClampedArray, side: number, lagX: 
   return output;
 }
 
+export interface TileArtifacts {
+  /** Join difference across the repeat edge relative to normal pixel-to-pixel detail (1 = invisible). */
+  seam: number;
+  /** Fine detail kept relative to the photo (below 1 = smeared, above 1 = noisy). */
+  detail: number;
+  /** Strongest light/dark band across columns or rows, in brightness levels. */
+  band: number;
+  /** Average colour shift from the photo, in RGB levels. */
+  colour: number;
+}
+
+const luma = (px: Uint8ClampedArray, n: number) =>
+  Float64Array.from({ length: n * n }, (_, i) => 0.299 * px[4 * i] + 0.587 * px[4 * i + 1] + 0.114 * px[4 * i + 2]);
+
+function bandRange(lum: Float64Array, n: number) {
+  let worst = 0;
+  for (const horizontal of [true, false]) {
+    const means = new Float64Array(n);
+    for (let a = 0; a < n; a++) {
+      let sum = 0;
+      for (let b = 0; b < n; b++) sum += horizontal ? lum[b * n + a] : lum[a * n + b];
+      means[a] = sum / n;
+    }
+    for (const w of [Math.max(2, n >> 4), Math.max(2, n >> 3)]) {
+      let lo = Infinity, hi = -Infinity;
+      for (let a = 0; a < n; a++) {
+        let sum = 0;
+        for (let k = 0; k < w; k++) sum += means[(a + k) % n];
+        lo = Math.min(lo, sum / w);
+        hi = Math.max(hi, sum / w);
+      }
+      worst = Math.max(worst, hi - lo);
+    }
+  }
+  return worst;
+}
+
+/** Measure how a repeating tile will look when laid edge to edge, against the photo it came from. */
+export function tileArtifacts(tile: Uint8ClampedArray, reference: Uint8ClampedArray, n: number): TileArtifacts {
+  const t = luma(tile, n), r = luma(reference, n);
+  const interior = (l: Float64Array) => {
+    let sum = 0;
+    for (let y = 0; y < n; y++) for (let x = 1; x < n; x++)
+      sum += Math.abs(l[y * n + x] - l[y * n + x - 1]) + Math.abs(l[x * n + y] - l[(x - 1) * n + y]);
+    return sum / (2 * n * (n - 1));
+  };
+  let join = 0;
+  for (let a = 0; a < n; a++)
+    join += Math.abs(t[a * n] - t[a * n + n - 1]) + Math.abs(t[a] - t[(n - 1) * n + a]);
+  join /= 2 * n;
+  const detailT = interior(t), detailR = interior(r);
+  let colour = 0;
+  for (let c = 0; c < 3; c++) {
+    let dt = 0, dr = 0;
+    for (let i = 0; i < n * n; i++) { dt += tile[4 * i + c]; dr += reference[4 * i + c]; }
+    colour = Math.max(colour, Math.abs(dt - dr) / (n * n));
+  }
+  return {
+    seam: join / (detailT + 0.5),
+    detail: (detailT + 2) / (detailR + 2),
+    band: bandRange(t, n),
+    colour,
+  };
+}
+
+/**
+ * Turn any photographed fabric (power-of-two square RGBA) into a repeat tile
+ * that lays edge to edge without seams or bands. Candidates are built and
+ * MEASURED rather than trusted:
+ *   - the whole photo made seamless, edge pixels matched (smooth prints),
+ *   - the whole photo made seamless from averaged edges (fine weaves), and
+ *   - an exact print-repeat crop (dots/checks, only if a repeat is detected).
+ * Among tiles that keep the photo's detail, colour and evenness, the one with
+ * the least visible join wins; nothing is assumed to work for every print.
+ * Lighting is evened out first so neither candidate repeats a shadow.
+ */
+export function buildFabricTile(source: Uint8ClampedArray, side: number): Uint8ClampedArray {
+  const flat = new Uint8ClampedArray(source);
+  for (let i = 0; i < side * side; i++) flat[4 * i + 3] = 255;
+  const gain = lightingGain(luma(flat, side), side);
+  for (let i = 0; i < side * side; i++)
+    for (let c = 0; c < 3; c++) flat[4 * i + c] = flat[4 * i + c] * gain[i];
+  const candidates = [seamlessFabricPixels(flat, side, side), seamlessFabricPixels(flat, side, side, true)];
+  if (side >= 16) {
+    const repeat = detectPrintRepeat(luma(flat, side), side);
+    if (repeat.x !== null || repeat.y !== null) candidates.push(repeatTilePixels(flat, side, repeat.x, repeat.y));
+  }
+  const flatBand = bandRange(luma(flat, side), side);
+  const scored = candidates.map(tile => ({ tile, m: tileArtifacts(tile, flat, side) }));
+  const faithful = scored.filter(({ m }) =>
+    m.detail >= 0.85 && m.detail <= 1.2 && m.colour <= 5 && m.band <= flatBand * 1.1 + 3);
+  // Cleanest join among faithful tiles; if none qualify, the most even one.
+  const pool = faithful.length ? faithful : scored;
+  pool.sort((a, b) => faithful.length ? a.m.seam - b.m.seam : a.m.band - b.m.band);
+  return pool[0].tile;
+}
+
+/** Halve with averaging; keeps a tile seamless and pre-filters fine weaves against shimmer/moiré. */
+export function halveTile(px: Uint8ClampedArray, side: number) {
+  const h = side >> 1;
+  const out = new Uint8ClampedArray(h * h * 4);
+  for (let y = 0; y < h; y++) for (let x = 0; x < h; x++) for (let c = 0; c < 4; c++) {
+    const i = (yy: number, xx: number) => px[((2 * y + yy) * side + 2 * x + xx) * 4 + c];
+    out[(y * h + x) * 4 + c] = (i(0, 0) + i(0, 1) + i(1, 0) + i(1, 1)) / 4;
+  }
+  return out;
+}
+
+/** Downscale in halving steps; a single big drawImage step aliases fine knits into stripes. */
+export function drawSquareCrop(image: CanvasImageSource, width: number, height: number, side: number) {
+  const crop = Math.min(width, height);
+  let sx = (width - crop) / 2, sy = (height - crop) / 2, size = crop;
+  let src: CanvasImageSource = image;
+  while (size / 2 >= side * 1.5) {
+    const next = Math.round(size / 2);
+    const step = document.createElement("canvas");
+    step.width = next;
+    step.height = next;
+    const ctx = step.getContext("2d");
+    if (!ctx) break;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, next, next);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(src, sx, sy, size, size, 0, 0, next, next);
+    src = step; sx = 0; sy = 0; size = next;
+  }
+  const canvas = document.createElement("canvas");
+  canvas.width = side;
+  canvas.height = side;
+  const context = canvas.getContext("2d");
+  if (!context) return null;
+  context.fillStyle = "#ffffff";
+  context.fillRect(0, 0, side, side);
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.drawImage(src, sx, sy, size, size, 0, 0, side, side);
+  return { canvas, context };
+}
+
 const textures = new Map<string, Promise<string>>();
 
-/** Prepare one lighting-corrected square repeat per photo, not per piece. */
+/** Prepare one lighting-corrected, measured-seamless square repeat per photo, not per piece. */
 export function fabricTexture(url: string): Promise<string> {
   const cached = textures.get(url);
   if (cached) return cached;
@@ -215,38 +382,21 @@ export function fabricTexture(url: string): Promise<string> {
     const image = new Image();
     image.onload = () => {
       try {
-        const available = Math.min(512, image.naturalWidth, image.naturalHeight);
-        if (available < 2) { resolve(url); return; }
-        const side = 2 ** Math.floor(Math.log2(available));
-        const canvas = document.createElement("canvas");
-        canvas.width = side;
-        canvas.height = side;
-        const context = canvas.getContext("2d");
-        if (!context) { resolve(url); return; }
-        const crop = Math.min(image.naturalWidth, image.naturalHeight);
-        const left = (image.naturalWidth - crop) / 2;
-        const top = (image.naturalHeight - crop) / 2;
-        context.drawImage(image, left, top, crop, crop, 0, 0, side, side);
-        // Regular prints: crop to a whole number of print repeats, then lay
-        // copies side by side so every tile edge continues the print exactly.
-        const sample = context.getImageData(0, 0, side, side).data;
-        const gray = new Float64Array(side * side);
-        for (let i = 0; i < side * side; i++)
-          gray[i] = 0.299 * sample[4 * i] + 0.587 * sample[4 * i + 1] + 0.114 * sample[4 * i + 2];
-        // Even out camera lighting first; otherwise each repeated copy keeps
-        // its own bright-to-dark ramp and the quilt shows soft stripes.
-        const gain = lightingGain(gray, side);
-        const flat = new Float64Array(side * side);
-        for (let i = 0; i < side * side; i++) {
-          flat[i] = gray[i] * gain[i];
-          for (let channel = 0; channel < 3; channel++) sample[4 * i + channel] *= gain[i];
-        }
-        // Correct the source before resampling, so the print and its lighting
-        // correction undergo exactly the same crop and interpolation.
-        const repeat = detectPrintRepeat(flat, side);
-        const tiled = repeatTilePixels(sample, side, repeat.x, repeat.y);
-        context.putImageData(new ImageData(tiled, side, side), 0, 0);
-        resolve(canvas.toDataURL("image/png"));
+        const w = image.naturalWidth, h = image.naturalHeight;
+        if (Math.min(w, h) < 1) { resolve(url); return; }
+        // Analyse at up to 512 px, never below 64 (tiny photos are enlarged).
+        const side = Math.max(64, Math.min(512, 2 ** Math.floor(Math.log2(Math.min(w, h)))));
+        const drawn = drawSquareCrop(image, w, h, side);
+        if (!drawn) { resolve(url); return; }
+        const sample = drawn.context.getImageData(0, 0, side, side).data;
+        let tile = buildFabricTile(sample, side);
+        let out = side;
+        // Deliver at most 256 px: plenty for on-screen tiles and pre-filtered against moiré.
+        while (out > 256) { tile = halveTile(tile, out); out >>= 1; }
+        drawn.canvas.width = out;
+        drawn.canvas.height = out;
+        drawn.context.putImageData(new ImageData(new Uint8ClampedArray(tile), out, out), 0, 0);
+        resolve(drawn.canvas.toDataURL("image/png"));
       } catch { resolve(url); }
     };
     image.onerror = () => resolve(url);
