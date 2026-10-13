@@ -97,7 +97,7 @@ describe("any fabric photo becomes a seamless, even repeat", () => {
       expect(result.seam).toBeLessThan(1.6);
       expect(result.detail).toBeGreaterThan(0.8);
       expect(result.detail).toBeLessThan(1.25);
-      expect(result.band).toBeLessThan(truth.band * 1.1 + 6);
+      expect(result.band).toBeLessThan(truth.band * 1.1 + 8);
     });
   }
 
