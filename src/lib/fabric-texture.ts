@@ -157,6 +157,54 @@ export function lightingGain(gray: Float64Array, side: number, radius = Math.max
   return gain;
 }
 
+/**
+ * Build the square texture from one print repeat. Fine weaves report tiny
+ * repeats (2–6 px); slicing those into hundreds of copies smears the photo
+ * into flat vertical bands. So a repeat is widened to a whole multiple of at
+ * least side/16, ONE repeat is made seamless on its own (so every internal
+ * copy join is seamless, not only the outer tile edge), then copies are laid
+ * down by wrap-around sampling.
+ */
+export function repeatTilePixels(source: Uint8ClampedArray, side: number, lagX: number | null, lagY: number | null) {
+  const minLag = Math.max(4, side / 16);
+  const widen = (lag: number | null) => {
+    if (lag === null || !(lag > 0) || lag > side) return side;
+    return lag < minLag ? lag * Math.ceil(minLag / lag) : lag;
+  };
+  const lx = Math.min(side, widen(lagX));
+  const ly = Math.min(side, widen(lagY));
+  const copiesX = Math.max(1, Math.round(side / lx));
+  const copiesY = Math.max(1, Math.round(side / ly));
+  const pow2 = (n: number) => Math.min(side, Math.max(16, 2 ** Math.ceil(Math.log2(n))));
+  const pw = pow2(lx), ph = pow2(ly);
+  const startX = (side - lx) / 2, startY = (side - ly) / 2;
+  const clampAt = (x: number, y: number, c: number) =>
+    source[(Math.min(side - 1, Math.max(0, y)) * side + Math.min(side - 1, Math.max(0, x))) * 4 + c];
+  // One repeat, resampled to a power-of-two cell.
+  const cell = new Uint8ClampedArray(pw * ph * 4);
+  for (let y = 0; y < ph; y++) for (let x = 0; x < pw; x++) {
+    const sx = startX + (x + 0.5) * lx / pw - 0.5, sy = startY + (y + 0.5) * ly / ph - 0.5;
+    const x0 = Math.floor(sx), y0 = Math.floor(sy), fx = sx - x0, fy = sy - y0;
+    for (let c = 0; c < 3; c++) cell[(y * pw + x) * 4 + c] =
+      (clampAt(x0, y0, c) * (1 - fx) + clampAt(x0 + 1, y0, c) * fx) * (1 - fy) +
+      (clampAt(x0, y0 + 1, c) * (1 - fx) + clampAt(x0 + 1, y0 + 1, c) * fx) * fy;
+    cell[(y * pw + x) * 4 + 3] = 255;
+  }
+  const seamless = seamlessFabricPixels(cell, pw, ph);
+  const at = (x: number, y: number, c: number) =>
+    seamless[((((y % ph) + ph) % ph) * pw + (((x % pw) + pw) % pw)) * 4 + c];
+  const output = new Uint8ClampedArray(side * side * 4);
+  for (let y = 0; y < side; y++) for (let x = 0; x < side; x++) {
+    const u = (x + 0.5) * copiesX * pw / side - 0.5, v = (y + 0.5) * copiesY * ph / side - 0.5;
+    const x0 = Math.floor(u), y0 = Math.floor(v), fx = u - x0, fy = v - y0;
+    for (let c = 0; c < 3; c++) output[(y * side + x) * 4 + c] =
+      (at(x0, y0, c) * (1 - fx) + at(x0 + 1, y0, c) * fx) * (1 - fy) +
+      (at(x0, y0 + 1, c) * (1 - fx) + at(x0 + 1, y0 + 1, c) * fx) * fy;
+    output[(y * side + x) * 4 + 3] = 255;
+  }
+  return output;
+}
+
 const textures = new Map<string, Promise<string>>();
 
 /** Prepare one lighting-corrected square repeat per photo, not per piece. */
@@ -195,29 +243,9 @@ export function fabricTexture(url: string): Promise<string> {
         }
         // Correct the source before resampling, so the print and its lighting
         // correction undergo exactly the same crop and interpolation.
-        context.putImageData(new ImageData(sample, side, side), 0, 0);
-        const corrected = document.createElement("canvas");
-        corrected.width = corrected.height = side;
-        corrected.getContext("2d")?.drawImage(canvas, 0, 0);
         const repeat = detectPrintRepeat(flat, side);
-        const lagX = repeat.x ?? side;
-        const lagY = repeat.y ?? side;
-        const copiesX = Math.max(1, Math.round(side / lagX));
-        const copiesY = Math.max(1, Math.round(side / lagY));
-        const startX = (side - lagX) / 2;
-        const startY = (side - lagY) / 2;
-        context.clearRect(0, 0, side, side);
-        for (let row = 0; row < copiesY; row++) for (let column = 0; column < copiesX; column++) {
-          const x0 = Math.round(column * side / copiesX);
-          const x1 = Math.round((column + 1) * side / copiesX);
-          const y0 = Math.round(row * side / copiesY);
-          const y1 = Math.round((row + 1) * side / copiesY);
-          context.drawImage(corrected, startX, startY, lagX, lagY,
-            x0, y0, x1 - x0, y1 - y0);
-        }
-        const pixels = context.getImageData(0, 0, side, side);
-        pixels.data.set(seamlessFabricPixels(pixels.data, side, side));
-        context.putImageData(pixels, 0, 0);
+        const tiled = repeatTilePixels(sample, side, repeat.x, repeat.y);
+        context.putImageData(new ImageData(tiled, side, side), 0, 0);
         resolve(canvas.toDataURL("image/png"));
       } catch { resolve(url); }
     };
