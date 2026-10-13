@@ -53,35 +53,45 @@ const fabrics: Record<string, Paint> = {
   "grainy linen": () => { const n = rand() * 40; return [180 + n, 170 + n, 150 + n]; },
 };
 
-function photo(paint: Paint) {
+type Light = (x: number, y: number) => number;
+const lights: Record<string, Light> = {
+  // Lamp at the top-left, ~30% fall-off to the far corner.
+  "corner lamp": (x, y) => 1.1 - 0.3 * ((x + y) / (2 * side)),
+  // Phone vignette: bright middle, darker edges.
+  vignette: (x, y) => 1.05 - 0.25 * (((x - side / 2) ** 2 + (y - side / 2) ** 2) / (side * side / 2)),
+};
+
+function photo(paint: Paint, light: Light = lights["corner lamp"], dx = 0, dy = 0) {
   const px = new Uint8ClampedArray(side * side * 4);
   for (let y = 0; y < side; y++) for (let x = 0; x < side; x++) {
-    // Lamp at the top-left, ~30% fall-off to the far corner.
-    const light = 1.1 - 0.3 * ((x + y) / (2 * side));
-    const [r, g, b] = paint(x, y);
+    const l = light(x, y);
+    const [r, g, b] = paint(x + dx, y + dy);
     const i = (y * side + x) * 4;
-    px[i] = r * light; px[i + 1] = g * light; px[i + 2] = b * light; px[i + 3] = 255;
+    px[i] = r * l; px[i + 1] = g * l; px[i + 2] = b * l; px[i + 3] = 255;
   }
   return px;
 }
 
 /** Reference without lighting: what the fabric actually looks like. */
-function evenPhoto(paint: Paint) {
+function evenPhoto(paint: Paint, dx = 0, dy = 0) {
   const px = new Uint8ClampedArray(side * side * 4);
   for (let y = 0; y < side; y++) for (let x = 0; x < side; x++) {
-    const [r, g, b] = paint(x, y);
+    const [r, g, b] = paint(x + dx, y + dy);
     px.set([r, g, b, 255], (y * side + x) * 4);
   }
   return px;
 }
 
 describe("any fabric photo becomes a seamless, even repeat", () => {
-  for (const [name, paint] of Object.entries(fabrics)) {
-    it(name, () => {
+  const framings = [[0, 0], [4, 7], [13, 2]];
+  for (const [name, paint] of Object.entries(fabrics))
+  for (const [lightName, light] of Object.entries(lights))
+  for (const [dx, dy] of framings) {
+    it(`${name} — ${lightName}, framed at +${dx},+${dy}`, () => {
       seed = 11;
-      const tile = buildFabricTile(photo(paint), side);
+      const tile = buildFabricTile(photo(paint, light, dx, dy), side);
       seed = 11;
-      const reference = evenPhoto(paint);
+      const reference = evenPhoto(paint, dx, dy);
       const result = tileArtifacts(tile, reference, side);
       const truth = tileArtifacts(reference, reference, side);
       expect(result.seam).toBeLessThan(1.6);
