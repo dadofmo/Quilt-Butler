@@ -42,13 +42,23 @@ export function seamlessFabricPixels(source: Uint8ClampedArray, width: number, h
   for (let channel = 0; channel < 3; channel++) {
     field.fill(0);
     const at = (x: number, y: number) => source[(y * width + x) * 4 + channel];
+    // Measure each edge jump from a few pixels' average, extrapolated to the
+    // edge. A lighting ramp is matched exactly, but a fine weave whose rib
+    // phase differs at the two edges is NOT mistaken for a lighting jump
+    // (correcting it would paint a light-to-dark ramp across every tile).
+    const jumpAcross = (n: number, sample: (i: number) => number) => {
+      const k = Math.max(1, Math.min(8, n >> 3));
+      let first = 0, last = 0;
+      for (let i = 0; i < k; i++) { first += sample(i); last += sample(n - 1 - i); }
+      return (last - first) / k * (n - 1) / (n - k);
+    };
     for (let x = 0; x < width; x++) {
-      const jump = at(x, height - 1) - at(x, 0);
+      const jump = jumpAcross(height, y => at(x, y));
       field[2 * x] += jump;
       field[2 * ((height - 1) * width + x)] -= jump;
     }
     for (let y = 0; y < height; y++) {
-      const jump = at(width - 1, y) - at(0, y);
+      const jump = jumpAcross(width, x => at(x, y));
       field[2 * y * width] += jump;
       field[2 * (y * width + width - 1)] -= jump;
     }
@@ -281,7 +291,7 @@ export function tileArtifacts(tile: Uint8ClampedArray, reference: Uint8ClampedAr
   }
   return {
     seam: join / (detailT + 0.5),
-    detail: (detailT + 0.5) / (detailR + 0.5),
+    detail: (detailT + 2) / (detailR + 2),
     band: bandRange(t, n),
     colour,
   };
