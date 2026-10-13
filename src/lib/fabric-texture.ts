@@ -395,7 +395,7 @@ export function fabricTexture(url: string): Promise<string> {
         while (out > 256) { tile = halveTile(tile, out); out >>= 1; }
         drawn.canvas.width = out;
         drawn.canvas.height = out;
-        drawn.context.putImageData(new ImageData(tile, out, out), 0, 0);
+        drawn.context.putImageData(new ImageData(new Uint8ClampedArray(tile), out, out), 0, 0);
         resolve(drawn.canvas.toDataURL("image/png"));
       } catch { resolve(url); }
     };
