@@ -6,7 +6,7 @@ import FFT from "fft.js";
  * The correction is harmonic inside the image, so it cannot add an edge band.
  * Dimensions must be powers of two (the prepared canvas guarantees this).
  */
-export function seamlessFabricPixels(source: Uint8ClampedArray, width: number, height: number) {
+export function seamlessFabricPixels(source: Uint8ClampedArray, width: number, height: number, averagedEdges = false) {
   const output = new Uint8ClampedArray(source);
   if (width < 2 || height < 2 || (width & (width - 1)) || (height & (height - 1))) return output;
   const horizontal = new FFT(width);
@@ -42,12 +42,12 @@ export function seamlessFabricPixels(source: Uint8ClampedArray, width: number, h
   for (let channel = 0; channel < 3; channel++) {
     field.fill(0);
     const at = (x: number, y: number) => source[(y * width + x) * 4 + channel];
-    // Measure each edge jump from a few pixels' average, extrapolated to the
-    // edge. A lighting ramp is matched exactly, but a fine weave whose rib
-    // phase differs at the two edges is NOT mistaken for a lighting jump
-    // (correcting it would paint a light-to-dark ramp across every tile).
+    // Exact mode matches edge pixels (best for smooth prints). Averaged mode
+    // measures each jump from a few pixels, extrapolated to the edge, so a
+    // fine weave whose rib phase differs at the two edges is NOT mistaken for
+    // a lighting jump (that would paint a light-to-dark ramp across each tile).
     const jumpAcross = (n: number, sample: (i: number) => number) => {
-      const k = Math.max(1, Math.min(8, n >> 3));
+      const k = averagedEdges ? Math.max(1, Math.min(8, n >> 3)) : 1;
       let first = 0, last = 0;
       for (let i = 0; i < k; i++) { first += sample(i); last += sample(n - 1 - i); }
       return (last - first) / k * (n - 1) / (n - k);
@@ -299,12 +299,13 @@ export function tileArtifacts(tile: Uint8ClampedArray, reference: Uint8ClampedAr
 
 /**
  * Turn any photographed fabric (power-of-two square RGBA) into a repeat tile
- * that lays edge to edge without seams or bands. Two candidates are built and
+ * that lays edge to edge without seams or bands. Candidates are built and
  * MEASURED rather than trusted:
- *   - the whole photo made seamless (always safe, works for any print), and
- *   - an exact print-repeat crop (best for dots/checks, but only if detected).
- * The crop is used only when it measurably joins better while keeping the
- * photo's detail, colour and evenness; otherwise the whole-photo tile wins.
+ *   - the whole photo made seamless, edge pixels matched (smooth prints),
+ *   - the whole photo made seamless from averaged edges (fine weaves), and
+ *   - an exact print-repeat crop (dots/checks, only if a repeat is detected).
+ * Among tiles that keep the photo's detail, colour and evenness, the one with
+ * the least visible join wins; nothing is assumed to work for every print.
  * Lighting is evened out first so neither candidate repeats a shadow.
  */
 export function buildFabricTile(source: Uint8ClampedArray, side: number): Uint8ClampedArray {
@@ -313,15 +314,19 @@ export function buildFabricTile(source: Uint8ClampedArray, side: number): Uint8C
   const gain = lightingGain(luma(flat, side), side);
   for (let i = 0; i < side * side; i++)
     for (let c = 0; c < 3; c++) flat[4 * i + c] = flat[4 * i + c] * gain[i];
-  const whole = seamlessFabricPixels(flat, side, side);
-  if (side < 16) return whole;
-  const repeat = detectPrintRepeat(luma(flat, side), side);
-  if (repeat.x === null && repeat.y === null) return whole;
-  const crop = repeatTilePixels(flat, side, repeat.x, repeat.y);
-  const a = tileArtifacts(whole, flat, side);
-  const b = tileArtifacts(crop, flat, side);
-  const faithful = b.detail >= 0.85 && b.detail <= 1.2 && b.colour <= 5 && b.band <= Math.max(a.band + 2, a.band * 1.15);
-  return faithful && b.seam < a.seam * 0.9 ? crop : whole;
+  const candidates = [seamlessFabricPixels(flat, side, side), seamlessFabricPixels(flat, side, side, true)];
+  if (side >= 16) {
+    const repeat = detectPrintRepeat(luma(flat, side), side);
+    if (repeat.x !== null || repeat.y !== null) candidates.push(repeatTilePixels(flat, side, repeat.x, repeat.y));
+  }
+  const flatBand = bandRange(luma(flat, side), side);
+  const scored = candidates.map(tile => ({ tile, m: tileArtifacts(tile, flat, side) }));
+  const faithful = scored.filter(({ m }) =>
+    m.detail >= 0.85 && m.detail <= 1.2 && m.colour <= 5 && m.band <= flatBand * 1.1 + 3);
+  // Cleanest join among faithful tiles; if none qualify, the most even one.
+  const pool = faithful.length ? faithful : scored;
+  pool.sort((a, b) => faithful.length ? a.m.seam - b.m.seam : a.m.band - b.m.band);
+  return pool[0].tile;
 }
 
 /** Halve with averaging; keeps a tile seamless and pre-filters fine weaves against shimmer/moiré. */
