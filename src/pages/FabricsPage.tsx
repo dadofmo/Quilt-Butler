@@ -1,4 +1,5 @@
 import { useNavigate, Link } from "react-router-dom";
+import { prepareFabricPhoto } from "@/lib/fabric-photo";
 import { BlockLayoutPicker } from "@/components/BlockLayoutPicker";
 import { Helmet } from "react-helmet-async";
 import { StepShell } from "@/components/StepShell";
@@ -118,13 +119,10 @@ function FabricsStepInner() {
   };
 
   const handlePhotoUpload = (key: FabricKey, file: File) => {
-    if (!file.type.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result;
-      if (typeof result === "string") setFabricPhoto(key, result);
-    };
-    reader.readAsDataURL(file);
+    void prepareFabricPhoto(file).then((dataUrl) => {
+      if (dataUrl) setFabricPhoto(key, dataUrl);
+      else window.alert("That photo couldn't be opened. Please try a JPEG or PNG picture of the fabric.");
+    });
   };
 
   // Patchwork preview is meaningful for "simple-squares" — a grid of squares

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { prepareFabricPhoto } from "@/lib/fabric-photo";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Check, FlipHorizontal2, RotateCw, Undo2 } from "lucide-react";
@@ -109,13 +110,10 @@ function DesignBlockInner() {
   };
 
   const handlePhotoUpload = (fk: FabricKey, file: File) => {
-    if (!file.type.startsWith("image/")) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result;
-      if (typeof result === "string") setFabricPhoto(fk, result);
-    };
-    reader.readAsDataURL(file);
+    void prepareFabricPhoto(file).then((dataUrl) => {
+      if (dataUrl) setFabricPhoto(fk, dataUrl);
+      else window.alert("That photo couldn't be opened. Please try a JPEG or PNG picture of the fabric.");
+    });
   };
 
   const save = (next: CustomBlockDesign) =>
