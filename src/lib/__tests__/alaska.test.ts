@@ -4,6 +4,8 @@ import { PATTERNS, getPattern } from "@/lib/patterns";
 import { calculateYardage } from "@/lib/yardage";
 import { rotationFor } from "@/lib/block-layouts";
 import { EMPTY_FILTERS, filterPatterns } from "@/lib/pattern-filters";
+import { alaskaFills } from "@/components/AlaskaBlock";
+import { fabricFill } from "@/lib/fabric-fill";
 import type { PlannerState } from "@/lib/planner-store";
 
 const base: PlannerState = {
@@ -32,6 +34,19 @@ describe("Alaska reference and registration", () => {
     expect(filterPatterns(PATTERNS, { ...EMPTY_FILTERS, query: "Alaska", skills: ["intermediate"], fabrics: ["4+"], techniques: ["hst", "onpoint"], features: ["sashing"] }).map(p => p.id)).toEqual(["alaska"]);
     expect(getPattern("alaska")?.fabricCount).toBe(7);
     expect(rotationFor("alaska", "alternating", 0, 1, 3, 3)).toBe(0);
+  });
+  it("resolves every shared preview role from registry defaults, reassignment and photos", () => {
+    const pattern = getPattern("alaska");
+    if (!pattern) throw new Error("Alaska missing");
+    const fills = alaskaFills({}).fills;
+    for (const [role, fill] of Object.entries(fills)) {
+      const section = pattern.sections.find(s => s.id === role);
+      if (!section) throw new Error(`Missing ${role}`);
+      expect(fill).toBe(fabricFill(section.defaultFabric));
+    }
+    expect(alaskaFills({ dark: "J" }).fills.dark).toBe(fabricFill("J"));
+    const photos = { J: "data:image/jpeg;base64,test" };
+    expect(alaskaFills({ dark: "J" }, photos).fills.dark).toBe(fabricFill("J", photos));
   });
   it("partitions the entire reference into exact fabric areas", () => {
     const totals = {} as Record<AlaskaRole, number>;
