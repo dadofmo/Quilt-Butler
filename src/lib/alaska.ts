@@ -5,10 +5,10 @@ export interface AlaskaPiece { role: AlaskaRole; points: [number, number][] }
 export function alaskaGeometry(): AlaskaPiece[] {
   const pieces: AlaskaPiece[] = [];
   const polygon = (role: AlaskaRole, points: [number, number][]) => pieces.push({ role, points });
-  // Four outer HST squares. Peach always occupies the upper triangle.
-  for (const [x, y, slash] of [[0, 0, 0], [9, 0, 1], [0, 9, 1], [9, 9, 0]]) {
-    polygon("peach", slash ? [[x, y], [x + 3, y], [x, y + 3]] : [[x, y], [x + 3, y], [x + 3, y + 3]]);
-    polygon("coral", slash ? [[x + 3, y], [x + 3, y + 3], [x, y + 3]] : [[x, y], [x + 3, y + 3], [x, y + 3]]);
+  // Peach is above the diagonal on the left, below it on the right.
+  for (const [x, y, slash, peachTop] of [[0, 0, 0, 1], [9, 0, 1, 0], [0, 9, 1, 1], [9, 9, 0, 0]]) {
+    polygon(peachTop ? "peach" : "coral", slash ? [[x, y], [x + 3, y], [x, y + 3]] : [[x, y], [x + 3, y], [x + 3, y + 3]]);
+    polygon(peachTop ? "coral" : "peach", slash ? [[x + 3, y], [x + 3, y + 3], [x, y + 3]] : [[x, y], [x + 3, y + 3], [x, y + 3]]);
   }
   // Each outer side is two 3×3 split-triangle squares. Rotating the top side
   // clockwise reproduces the alternating peach/coral placement in the reference.
