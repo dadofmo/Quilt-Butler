@@ -79,7 +79,7 @@ describe("Alaska construction-aware cutting", () => {
     const r = calculateYardage({ ...base, quiltWidth: 44, quiltHeight: 44, sashingWidth: 2, borderWidth: 2 });
     expect(r.fabrics.find(f => f.fabric === "C")?.pieces[0].count).toBe(36);
     expect(r.fabrics.find(f => f.fabric === "H")?.pieces.map(p => [p.count, p.w, p.h])).toEqual([[12, 12.5, 2.5]]);
-    expect(r.fabrics.find(f => f.fabric === "I")?.strips[0].count).toBe(5);
+    expect(r.fabrics.find(f => f.fabric === "I")?.strips[0].count).toBe(4);
   });
   it("uses trimmed bolt width, quarter-yard rounding and the ten-percent safety buffer", () => {
     const state = { ...base, quiltWidth: 48, quiltHeight: 48 };

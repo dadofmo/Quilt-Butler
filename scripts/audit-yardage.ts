@@ -2961,7 +2961,8 @@ console.log("\n=== Alaska: separate central and outer triangle scales ===");
   const sash = calculateYardage({ ...base(), pattern: "alaska", quiltWidth: 44, quiltHeight: 44, borderWidth: 2, sashingWidth: 2 });
   check("Alaska sashed central squares", sash.fabrics.find(f => f.fabric === "C")?.pieces[0].count ?? -1, 36);
   check("Alaska between-block sash strips", sash.fabrics.find(f => f.fabric === "H")?.pieces[0].count ?? -1, 12);
-  check("Alaska border strips", sash.fabrics.find(f => f.fabric === "I")?.strips[0].count ?? -1, 5);
+  // 40-inch inner top: 2*40 + 2*44 = 168 inches, four 42.5-inch strips.
+  check("Alaska border strips", sash.fabrics.find(f => f.fabric === "I")?.strips[0].count ?? -1, 4);
 }
 
 if (failures.length === 0) {
