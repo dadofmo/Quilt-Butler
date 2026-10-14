@@ -2,6 +2,7 @@ import type { PatternId } from "@/lib/planner-store";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FiftyFourFortyBlock, fiftyFourFortyFills } from "./FiftyFourFortyBlock";
 import { ChocolateCakeBlock, chocolateCakeFills } from "./ChocolateCakeBlock";
+import { AlaskaBlock, alaskaFills } from "./AlaskaBlock";
 import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ArkansasCrossroadsBlock, DominoChickenFootBlock, AtticWindowBlock, atticWindowFills, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
 
 
@@ -21,6 +22,7 @@ const C = {
 
 
 const PATTERN_ALT: Record<PatternId, string> = {
+  "alaska": "Alaska quilt block with a central nine-patch, dark left/right hourglass triangles, four outer diamonds and diagonal corner squares",
   "custom-block":
     "Preview of the quilt block you designed yourself in the block editor",
   "nine-patch":
@@ -1070,6 +1072,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return <svg {...common}><FiftyFourFortyBlock size={90} {...fiftyFourFortyFills({})} /></svg>;
     case "chocolate-cake":
       return <svg {...common}><ChocolateCakeBlock size={90} {...chocolateCakeFills({})} /></svg>;
+    case "alaska":
+      return <svg {...common}><AlaskaBlock size={90} {...alaskaFills({})} /></svg>;
     case "domino-chicken-foot":
       return (
         <svg {...common}>

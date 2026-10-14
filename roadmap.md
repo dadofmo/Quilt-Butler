@@ -1,5 +1,9 @@
 # Roadmap
 
+- [x] Add Alaska separately from Alaska Homestead with reference-matching geometry and all planner previews.
+- [x] Add construction-aware Alaska cutting, sewing notes, and concrete tests.
+- [x] Verify Alaska math, all-pattern coverage, pattern counts, and the live planner.
+
 - [x] Prevent false print-repeat crops from removing floral motifs; verified fabric B in the Chocolate Cake block, repeat tests, and all 1,011 tests.
 
 - [x] Add Chocolate Cake with reference-matching shared previews and fabric choices.

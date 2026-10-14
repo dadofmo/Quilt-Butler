@@ -74,6 +74,7 @@ export type PatternId =
   | "weathervane"
   | "wishing-ring"
   | "alaska-homestead"
+  | "alaska"
   | "blazing-arrows"
   | "apple-pie"
   | "album-cross"
