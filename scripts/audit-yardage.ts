@@ -2947,6 +2947,23 @@ console.log("\n=== Chocolate Cake: whole diamonds, four-at-a-time geese, continu
   check("Cake between-block sashing", sashed.fabrics.find(f => f.fabric === "E")?.pieces[0].count ?? -1, 12);
 }
 
+console.log("\n=== Alaska: separate central and outer triangle scales ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "alaska", quiltWidth: 48, quiltHeight: 48 });
+  check("Alaska solid central squares", r.fabrics.find(f => f.fabric === "C")?.pieces[0].count ?? -1, 64);
+  check("Alaska central square cut", r.fabrics.find(f => f.fabric === "C")?.pieces[0].w ?? -1, 2.5);
+  check("Alaska dark HST blanks", r.fabrics.find(f => f.fabric === "A")?.pieces[0].count ?? -1, 32);
+  check("Alaska dark hourglass blanks", r.fabrics.find(f => f.fabric === "A")?.pieces[1].count ?? -1, 8);
+  check("Alaska dark inches", r.fabrics.find(f => f.fabric === "A")?.totalInches ?? -1, 11.875);
+  check("Alaska contrast inches", r.fabrics.find(f => f.fabric === "D")?.totalInches ?? -1, 31);
+  check("Alaska diamond QST blanks", r.fabrics.find(f => f.fabric === "F")?.pieces[0].count ?? -1, 32);
+  check("Alaska diamond inches", r.fabrics.find(f => f.fabric === "F")?.totalInches ?? -1, 17);
+  const sash = calculateYardage({ ...base(), pattern: "alaska", quiltWidth: 44, quiltHeight: 44, borderWidth: 2, sashingWidth: 2 });
+  check("Alaska sashed central squares", sash.fabrics.find(f => f.fabric === "C")?.pieces[0].count ?? -1, 36);
+  check("Alaska between-block sash strips", sash.fabrics.find(f => f.fabric === "H")?.pieces[0].count ?? -1, 12);
+  check("Alaska border strips", sash.fabrics.find(f => f.fabric === "I")?.strips[0].count ?? -1, 5);
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {
