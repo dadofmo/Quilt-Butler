@@ -6,6 +6,7 @@ import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FabricPatternDefs } from "./FabricPatternDefs";
 import { FiftyFourFortyBlock, fiftyFourFortyFills } from "./FiftyFourFortyBlock";
 import { ChocolateCakeBlock, chocolateCakeFills } from "./ChocolateCakeBlock";
+import { AlaskaBlock, alaskaFills } from "./AlaskaBlock";
 import { CustomBlockShapes } from "./CustomBlockSvg";
 import type { CustomBlockDesign } from "@/lib/custom-block";
 
@@ -1111,6 +1112,8 @@ function renderInner(
       return <FiftyFourFortyBlock size={200} {...fiftyFourFortyFills(a, photos)} />;
     case "chocolate-cake":
       return <ChocolateCakeBlock size={200} {...chocolateCakeFills(a, photos)} />;
+    case "alaska":
+      return <AlaskaBlock size={200} {...alaskaFills(a, photos)} />;
     case "domino-chicken-foot":
       return <DominoChickenFootBlock size={200} bg={get("bg", "A")} primary={get("primary", "B")} accent={get("accent", "C")} />;
     case "arkansas-crossroads":

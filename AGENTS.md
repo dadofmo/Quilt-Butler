@@ -31,3 +31,6 @@
 
 ## Chocolate Cake construction
 - Use one shared block renderer for all previews; assemble four square-in-a-square corners, four four-at-a-time flying-geese-and-continuous-bar side units, and one centre as a three-row macro layout. Why: preserves the reference diamonds and straight seams without splitting diamonds or wasting stitch-and-flip offcuts.
+
+## Alaska construction
+- Use shared reference geometry and fabric-role resolution for all Alaska previews; assemble the central nine-patch, paired outer split-triangle squares and outer HST corners as three bands. Why: two different unit scales preserve the reference without Y-seams, while half/quarter-square triangle starting blanks provide honest cutting allowances.
