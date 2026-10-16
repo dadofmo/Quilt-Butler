@@ -86,6 +86,17 @@ describe("Album 5 Patch reference and conventional construction", () => {
     expect(r.fabrics.find(f=>f.fabric==="A")?.pieces.map(p=>[p.count,p.w,p.h])).toEqual([[2,10.75,4],[2,4.625,4.625]]);
     expect(r.fabrics.find(f=>f.fabric==="C")?.pieces.map(p=>[p.count,p.w,p.h])).toEqual([[4,10.75,3.125]]);
   });
+  it("fits quarter-inch-offset setting triangles in diagonally cut square blanks", () => {
+    for (const block of [6,12,15,18,24]) {
+      const d = albumFivePatchDimensions(block);
+      // A right triangle with leg L and 1/4-inch allowances needs
+      // L + 1/2 + sqrt(2)/4 along each square edge before diagonal cutting.
+      for (const [leg, blank] of [[d.corner,d.cornerTriangleBlank],[d.bar,d.capBlank]]) {
+        expect(blank).toBeGreaterThanOrEqual(leg + 0.5 + Math.SQRT2 / 4);
+        expect(blank * 8).toBeCloseTo(Math.round(blank * 8));
+      }
+    }
+  });
   it("packs sixteen blocks with usable bolt width, quarter-yard rounding and safety buffer", () => {
     const state={...base,quiltWidth:48,quiltHeight:48};
     const r=calculateYardage(state);
