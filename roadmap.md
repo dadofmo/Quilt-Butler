@@ -1,8 +1,8 @@
 # Roadmap
 
-- [ ] Add Album 5 Patch with reference-matching shared previews and fabric choices.
-- [ ] Add conventional angled-strip cutting and sewing instructions with concrete math tests.
-- [ ] Verify math audit, existing patterns, and the live planner.
+- [x] Add Album 5 Patch with reference-matching shared previews and fabric choices.
+- [x] Add conventional angled-strip cutting and sewing instructions with concrete math tests.
+- [x] Verify math audit, existing patterns, and the live planner.
 
 - [x] Add Alaska separately from Alaska Homestead with reference-matching geometry and all planner previews.
 - [x] Add construction-aware Alaska cutting, sewing notes, and concrete tests.
