@@ -2965,6 +2965,25 @@ console.log("\n=== Alaska: separate central and outer triangle scales ===");
   check("Alaska border strips", sash.fabrics.find(f => f.fabric === "I")?.strips[0].count ?? -1, 4);
 }
 
+console.log("\n=== Album 5 Patch: straight-grain rails and setting triangles ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "album-five-patch", quiltWidth: 48, quiltHeight: 48 });
+  check("Album5 dark rail blanks", r.fabrics.find(f => f.fabric === "A")?.pieces[0].count ?? -1, 32);
+  check("Album5 rail blank length", r.fabrics.find(f => f.fabric === "A")?.pieces[0].w ?? -1, 7.375);
+  check("Album5 rail blank width", r.fabrics.find(f => f.fabric === "A")?.pieces[0].h ?? -1, 2.875);
+  check("Album5 dark inches", r.fabrics.find(f => f.fabric === "A")?.totalInches ?? -1, 30.625);
+  // light: 4 rail strips*2.875 + 3 HST strips*3.5 + 6 corner strips*3.375 + 2 cap strips*2.625.
+  check("Album5 light inches", r.fabrics.find(f => f.fabric === "B")?.totalInches ?? -1, 47.5);
+  check("Album5 continuous bar count", r.fabrics.find(f => f.fabric === "C")?.pieces[0].count ?? -1, 64);
+  check("Album5 bar inches", r.fabrics.find(f => f.fabric === "C")?.totalInches ?? -1, 29.25);
+  const sash = calculateYardage({ ...base(), pattern: "album-five-patch", quiltWidth: 44, quiltHeight: 44, borderWidth: 2, sashingWidth: 2 });
+  check("Album5 sashed rail count", sash.fabrics.find(f => f.fabric === "A")?.pieces[0].count ?? -1, 18);
+  check("Album5 between-block sash strips", sash.fabrics.find(f => f.fabric === "D")?.pieces[0].count ?? -1, 12);
+  const large = calculateYardage({ ...base(), pattern: "album-five-patch", quiltWidth: 18, quiltHeight: 18, blockSize: 18 });
+  check("Album5 eighteen-inch bar blank length", large.fabrics.find(f => f.fabric === "C")?.pieces[0].w ?? -1, 10.75);
+  check("Album5 eighteen-inch bar blank width", large.fabrics.find(f => f.fabric === "C")?.pieces[0].h ?? -1, 3.125);
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {

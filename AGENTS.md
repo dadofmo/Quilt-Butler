@@ -34,3 +34,7 @@
 
 ## Alaska construction
 - Use shared reference geometry and fabric-role resolution for all Alaska previews; assemble the central nine-patch, paired outer split-triangle squares and outer HST corners as three bands. Why: two different unit scales preserve the reference without Y-seams, while half/quarter-square triangle starting blanks provide honest cutting allowances.
+
+## Album 5 Patch
+- Share geometry/dimensions across previews and cuts; use straight-grain rails, HST/triangle corners and continuous bars, cap two opposite units, then sew opposite pairs. Why: no bias strips, miters or Y-seams.
+- Supply actual-size quarter-inch-offset templates; charge rounded-up eighth-inch blanks via yardage helpers. Why: exact on-point geometry and honest trimming waste.

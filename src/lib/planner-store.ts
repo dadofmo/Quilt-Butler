@@ -78,6 +78,7 @@ export type PatternId =
   | "blazing-arrows"
   | "apple-pie"
   | "album-cross"
+  | "album-five-patch"
   | "butlers-trellis"
   | "arkansas-crossroads"
   | "attic-window"
