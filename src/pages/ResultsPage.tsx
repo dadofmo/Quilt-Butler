@@ -7,6 +7,7 @@ import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { getPattern, getEffectiveBorderDefault, patternHasSashingSection } from "@/lib/patterns";
 import { calculateYardage, computePrecutPlan, computeFatQuarterPlan, describePieceShape, piecesPerStrip, usableFabricWidth, JELLY_ROLL_USABLE_LENGTH, type FabricRequirement, type MaterialsRequirement, type PrecutPlan, type FatQuarterPlan } from "@/lib/yardage";
 import { Printer } from "lucide-react";
+import { AlbumFivePatchTemplateDownload } from "@/components/AlbumFivePatchTemplateDownload";
 import { VBlockTemplateDownload } from "@/components/VBlockTemplateDownload";
 
 export default function ResultsStep() {
@@ -263,6 +264,7 @@ function ResultsStepInner() {
                   {result.notes.map((n, i) => <li key={i}>{n}</li>)}
                 </ul>
                 {planner.pattern === "fifty-four-forty-or-fight" && <VBlockTemplateDownload blockSize={planner.blockSize} />}
+                {planner.pattern === "album-five-patch" && <AlbumFivePatchTemplateDownload blockSize={planner.blockSize} />}
               </div>
             )}
           </Section>

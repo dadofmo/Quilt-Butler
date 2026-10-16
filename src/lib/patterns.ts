@@ -1909,6 +1909,19 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "album-five-patch",
+    name: "Album 5 Patch",
+    hasMath: true,
+    intro: "Three continuous centre rails sit on point inside four accent bars, with light setting triangles and inward-facing dark corner triangles. Cut rails and bars on straight grain; their diagonal appearance comes from turning the pieced square, not cutting bias strips. Full-size cutting templates preserve the exact proportions and quarter-inch seams. Optional sashing separates blocks.",
+    sections: [
+      { id: "dark", label: "Outer centre rails & corner triangles", defaultFabric: "A", hint: "Two continuous centre rails and the inward-facing half of each corner HST." },
+      { id: "light", label: "Middle rail & setting triangles", defaultFabric: "B", hint: "The middle centre rail, light corner halves and all setting triangles." },
+      { id: "bars", label: "Four diagonal accent bars", defaultFabric: "C", hint: "Four unpieced rectangles surrounding the centre square." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "D", hint: "Optional separation; leave at 0 for an edge-to-edge quilt." },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+  {
     id: "alaska",
     name: "Alaska",
     hasMath: true,
@@ -2093,6 +2106,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "alaska": { skill: "intermediate", fabricCount: 7, techniques: ["squares", "hst", "onpoint"] },
   "blazing-arrows": { skill: "intermediate", fabricCount: 2, techniques: ["hst", "geese"] },
   "apple-pie": { skill: "intermediate", fabricCount: 4, techniques: ["geese", "squares"] },
+  "album-five-patch": { skill: "intermediate", fabricCount: 3, techniques: ["strips", "hst", "onpoint"] },
   "album-cross": { skill: "confident", fabricCount: 4, techniques: ["hst", "squares"] },
   "butlers-trellis": { skill: "intermediate", fabricCount: 7, techniques: ["hst", "squares"] },
   "arkansas-crossroads": { skill: "confident", fabricCount: 5, techniques: ["hst", "squares"] },
