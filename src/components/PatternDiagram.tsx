@@ -8,6 +8,7 @@ import { FiftyFourFortyBlock, fiftyFourFortyFills } from "./FiftyFourFortyBlock"
 import { ChocolateCakeBlock, chocolateCakeFills } from "./ChocolateCakeBlock";
 import { AlaskaBlock, alaskaFills } from "./AlaskaBlock";
 import { AlbumFivePatchBlock, albumFivePatchFills } from "./AlbumFivePatchBlock";
+import { ArtSquareBlock, artSquareFills } from "./ArtSquareBlock";
 import { CustomBlockShapes } from "./CustomBlockSvg";
 import type { CustomBlockDesign } from "@/lib/custom-block";
 
@@ -1113,6 +1114,8 @@ function renderInner(
       return <FiftyFourFortyBlock size={200} {...fiftyFourFortyFills(a, photos)} />;
     case "chocolate-cake":
       return <ChocolateCakeBlock size={200} {...chocolateCakeFills(a, photos)} />;
+    case "art-square":
+      return <ArtSquareBlock size={200} {...artSquareFills(a, photos)} />;
     case "album-five-patch":
       return <AlbumFivePatchBlock size={200} {...albumFivePatchFills(a, photos)} />;
     case "alaska":

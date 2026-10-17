@@ -17,6 +17,7 @@ import { FiftyFourFortyBlock, fiftyFourFortyFills } from "./FiftyFourFortyBlock"
 import { ChocolateCakeBlock, chocolateCakeFills } from "./ChocolateCakeBlock";
 import { AlaskaBlock, alaskaFills } from "./AlaskaBlock";
 import { AlbumFivePatchBlock, albumFivePatchFills } from "./AlbumFivePatchBlock";
+import { ArtSquareBlock, artSquareFills } from "./ArtSquareBlock";
 import { CustomBlockShapes } from "./CustomBlockSvg";
 import { swapFabrics, fabricsUsed, resolveSwapPair, customCellVariant, type CustomBlockDesign } from "@/lib/custom-block";
 import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ArkansasCrossroadsBlock, DominoChickenFootBlock, AtticWindowBlock, atticWindowFills, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
@@ -1478,6 +1479,8 @@ function MiniBlock({
       return <FiftyFourFortyBlock size={200} {...fiftyFourFortyFills(assignments, photos)} />;
     case "chocolate-cake":
       return <ChocolateCakeBlock size={200} {...chocolateCakeFills(assignments, photos)} />;
+    case "art-square":
+      return <ArtSquareBlock size={200} {...artSquareFills(assignments, photos)} />;
     case "album-five-patch":
       return <AlbumFivePatchBlock size={200} {...albumFivePatchFills(assignments, photos)} />;
     case "alaska":
