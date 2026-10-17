@@ -41,7 +41,7 @@ describe("Art Square three-fabric reference and construction", () => {
     }
     expect(totals).toEqual({center:8,corners:4,background:4});
     // Interior sample points must belong to exactly one piece: no gaps/overlap.
-    for (let x=0.037; x<4; x+=0.13) for (let y=0.053; y<4; y+=0.17) {
+    for (let x=0.037; x<4; x+=Math.SQRT2/10) for (let y=0.053; y<4; y+=Math.sqrt(3)/10) {
       const inside=pieces.filter(p=>p.points.every(([px,py],i)=>{
         const [nx,ny]=p.points[(i+1)%p.points.length];
         return (nx-px)*(y-py)-(ny-py)*(x-px)>1e-9;
