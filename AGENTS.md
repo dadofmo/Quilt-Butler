@@ -37,7 +37,7 @@
 
 ## Album 5 Patch
 - Share geometry/dimensions across previews and cuts; use straight-grain rails, HST/triangle corners and continuous bars, cap two opposite units, then sew opposite pairs. Why: no bias strips, miters or Y-seams.
-- Supply actual-size quarter-inch-offset templates; charge rounded-up eighth-inch blanks via yardage helpers. Why: exact on-point geometry and honest trimming waste.
+- Use seam-offset templates and rounded eighth-inch blanks via yardage helpers. Why: exact geometry, honest waste.
 
 ## Art Square
-- Share geometry and dimensions across previews/cuts; piece four setting triangles around an uncut centre and provide true seam-offset trimming templates. Why: preserves the reference with straight seams and honest rounded blanks.
+- Share geometry/cuts and seam-offset templates; piece setting triangles around an uncut centre. Why: straight seams, honest blanks.

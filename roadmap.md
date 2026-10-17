@@ -1,7 +1,7 @@
 # Roadmap
 
-- [ ] Add Art Square with independent Fabric C corners and shared reference geometry.
-- [ ] Add practical cutting/sewing math and verify tests, audit, and live planner.
+- [x] Add Art Square with independent Fabric C corners and shared reference geometry.
+- [x] Add practical cutting/sewing math and verify tests, audit, and live planner.
 
 - [x] Add Album 5 Patch with reference-matching shared previews and fabric choices.
 - [x] Add conventional angled-strip cutting and sewing instructions with concrete math tests.
