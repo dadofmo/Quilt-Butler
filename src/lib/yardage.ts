@@ -15,6 +15,7 @@ import {
 } from "./custom-block";
 import { optimizeGrid, detectFrames, type GridPiece } from "./grid-optimizer";
 import { albumFivePatchDimensions } from "./album-five-patch";
+import { artSquareDimensions } from "./art-square";
 
 /** Round an inch measurement to 2dp so cut sizes stay tidy. */
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -216,6 +217,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isTulipLadyFingers = s.pattern === "tulip-lady-fingers";
   const isWeathervane = s.pattern === "weathervane";
   const isWishingRing = s.pattern === "wishing-ring";
+  const isArtSquare = s.pattern === "art-square";
   const isAlbumFivePatch = s.pattern === "album-five-patch";
   const isAlaska = s.pattern === "alaska";
   const isAlaskaHomestead = s.pattern === "alaska-homestead";
@@ -231,7 +233,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isCustomBlock = s.pattern === "custom-block";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isArtSquare || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -239,7 +241,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const innerH = s.quiltHeight - 2 * s.borderWidth;
   // Attic Window fits optional between-block sashing inside the requested top,
   // matching the shared Size, Fabrics, and Results page grid calculation.
-  const windowSash = (isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
+  const windowSash = (isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
   const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (s.blockSize + windowSash)));
   const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (s.blockSize + windowSash)));
   const blockCount = blocksAcross * blocksDown;
@@ -539,6 +541,31 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (totalSash > 0) addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
       notes.push(`Sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" from Fabric ${sashFab} — ${vSash} vertical and ${hSash} horizontal. Sew strips only between blocks; add the optional border last. Leave sashing at 0" if you want the secondary star to form where blocks meet.`);
     }
+  } else if (s.pattern === "art-square") {
+    const d = artSquareDimensions(s.blockSize);
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Art Square section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const center = fabric("center"), background = fabric("background"), corners = fabric("corners");
+    addSquares(reqs[center], "On-point centre square blank||trim with the full-size centre template", blockCount, d.centerBlank, s.fabricWidth);
+    addSquares(reqs[corners], "Corner square blanks||trim with the full-size corner template", 4 * blockCount, d.cornerBlank, s.fabricWidth);
+    addSquares(reqs[background], "Background triangle starting squares||cut ONCE diagonally; eight triangles per block", 4 * blockCount, d.backgroundBlank, s.fabricWidth);
+    notes.push(
+      `Art Square: one continuous Fabric ${center} centre diamond, eight Fabric ${background} background triangles and four Fabric ${corners} corner squares per block. Cut the centre square on straight grain and turn it on point during assembly; do not split the diamond or cut it on bias. All seams are straight; no Y-seams, partial seams or stitch-and-flip offcuts.`,
+      `Download the full-size Art Square cutting templates. Print Actual size / 100%, never Fit, and check the 1-inch calibration square. Large blocks may need a larger sheet or tiled/poster printing at 100%. Solid outlines include a true 1/4-inch seam allowance; dashed lines are finished seams. Mark seam endpoints. Rounded-up eighth-inch blanks include trimming waste: trim before sewing, rather than treating the rounded blank as the exact cut size.`,
+      `Per block: cut one Fabric ${center} square blank at ${d.centerBlank}" and trim with the centre template to ${(d.center+SEAM).toFixed(4)}" square. Cut four Fabric ${corners} blanks at ${d.cornerBlank}" and trim to ${(d.corner+SEAM).toFixed(4)}" square. Cut four Fabric ${background} starting squares at ${d.backgroundBlank}"; cut each ONCE diagonally to make eight loose triangles, not sewn HST squares.`,
+      `Make four pieced setting triangles. For each, place a corner square at the outside right-angle corner. Sew one background triangle to its right edge, with the triangle's right-angle corner at the top of that edge and its tip at the square's inner bottom-right corner. Press, then sew a second triangle to the square's bottom edge, its right-angle corner at the left and tip at the same inner corner. The triangles meet only at a point on the unit's long outside diagonal, not along a seam: there is no set-in junction. Match seam endpoints, not raw triangle tips; let dog ears overhang.`,
+      `Trim each sewn setting triangle with the full-size setting-unit template. Align the dashed right-angle legs with the square's outside finished seam lines and its marked inner corner with the midpoint of the dashed hypotenuse. The finished unit has legs ${(s.blockSize/2).toFixed(4)}" and a diagonal ${(d.center).toFixed(4)}". Preserve 1/4 inch beyond the corner square's inner point on that diagonal.`,
+      `Final assembly: fold and mark the centre of every centre-square edge and each setting triangle's long diagonal. Sew the long diagonals of two opposite setting units to opposite centre-square edges, matching midpoints and finished seam endpoints. Press toward the centre. Add the remaining two setting units to the other opposite sides with two full straight seams. Corner squares face outward; keep the diamond unpieced. Handle bias triangle edges gently, without pulling or sliding the iron.`,
+      `Square up to ${(s.blockSize+SEAM).toFixed(4)}" unfinished, keeping the diamond's four points at the side midpoints with 1/4 inch beyond each point. Make and measure one test block before chain-piecing the quilt. Use a consistent quarter-inch seam.`,
+    );
+    if (windowSash > 0) {
+      const count = Math.max(0, blocksAcross-1)*blocksDown + Math.max(0, blocksDown-1)*blocksAcross;
+      if (count) addRails(reqs[fabric("sashing")], "Sashing strips between blocks", count, s.blockSize+SEAM, windowSash+SEAM, s.fabricWidth);
+      notes.push(`Join blocks with Fabric ${fabric("sashing")} strips only BETWEEN blocks. Piece horizontal runs from the listed strips; no outer sashing frame. Add the optional border last.`);
+    } else notes.push("Join Art Square blocks edge to edge; the third-fabric corner squares form four-patches where blocks meet. Add the optional border last.");
   } else if (s.pattern === "album-five-patch") {
     const d = albumFivePatchDimensions(s.blockSize);
     const fabric = (id: string): FabricKey => {
@@ -4981,6 +5008,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "tippecanoe-and-tyler-too" ||
     s.pattern === "tulip-lady-fingers" ||
     s.pattern === "weathervane" ||
+    s.pattern === "art-square" ||
     s.pattern === "album-five-patch" ||
     s.pattern === "alaska" ||
     s.pattern === "alaska-homestead" ||

@@ -1909,6 +1909,19 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "art-square",
+    name: "Art Square",
+    hasMath: true,
+    intro: "One continuous centre square sits on point against eight background triangles, framed by four corner squares in a separate third fabric. Piece the corner setting triangles first, then join opposite pairs to the centre with straight seams. Optional sashing separates the blocks; without it, corner squares meet in four-patches across the quilt.",
+    sections: [
+      { id: "center", label: "On-point centre square", defaultFabric: "A", hint: "One continuous square, cut on straight grain and turned diagonally." },
+      { id: "background", label: "Background triangles", defaultFabric: "B", hint: "Eight triangles surrounding the centre diamond." },
+      { id: "corners", label: "Four corner squares", defaultFabric: "C", hint: "A third fabric, independent of the centre and background." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "D", hint: "Optional; leave at 0 for edge-to-edge blocks." },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+  {
     id: "album-five-patch",
     name: "Album 5 Patch",
     hasMath: true,
@@ -2106,6 +2119,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "alaska": { skill: "intermediate", fabricCount: 7, techniques: ["squares", "hst", "onpoint"] },
   "blazing-arrows": { skill: "intermediate", fabricCount: 2, techniques: ["hst", "geese"] },
   "apple-pie": { skill: "intermediate", fabricCount: 4, techniques: ["geese", "squares"] },
+  "art-square": { skill: "confident", fabricCount: 3, techniques: ["squares", "onpoint"] },
   "album-five-patch": { skill: "intermediate", fabricCount: 3, techniques: ["strips", "hst", "onpoint"] },
   "album-cross": { skill: "confident", fabricCount: 4, techniques: ["hst", "squares"] },
   "butlers-trellis": { skill: "intermediate", fabricCount: 7, techniques: ["hst", "squares"] },

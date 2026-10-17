@@ -2984,6 +2984,23 @@ console.log("\n=== Album 5 Patch: straight-grain rails and setting triangles ===
   check("Album5 eighteen-inch bar blank width", large.fabrics.find(f => f.fabric === "C")?.pieces[0].h ?? -1, 3.125);
 }
 
+console.log("\n=== Art Square: 48-inch quilt, sixteen 12-inch blocks ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "art-square", quiltWidth: 48, quiltHeight: 48 });
+  const center = r.fabrics.find(f => f.fabric === "A");
+  const background = r.fabrics.find(f => f.fabric === "B");
+  const corners = r.fabrics.find(f => f.fabric === "C");
+  check("Art Square centre count", center?.pieces[0].count ?? -1, 16);
+  check("Art Square centre blank", center?.pieces[0].w ?? -1, 9);
+  check("Art Square centre length (four across)", center?.totalInches ?? -1, 36);
+  check("Art Square background squares (eight triangles per block)", background?.pieces[0].count ?? -1, 64);
+  check("Art Square background blank", background?.pieces[0].w ?? -1, 3.875);
+  check("Art Square background length (ten across)", background?.totalInches ?? -1, 27.125);
+  check("Art Square independent corner count", corners?.pieces[0].count ?? -1, 64);
+  check("Art Square corner blank", corners?.pieces[0].w ?? -1, 3.5);
+  check("Art Square corner length (twelve across)", corners?.totalInches ?? -1, 21);
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {

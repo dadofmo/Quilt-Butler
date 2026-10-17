@@ -4,6 +4,7 @@ import { FiftyFourFortyBlock, fiftyFourFortyFills } from "./FiftyFourFortyBlock"
 import { ChocolateCakeBlock, chocolateCakeFills } from "./ChocolateCakeBlock";
 import { AlaskaBlock, alaskaFills } from "./AlaskaBlock";
 import { AlbumFivePatchBlock, albumFivePatchFills } from "./AlbumFivePatchBlock";
+import { ArtSquareBlock, artSquareFills } from "./ArtSquareBlock";
 import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ArkansasCrossroadsBlock, DominoChickenFootBlock, AtticWindowBlock, atticWindowFills, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
 
 
@@ -23,6 +24,7 @@ const C = {
 
 
 const PATTERN_ALT: Record<PatternId, string> = {
+  "art-square": "Art Square: one centre diamond, eight background triangles and four corner squares in a separate third fabric",
   "album-five-patch": "Album 5 Patch: three diagonal centre rails, four continuous accent bars and inward-facing corner triangles",
   "alaska": "Alaska quilt block with a central nine-patch, dark left/right hourglass triangles, four outer diamonds and diagonal corner squares",
   "custom-block":
@@ -1074,6 +1076,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return <svg {...common}><FiftyFourFortyBlock size={90} {...fiftyFourFortyFills({})} /></svg>;
     case "chocolate-cake":
       return <svg {...common}><ChocolateCakeBlock size={90} {...chocolateCakeFills({})} /></svg>;
+    case "art-square":
+      return <svg {...common}><ArtSquareBlock size={90} {...artSquareFills({})} /></svg>;
     case "album-five-patch":
       return <svg {...common}><AlbumFivePatchBlock size={90} {...albumFivePatchFills({})} /></svg>;
     case "alaska":
