@@ -109,11 +109,11 @@ describe("X Marks the Chain yardage", () => {
     // 8 X blocks: centre 2×2 merges into one 6.5" square per block.
     const a = r.fabrics.find((f) => f.fabric === "A");
     expect(a?.pieces[0]).toMatchObject({ count: 8, w: 6.5, h: 6.5 });
-    // 96 HST units → 48 starting squares of each of B and C at 3.875".
+    // 96 HST units → 48 starting squares of each of B and C at 3.88".
     const b = r.fabrics.find((f) => f.fabric === "B");
-    expect(b?.pieces[0]).toMatchObject({ count: 48, w: 3.875 });
+    expect(b?.pieces[0]).toMatchObject({ count: 48, w: 3.88 });
     const c = r.fabrics.find((f) => f.fabric === "C");
-    expect(c?.pieces.some((p) => p.count === 48 && p.w === 3.875)).toBe(true);
+    expect(c?.pieces.some((p) => p.count === 48 && p.w === 3.88)).toBe(true);
     // 8 chain blocks: centre merges to one 4.5" square per block.
     const d = r.fabrics.find((f) => f.fabric === "D");
     expect(d?.pieces[0]).toMatchObject({ count: 8, w: 4.5, h: 4.5 });

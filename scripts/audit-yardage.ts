@@ -3013,8 +3013,8 @@ console.log("\n=== X Marks the Chain: 48-inch quilt, sixteen 12-inch blocks (8 X
   check("XChain X-block merged centre count", a?.pieces[0].count ?? -1, 8);
   check("XChain X-block merged centre size", a?.pieces[0].w ?? -1, 6.5);
   check("XChain X-arm HST starting squares", b?.pieces[0].count ?? -1, 48);
-  check("XChain X-arm HST blank", b?.pieces[0].w ?? -1, 3.875);
-  check("XChain background HST starting squares", c?.pieces.find(p => p.w === 3.875)?.count ?? -1, 48);
+  check("XChain X-arm HST blank", b?.pieces[0].w ?? -1, 3.88);
+  check("XChain background HST starting squares", c?.pieces.find(p => p.w === 3.88)?.count ?? -1, 48);
   check("XChain chain merged centre count", d?.pieces[0].count ?? -1, 8);
   check("XChain chain merged centre size", d?.pieces[0].w ?? -1, 4.5);
   check("XChain chain accent squares", e?.pieces[0].count ?? -1, 32);
