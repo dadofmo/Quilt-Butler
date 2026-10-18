@@ -231,9 +231,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isChocolateCake = s.pattern === "chocolate-cake";
   const isDominoChickenFoot = s.pattern === "domino-chicken-foot";
   const isCustomBlock = s.pattern === "custom-block";
+  const isXChain = s.pattern === "x-marks-the-chain";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isArtSquare || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isArtSquare || isXChain || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -4629,8 +4630,13 @@ export function calculateYardage(s: PlannerState): CalcResult {
   // block count FIRST and only then divided by the 2-at-a-time / 4-at-a-time
   // yields, so we never round up once per block.
   // =========================================================================
-  if (isCustomBlock) {
-    const designA = s.customBlock;
+  if (isCustomBlock || isXChain) {
+    // X Marks the Chain is a built-in two-block set: both designs are fixed
+    // Studio blocks with the quilter's fabric assignments applied, always
+    // alternating checkerboard-style. Everything else in this branch — the
+    // tallies, the grid optimizer, the cut notes — is shared with custom blocks.
+    const xChain = isXChain ? xChainDesigns(s.assignments) : null;
+    const designA = xChain ? xChain.a : s.customBlock;
     if (!designA) {
       return {
         fabrics: [],
@@ -4642,8 +4648,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
     const grid = designA.size;
     const unit = s.blockSize / grid;
-    const usingB = !!(s.useBlockB && s.customBlockB && s.customBlockB.size === grid);
-    const designB = usingB ? s.customBlockB! : null;
+    const usingB = xChain ? true : !!(s.useBlockB && s.customBlockB && s.customBlockB.size === grid);
+    const designB = xChain ? xChain.b : usingB ? s.customBlockB! : null;
     // A saved swap pair can go stale (the quilter edited the block, or turned
     // Block B off), so clamp it to the fabrics actually in the quilt — the
     // cutting list must never name a fabric the design doesn't use.
