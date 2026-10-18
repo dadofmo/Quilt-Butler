@@ -1118,7 +1118,7 @@ function renderInner(
     case "art-square":
       return <ArtSquareBlock size={200} {...artSquareFills(a, photos)} />;
     case "x-marks-the-chain":
-      return <CustomBlockShapes design={xChainDesigns(a).a} photos={photos} />;
+      return <CustomBlockShapes design={customBlock ?? xChainDesigns(a).a} photos={photos} />;
     case "album-five-patch":
       return <AlbumFivePatchBlock size={200} {...albumFivePatchFills(a, photos)} />;
     case "alaska":

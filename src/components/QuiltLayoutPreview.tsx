@@ -85,10 +85,14 @@ export function QuiltLayoutPreview({
   const fullMax = useViewportMax();
 
   // Two-block set: show Block A and Block B side by side, each with its own
-  // full-screen link, so the user can check both drawings.
-  const showTwoBlocks = pattern === "custom-block" && !!useBlockB && !!customBlockB;
+  // full-screen link, so the user can check both drawings. X Marks the Chain
+  // is always a two-block set with fixed Studio designs.
+  const xChainBlocks = pattern === "x-marks-the-chain" ? xChainDesigns(assignments) : null;
+  const showTwoBlocks = (pattern === "custom-block" && !!useBlockB && !!customBlockB) || !!xChainBlocks;
+  const blockA = xChainBlocks ? xChainBlocks.a : customBlock;
+  const blockB = xChainBlocks ? xChainBlocks.b : customBlockB;
 
-  const renderBlock = (size: number, design: CustomBlockDesign | null = customBlock) =>
+  const renderBlock = (size: number, design: CustomBlockDesign | null = blockA) =>
     pattern === "rail-fence" ? (
       <div className="flex items-stretch gap-2">
         <div className="flex flex-col justify-around py-[5px] text-right">
@@ -173,7 +177,7 @@ export function QuiltLayoutPreview({
                 See block full screen
               </button>
             </div>
-            {renderBlock(showTwoBlocks ? 170 : 220, which === "B" ? customBlockB : customBlock)}
+            {renderBlock(showTwoBlocks ? 170 : 220, which === "B" ? blockB : blockA)}
           </div>
         ))}
       </div>
@@ -235,7 +239,7 @@ export function QuiltLayoutPreview({
             </DialogTitle>
           </DialogHeader>
           <div className="flex items-center justify-center">
-            {renderBlock(fullMax, blockFullOpen === "B" ? customBlockB : customBlock)}
+            {renderBlock(fullMax, blockFullOpen === "B" ? blockB : blockA)}
           </div>
           <p className="text-muted-foreground text-center text-xs">
             One {getPattern(pattern)?.name ?? "quilt"} block
