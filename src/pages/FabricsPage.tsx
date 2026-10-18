@@ -278,9 +278,19 @@ function FabricsStepInner() {
                   customSwapPair={planner.customSwapPair}
                 />
                 <p className="text-muted-foreground mt-4 text-center text-xs leading-relaxed">
-                  You&apos;re designing <strong>one block</strong>. That block will be sewn{" "}
-                  <strong>{blocksAcross * blocksDown} times</strong> and arranged in a{" "}
-                  {blocksAcross} × {blocksDown} grid to make your finished quilt.
+                  {pattern.id === "x-marks-the-chain" ? (
+                    <>
+                      This quilt alternates <strong>two blocks</strong> checkerboard-style — the X block and the chain block —{" "}
+                      <strong>{blocksAcross * blocksDown} blocks</strong> in a{" "}
+                      {blocksAcross} × {blocksDown} grid make your finished quilt.
+                    </>
+                  ) : (
+                    <>
+                      You&apos;re designing <strong>one block</strong>. That block will be sewn{" "}
+                      <strong>{blocksAcross * blocksDown} times</strong> and arranged in a{" "}
+                      {blocksAcross} × {blocksDown} grid to make your finished quilt.
+                    </>
+                  )}
                   {hasBorder && " The border wraps around the outside."}
                   {isSashed && sashing > 0 && (
                     <> Each block is separated by <strong>{sashing}&quot; sashing</strong>{hasCornerstones ? " with cornerstone squares at the intersections" : ""}.</>
