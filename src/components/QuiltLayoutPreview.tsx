@@ -20,6 +20,7 @@ import { AlbumFivePatchBlock, albumFivePatchFills } from "./AlbumFivePatchBlock"
 import { ArtSquareBlock, artSquareFills } from "./ArtSquareBlock";
 import { CustomBlockShapes } from "./CustomBlockSvg";
 import { swapFabrics, fabricsUsed, resolveSwapPair, customCellVariant, type CustomBlockDesign } from "@/lib/custom-block";
+import { xChainDesigns } from "@/lib/x-marks-the-chain";
 import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ArkansasCrossroadsBlock, DominoChickenFootBlock, AtticWindowBlock, atticWindowFills, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
 
 interface Props {
@@ -84,10 +85,14 @@ export function QuiltLayoutPreview({
   const fullMax = useViewportMax();
 
   // Two-block set: show Block A and Block B side by side, each with its own
-  // full-screen link, so the user can check both drawings.
-  const showTwoBlocks = pattern === "custom-block" && !!useBlockB && !!customBlockB;
+  // full-screen link, so the user can check both drawings. X Marks the Chain
+  // is always a two-block set with fixed Studio designs.
+  const xChainBlocks = pattern === "x-marks-the-chain" ? xChainDesigns(assignments) : null;
+  const showTwoBlocks = (pattern === "custom-block" && !!useBlockB && !!customBlockB) || !!xChainBlocks;
+  const blockA = xChainBlocks ? xChainBlocks.a : customBlock;
+  const blockB = xChainBlocks ? xChainBlocks.b : customBlockB;
 
-  const renderBlock = (size: number, design: CustomBlockDesign | null = customBlock) =>
+  const renderBlock = (size: number, design: CustomBlockDesign | null = blockA) =>
     pattern === "rail-fence" ? (
       <div className="flex items-stretch gap-2">
         <div className="flex flex-col justify-around py-[5px] text-right">
@@ -172,7 +177,7 @@ export function QuiltLayoutPreview({
                 See block full screen
               </button>
             </div>
-            {renderBlock(showTwoBlocks ? 170 : 220, which === "B" ? customBlockB : customBlock)}
+            {renderBlock(showTwoBlocks ? 170 : 220, which === "B" ? blockB : blockA)}
           </div>
         ))}
       </div>
@@ -234,7 +239,7 @@ export function QuiltLayoutPreview({
             </DialogTitle>
           </DialogHeader>
           <div className="flex items-center justify-center">
-            {renderBlock(fullMax, blockFullOpen === "B" ? customBlockB : customBlock)}
+            {renderBlock(fullMax, blockFullOpen === "B" ? blockB : blockA)}
           </div>
           <p className="text-muted-foreground text-center text-xs">
             One {getPattern(pattern)?.name ?? "quilt"} block
@@ -315,6 +320,8 @@ export function QuiltCanvas({
   maxSize,
 }: CanvasProps & { maxSize: number }) {
   const textures = useFabricTextures(photos);
+  // X Marks the Chain: two fixed Studio designs alternating checkerboard-style.
+  const xChain = pattern === "x-marks-the-chain" ? xChainDesigns(assignments) : null;
   const MAX = maxSize;
   const aspect = quiltWidth / quiltHeight;
   const thumbW = aspect >= 1 ? MAX : Math.round(MAX * aspect);
@@ -445,6 +452,9 @@ export function QuiltCanvas({
                 const pair = resolveSwapPair(customSwapPair, inPlay);
                 if (pair) cellDesign = swapFabrics(cellDesign, pair[0], pair[1]);
               }
+            } else if (xChain) {
+              // Block A in the top-left corner; Block B on alternating cells.
+              cellDesign = (i + j) % 2 === 1 ? xChain.b : xChain.a;
             }
             return (
               <svg
@@ -546,7 +556,7 @@ function MiniBlock({
     return fabricFill((assignments[k] ?? sectionDefault ?? fb) as FabricKey, photos);
   };
 
-  if (pattern === "custom-block") {
+  if (pattern === "custom-block" || pattern === "x-marks-the-chain") {
     return customDesign ? <CustomBlockShapes design={customDesign} photos={photos} /> : null;
   }
 

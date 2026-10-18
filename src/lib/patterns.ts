@@ -1922,6 +1922,23 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "x-marks-the-chain",
+    name: "X Marks the Chain",
+    hasMath: true,
+    intro:
+      "Originally designed in QuiltButler's Custom Block Studio. An X block — a plain centre square with four diamond arms — alternates checkerboard-style with a chain block of corner and accent squares, so the X arms and chain links weave a secondary design across the quilt top. The two-block layout flexes to your block size, border and finished quilt size; the preview's block count is never fixed. Optional sashing separates the blocks; without it, the chain corners meet in four-patches.",
+    sections: [
+      { id: "center", label: "X block centre square", defaultFabric: "A", hint: "The plain 2×2 square in the middle of every X block." },
+      { id: "points", label: "X diamond arms", defaultFabric: "B", hint: "Twelve half-square triangle halves per X block that meet as four diamonds." },
+      { id: "background", label: "Background (both blocks)", defaultFabric: "C", hint: "The triangles around the X arms and the bars of the chain block." },
+      { id: "chainCenter", label: "Chain block centre", defaultFabric: "D", hint: "The plain 2×2 square in the middle of every chain block." },
+      { id: "chainAccent", label: "Chain accent squares", defaultFabric: "E", hint: "Four squares on the inner diagonals of each chain block." },
+      { id: "chainCorners", label: "Chain corner squares", defaultFabric: "F", hint: "Four corner squares per chain block — they meet in four-patches when blocks touch." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "G", hint: "Optional; leave at 0 for edge-to-edge blocks." },
+      { ...borderSection, defaultFabric: "H" },
+    ],
+  },
+  {
     id: "album-five-patch",
     name: "Album 5 Patch",
     hasMath: true,
@@ -2120,6 +2137,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "blazing-arrows": { skill: "intermediate", fabricCount: 2, techniques: ["hst", "geese"] },
   "apple-pie": { skill: "intermediate", fabricCount: 4, techniques: ["geese", "squares"] },
   "art-square": { skill: "confident", fabricCount: 3, techniques: ["squares", "onpoint"] },
+  "x-marks-the-chain": { skill: "confident", fabricCount: 6, techniques: ["squares", "hst"] },
   "album-five-patch": { skill: "intermediate", fabricCount: 3, techniques: ["strips", "hst", "onpoint"] },
   "album-cross": { skill: "confident", fabricCount: 4, techniques: ["hst", "squares"] },
   "butlers-trellis": { skill: "intermediate", fabricCount: 7, techniques: ["hst", "squares"] },

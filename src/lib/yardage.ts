@@ -16,6 +16,7 @@ import {
 import { optimizeGrid, detectFrames, type GridPiece } from "./grid-optimizer";
 import { albumFivePatchDimensions } from "./album-five-patch";
 import { artSquareDimensions } from "./art-square";
+import { xChainDesigns } from "./x-marks-the-chain";
 
 /** Round an inch measurement to 2dp so cut sizes stay tidy. */
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -231,9 +232,10 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isChocolateCake = s.pattern === "chocolate-cake";
   const isDominoChickenFoot = s.pattern === "domino-chicken-foot";
   const isCustomBlock = s.pattern === "custom-block";
+  const isXChain = s.pattern === "x-marks-the-chain";
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isArtSquare || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isArtSquare || isXChain || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -4629,8 +4631,13 @@ export function calculateYardage(s: PlannerState): CalcResult {
   // block count FIRST and only then divided by the 2-at-a-time / 4-at-a-time
   // yields, so we never round up once per block.
   // =========================================================================
-  if (isCustomBlock) {
-    const designA = s.customBlock;
+  if (isCustomBlock || isXChain) {
+    // X Marks the Chain is a built-in two-block set: both designs are fixed
+    // Studio blocks with the quilter's fabric assignments applied, always
+    // alternating checkerboard-style. Everything else in this branch — the
+    // tallies, the grid optimizer, the cut notes — is shared with custom blocks.
+    const xChain = isXChain ? xChainDesigns(s.assignments) : null;
+    const designA = xChain ? xChain.a : s.customBlock;
     if (!designA) {
       return {
         fabrics: [],
@@ -4642,15 +4649,15 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
     const grid = designA.size;
     const unit = s.blockSize / grid;
-    const usingB = !!(s.useBlockB && s.customBlockB && s.customBlockB.size === grid);
-    const designB = usingB ? s.customBlockB! : null;
+    const usingB = xChain ? true : !!(s.useBlockB && s.customBlockB && s.customBlockB.size === grid);
+    const designB = xChain ? xChain.b : usingB ? s.customBlockB! : null;
     // A saved swap pair can go stale (the quilter edited the block, or turned
     // Block B off), so clamp it to the fabrics actually in the quilt — the
     // cutting list must never name a fabric the design doesn't use.
     const inPlayFabrics = [
       ...new Set([...fabricsUsed(designA), ...(designB ? fabricsUsed(designB) : [])]),
     ].sort();
-    const pair = resolveSwapPair(s.customSwapPair, inPlayFabrics);
+    const pair = xChain ? null : resolveSwapPair(s.customSwapPair, inPlayFabrics);
     const swapping = !!(s.alternateBlocks && pair);
 
     // Walk the real quilt grid so the counts match exactly what
@@ -4683,9 +4690,15 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const hstCut = round2(unit + HST_EXTRA);
     const qstCut = round2(unit + 1.25);
 
-    notes.push(
-      `Your block is a ${grid}×${grid} grid, so each grid square finishes at ${unit.toFixed(2)}".`,
-    );
+    if (xChain) {
+      notes.push(
+        `X Marks the Chain is a two-block set: Block A (the X) is a 4×4 grid, so its grid squares finish at ${unit.toFixed(2)}"; Block B (the chain) is a 6×6 grid, so its grid squares finish at ${(s.blockSize / 6).toFixed(2)}".`,
+      );
+    } else {
+      notes.push(
+        `Your block is a ${grid}×${grid} grid, so each grid square finishes at ${unit.toFixed(2)}".`,
+      );
+    }
     if (usingB) {
       notes.push(
         `Two-block set: cut ${evenCount} of Block A and ${oddCount} of Block B, then alternate them across the quilt like a checkerboard (Block A in the top-left corner).`,
@@ -4716,7 +4729,9 @@ export function calculateYardage(s: PlannerState): CalcResult {
     ];
     for (const [d, n] of variants) {
       if (!d || n <= 0) continue;
-      for (const p of optimizeGrid(plainSquareGrid(d), unit)) {
+      // Each design may have its own grid size (X Marks the Chain: 4×4 and
+      // 6×6), so the cell size comes from the design, not the shared `unit`.
+      for (const p of optimizeGrid(plainSquareGrid(d), s.blockSize / d.size)) {
         const key = `${p.fabric}|${p.cellsW}|${p.cellsH}`;
         const ex = pooledSq.get(key);
         if (ex) ex.count += p.count * n;
@@ -4897,13 +4912,16 @@ export function calculateYardage(s: PlannerState): CalcResult {
     }
     const sizeCheck = `Every finished block should measure ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`;
     notes.push(
-      frameFabrics.length
-        ? `Block check: ${sizeCheck}`
-        : `Block assembly: sew the units of each row together left to right, press the seams in opposite directions row to row, then join the ${grid} rows. ${sizeCheck}`,
+      xChain
+        ? `Block assembly: sew each block's units row by row, pressing the seams in opposite directions row to row (Block A has 4 rows, Block B has 6). Then set the finished blocks out checkerboard-style with an X block in the top-left corner and join the rows. ${sizeCheck}`
+        : frameFabrics.length
+          ? `Block check: ${sizeCheck}`
+          : `Block assembly: sew the units of each row together left to right, press the seams in opposite directions row to row, then join the ${grid} rows. ${sizeCheck}`,
     );
 
     if (sashWidth > 0) {
-      const sashFab = (s.assignments["sashing"] ?? "Y") as FabricKey;
+      const sashDefault = getPattern(s.pattern)?.sections.find((sec) => sec.id === "sashing")?.defaultFabric ?? "Y";
+      const sashFab = (s.assignments["sashing"] ?? sashDefault) as FabricKey;
       const sashCutW = sashWidth + SEAM;
       const sashCutL = s.blockSize + SEAM;
       const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
@@ -5021,6 +5039,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "fifty-four-forty-or-fight" ||
     s.pattern === "chocolate-cake" ||
     s.pattern === "domino-chicken-foot" ||
+    s.pattern === "x-marks-the-chain" ||
     s.pattern === "custom-block";
   // Block-setting note. Rotation-only settings never change piece counts —
   // they only change how the finished blocks are turned when the top is
