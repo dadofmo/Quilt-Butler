@@ -20,6 +20,7 @@ import { AlbumFivePatchBlock, albumFivePatchFills } from "./AlbumFivePatchBlock"
 import { ArtSquareBlock, artSquareFills } from "./ArtSquareBlock";
 import { CustomBlockShapes } from "./CustomBlockSvg";
 import { swapFabrics, fabricsUsed, resolveSwapPair, customCellVariant, type CustomBlockDesign } from "@/lib/custom-block";
+import { xChainDesigns } from "@/lib/x-marks-the-chain";
 import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ArkansasCrossroadsBlock, DominoChickenFootBlock, AtticWindowBlock, atticWindowFills, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
 
 interface Props {
@@ -315,6 +316,8 @@ export function QuiltCanvas({
   maxSize,
 }: CanvasProps & { maxSize: number }) {
   const textures = useFabricTextures(photos);
+  // X Marks the Chain: two fixed Studio designs alternating checkerboard-style.
+  const xChain = pattern === "x-marks-the-chain" ? xChainDesigns(assignments) : null;
   const MAX = maxSize;
   const aspect = quiltWidth / quiltHeight;
   const thumbW = aspect >= 1 ? MAX : Math.round(MAX * aspect);
@@ -445,6 +448,9 @@ export function QuiltCanvas({
                 const pair = resolveSwapPair(customSwapPair, inPlay);
                 if (pair) cellDesign = swapFabrics(cellDesign, pair[0], pair[1]);
               }
+            } else if (xChain) {
+              // Block A in the top-left corner; Block B on alternating cells.
+              cellDesign = (i + j) % 2 === 1 ? xChain.b : xChain.a;
             }
             return (
               <svg
@@ -546,7 +552,7 @@ function MiniBlock({
     return fabricFill((assignments[k] ?? sectionDefault ?? fb) as FabricKey, photos);
   };
 
-  if (pattern === "custom-block") {
+  if (pattern === "custom-block" || pattern === "x-marks-the-chain") {
     return customDesign ? <CustomBlockShapes design={customDesign} photos={photos} /> : null;
   }
 
