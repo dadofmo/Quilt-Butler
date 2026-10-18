@@ -27,7 +27,7 @@ function base(): PlannerState {
     customBlockB: null,
     useBlockB: false,
     customSwapPair: null,
-  } as PlannerState;
+  } as unknown as PlannerState;
 }
 
 describe("X Marks the Chain registration", () => {
