@@ -3001,6 +3001,29 @@ console.log("\n=== Art Square: 48-inch quilt, sixteen 12-inch blocks ===");
   check("Art Square corner length (twelve across)", corners?.totalInches ?? -1, 21);
 }
 
+console.log("\n=== X Marks the Chain: 48-inch quilt, sixteen 12-inch blocks (8 X + 8 chain) ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "x-marks-the-chain", quiltWidth: 48, quiltHeight: 48 });
+  const a = r.fabrics.find(f => f.fabric === "A");
+  const b = r.fabrics.find(f => f.fabric === "B");
+  const c = r.fabrics.find(f => f.fabric === "C");
+  const d = r.fabrics.find(f => f.fabric === "D");
+  const e = r.fabrics.find(f => f.fabric === "E");
+  const f = r.fabrics.find(f => f.fabric === "F");
+  check("XChain X-block merged centre count", a?.pieces[0].count ?? -1, 8);
+  check("XChain X-block merged centre size", a?.pieces[0].w ?? -1, 6.5);
+  check("XChain X-arm HST starting squares", b?.pieces[0].count ?? -1, 48);
+  check("XChain X-arm HST blank", b?.pieces[0].w ?? -1, 3.875);
+  check("XChain background HST starting squares", c?.pieces.find(p => p.w === 3.875)?.count ?? -1, 48);
+  check("XChain chain merged centre count", d?.pieces[0].count ?? -1, 8);
+  check("XChain chain merged centre size", d?.pieces[0].w ?? -1, 4.5);
+  check("XChain chain accent squares", e?.pieces[0].count ?? -1, 32);
+  check("XChain chain corner squares", f?.pieces[0].count ?? -1, 32);
+  const odd = calculateYardage({ ...base(), pattern: "x-marks-the-chain", quiltWidth: 36, quiltHeight: 60 });
+  check("XChain odd split X blocks", odd.fabrics.find(x => x.fabric === "A")?.pieces[0].count ?? -1, 8);
+  check("XChain odd split chain blocks", odd.fabrics.find(x => x.fabric === "D")?.pieces[0].count ?? -1, 7);
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {
