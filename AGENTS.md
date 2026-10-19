@@ -1,6 +1,6 @@
 
 ## Grid-cutting optimizer
-- Plain-square block grids merge via `optimizeGrid` (src/lib/grid-optimizer.ts): rings become symmetrical frames (two full-width + two side strips), rest greedy rectangles, never L-shapes. Merged cuts are always kept (no fallback to loose squares); `addOptimizedGridPieces` co-cuts pieces sharing a strip height onto the same strips. Why: experienced-quilter construction (fewer seams, flat accurate blocks) with honest yardage.
+- `optimizeGrid` uses symmetric frames or rectangles, never L-shapes; keep merged cuts and co-pack equal heights via `addOptimizedGridPieces`. Why: fewer seams and honest yardage.
 
 ## Plus Block construction
 - Cut each Plus Block as one continuous 1×3 center strip, two cross-arm squares, and four background corner squares; preserve those roles when fabrics reverse. Why: this is the real-world three-column construction and avoids two unnecessary seams.
@@ -41,3 +41,6 @@
 
 ## Art Square
 - Share geometry/cuts and seam-offset templates; piece setting triangles around an uncut centre. Why: straight seams, honest blanks.
+
+## X Marks the Chain
+- Share geometry and construction cuts: X uses a whole centre, HST side pairs and full-width rows; chain uses four corner four-patches and five whole macro squares. Why: straight seams and consistent guides at both grid scales.

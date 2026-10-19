@@ -3019,6 +3019,8 @@ console.log("\n=== X Marks the Chain: 48-inch quilt, sixteen 12-inch blocks (8 X
   check("XChain chain merged centre size", d?.pieces[0].w ?? -1, 4.5);
   check("XChain chain accent squares", e?.pieces[0].count ?? -1, 32);
   check("XChain chain corner squares", f?.pieces[0].count ?? -1, 32);
+  check("XChain chain background corner squares", c?.pieces.find(p => p.w === 2.5)?.count ?? -1, 64);
+  check("XChain chain whole background macro squares", c?.pieces.find(p => p.w === 4.5)?.count ?? -1, 32);
   const odd = calculateYardage({ ...base(), pattern: "x-marks-the-chain", quiltWidth: 36, quiltHeight: 60 });
   check("XChain odd split X blocks", odd.fabrics.find(x => x.fabric === "A")?.pieces[0].count ?? -1, 8);
   check("XChain odd split chain blocks", odd.fabrics.find(x => x.fabric === "D")?.pieces[0].count ?? -1, 7);
