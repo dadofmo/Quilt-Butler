@@ -16,7 +16,7 @@ import {
 import { optimizeGrid, detectFrames, type GridPiece } from "./grid-optimizer";
 import { albumFivePatchDimensions } from "./album-five-patch";
 import { artSquareDimensions } from "./art-square";
-import { xChainDesigns } from "./x-marks-the-chain";
+import { xChainDesigns, xChainPlainPieces, xChainSewingNotes } from "./x-marks-the-chain";
 
 /** Round an inch measurement to 2dp so cut sizes stay tidy. */
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -4731,8 +4731,11 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (!d || n <= 0) continue;
       // Each design may have its own grid size (X Marks the Chain: 4×4 and
       // 6×6), so the cell size comes from the design, not the shared `unit`.
-      for (const p of optimizeGrid(plainSquareGrid(d), s.blockSize / d.size)) {
-        const key = `${p.fabric}|${p.cellsW}|${p.cellsH}`;
+      const plainPieces = xChain
+        ? xChainPlainPieces(d, s.blockSize, SEAM)
+        : optimizeGrid(plainSquareGrid(d), s.blockSize / d.size);
+      for (const p of plainPieces) {
+        const key = `${p.fabric}|${p.cutW}|${p.cutH}`;
         const ex = pooledSq.get(key);
         if (ex) ex.count += p.count * n;
         else pooledSq.set(key, { ...p, cutW: round2(p.cutW), cutH: round2(p.cutH), count: p.count * n });
@@ -4754,7 +4757,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     for (const p of sqPieces) {
       if (p.cellsW === 1 && p.cellsH === 1) {
         notes.push(
-          `Plain squares: cut ${p.count} squares of Fabric ${p.fabric} at ${sqCut.toFixed(2)}" (finishes ${unit.toFixed(2)}").`,
+          `Plain squares: cut ${p.count} squares of Fabric ${p.fabric} at ${p.cutW.toFixed(2)}" (finishes ${(p.cutW - SEAM).toFixed(2)}").`,
         );
       } else {
         const shape = p.cellsW === p.cellsH ? "large squares" : "strips";
@@ -4911,13 +4914,14 @@ export function calculateYardage(s: PlannerState): CalcResult {
       );
     }
     const sizeCheck = `Every finished block should measure ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`;
-    notes.push(
-      xChain
-        ? `Block assembly: sew each block's units row by row, pressing the seams in opposite directions row to row (Block A has 4 rows, Block B has 6). Then set the finished blocks out checkerboard-style with an X block in the top-left corner and join the rows. ${sizeCheck}`
-        : frameFabrics.length
-          ? `Block check: ${sizeCheck}`
-          : `Block assembly: sew the units of each row together left to right, press the seams in opposite directions row to row, then join the ${grid} rows. ${sizeCheck}`,
-    );
+    if (xChain) {
+      notes.push(...xChainSewingNotes(s.blockSize, s.assignments, SEAM));
+      notes.push(`Quilt assembly: ${sizeCheck} Make ${evenCount} X blocks and ${oddCount} chain blocks. Set them out checkerboard-style with an X block in the top-left corner, matching the quilt preview. Use the specified between-block sashing if selected; otherwise join edge to edge. Add the border last.`);
+    } else {
+      notes.push(frameFabrics.length
+        ? `Block check: ${sizeCheck}`
+        : `Block assembly: sew the units of each row together left to right, press the seams in opposite directions row to row, then join the ${grid} rows. ${sizeCheck}`);
+    }
 
     if (sashWidth > 0) {
       const sashDefault = getPattern(s.pattern)?.sections.find((sec) => sec.id === "sashing")?.defaultFabric ?? "Y";
