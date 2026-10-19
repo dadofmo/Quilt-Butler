@@ -45,8 +45,8 @@ export const X_CHAIN_BLOCK_A: CustomBlockDesign = {
     "3,0": { kind: "hst", rotation: 270, fabrics: ["C", "B"] },
     "3,1": { kind: "hst", rotation: 180, fabrics: ["C", "B"] },
     // Bottom-right quadrant
-    "2,3": { kind: "hst", rotation: 270, fabrics: ["C", "B"] },
-    "3,2": { kind: "hst", rotation: 90, fabrics: ["C", "B"] },
+    "2,3": { kind: "hst", rotation: 90, fabrics: ["C", "B"] },
+    "3,2": { kind: "hst", rotation: 270, fabrics: ["C", "B"] },
     "3,3": { kind: "hst", rotation: 180, fabrics: ["C", "B"] },
   },
 };

@@ -52,6 +52,22 @@ describe("X Marks the Chain registration", () => {
 });
 
 describe("X Marks the Chain geometry", () => {
+  it("all four X arms match the top-left arm after a quarter turn", () => {
+    const arms = blockPolys(X_CHAIN_BLOCK_A).filter((p) => p.fabric === "B");
+    const canonical = (points: [number, number][]) =>
+      points.map(([x, y]) => `${x},${y}`).sort().join("|");
+    const actual = arms.map((p) => canonical(p.points)).sort();
+    const topLeft = arms.filter((p) => p.points.every(([x, y]) => x <= 2 && y <= 2));
+    expect(topLeft).toHaveLength(3);
+    for (const turns of [1, 2, 3]) {
+      const rotated = topLeft.map((p) => canonical(p.points.map(([x, y]) => {
+        for (let turn = 0; turn < turns; turn++) [x, y] = [4 - y, x];
+        return [x, y] as [number, number];
+      })));
+      for (const triangle of rotated) expect(actual).toContain(triangle);
+    }
+  });
+
   it("both designs validate cleanly", () => {
     expect(validateDesign(X_CHAIN_BLOCK_A)).toEqual([]);
     expect(validateDesign(X_CHAIN_BLOCK_B)).toEqual([]);
