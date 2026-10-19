@@ -7,6 +7,8 @@ import {
   X_CHAIN_BLOCK_B,
   xChainDesigns,
   remapDesign,
+  xChainPlainUnits,
+  xChainPlainPieces,
 } from "@/lib/x-marks-the-chain";
 import type { PlannerState } from "@/lib/planner-store";
 
@@ -120,6 +122,44 @@ describe("X Marks the Chain geometry", () => {
 });
 
 describe("X Marks the Chain yardage", () => {
+  it("chain construction units cover every cell once without crossing fabric regions", () => {
+    const covered = new Set<string>();
+    for (const { row, col, cellsW, cellsH } of xChainPlainUnits(6)) {
+      const fabric = X_CHAIN_BLOCK_B.cells[`${row},${col}`].fabrics[0];
+      for (let r = row; r < row + cellsH; r++) for (let c = col; c < col + cellsW; c++) {
+        const key = `${r},${c}`;
+        expect(covered.has(key)).toBe(false);
+        expect(X_CHAIN_BLOCK_B.cells[key].fabrics[0]).toBe(fabric);
+        covered.add(key);
+      }
+    }
+    expect(covered.size).toBe(36);
+  });
+
+  it.each([12, 18])("chain cuts match four corner four-patches and five whole squares at %s inches", (size) => {
+    const pieces = xChainPlainPieces(X_CHAIN_BLOCK_B, size, 0.5);
+    expect(pieces.filter((p) => p.fabric === "C" && p.cellsW === 2)).toHaveLength(4);
+    expect(pieces.filter((p) => p.fabric === "C" && p.cellsW === 1)).toHaveLength(8);
+    for (const p of pieces) {
+      expect(p.cutW).toBe(p.cellsW * size / 6 + 0.5);
+      expect(p.cutH).toBe(p.cellsH * size / 6 + 0.5);
+    }
+    const r = calculateYardage({ ...base(), blockSize: size, quiltWidth: size * 4, quiltHeight: size * 4 });
+    const background = r.fabrics.find((f) => f.fabric === "C");
+    expect(background?.pieces).toEqual(expect.arrayContaining([
+      expect.objectContaining({ count: 64, w: size / 6 + 0.5, h: size / 6 + 0.5 }),
+      expect.objectContaining({ count: 32, w: size / 3 + 0.5, h: size / 3 + 0.5 }),
+    ]));
+  });
+
+  it("keeps X and chain centre sizes separate when roles share a fabric", () => {
+    const r = calculateYardage({ ...base(), assignments: { chainCenter: "A" } });
+    expect(r.fabrics.find((f) => f.fabric === "A")?.pieces).toEqual(expect.arrayContaining([
+      expect.objectContaining({ count: 8, w: 6.5, h: 6.5 }),
+      expect.objectContaining({ count: 8, w: 4.5, h: 4.5 }),
+    ]));
+  });
+
   it("splits a 4×4 quilt into 8 X blocks and 8 chain blocks", () => {
     const r = calculateYardage(base());
     // 8 X blocks: centre 2×2 merges into one 6.5" square per block.
