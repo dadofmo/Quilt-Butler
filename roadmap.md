@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Verify and correct X Marks the Chain cutting, straight-seam sewing instructions, printed guides, and live results after the X arm correction.
+- [x] Verify and correct X Marks the Chain cutting, straight-seam sewing instructions, printed guides, and live results after the X arm correction.
 
 - [x] Add Art Square with independent Fabric C corners and shared reference geometry.
 - [x] Add practical cutting/sewing math and verify tests, audit, and live planner.
