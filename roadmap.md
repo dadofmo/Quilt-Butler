@@ -1,5 +1,6 @@
 # Roadmap
 
+- [x] Add Whirlwind Waltz (two-block Studio Pick: spinning star + arrow block, 6x6 quadrant construction).
 - [x] Verify and correct X Marks the Chain cutting, straight-seam sewing instructions, printed guides, and live results after the X arm correction.
 
 - [x] Add Art Square with independent Fabric C corners and shared reference geometry.

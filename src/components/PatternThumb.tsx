@@ -7,6 +7,7 @@ import { AlbumFivePatchBlock, albumFivePatchFills } from "./AlbumFivePatchBlock"
 import { ArtSquareBlock, artSquareFills } from "./ArtSquareBlock";
 import { CustomBlockSvg } from "./CustomBlockSvg";
 import { xChainDesigns } from "@/lib/x-marks-the-chain";
+import { whirlwindDesigns } from "@/lib/whirlwind-waltz";
 import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ArkansasCrossroadsBlock, DominoChickenFootBlock, AtticWindowBlock, atticWindowFills, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
 
 
@@ -27,6 +28,7 @@ const C = {
 
 const PATTERN_ALT: Record<PatternId, string> = {
   "art-square": "Art Square: one centre diamond, eight background triangles and four corner squares in a separate third fabric",
+  "whirlwind-waltz": "Whirlwind Waltz: a spinning four-arm star block alternating checkerboard-style with an arrow block whose arms point outward, framed by contrasting corner squares",
   "x-marks-the-chain": "X Marks the Chain: an X block with four diamond arms alternating checkerboard-style with a chain block of corner and accent squares",
   "album-five-patch": "Album 5 Patch: three diagonal centre rails, four continuous accent bars and inward-facing corner triangles",
   "alaska": "Alaska quilt block with a central nine-patch, dark left/right hourglass triangles, four outer diamonds and diagonal corner squares",
@@ -1083,6 +1085,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return <svg {...common}><ArtSquareBlock size={90} {...artSquareFills({})} /></svg>;
     case "x-marks-the-chain":
       return <CustomBlockSvg design={xChainDesigns().a} size={s} />;
+    case "whirlwind-waltz":
+      return <CustomBlockSvg design={whirlwindDesigns().a} size={s} />;
     case "album-five-patch":
       return <svg {...common}><AlbumFivePatchBlock size={90} {...albumFivePatchFills({})} /></svg>;
     case "alaska":

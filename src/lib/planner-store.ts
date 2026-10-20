@@ -80,6 +80,7 @@ export type PatternId =
   | "album-cross"
   | "art-square"
   | "x-marks-the-chain"
+  | "whirlwind-waltz"
   | "album-five-patch"
   | "butlers-trellis"
   | "arkansas-crossroads"

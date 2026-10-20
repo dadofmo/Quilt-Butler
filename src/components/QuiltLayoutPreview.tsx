@@ -20,7 +20,7 @@ import { AlbumFivePatchBlock, albumFivePatchFills } from "./AlbumFivePatchBlock"
 import { ArtSquareBlock, artSquareFills } from "./ArtSquareBlock";
 import { CustomBlockShapes } from "./CustomBlockSvg";
 import { swapFabrics, fabricsUsed, resolveSwapPair, customCellVariant, type CustomBlockDesign } from "@/lib/custom-block";
-import { xChainDesigns } from "@/lib/x-marks-the-chain";
+import { studioPairDesigns } from "@/lib/studio-pairs";
 import { PatternDiagram, IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ArkansasCrossroadsBlock, DominoChickenFootBlock, AtticWindowBlock, atticWindowFills, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
 
 interface Props {
@@ -87,7 +87,7 @@ export function QuiltLayoutPreview({
   // Two-block set: show Block A and Block B side by side, each with its own
   // full-screen link, so the user can check both drawings. X Marks the Chain
   // is always a two-block set with fixed Studio designs.
-  const xChainBlocks = pattern === "x-marks-the-chain" ? xChainDesigns(assignments) : null;
+  const xChainBlocks = studioPairDesigns(pattern, assignments);
   const showTwoBlocks = (pattern === "custom-block" && !!useBlockB && !!customBlockB) || !!xChainBlocks;
   const blockA = xChainBlocks ? xChainBlocks.a : customBlock;
   const blockB = xChainBlocks ? xChainBlocks.b : customBlockB;
@@ -321,7 +321,7 @@ export function QuiltCanvas({
 }: CanvasProps & { maxSize: number }) {
   const textures = useFabricTextures(photos);
   // X Marks the Chain: two fixed Studio designs alternating checkerboard-style.
-  const xChain = pattern === "x-marks-the-chain" ? xChainDesigns(assignments) : null;
+  const xChain = studioPairDesigns(pattern, assignments);
   const MAX = maxSize;
   const aspect = quiltWidth / quiltHeight;
   const thumbW = aspect >= 1 ? MAX : Math.round(MAX * aspect);
@@ -556,7 +556,7 @@ function MiniBlock({
     return fabricFill((assignments[k] ?? sectionDefault ?? fb) as FabricKey, photos);
   };
 
-  if (pattern === "custom-block" || pattern === "x-marks-the-chain") {
+  if (pattern === "custom-block" || studioPairDesigns(pattern)) {
     return customDesign ? <CustomBlockShapes design={customDesign} photos={photos} /> : null;
   }
 
