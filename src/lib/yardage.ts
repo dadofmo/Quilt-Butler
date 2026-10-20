@@ -16,7 +16,7 @@ import {
 import { optimizeGrid, detectFrames, type GridPiece } from "./grid-optimizer";
 import { albumFivePatchDimensions } from "./album-five-patch";
 import { artSquareDimensions } from "./art-square";
-import { xChainDesigns, xChainPlainPieces, xChainSewingNotes } from "./x-marks-the-chain";
+import { studioPair } from "./studio-pairs";
 
 /** Round an inch measurement to 2dp so cut sizes stay tidy. */
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -232,7 +232,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isChocolateCake = s.pattern === "chocolate-cake";
   const isDominoChickenFoot = s.pattern === "domino-chicken-foot";
   const isCustomBlock = s.pattern === "custom-block";
-  const isXChain = s.pattern === "x-marks-the-chain";
+  const isXChain = !!studioPair(s.pattern);
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
   const sashWidth = (isArtSquare || isXChain || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
@@ -4636,7 +4636,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     // Studio blocks with the quilter's fabric assignments applied, always
     // alternating checkerboard-style. Everything else in this branch — the
     // tallies, the grid optimizer, the cut notes — is shared with custom blocks.
-    const xChain = isXChain ? xChainDesigns(s.assignments) : null;
+    const pairDef = studioPair(s.pattern);
+    const xChain = pairDef ? pairDef.designs(s.assignments) : null;
     const designA = xChain ? xChain.a : s.customBlock;
     if (!designA) {
       return {
@@ -4690,10 +4691,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const hstCut = round2(unit + HST_EXTRA);
     const qstCut = round2(unit + 1.25);
 
-    if (xChain) {
-      notes.push(
-        `X Marks the Chain is a two-block set: Block A (the X) is a 4×4 grid, so its grid squares finish at ${unit.toFixed(2)}"; Block B (the chain) is a 6×6 grid, so its grid squares finish at ${(s.blockSize / 6).toFixed(2)}".`,
-      );
+    if (pairDef) {
+      notes.push(pairDef.gridNote(s.blockSize));
     } else {
       notes.push(
         `Your block is a ${grid}×${grid} grid, so each grid square finishes at ${unit.toFixed(2)}".`,
@@ -4732,7 +4731,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
       // Each design may have its own grid size (X Marks the Chain: 4×4 and
       // 6×6), so the cell size comes from the design, not the shared `unit`.
       const plainPieces = xChain
-        ? xChainPlainPieces(d, s.blockSize, SEAM)
+        ? pairDef!.plainPieces(d, s.blockSize, SEAM)
         : optimizeGrid(plainSquareGrid(d), s.blockSize / d.size);
       for (const p of plainPieces) {
         const key = `${p.fabric}|${p.cutW}|${p.cutH}`;
@@ -4914,9 +4913,9 @@ export function calculateYardage(s: PlannerState): CalcResult {
       );
     }
     const sizeCheck = `Every finished block should measure ${(s.blockSize + SEAM).toFixed(2)}" raw / ${s.blockSize}" finished.`;
-    if (xChain) {
-      notes.push(...xChainSewingNotes(s.blockSize, s.assignments, SEAM));
-      notes.push(`Quilt assembly: ${sizeCheck} Make ${evenCount} X blocks and ${oddCount} chain blocks. Set them out checkerboard-style with an X block in the top-left corner, matching the quilt preview. Use the specified between-block sashing if selected; otherwise join edge to edge. Add the border last.`);
+    if (pairDef) {
+      notes.push(...pairDef.sewingNotes(s.blockSize, s.assignments, SEAM));
+      notes.push(`Quilt assembly: ${sizeCheck} Make ${evenCount} ${pairDef.names.a}s and ${oddCount} ${pairDef.names.b}s. Set them out checkerboard-style with a ${pairDef.names.a} in the top-left corner, matching the quilt preview. Use the specified between-block sashing if selected; otherwise join edge to edge. Add the border last.`);
     } else {
       notes.push(frameFabrics.length
         ? `Block check: ${sizeCheck}`
@@ -5044,6 +5043,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "chocolate-cake" ||
     s.pattern === "domino-chicken-foot" ||
     s.pattern === "x-marks-the-chain" ||
+    s.pattern === "whirlwind-waltz" ||
     s.pattern === "custom-block";
   // Block-setting note. Rotation-only settings never change piece counts —
   // they only change how the finished blocks are turned when the top is

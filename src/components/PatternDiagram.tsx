@@ -11,6 +11,7 @@ import { AlbumFivePatchBlock, albumFivePatchFills } from "./AlbumFivePatchBlock"
 import { ArtSquareBlock, artSquareFills } from "./ArtSquareBlock";
 import { CustomBlockShapes } from "./CustomBlockSvg";
 import { xChainDesigns } from "@/lib/x-marks-the-chain";
+import { studioPairDesigns } from "@/lib/studio-pairs";
 import type { CustomBlockDesign } from "@/lib/custom-block";
 
 interface Props {
@@ -63,8 +64,10 @@ export function PatternDiagram({ pattern, assignments, hasBorder, size = 280, ph
         <svg width={size - 40} height={size - 40} viewBox="0 0 200 200">
           {/* Fabric photos share one fixed scale across every piece. */}
           <FabricPatternDefs photos={photos} />
-          {pattern === "custom-block" || pattern === "x-marks-the-chain"
+          {pattern === "custom-block"
             ? customBlock && <CustomBlockShapes design={customBlock} photos={photos} />
+            : studioPairDesigns(pattern)
+            ? <CustomBlockShapes design={customBlock ?? studioPairDesigns(pattern, assignments)!.a} photos={photos} />
             : renderInner(pattern, assignments, photos)}
         </svg>
       </div>
@@ -1119,6 +1122,8 @@ function renderInner(
       return <ArtSquareBlock size={200} {...artSquareFills(a, photos)} />;
     case "x-marks-the-chain":
       return <CustomBlockShapes design={xChainDesigns(a).a} photos={photos} />;
+    case "whirlwind-waltz":
+      return <CustomBlockShapes design={studioPairDesigns(pattern, a)!.a} photos={photos} />;
     case "album-five-patch":
       return <AlbumFivePatchBlock size={200} {...albumFivePatchFills(a, photos)} />;
     case "alaska":

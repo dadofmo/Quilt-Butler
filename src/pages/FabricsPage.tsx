@@ -1,3 +1,4 @@
+import { studioPair } from "@/lib/studio-pairs";
 import { useNavigate, Link } from "react-router-dom";
 import { prepareFabricPhoto } from "@/lib/fabric-photo";
 import { BlockLayoutPicker } from "@/components/BlockLayoutPicker";
@@ -278,9 +279,9 @@ function FabricsStepInner() {
                   customSwapPair={planner.customSwapPair}
                 />
                 <p className="text-muted-foreground mt-4 text-center text-xs leading-relaxed">
-                  {pattern.id === "x-marks-the-chain" ? (
+                  {studioPair(pattern.id) ? (
                     <>
-                      This quilt alternates <strong>two blocks</strong> checkerboard-style — the X block and the chain block —{" "}
+                      This quilt alternates <strong>two blocks</strong> checkerboard-style — the {studioPair(pattern.id)!.names.a} and the {studioPair(pattern.id)!.names.b} —{" "}
                       <strong>{blocksAcross * blocksDown} blocks</strong> in a{" "}
                       {blocksAcross} × {blocksDown} grid make your finished quilt.
                     </>
