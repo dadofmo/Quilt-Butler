@@ -41,10 +41,8 @@ const hstCorner = (d: CustomBlockDesign, key: string) => {
   const [r, c] = key.split(",").map(Number);
   const xs = poly.points.map(([x]) => x - c);
   const ys = poly.points.map(([, y]) => y - r);
-  const corner = (x: number, y: number) => poly.points.some(([px, py]) => px - c === x && py - r === y);
   const right = xs.filter((x) => x === 1).length === 2;
   const bottom = ys.filter((y) => y === 1).length === 2;
-  void corner;
   return `${bottom ? "B" : "T"}${right ? "R" : "L"}`;
 };
 
@@ -151,7 +149,7 @@ describe("Whirlwind Waltz cutting & sewing", () => {
       expect.objectContaining({ count: 32, w: 2.5, h: 2.5 }),
     ]));
     expect(hstStarts(f)).toBe(16);
-    expect(r.notes.join(" ")).toContain("Make 8 star blocks and 8 arrow blocks");
+    expect((r.notes ?? []).join(" ")).toContain("Make 8 star blocks and 8 arrow blocks");
   });
 
   it("sewing notes name the same fabrics and HST corners the previews draw", () => {
