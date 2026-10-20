@@ -141,14 +141,16 @@ describe("Whirlwind Waltz cutting & sewing", () => {
     expect(bg.pieces).toEqual(expect.arrayContaining([
       expect.objectContaining({ count: 64, w: 4.5, h: 2.5 }),
       expect.objectContaining({ count: 64, w: 2.5, h: 2.5 }),
-      expect.objectContaining({ count: 64, w: 2.88 }),
     ]));
+    const hstStarts = (x: typeof bg) =>
+      x.pieces.filter((p) => p.w === 2.88).reduce((n, p) => n + p.count, 0);
+    expect(hstStarts(bg)).toBe(64);
     const f = r.fabrics.find((x) => x.fabric === "F")!;
     expect(f.pieces).toEqual(expect.arrayContaining([
       expect.objectContaining({ count: 16, w: 4.5, h: 2.5 }),
       expect.objectContaining({ count: 32, w: 2.5, h: 2.5 }),
-      expect.objectContaining({ count: 16, w: 2.88 }),
     ]));
+    expect(hstStarts(f)).toBe(16);
     expect(r.notes.join(" ")).toContain("Make 8 star blocks and 8 arrow blocks");
   });
 
