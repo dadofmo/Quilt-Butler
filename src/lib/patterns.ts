@@ -1955,7 +1955,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
       { id: "arrowCorners1", label: "Arrow corner squares 1", defaultFabric: "F", hint: "Top-left and bottom-right corners of the arrow block." },
       { id: "arrowCorners2", label: "Arrow corner squares 2", defaultFabric: "G", hint: "Top-right and bottom-left corners of the arrow block." },
       { id: "sashing", label: "Sashing between blocks", defaultFabric: "C", hint: "Optional; leave at 0 for edge-to-edge blocks." },
-      { ...borderSection, defaultFabric: "D" },
+      { ...borderSection, defaultFabric: "H" },
     ],
   },
   {
