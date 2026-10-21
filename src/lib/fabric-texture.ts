@@ -6,7 +6,7 @@ import FFT from "fft.js";
  * The correction is harmonic inside the image, so it cannot add an edge band.
  * Dimensions must be powers of two (the prepared canvas guarantees this).
  */
-export function seamlessFabricPixels(source: Uint8ClampedArray, width: number, height: number, averagedEdges = false) {
+export function seamlessFabricPixels(source: Uint8ClampedArray, width: number, height: number, averagedEdges = false, smoothEdges = false) {
   const output = new Uint8ClampedArray(source);
   if (width < 2 || height < 2 || (width & (width - 1)) || (height & (height - 1))) return output;
   const horizontal = new FFT(width);
@@ -52,15 +52,30 @@ export function seamlessFabricPixels(source: Uint8ClampedArray, width: number, h
       for (let i = 0; i < k; i++) { first += sample(i); last += sample(n - 1 - i); }
       return (last - first) / k * (n - 1) / (n - k);
     };
+    // Smooth mode keeps only the gradual (lighting) part of each edge jump.
+    // A motif touching one edge but not the other is a sharp, local jump;
+    // diffusing it into the tile paints cloudy blotches on plain grounds.
+    const lowPass = (jumps: Float64Array) => {
+      if (!smoothEdges) return jumps;
+      const n = jumps.length, radius = Math.max(2, n >> 2);
+      const sorted = Float64Array.from(jumps).sort();
+      const med = sorted[n >> 1];
+      const clipped = jumps.map(j => Math.max(med - 8, Math.min(med + 8, j)));
+      return clipped.map((_, i) => {
+        let sum = 0;
+        for (let k = -radius; k <= radius; k++) sum += clipped[((i + k) % n + n) % n];
+        return sum / (2 * radius + 1);
+      });
+    };
+    const colJumps = lowPass(Float64Array.from({ length: width }, (_, x) => jumpAcross(height, y => at(x, y))));
     for (let x = 0; x < width; x++) {
-      const jump = jumpAcross(height, y => at(x, y));
-      field[2 * x] += jump;
-      field[2 * ((height - 1) * width + x)] -= jump;
+      field[2 * x] += colJumps[x];
+      field[2 * ((height - 1) * width + x)] -= colJumps[x];
     }
+    const rowJumps = lowPass(Float64Array.from({ length: height }, (_, y) => jumpAcross(width, x => at(x, y))));
     for (let y = 0; y < height; y++) {
-      const jump = jumpAcross(width, x => at(x, y));
-      field[2 * y * width] += jump;
-      field[2 * (y * width + width - 1)] -= jump;
+      field[2 * y * width] += rowJumps[y];
+      field[2 * (y * width + width - 1)] -= rowJumps[y];
     }
     transform(false);
     field[0] = 0;
@@ -241,6 +256,21 @@ export interface TileArtifacts {
   band: number;
   /** Average colour shift from the photo, in RGB levels. */
   colour: number;
+  /** Worst local cloudy shift from the photo (patch mean vs typical), in brightness levels. */
+  blotch: number;
+}
+
+function blotchLevel(t: Float64Array, r: Float64Array, n: number) {
+  const cells = 16, size = Math.max(1, Math.floor(n / cells)), means: number[] = [];
+  for (let by = 0; by < cells; by++) for (let bx = 0; bx < cells; bx++) {
+    let sum = 0, count = 0;
+    for (let y = by * size; y < Math.min(n, (by + 1) * size); y++)
+      for (let x = bx * size; x < Math.min(n, (bx + 1) * size); x++) { sum += t[y * n + x] - r[y * n + x]; count++; }
+    if (count) means.push(sum / count);
+  }
+  const sorted = [...means].sort((a, b) => a - b);
+  const med = sorted[sorted.length >> 1] ?? 0;
+  return Math.max(0, ...means.map(m => Math.abs(m - med)));
 }
 
 const luma = (px: Uint8ClampedArray, n: number) =>
@@ -294,6 +324,7 @@ export function tileArtifacts(tile: Uint8ClampedArray, reference: Uint8ClampedAr
     detail: (detailT + 2) / (detailR + 2),
     band: bandRange(t, n),
     colour,
+    blotch: blotchLevel(t, r, n),
   };
 }
 
@@ -314,7 +345,7 @@ export function buildFabricTile(source: Uint8ClampedArray, side: number): Uint8C
   const gain = lightingGain(luma(flat, side), side);
   for (let i = 0; i < side * side; i++)
     for (let c = 0; c < 3; c++) flat[4 * i + c] = flat[4 * i + c] * gain[i];
-  const candidates = [seamlessFabricPixels(flat, side, side), seamlessFabricPixels(flat, side, side, true)];
+  const candidates = [seamlessFabricPixels(flat, side, side), seamlessFabricPixels(flat, side, side, true), seamlessFabricPixels(flat, side, side, false, true)];
   if (side >= 16) {
     const repeat = detectPrintRepeat(luma(flat, side), side);
     if (repeat.x !== null || repeat.y !== null) candidates.push(repeatTilePixels(flat, side, repeat.x, repeat.y));
@@ -324,8 +355,10 @@ export function buildFabricTile(source: Uint8ClampedArray, side: number): Uint8C
   const faithful = scored.filter(({ m }) =>
     m.detail >= 0.85 && m.detail <= 1.2 && m.colour <= 5 && m.band <= flatBand * 1.1 + 3);
   // Cleanest join among faithful tiles; if none qualify, the most even one.
-  const pool = faithful.length ? faithful : scored;
-  pool.sort((a, b) => faithful.length ? a.m.seam - b.m.seam : a.m.band - b.m.band);
+  // Prefer tiles that don't paint cloudy blotches onto plain grounds.
+  const clean = faithful.filter(({ m }) => m.blotch <= 8 && m.seam < 1.4);
+  const pool = clean.length ? clean : faithful.length ? faithful : scored;
+  pool.sort((a, b) => pool !== scored ? a.m.seam - b.m.seam : a.m.band - b.m.band);
   return pool[0].tile;
 }
 
