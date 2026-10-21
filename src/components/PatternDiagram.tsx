@@ -9,6 +9,7 @@ import { ChocolateCakeBlock, chocolateCakeFills } from "./ChocolateCakeBlock";
 import { AlaskaBlock, alaskaFills } from "./AlaskaBlock";
 import { AlbumFivePatchBlock, albumFivePatchFills } from "./AlbumFivePatchBlock";
 import { ArtSquareBlock, artSquareFills } from "./ArtSquareBlock";
+import { BrickWorkBlock, brickWorkFills } from "./BrickWorkBlock";
 import { CustomBlockShapes } from "./CustomBlockSvg";
 import { xChainDesigns } from "@/lib/x-marks-the-chain";
 import { studioPairDesigns } from "@/lib/studio-pairs";
@@ -1120,6 +1121,8 @@ function renderInner(
       return <ChocolateCakeBlock size={200} {...chocolateCakeFills(a, photos)} />;
     case "art-square":
       return <ArtSquareBlock size={200} {...artSquareFills(a, photos)} />;
+    case "brick-work":
+      return <BrickWorkBlock size={200} {...brickWorkFills(a, photos)} />;
     case "x-marks-the-chain":
       return <CustomBlockShapes design={xChainDesigns(a).a} photos={photos} />;
     case "whirlwind-waltz":

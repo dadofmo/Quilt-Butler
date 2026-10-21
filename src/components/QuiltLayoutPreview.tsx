@@ -18,6 +18,7 @@ import { ChocolateCakeBlock, chocolateCakeFills } from "./ChocolateCakeBlock";
 import { AlaskaBlock, alaskaFills } from "./AlaskaBlock";
 import { AlbumFivePatchBlock, albumFivePatchFills } from "./AlbumFivePatchBlock";
 import { ArtSquareBlock, artSquareFills } from "./ArtSquareBlock";
+import { BrickWorkBlock, brickWorkFills } from "./BrickWorkBlock";
 import { CustomBlockShapes } from "./CustomBlockSvg";
 import { swapFabrics, fabricsUsed, resolveSwapPair, customCellVariant, type CustomBlockDesign } from "@/lib/custom-block";
 import { studioPairDesigns } from "@/lib/studio-pairs";
@@ -1491,6 +1492,8 @@ function MiniBlock({
       return <ChocolateCakeBlock size={200} {...chocolateCakeFills(assignments, photos)} />;
     case "art-square":
       return <ArtSquareBlock size={200} {...artSquareFills(assignments, photos)} />;
+    case "brick-work":
+      return <BrickWorkBlock size={200} {...brickWorkFills(assignments, photos)} />;
     case "album-five-patch":
       return <AlbumFivePatchBlock size={200} {...albumFivePatchFills(assignments, photos)} />;
     case "alaska":

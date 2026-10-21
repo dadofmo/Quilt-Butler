@@ -62,6 +62,7 @@ export const PATTERN_DIFFICULTY: Record<PatternId, 1 | 2 | 3 | 4 | 5> = {
   "apple-pie": 3,
   "album-cross": 2,
   "art-square": 2,
+  "brick-work": 2,
   "x-marks-the-chain": 2,
   "whirlwind-waltz": 3,
   "album-five-patch": 3,
