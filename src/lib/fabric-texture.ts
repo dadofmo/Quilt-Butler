@@ -356,7 +356,7 @@ export function buildFabricTile(source: Uint8ClampedArray, side: number): Uint8C
     m.detail >= 0.85 && m.detail <= 1.2 && m.colour <= 5 && m.band <= flatBand * 1.1 + 3);
   // Cleanest join among faithful tiles; if none qualify, the most even one.
   // Prefer tiles that don't paint cloudy blotches onto plain grounds.
-  const clean = faithful.filter(({ m }) => m.blotch <= 8);
+  const clean = faithful.filter(({ m }) => m.blotch <= 8 && m.seam < 1.4);
   const pool = clean.length ? clean : faithful.length ? faithful : scored;
   pool.sort((a, b) => pool !== scored ? a.m.seam - b.m.seam : a.m.band - b.m.band);
   return pool[0].tile;
