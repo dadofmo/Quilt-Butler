@@ -57,10 +57,10 @@ export function seamlessFabricPixels(source: Uint8ClampedArray, width: number, h
     // diffusing it into the tile paints cloudy blotches on plain grounds.
     const lowPass = (jumps: Float64Array) => {
       if (!smoothEdges) return jumps;
-      const n = jumps.length, radius = Math.max(2, n >> 3);
+      const n = jumps.length, radius = Math.max(2, n >> 2);
       const sorted = Float64Array.from(jumps).sort();
       const med = sorted[n >> 1];
-      const clipped = jumps.map(j => Math.max(med - 16, Math.min(med + 16, j)));
+      const clipped = jumps.map(j => Math.max(med - 8, Math.min(med + 8, j)));
       return clipped.map((_, i) => {
         let sum = 0;
         for (let k = -radius; k <= radius; k++) sum += clipped[((i + k) % n + n) % n];
