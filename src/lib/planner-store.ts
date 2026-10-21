@@ -79,6 +79,7 @@ export type PatternId =
   | "apple-pie"
   | "album-cross"
   | "art-square"
+  | "brick-work"
   | "x-marks-the-chain"
   | "whirlwind-waltz"
   | "album-five-patch"

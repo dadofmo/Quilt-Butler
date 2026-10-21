@@ -16,6 +16,7 @@ import {
 import { optimizeGrid, detectFrames, type GridPiece } from "./grid-optimizer";
 import { albumFivePatchDimensions } from "./album-five-patch";
 import { artSquareDimensions } from "./art-square";
+import { brickWorkDimensions } from "./brick-work";
 import { studioPair } from "./studio-pairs";
 
 /** Round an inch measurement to 2dp so cut sizes stay tidy. */
@@ -218,7 +219,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isTulipLadyFingers = s.pattern === "tulip-lady-fingers";
   const isWeathervane = s.pattern === "weathervane";
   const isWishingRing = s.pattern === "wishing-ring";
-  const isArtSquare = s.pattern === "art-square";
+  const isArtSquare = s.pattern === "art-square" || s.pattern === "brick-work";
   const isAlbumFivePatch = s.pattern === "album-five-patch";
   const isAlaska = s.pattern === "alaska";
   const isAlaskaHomestead = s.pattern === "alaska-homestead";
@@ -568,6 +569,35 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (count) addRails(reqs[fabric("sashing")], "Sashing strips between blocks", count, s.blockSize+SEAM, windowSash+SEAM, s.fabricWidth);
       notes.push(`Join blocks with Fabric ${fabric("sashing")} strips only BETWEEN blocks. Piece horizontal runs from the listed strips; no outer sashing frame. Add the optional border last.`);
     } else notes.push("Join Art Square blocks edge to edge; the third-fabric corner squares form four-patches where blocks meet. Add the optional border last.");
+  } else if (s.pattern === "brick-work") {
+    const d = brickWorkDimensions(s.blockSize);
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Brick Work section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const bars = fabric("bars"), squares = fabric("squares"), bg = fabric("background");
+    const ex = (v: number) => v.toFixed(3);
+    addRails(reqs[bars], "Brick bars (cut as one continuous rectangle)||trim to exact size before sewing", 4 * blockCount, d.barBlankLength, d.squareBlank, s.fabricWidth);
+    addSquares(reqs[squares], "Accent squares||trim to exact size before sewing", 8 * blockCount, d.squareBlank, s.fabricWidth);
+    addRails(reqs[bg], "Centre background bar (one continuous rectangle)||trim to exact size before sewing", blockCount, d.barBlankLength, d.squareBlank, s.fabricWidth);
+    addSquares(reqs[bg], "Centre background squares||trim to exact size before sewing", 2 * blockCount, d.squareBlank, s.fabricWidth);
+    addSquares(reqs[bg], "Setting triangle squares||cut TWICE diagonally; twelve triangles per block", 3 * blockCount, d.settingBlank, s.fabricWidth);
+    addSquares(reqs[bg], "Corner triangle squares||cut ONCE diagonally; four triangles per block", 2 * blockCount, d.cornerBlank, s.fabricWidth);
+    notes.push(
+      `Brick Work is sewn on point: per block four continuous Fabric ${bars} brick bars, eight Fabric ${squares} accent squares, one continuous Fabric ${bg} centre bar, two Fabric ${bg} centre squares, twelve setting triangles and four corner triangles. Bars are cut as single rectangles, never pieced from squares. All seams are straight; no Y-seams.`,
+      `Per block: cut four Fabric ${bars} bars and one Fabric ${bg} centre bar at ${d.squareBlank}" × ${d.barBlankLength}", trimming each to exactly ${ex(d.squareExact)}" × ${ex(d.barExactLength)}". Cut eight Fabric ${squares} and two Fabric ${bg} squares at ${d.squareBlank}", trimmed to ${ex(d.squareExact)}". The finished small square is ${ex(d.unit)}" (block ÷ 4√2), so the rounded blanks are a hair oversize on purpose.`,
+      `Setting and corner triangles: cut three Fabric ${bg} squares at ${d.settingBlank}" TWICE diagonally for twelve setting triangles, and two at ${d.cornerBlank}" ONCE diagonally for four corner triangles. Both keep the straight grain on the outside edge of the block, so the block will not stretch. They are cut generously; you trim the block at the end.`,
+      `Centre: sew a Fabric ${squares} square to each side of a Fabric ${bg} square (accent / background / accent). Make two. Sew one to each long side of the Fabric ${bg} centre bar, with the bar running the full height. Press toward the bar. This is the centre diamond.`,
+      `Middle band: sew a corner triangle to the outer edge of each accent tip square. For the two side columns, sew a setting triangle above and below a tip square (corner triangle facing out). Join, in order: side column, brick bar, centre diamond, brick bar, side column, with the bars running the full height of the centre. Press toward the bars.`,
+      `Top and bottom sections (make two): row 1 is setting triangle / tip square (corner triangle facing out) / setting triangle; row 2 is setting triangle / brick bar / setting triangle. Sew the rows, press, then join row 1 to row 2, centring the tip on the bar.`,
+      `Sew the top and bottom sections to the long edges of the middle band, matching the bar ends. Square up to ${(s.blockSize + SEAM).toFixed(2)}" unfinished, leaving 1/4 inch beyond the tip and bar points. Make and measure one test block before chain-piecing.`,
+    );
+    if (windowSash > 0) {
+      const count = Math.max(0, blocksAcross - 1) * blocksDown + Math.max(0, blocksDown - 1) * blocksAcross;
+      if (count) addRails(reqs[fabric("sashing")], "Sashing strips between blocks", count, s.blockSize + SEAM, windowSash + SEAM, s.fabricWidth);
+      notes.push(`Join blocks with Fabric ${fabric("sashing")} strips only BETWEEN blocks; no outer sashing frame. Add the optional border last.`);
+    } else notes.push("Join Brick Work blocks edge to edge; the accent tips meet at block edges and form a secondary diamond where four blocks meet. Add the optional border last.");
   } else if (s.pattern === "album-five-patch") {
     const d = albumFivePatchDimensions(s.blockSize);
     const fabric = (id: string): FabricKey => {
@@ -5030,6 +5060,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "tulip-lady-fingers" ||
     s.pattern === "weathervane" ||
     s.pattern === "art-square" ||
+    s.pattern === "brick-work" ||
     s.pattern === "album-five-patch" ||
     s.pattern === "alaska" ||
     s.pattern === "alaska-homestead" ||
