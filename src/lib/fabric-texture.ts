@@ -350,7 +350,6 @@ export function buildFabricTile(source: Uint8ClampedArray, side: number): Uint8C
     const repeat = detectPrintRepeat(luma(flat, side), side);
     if (repeat.x !== null || repeat.y !== null) candidates.push(repeatTilePixels(flat, side, repeat.x, repeat.y));
   }
-  if (process.env.FTDBG) console.log(candidates.map(c => tileArtifacts(c, flat, side)));
   const flatBand = bandRange(luma(flat, side), side);
   const scored = candidates.map(tile => ({ tile, m: tileArtifacts(tile, flat, side) }));
   const faithful = scored.filter(({ m }) =>
