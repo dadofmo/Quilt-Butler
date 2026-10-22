@@ -1071,8 +1071,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
             bars={C.c}
             ringLight={C.d}
             ringDark={C.e}
-            inner="var(--fabric-f)"
-            center="var(--fabric-g)"
+            inner={C.b}
+            center={C.c}
           />
         </svg>
       );
@@ -1094,7 +1094,7 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     case "album-five-patch":
       return <svg {...common}><AlbumFivePatchBlock size={90} {...albumFivePatchFills({})} /></svg>;
     case "alaska":
-      return <svg {...common}><AlaskaBlock size={90} {...alaskaFills({})} /></svg>;
+      return <svg {...common}><AlaskaBlock size={90} {...alaskaFills({ diamond: "A", edge: "B" })} /></svg>;
     case "domino-chicken-foot":
       return (
         <svg {...common}>
