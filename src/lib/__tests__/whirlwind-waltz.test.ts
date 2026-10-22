@@ -143,7 +143,7 @@ describe("Whirlwind Waltz cutting & sewing", () => {
     const hstStarts = (x: typeof bg) =>
       x.pieces.filter((p) => p.w === 2.88).reduce((n, p) => n + p.count, 0);
     expect(hstStarts(bg)).toBe(64);
-    const f = r.fabrics.find((x) => x.fabric === "F")!;
+    const f = r.fabrics.find((x) => x.fabric === "A")!;
     expect(f.pieces).toEqual(expect.arrayContaining([
       expect.objectContaining({ count: 16, w: 4.5, h: 2.5 }),
       expect.objectContaining({ count: 32, w: 2.5, h: 2.5 }),
@@ -154,7 +154,7 @@ describe("Whirlwind Waltz cutting & sewing", () => {
 
   it("sewing notes name the same fabrics and HST corners the previews draw", () => {
     const notes = whirlwindSewingNotes(12, { starArms1: "K" }, 0.5).join(" ");
-    expect(notes).toContain("Top-left quadrant — row 1: Fabric A square, Fabric B square, HST (Fabric K triangle in the bottom-left corner)");
+    expect(notes).toContain("Top-left quadrant — row 1: Fabric C square, Fabric B square, HST (Fabric K triangle in the bottom-left corner)");
     expect(notes).toContain('Fabric B bar 4.50" × 2.50"');
     expect(notes).toContain('6.50" square unfinished');
   });
