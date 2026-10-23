@@ -495,6 +495,24 @@ console.log("\n=== Attic Window: 48×48, 12\" block ===");
   check("AW sashing pieces", sash.fabrics.find(f => f.fabric === "D")?.pieces[0].count ?? 0, 12);
 }
 
+console.log("\n=== Contrary Wife: 48×48, 12-inch block ===");
+{
+  const s = { ...base(), pattern: "contrary-wife" as const, quiltWidth: 48, quiltHeight: 48 };
+  const result = calculateYardage(s);
+  for (const [key, count, size, inches] of [["A",32,4.5,18],["B",48,4.5,27],["C",32,4.875,19.5],["D",32,4.875,19.5]] as const) {
+    const f = result.fabrics.find(f => f.fabric === key);
+    check(`CW ${key} count`, f?.pieces[0].count ?? 0, count);
+    check(`CW ${key} cut`, f?.pieces[0].w ?? 0, size);
+    check(`CW ${key} inches`, f?.totalInches ?? 0, inches);
+  }
+  const alt = calculateYardage({ ...s, blockLayout: "alternating" });
+  check("CW rotation unchanged", JSON.stringify(alt.fabrics) === JSON.stringify(result.fabrics) ? 1 : 0, 1);
+  const sash = calculateYardage({ ...s, quiltWidth: 50, quiltHeight: 50, sashingWidth: 2 });
+  check("CW sashed blocks", (sash.fabrics.find(f => f.fabric === "A")?.pieces[0].count ?? 0) / 2, 9);
+  check("CW sashing strips", sash.fabrics.find(f => f.fabric === "E")?.pieces[0].count ?? 0, 12);
+  check("CW sashing intersections", sash.fabrics.find(f => f.fabric === "E")?.pieces[1].count ?? 0, 4);
+}
+
 console.log("\n=== Arkansas Crossroads: 48×48, 12\" block ===");
 {
   const s = { ...base(), pattern: "arkansas-crossroads" as const, quiltWidth: 48, quiltHeight: 48, blockSize: 12, borderWidth: 0, sashingWidth: 0 };

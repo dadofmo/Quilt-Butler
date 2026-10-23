@@ -539,6 +539,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
       const horizontal = (blocksDown - 1) * blocksAcross;
       const count = vertical + horizontal;
       if (count > 0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize + SEAM, sashWidth + SEAM, s.fabricWidth);
+      const intersections = (blocksAcross - 1) * (blocksDown - 1);
+      if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
       notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${(s.blockSize + SEAM).toFixed(3)}" (${vertical} vertical and ${horizontal} horizontal). Join blocks into rows with vertical sashing. Piece the horizontal strips into full-width sashing rows, adding a ${(sashWidth + SEAM).toFixed(3)}" square at each intersection; cut those intersection squares as listed below. Sew these between block rows, with no outer sashing frame. Add the optional border last.`);
     }
     if (s.blockLayout === "straight" || !pattern.layouts?.includes(s.blockLayout)) notes.push("Block setting — straight set: keep all Contrary Wife blocks facing the same direction as the block diagram before joining the quilt rows.");

@@ -11,8 +11,8 @@
 ## Butler's Trellis construction
 - Assemble the 8×8 block as a 3×3 macro layout (3+2+3 cells): corner units sewn row-wise from a corner square, two continuous 1×2 background rectangles, one background square and three HSTs; edge units are outer bar / HST pair / inner bar; one 2×2 centre. Why: straight seams only, no set-in seams, no needless piecing of same-fabric runs.
 
-## Arkansas Crossroads construction
-- Cut all 16 cells as separate units (12 plain squares + 4 HSTs made two at a time) and assemble as four 2×2 quadrants; offer only rotation layouts (alternating turn), never merged strips. Why: no matching same-fabric cells share a sewn unit, and rotation changes the look without changing cuts.
+## Arkansas Crossroads
+- Cut 12 squares + four two-at-a-time HSTs; assemble four 2×2 quadrants, with rotation-only layouts. Why: preserves the sewn units.
 
 ## Domino Chicken Foot construction
 - 5x5 row-by-row: 12 HSTs made two at a time (A/B, A/C, B/C), rows 2 and 4 centre B cells cut as one continuous 1x3 bar, other cells plain squares; rotation layouts only. Why: fewer seams without breaking straight-row assembly.
@@ -44,3 +44,7 @@
 
 ## X Marks the Chain
 - Share geometry and construction cuts: X uses a whole centre, HST side pairs and full-width rows; chain uses four corner four-patches and five whole macro squares. Why: straight seams and consistent guides at both grid scales.
+
+
+## Contrary Wife
+- Share the nine-cell reference map across previews, cut counts and row instructions; use two-at-a-time HSTs and rotation-only layouts. Why: triangles and guides stay consistent.
