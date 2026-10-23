@@ -47,4 +47,4 @@
 
 
 ## Contrary Wife
-- Share the nine-cell reference map across previews, cut counts and row instructions; use two-at-a-time HSTs and rotation-only layouts. Why: triangles and guides stay consistent.
+- Share the nine-cell reference map across previews, cut counts and row instructions; use two-at-a-time HSTs and rotation-only layouts. Why: keeps guides consistent.
