@@ -18,6 +18,7 @@ import { albumFivePatchDimensions } from "./album-five-patch";
 import { artSquareDimensions } from "./art-square";
 import { brickWorkDimensions } from "./brick-work";
 import { studioPair } from "./studio-pairs";
+import { CONTRARY_WIFE_CELLS } from "./contrary-wife";
 
 /** Round an inch measurement to 2dp so cut sizes stay tidy. */
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -227,6 +228,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isApplePie = s.pattern === "apple-pie";
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
+  const isContraryWife = s.pattern === "contrary-wife";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
   const isFiftyFourForty = s.pattern === "fifty-four-forty-or-fight";
@@ -236,7 +238,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isXChain = !!studioPair(s.pattern);
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isArtSquare || isXChain || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isContraryWife || isArtSquare || isXChain || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -244,7 +246,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const innerH = s.quiltHeight - 2 * s.borderWidth;
   // Attic Window fits optional between-block sashing inside the requested top,
   // matching the shared Size, Fabrics, and Results page grid calculation.
-  const windowSash = (isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
+  const windowSash = (isContraryWife || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
   const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (s.blockSize + windowSash)));
   const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (s.blockSize + windowSash)));
   const blockCount = blocksAcross * blocksDown;
@@ -503,6 +505,43 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}\" × ${sashCutL.toFixed(2)}\" from Fabric ${sashFab} — ${vSash} vertical and ${hSash} horizontal. Sew strips only between blocks, then add the optional outer border last.`,
       );
     }
+  } else if (s.pattern === "contrary-wife") {
+    const unit = s.blockSize / 3;
+    const squareCut = unit + SEAM, hstCut = unit + HST_EXTRA;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Contrary Wife section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const corners = fabric("corners"), squares = fabric("squares");
+    const light = fabric("light"), dark = fabric("dark");
+    const counts = new Map<FabricKey, number>();
+    for (const cell of CONTRARY_WIFE_CELLS) {
+      if ("role" in cell) {
+        const f = fabric(cell.role);
+        counts.set(f, (counts.get(f) ?? 0) + blockCount);
+      }
+    }
+    for (const [f, count] of counts) addSquares(reqs[f], "Plain squares", count, squareCut, s.fabricWidth);
+    const starters = new Map<FabricKey, number>();
+    for (const f of [light, dark]) starters.set(f, (starters.get(f) ?? 0) + 2 * blockCount);
+    for (const [f, count] of starters) addSquares(reqs[f], "HST starting squares||two matched starter squares make two HST units", count, hstCut, s.fabricWidth);
+    notes.push(
+      `Contrary Wife: each block is a 3 × 3 grid of ${unit.toFixed(3)}" finished units: 2 Fabric ${corners} corner squares, 3 Fabric ${squares} centre/diagonal squares and 4 Fabric ${light}/${dark} half-square triangle units.`,
+      `Cutting per block: 2 Fabric ${corners} and 3 Fabric ${squares} plain squares at ${squareCut.toFixed(3)}" square; 2 Fabric ${light} and 2 Fabric ${dark} HST starting squares at ${hstCut.toFixed(3)}" square. These are starter-square counts, not finished triangle counts.`,
+      `Make four HSTs per block, two at a time: pair a Fabric ${light} starter square with a Fabric ${dark} starter square, right sides together. Draw one diagonal, sew 1/4" on both sides, cut on the line, open and press without stretching. Each pair makes two HSTs; use two pairs per block. Trim each HST to ${squareCut.toFixed(3)}" UNFINISHED square, with its seam exactly corner to corner; it finishes at ${unit.toFixed(3)}" after joining.`,
+      ...[0, 1, 2].map(row => `Contrary Wife row ${row + 1}, left to right: ` + CONTRARY_WIFE_CELLS.filter(cell => cell.row === row).map(cell => "role" in cell ? `Fabric ${fabric(cell.role)} plain square` : `HST with Fabric ${dark} at the ${cell.darkCorner} right-angle corner and Fabric ${light} opposite (seam top-right to bottom-left)`).join("; ") + "."),
+      `Sew the three units in each row with 1/4" seams, keeping the HSTs in the positions shown. Press rows 1 and 3 one way and row 2 the opposite way so seams nest; join the three rows, pinning intersections, and press the row seams open. Check each block measures ${(s.blockSize + SEAM).toFixed(3)}" UNFINISHED and ${s.blockSize}" finished. No Y-seams or templates are needed.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing");
+      const vertical = (blocksAcross - 1) * blocksDown;
+      const horizontal = (blocksDown - 1) * blocksAcross;
+      const count = vertical + horizontal;
+      if (count > 0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize + SEAM, sashWidth + SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${(s.blockSize + SEAM).toFixed(3)}" (${vertical} vertical and ${horizontal} horizontal). Join blocks into rows with vertical sashing. Piece the horizontal strips into full-width sashing rows, adding a ${(sashWidth + SEAM).toFixed(3)}" square at each intersection; cut those intersection squares as listed below. Sew these between block rows, with no outer sashing frame. Add the optional border last.`);
+    }
+    if (s.blockLayout === "straight" || !pattern.layouts?.includes(s.blockLayout)) notes.push("Block setting — straight set: keep all Contrary Wife blocks facing the same direction as the block diagram before joining the quilt rows.");
   } else if (s.pattern === "arkansas-crossroads") {
     // 4×4 grid of equal units: 12 plain squares (4 diag A, 4 light B, 4 dark C)
     // and 4 HSTs (D/E) made two at a time. Four 2×2 quadrants, straight seams.
@@ -5011,6 +5050,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   // steps in the notes. Simple Squares is "join squares edge to edge" — the
   // glossary would be overkill there.
   const showBasics =
+    isContraryWife ||
     s.pattern === "hst" ||
     s.pattern === "nine-patch" ||
     s.pattern === "rail-fence" ||
