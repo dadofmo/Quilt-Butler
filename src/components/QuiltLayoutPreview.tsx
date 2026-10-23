@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ContraryWifeBlock } from "./ContraryWifeBlock";
 import type { PatternId, SectionAssignments, FabricKey, BlockLayout } from "@/lib/planner-store";
 import { rotationFor } from "@/lib/block-layouts";
 import { FABRIC_COLORS } from "@/lib/planner-store";
@@ -1502,6 +1503,8 @@ function MiniBlock({
       return <DominoChickenFootBlock size={200} bg={get("bg", "A")} primary={get("primary", "B")} accent={get("accent", "C")} />;
     case "arkansas-crossroads":
       return <ArkansasCrossroadsBlock size={200} diag={get("diag", "A")} light={get("patchLight", "B")} dark={get("patchDark", "C")} point={get("point", "D")} hstBg={get("hstBg", "E")} />;
+    case "contrary-wife":
+      return <ContraryWifeBlock size={200} assignments={assignments} photos={photos} />;
     case "double-pinwheel": {
       const pinwheel = get("pinwheel", "A");
       const bg = get("bg", "B");

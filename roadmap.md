@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Add Contrary Wife with reference-image geometry, standard palette, straight and alternating layouts.
+- [ ] Verify cutting, sewing, print views, photos, math audit, tests and live planner.
 
 - [x] Add Whirlwind Waltz (two-block Studio Pick: spinning star + arrow block, 6x6 quadrant construction).
 - [x] Verify and correct X Marks the Chain cutting, straight-seam sewing instructions, printed guides, and live results after the X arm correction.

@@ -1,4 +1,5 @@
 import type { PatternId } from "@/lib/planner-store";
+import { ContraryWifeBlock } from "./ContraryWifeBlock";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FiftyFourFortyBlock, fiftyFourFortyFills } from "./FiftyFourFortyBlock";
 import { ChocolateCakeBlock, chocolateCakeFills } from "./ChocolateCakeBlock";
@@ -28,6 +29,7 @@ const C = {
 
 
 const PATTERN_ALT: Record<PatternId, string> = {
+  "contrary-wife": "Contrary Wife: a three-by-three block with five solid squares and four same-slant half-square triangles around the centre",
   "brick-work": "Brick Work: four diagonal brick bars framing an on-point centre of accent squares and a long background bar, with accent squares pointing out from each side",
   "art-square": "Art Square: one centre diamond, eight background triangles and four corner squares in a separate third fabric",
   "whirlwind-waltz": "Whirlwind Waltz: a spinning four-arm star block alternating checkerboard-style with an arrow block whose arms point outward, framed by contrasting corner squares",
@@ -165,6 +167,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     "aria-label": label,
   };
   switch (pattern) {
+    case "contrary-wife":
+      return <svg {...common}><ContraryWifeBlock size={90} /></svg>;
     case "simple-squares":
       return (
         <svg {...common}>
