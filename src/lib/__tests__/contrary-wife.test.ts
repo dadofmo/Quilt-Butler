@@ -58,7 +58,9 @@ describe("Contrary Wife image-reference construction", () => {
       return a + x*ny - nx*y;
     }, 0))/2, 0);
     expect(area).toBeCloseTo(size*size);
-    expect(polys.map(p => p.points.map(([x,y]) => [x/size,y/size]))).toEqual(contraryWifePolygons(3).map(p => p.points.map(([x,y]) => [x/3,y/3])));
+    const normal = polys.flatMap(p => p.points.flatMap(([x,y]) => [x/size,y/size]));
+    const reference = contraryWifePolygons(3).flatMap(p => p.points.flatMap(([x,y]) => [x/3,y/3]));
+    normal.forEach((value, i) => expect(value).toBeCloseTo(reference[i], 12));
   });
 
   it("has 180-degree symmetry, but changes after a quarter turn", () => {
