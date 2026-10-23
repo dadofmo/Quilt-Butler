@@ -64,6 +64,21 @@ const borderSection: PatternSection = {
 
 const BASE_PATTERNS: PatternDefBase[] = [
   {
+    id: "contrary-wife",
+    name: "Contrary Wife",
+    hasMath: true,
+    layouts: ["alternating"],
+    intro: "A traditional 3×3 block with two opposite corner squares, three accent squares and four half-square triangles around the centre. All four diagonal seams slant the same way. Keep blocks facing the same direction, or give every other block a quarter turn for a different linked design. Optional sashing separates the blocks.",
+    sections: [
+      { id: "corners", label: "Opposite corner squares", defaultFabric: "A", hint: "Two whole squares: top-left and bottom-right." },
+      { id: "squares", label: "Centre & diagonal squares", defaultFabric: "B", hint: "Three whole squares: top-right, centre and bottom-left." },
+      { id: "light", label: "Light triangle halves", defaultFabric: "C", hint: "One half of each of the four edge-middle triangle squares." },
+      { id: "dark", label: "Dark triangle halves", defaultFabric: "D", hint: "The other half of each triangle square; choose contrast with the light halves." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "E", hint: "Optional; set to 0 for edge-to-edge blocks." },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
+  {
     id: "nine-patch",
     name: "Nine Patch",
     hasMath: true,
@@ -2115,6 +2130,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
  * equal the number of block sections excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
+  "contrary-wife": { skill: "beginner", fabricCount: 4, techniques: ["squares", "hst"] },
   "nine-patch": { skill: "beginner", fabricCount: 2, techniques: ["squares"] },
   "hst": { skill: "beginner", fabricCount: 2, techniques: ["hst"] },
   "simple-squares": { skill: "beginner", fabricCount: 1, techniques: ["squares"], precut: "fat-quarter" },
