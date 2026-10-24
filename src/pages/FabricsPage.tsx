@@ -98,7 +98,7 @@ function FabricsStepInner() {
   // Fabrics actually used INSIDE the block (excluding the border, and also
   // excluding sashing/cornerstone sections when those aren't active) — used to
   // figure out which letter is the "next unused" one for an accent border.
-  const ALL_ORDER: FabricKey[] = ["A","B","C","D","E","F","G","H","I","J","K","L"];
+  const ALL_ORDER: FabricKey[] = ALL_FABRIC_KEYS;
   const blockOnlyFabrics = ALL_ORDER.filter((f) =>
     pattern.sections.some((s) => {
       if (s.id === "border") return false;

@@ -75,8 +75,8 @@ const BASE_PATTERNS: PatternDefBase[] = [
       { id: "turquoise", label: "Outer diamonds", defaultFabric: "F", hint: "Top, bottom, left and right tips of the diamond cross." },
       { id: "mint", label: "Inner diamonds", defaultFabric: "J", hint: "Four pale mint diamonds immediately surrounding the centre." },
       { id: "center", label: "Centre diamond", defaultFabric: "S", hint: "A separate muted turquoise centre, not forced to match the other diamonds." },
-      { id: "sashing", label: "Sashing between blocks", defaultFabric: "B", hint: "Optional; set to zero for edge-to-edge blocks." },
-      { ...borderSection, defaultFabric: "A" },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "A", hint: "Optional; set to zero for edge-to-edge blocks." },
+      { ...borderSection, defaultFabric: "B" },
     ],
   },
   {
