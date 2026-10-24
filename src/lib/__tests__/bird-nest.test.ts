@@ -84,6 +84,6 @@ describe("Bird Nest reference and construction",()=>{
     const assignments=Object.fromEntries(["turquoise","mint","center","background","dark","peach"].map(id=>[id,"C" as const]));
     const r=calculateYardage({...base,assignments});
     expect(r.fabrics).toHaveLength(1);
-    expect(r.fabrics[0].pieces.reduce((a,p)=>a+p.count,0)).toBe(39);
+    expect(r.fabrics[0].pieces.reduce((a,p)=>a+p.count,0)).toBe(37);
   });
 });

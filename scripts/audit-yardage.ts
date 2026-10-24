@@ -3051,6 +3051,21 @@ console.log("\n=== X Marks the Chain: 48-inch quilt, sixteen 12-inch blocks (8 X
   check("XChain odd split chain blocks", odd.fabrics.find(x => x.fabric === "D")?.pieces[0].count ?? -1, 7);
 }
 
+console.log("\n=== Bird Nest: one 15-inch block, straight-grain diamonds and whole dark fields ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "bird-nest", blockSize: 15, quiltWidth: 15, quiltHeight: 15 });
+  check("Bird Nest outer diamond squares", r.fabrics.find(f => f.fabric === "F")?.pieces[0].count ?? -1, 4);
+  check("Bird Nest mint diamond squares", r.fabrics.find(f => f.fabric === "J")?.pieces[0].count ?? -1, 4);
+  check("Bird Nest centre square", r.fabrics.find(f => f.fabric === "S")?.pieces[0].count ?? -1, 1);
+  check("Bird Nest diamond cut side", r.fabrics.find(f => f.fabric === "F")?.pieces[0].w ?? -1, 3/Math.SQRT2+.5);
+  check("Bird Nest setting starter squares", r.fabrics.find(f => f.fabric === "H")?.pieces[0].count ?? -1, 18);
+  check("Bird Nest oversized diamond setting blank", r.fabrics.find(f => f.fabric === "H")?.pieces[0].w ?? -1, 2.375);
+  check("Bird Nest peach HST starters", r.fabrics.find(f => f.fabric === "E")?.pieces[0].count ?? -1, 2);
+  check("Bird Nest whole dark triangle starters", r.fabrics.find(f => f.fabric === "L")?.pieces[0].count ?? -1, 2);
+  check("Bird Nest dark blank", r.fabrics.find(f => f.fabric === "L")?.pieces[0].w ?? -1, 6.875);
+  check("Bird Nest setting total inches", r.fabrics.find(f => f.fabric === "H")?.totalInches ?? -1, 12.5);
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {
