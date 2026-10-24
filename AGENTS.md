@@ -48,3 +48,6 @@
 
 ## Contrary Wife
 - Share the nine-cell reference map across previews, cut counts and row instructions; use two-at-a-time HSTs and rotation-only layouts. Why: keeps guides consistent.
+
+## Bird Nest
+- Share diamond/corner geometry and dimensions across views and cuts; assemble nine square-in-a-square diamonds and four pieced setting corners as three bands. Why: preserves continuous dark fields and avoids Y-seams and needless seams.

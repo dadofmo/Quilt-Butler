@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { BirdNestBlock } from "./BirdNestBlock";
 import { ContraryWifeBlock } from "./ContraryWifeBlock";
 import type { FabricKey, PatternId, SectionAssignments } from "@/lib/planner-store";
 import { fabricFill, fabricTileBackgroundStyle } from "@/lib/fabric-fill";
@@ -84,6 +85,8 @@ function renderInner(
 ) {
   const get = (k: string, fb: FabricKey) => fillFor(pattern, a, k, fb, photos);
   switch (pattern) {
+    case "bird-nest":
+      return <BirdNestBlock size={200} assignments={a} photos={photos} />;
     case "contrary-wife":
       return <ContraryWifeBlock size={200} assignments={a} photos={photos} />;
     case "simple-squares": {
