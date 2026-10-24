@@ -22,6 +22,11 @@ const TECHS = TECHNIQUE_OPTIONS.map((o) => o.value);
 const NON_BLOCK = new Set(["sashing", "cornerstone", "border"]);
 
 describe("pattern metadata", () => {
+  it("keeps the free Nine Patch first in the picker and unfiltered results", () => {
+    expect(PATTERNS[0]?.id).toBe("nine-patch");
+    expect(filterPatterns(PATTERNS, EMPTY_FILTERS)[0]?.id).toBe("nine-patch");
+  });
+
   it.each(PATTERNS.map((p) => [p.name, p] as const))("%s has complete filter metadata", (_n, p) => {
     expect(SKILLS).toContain(p.skill);
     expect(p.techniques.length).toBeGreaterThan(0);
