@@ -1,6 +1,6 @@
 # Roadmap
-- [ ] Add Bird Nest as a standard pattern with shared reference geometry and construction-aware cuts.
-- [ ] Verify Bird Nest previews, fabric choices, cutting, sewing, print, sizing and math.
+- [x] Add Bird Nest as a standard pattern with shared reference geometry and construction-aware cuts.
+- [x] Verify Bird Nest previews, fabric choices, cutting, sewing, print, sizing and math; 1,278 tests and math audit passed, live fabric reassignment and printed plan checked.
 - [x] Add Contrary Wife with reference-image geometry, standard palette, straight and alternating layouts.
 - [x] Verify cutting, sewing, print views, shared photo-fill support, math audit, all 1,251 tests and live planner.
 
