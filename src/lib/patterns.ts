@@ -64,6 +64,22 @@ const borderSection: PatternSection = {
 
 const BASE_PATTERNS: PatternDefBase[] = [
   {
+    id: "bird-nest",
+    name: "Bird Nest",
+    hasMath: true,
+    intro: "Nine on-point diamonds form a cross on a 5×5 draft, framed by four large diagonal fields and pieced outer corners. The centre diamond has its own fabric, preserving the reference's colour placement. Sew square-in-a-square diamonds and four corner units, then join three bands with straight seams. Optional sashing and border.",
+    sections: [
+      { id: "background", label: "Warm setting triangles", defaultFabric: "H", hint: "Tan/brown triangles around diamonds and outer peach corners." },
+      { id: "peach", label: "Outer corner triangles", defaultFabric: "E", hint: "Four peach triangles, facing inward from the corners." },
+      { id: "dark", label: "Large diagonal fields", defaultFabric: "L", hint: "Four continuous dark triangles; choose charcoal for the reference look." },
+      { id: "turquoise", label: "Outer diamonds", defaultFabric: "F", hint: "Top, bottom, left and right tips of the diamond cross." },
+      { id: "mint", label: "Inner diamonds", defaultFabric: "J", hint: "Four pale mint diamonds immediately surrounding the centre." },
+      { id: "center", label: "Centre diamond", defaultFabric: "S", hint: "A separate muted turquoise centre, not forced to match the other diamonds." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "A", hint: "Optional; set to zero for edge-to-edge blocks." },
+      { ...borderSection, defaultFabric: "B" },
+    ],
+  },
+  {
     id: "contrary-wife",
     name: "Contrary Wife",
     hasMath: true,
@@ -2130,6 +2146,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
  * equal the number of block sections excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
+  "bird-nest": { skill: "intermediate", fabricCount: 6, techniques: ["squares", "hst", "onpoint"] },
   "contrary-wife": { skill: "beginner", fabricCount: 4, techniques: ["squares", "hst"] },
   "nine-patch": { skill: "beginner", fabricCount: 2, techniques: ["squares"] },
   "hst": { skill: "beginner", fabricCount: 2, techniques: ["hst"] },

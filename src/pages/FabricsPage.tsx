@@ -98,7 +98,7 @@ function FabricsStepInner() {
   // Fabrics actually used INSIDE the block (excluding the border, and also
   // excluding sashing/cornerstone sections when those aren't active) — used to
   // figure out which letter is the "next unused" one for an accent border.
-  const ALL_ORDER: FabricKey[] = ["A","B","C","D","E","F","G","H","I","J","K","L"];
+  const ALL_ORDER: FabricKey[] = ALL_FABRIC_KEYS;
   const blockOnlyFabrics = ALL_ORDER.filter((f) =>
     pattern.sections.some((s) => {
       if (s.id === "border") return false;
@@ -245,7 +245,7 @@ function FabricsStepInner() {
             const sashing = isSashed ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
-            const windowSash = (pattern.id === "contrary-wife" || pattern.id === "art-square" || pattern.id === "brick-work" || pattern.id === "album-five-patch" || pattern.id === "alaska" || pattern.id === "attic-window" || pattern.id === "fifty-four-forty-or-fight" || pattern.id === "chocolate-cake") ? sashing : 0;
+            const windowSash = (pattern.id === "bird-nest" || pattern.id === "contrary-wife" || pattern.id === "art-square" || pattern.id === "brick-work" || pattern.id === "album-five-patch" || pattern.id === "alaska" || pattern.id === "attic-window" || pattern.id === "fifty-four-forty-or-fight" || pattern.id === "chocolate-cake") ? sashing : 0;
             const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (planner.blockSize + windowSash)));
             const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (planner.blockSize + windowSash)));
             const hasCornerstones = isBearPaw && sashing > 0;

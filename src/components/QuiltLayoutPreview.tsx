@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { BirdNestBlock } from "./BirdNestBlock";
 import { ContraryWifeBlock } from "./ContraryWifeBlock";
 import type { PatternId, SectionAssignments, FabricKey, BlockLayout } from "@/lib/planner-store";
 import { rotationFor } from "@/lib/block-layouts";
@@ -1505,6 +1506,8 @@ function MiniBlock({
       return <ArkansasCrossroadsBlock size={200} diag={get("diag", "A")} light={get("patchLight", "B")} dark={get("patchDark", "C")} point={get("point", "D")} hstBg={get("hstBg", "E")} />;
     case "contrary-wife":
       return <ContraryWifeBlock size={200} assignments={assignments} photos={photos} />;
+    case "bird-nest":
+      return <BirdNestBlock size={200} assignments={assignments} photos={photos} />;
     case "double-pinwheel": {
       const pinwheel = get("pinwheel", "A");
       const bg = get("bg", "B");
