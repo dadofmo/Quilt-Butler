@@ -2217,7 +2217,9 @@ const ALL_PATTERNS: PatternDef[] = BASE_PATTERNS.map((p) => ({
 }));
 
 /** Every browsable pattern — what the picker grid and filters iterate. */
-export const PATTERNS: PatternDef[] = ALL_PATTERNS.filter((p) => p.id !== CUSTOM_BLOCK_ID);
+export const PATTERNS: PatternDef[] = ALL_PATTERNS
+  .filter((p) => p.id !== CUSTOM_BLOCK_ID)
+  .sort((a, b) => Number(b.id === "nine-patch") - Number(a.id === "nine-patch"));
 
 /** The user-designed block definition. */
 export const CUSTOM_BLOCK_PATTERN: PatternDef =
