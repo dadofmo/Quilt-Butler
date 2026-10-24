@@ -19,6 +19,7 @@ import { artSquareDimensions } from "./art-square";
 import { brickWorkDimensions } from "./brick-work";
 import { studioPair } from "./studio-pairs";
 import { CONTRARY_WIFE_CELLS } from "./contrary-wife";
+import { BIRD_NEST_DIAMONDS, birdNestDimensions } from "./bird-nest";
 
 /** Round an inch measurement to 2dp so cut sizes stay tidy. */
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -220,7 +221,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isTulipLadyFingers = s.pattern === "tulip-lady-fingers";
   const isWeathervane = s.pattern === "weathervane";
   const isWishingRing = s.pattern === "wishing-ring";
-  const isArtSquare = s.pattern === "art-square" || s.pattern === "brick-work";
+  const isArtSquare = s.pattern === "art-square" || s.pattern === "brick-work" || s.pattern === "bird-nest";
   const isAlbumFivePatch = s.pattern === "album-five-patch";
   const isAlaska = s.pattern === "alaska";
   const isAlaskaHomestead = s.pattern === "alaska-homestead";
@@ -505,6 +506,42 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}\" × ${sashCutL.toFixed(2)}\" from Fabric ${sashFab} — ${vSash} vertical and ${hSash} horizontal. Sew strips only between blocks, then add the optional outer border last.`,
       );
     }
+  } else if (s.pattern === "bird-nest") {
+    const d = birdNestDimensions(s.blockSize);
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Bird Nest section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const bg = fabric("background"), peach = fabric("peach"), dark = fabric("dark");
+    const diamondCounts = new Map<FabricKey, number>();
+    for (const diamond of BIRD_NEST_DIAMONDS) {
+      const f = fabric(diamond.role);
+      diamondCounts.set(f, (diamondCounts.get(f) ?? 0) + blockCount);
+    }
+    for (const [f,count] of diamondCounts) addSquares(reqs[f], "Whole diamond squares||cut straight grain; turn on point during assembly", count, d.diamondCut, s.fabricWidth);
+    addSquares(reqs[bg], "Diamond setting triangle starters||cut ONCE diagonally; 36 triangles per block", 2*BIRD_NEST_DIAMONDS.length*blockCount, d.diamondTriangleStarter, s.fabricWidth);
+    addSquares(reqs[bg], "Corner HST starting squares||pair with peach; two HSTs per pair", 2*blockCount, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[peach], "Corner HST starting squares||pair with setting fabric; two HSTs per pair", 2*blockCount, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[bg], "Outer setting triangle starters||cut ONCE diagonally; eight triangles per block", 4*blockCount, d.settingTriangleStarter, s.fabricWidth);
+    addSquares(reqs[dark], "Large diagonal triangle starters||cut ONCE diagonally; four whole triangles per block", 2*blockCount, d.darkTriangleStarter, s.fabricWidth);
+    notes.push(
+      `Bird Nest: a 5 × 5 draft with ${d.unit.toFixed(4)}" finished cells. Nine whole diamonds form a cross: four Fabric ${fabric("turquoise")} outer diamonds, four Fabric ${fabric("mint")} inner diamonds and one Fabric ${fabric("center")} centre. Four continuous Fabric ${dark} triangles fill the diagonal fields. Cream lines in the reference mark seams, not additional narrow strips. All assembly uses straight seams; no Y-seams or templates.`,
+      `Diamond units: cut the nine straight-grain centre squares at ${d.diamondCut.toFixed(4)}" square (do not round this measurement down). Cut 18 Fabric ${bg} setting squares per block at ${d.diamondTriangleStarter}" and cut each once diagonally for 36 loose triangles. Sew two triangles to opposite centre-square edges, matching midpoints, then add the other two. Let dog ears overhang; press without stretching. Trim each unit to ${d.unitUnfinished.toFixed(4)}" UNFINISHED square, preserving 1/4" beyond every diamond point. Rounded-up setting blanks include trimming waste.`,
+      `Corner HSTs: per block pair two Fabric ${bg} and two Fabric ${peach} starting squares at ${d.hstStarter.toFixed(4)}". Draw a diagonal, sew 1/4" on both sides, cut on the line and press. Two pairs make four HSTs. Trim each to ${d.unitUnfinished.toFixed(4)}" unfinished.`,
+      `Pieced corner units: cut four Fabric ${bg} squares at ${d.settingTriangleStarter.toFixed(4)}" once diagonally for eight triangles. Place each HST at the outer block corner with Fabric ${bg} at the outside right angle and Fabric ${peach} facing inward. Sew one setting triangle to each of the HST's two inward-facing edges in sequence, making a large right triangle. The two setting triangles touch only at the peach point on its long diagonal; do not sew a set-in seam.`,
+      `Cut two Fabric ${dark} squares at ${d.darkTriangleStarter.toFixed(4)}" once diagonally for four large triangles. Sew one to each pieced corner unit along its full long diagonal. Align seam intersections and leave 1/4" beyond the peach point. Trim the four corner units to ${d.cornerUnfinished.toFixed(4)}" unfinished square. Rotate the units so the peach HST is at each outside block corner and the dark half faces the centre. Keep each dark field as one unpieced triangle.`,
+      `Top band: join the top Fabric ${fabric("turquoise")} diamond above a Fabric ${fabric("mint")} diamond into a two-unit column. Sew the top-left and top-right corner units to its sides. Middle band, left to right: Fabric ${fabric("turquoise")}, ${fabric("mint")}, ${fabric("center")}, ${fabric("mint")}, ${fabric("turquoise")} diamond units. Bottom band: join a Fabric ${fabric("mint")} diamond above the bottom Fabric ${fabric("turquoise")} diamond; sew the lower corner units to its sides.`,
+      `Join the three bands with 1/4" seams, pinning the diamond points and matching the centre-column seams. Press seam allowances to reduce bulk without stretching bias edges. Check the block is ${(s.blockSize+.5).toFixed(4)}" UNFINISHED and ${s.blockSize}" finished. Make and measure one test block before chain-piecing.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing");
+      const vertical = (blocksAcross-1)*blocksDown, horizontal = (blocksDown-1)*blocksAcross;
+      const count = vertical+horizontal, intersections = (blocksAcross-1)*(blocksDown-1);
+      if (count > 0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize+SEAM, sashWidth+SEAM, s.fabricWidth);
+      if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
+      notes.push(`Sashing: join block rows with ${vertical} vertical Fabric ${sash} strips, then piece ${horizontal} horizontal strips with ${intersections} intersection squares into full-width rows. Strips are ${(sashWidth+.5).toFixed(4)}" × ${(s.blockSize+.5).toFixed(4)}"; intersection squares are ${(sashWidth+.5).toFixed(4)}". Add sashing only between blocks, then the optional border last.`);
+    } else notes.push("Join Bird Nest blocks edge to edge, keeping the reference orientation. Add the optional outer border last.");
   } else if (s.pattern === "contrary-wife") {
     const unit = s.blockSize / 3;
     const squareCut = unit + SEAM, hstCut = unit + HST_EXTRA;
@@ -5102,6 +5139,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "tulip-lady-fingers" ||
     s.pattern === "weathervane" ||
     s.pattern === "art-square" ||
+    s.pattern === "bird-nest" ||
     s.pattern === "brick-work" ||
     s.pattern === "album-five-patch" ||
     s.pattern === "alaska" ||
