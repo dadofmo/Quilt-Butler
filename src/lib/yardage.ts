@@ -20,6 +20,7 @@ import { brickWorkDimensions } from "./brick-work";
 import { studioPair } from "./studio-pairs";
 import { CONTRARY_WIFE_CELLS } from "./contrary-wife";
 import { BIRD_NEST_DIAMONDS, birdNestDimensions } from "./bird-nest";
+import { duckAndDucklingDimensions } from "./duck-and-duckling";
 
 /** Round an inch measurement to 2dp so cut sizes stay tidy. */
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -230,6 +231,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
+  const isDuckAndDuckling = s.pattern === "duck-and-duckling";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
   const isFiftyFourForty = s.pattern === "fifty-four-forty-or-fight";
@@ -239,7 +241,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isXChain = !!studioPair(s.pattern);
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isContraryWife || isArtSquare || isXChain || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isContraryWife || isDuckAndDuckling || isArtSquare || isXChain || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -247,7 +249,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const innerH = s.quiltHeight - 2 * s.borderWidth;
   // Attic Window fits optional between-block sashing inside the requested top,
   // matching the shared Size, Fabrics, and Results page grid calculation.
-  const windowSash = (isContraryWife || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
+  const windowSash = (isContraryWife || isDuckAndDuckling || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
   const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (s.blockSize + windowSash)));
   const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (s.blockSize + windowSash)));
   const blockCount = blocksAcross * blocksDown;
@@ -5140,6 +5142,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "weathervane" ||
     s.pattern === "art-square" ||
     s.pattern === "bird-nest" ||
+    s.pattern === "duck-and-duckling" ||
     s.pattern === "brick-work" ||
     s.pattern === "album-five-patch" ||
     s.pattern === "alaska" ||
