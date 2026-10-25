@@ -1,16 +1,18 @@
 /**
- * Duck and Duckling: 5×5 draft. Four 2×2 corner units (one large coral
- * triangle plus two small sage/pale HSTs), an ochre-and-pale cross through
- * the middle, and a solid ochre centre. Cream lines in the reference are
- * seams, not extra fabric.
+ * Duck and Duckling: 5×5 draft. Each corner is a 2×2 unit built from one
+ * large coral/pale half-square triangle with a small sage/pale HST at the
+ * outer corner; an ochre-and-pale cross runs through the middle around a
+ * solid ochre centre. Cream lines in the reference are seams, not fabric.
  */
 export type DuckRole = "coral" | "background" | "ochre" | "sage";
 export type DuckPoint = [number, number];
 export interface DuckPiece { role: DuckRole; points: DuckPoint[] }
 
-/** One corner unit: large coral triangle + two sage/pale HSTs, in a 2×2 cell
- *  box whose inner corner touches the cross. `turn` rotates the unit 0–3
- *  quarter turns around the block centre (5×5 grid). */
+/** One corner unit in a 2×2 cell box; `turn` rotates it 0–3 quarter turns
+ *  around the block centre (5×5 grid). Base orientation = top-left corner
+ *  (matches the reference): large coral triangle toward the centre cross,
+ *  large pale triangle toward the outer corner, small sage triangle at the
+ *  outer corner cell with its right angle pointing into the block. */
 function cornerPieces(turn: number, add: (role: DuckRole, pts: DuckPoint[]) => void) {
   const rotate = ([x0, y0]: DuckPoint): DuckPoint => {
     let x = x0, y = y0;
@@ -18,15 +20,11 @@ function cornerPieces(turn: number, add: (role: DuckRole, pts: DuckPoint[]) => v
     return [x, y];
   };
   const p = (role: DuckRole, pts: DuckPoint[]) => add(role, pts.map(rotate));
-  // Base orientation = top-left corner unit (matches the reference):
-  // large coral triangle fills the inner half, diagonal from (2,0) to (0,2).
   p("coral", [[2, 0], [2, 2], [0, 2]]);
-  // Outer edge HST (top edge, cols 0–1): sage at the outer corner.
-  p("sage", [[0, 0], [1, 0], [0, 1]]);
-  p("background", [[1, 0], [1, 1], [0, 1]]);
-  // HST against the cross arm (rows 0–1, col 1): sage faces the coral field.
-  p("background", [[1, 0], [2, 0], [1, 1]]);
-  p("sage", [[2, 0], [2, 1], [1, 1]]);
+  p("background", [[0, 0], [2, 0], [0, 2]]);
+  // Small sage HST half at the outer corner cell, drawn over the pale
+  // triangle (its pale half is the same fabric, so no seam shows).
+  p("sage", [[1, 0], [1, 1], [0, 1]]);
 }
 
 export function duckAndDucklingGeometry(size: number): DuckPiece[] {
@@ -52,6 +50,6 @@ export function duckAndDucklingDimensions(block: number) {
     unit,
     unitUnfinished: unit + 0.5,
     hstStarter: unit + 0.875,
-    coralStarter: 2 * unit + 0.875,
+    bigTriangleStarter: 2 * unit + 0.875,
   };
 }
