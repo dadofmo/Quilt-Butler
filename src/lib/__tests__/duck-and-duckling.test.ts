@@ -32,13 +32,13 @@ describe("Duck and Duckling reference and construction", () => {
   });
   it("preserves the reference layout: coral corner fields, ochre cross, sage accents", () => {
     const pieces = duckAndDucklingGeometry(5);
-    // 4 coral triangles + 8 sage + 8 background HST halves + 9 cross squares
-    // + 4 corner background squares = 29 pieces.
-    expect(pieces).toHaveLength(29);
+    // Per corner unit: 1 coral big triangle + 1 background big triangle
+    // + 1 sage small triangle = 3 pieces; ×4 corners + 9 cross squares = 21.
+    expect(pieces).toHaveLength(21);
     expect(pieces.filter(p => p.role === "coral")).toHaveLength(4);
-    expect(pieces.filter(p => p.role === "sage")).toHaveLength(8);
+    expect(pieces.filter(p => p.role === "sage")).toHaveLength(4);
     expect(pieces.filter(p => p.role === "ochre")).toHaveLength(5);
-    expect(pieces.filter(p => p.role === "background")).toHaveLength(12);
+    expect(pieces.filter(p => p.role === "background")).toHaveLength(8);
     // Each coral triangle covers half a 2×2 corner unit (area 2 grid units).
     expect(pieces.filter(p => p.role === "coral").map(p => area(p.points))).toEqual([2, 2, 2, 2]);
     // Ochre cross: four arm ends plus the solid centre.
@@ -63,8 +63,8 @@ describe("Duck and Duckling reference and construction", () => {
     const pieces = (f: string) => r.fabrics.find(p => p.fabric === f)?.pieces.map(p => [p.count, p.w]);
     expect(pieces("E")).toEqual([[2, 2 * u + .875]]);
     expect(pieces("B")).toEqual([[5, u + .5]]);
-    expect(pieces("C")).toEqual([[4, u + .875]]);
-    expect(pieces("D")).toEqual([[8, u + .5], [4, u + .875]]);
+    expect(pieces("C")).toEqual([[2, u + .875]]);
+    expect(pieces("D")).toEqual([[2, 2 * u + .875], [2, u + .875], [4, u + .5]]);
     expect(d.unitUnfinished).toBeCloseTo(u + .5, 12);
     expect(5 * d.unitUnfinished - 4 * .5).toBeCloseTo(blockSize + .5, 10);
   });
@@ -86,6 +86,6 @@ describe("Duck and Duckling reference and construction", () => {
     const assignments = Object.fromEntries(["coral", "background", "ochre", "sage"].map(id => [id, "C" as const]));
     const r = calculateYardage({ ...base, assignments });
     expect(r.fabrics).toHaveLength(1);
-    expect(r.fabrics[0].pieces.reduce((a, p) => a + p.count, 0)).toBe(23);
+    expect(r.fabrics[0].pieces.reduce((a, p) => a + p.count, 0)).toBe(15);
   });
 });

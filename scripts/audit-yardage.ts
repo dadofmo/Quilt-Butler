@@ -516,9 +516,10 @@ console.log("\n=== Contrary Wife: 48×48, 12-inch block ===");
 console.log("\n=== Duck and Duckling: 50×50, 15-inch block ===");
 {
   const s = { ...base(), pattern: "duck-and-duckling" as const, quiltWidth: 50, quiltHeight: 50, blockSize: 15, borderWidth: 0, sashingWidth: 0 };
-  // 9 blocks. Unit 3" → plain squares 3.5" (12/strip), HST starters 3.875"
-  // (10/strip), coral starters 6.875" (6/strip). Per block: 2 coral,
-  // 8+4 background, 5 ochre, 4 sage.
+  // 9 blocks. Unit 3" → plain squares 3.5" (12/strip), small HST starters
+  // 3.875" (10/strip), big-triangle starters 6.875" (6/strip). Per block:
+  // 2 coral + 2 background big starters, 2 sage + 2 background small HST
+  // starters, 5 ochre + 4 background plain squares.
   const r = calculateYardage(s);
   const f = (k: string) => r.fabrics.find(x => x.fabric === k)!;
   check("DD coral starters", f("E").pieces[0].count, 18);
@@ -526,12 +527,13 @@ console.log("\n=== Duck and Duckling: 50×50, 15-inch block ===");
   check("DD coral inches", f("E").totalInches, 20.625);
   check("DD ochre squares", f("B").pieces[0].count, 45);
   check("DD ochre inches", f("B").totalInches, 14);
-  check("DD sage HST starters", f("C").pieces[0].count, 36);
+  check("DD sage HST starters", f("C").pieces[0].count, 18);
   check("DD sage size", f("C").pieces[0].w, 3.875);
-  check("DD sage inches", f("C").totalInches, 15.5);
-  check("DD bg plain squares", f("D").pieces[0].count, 72);
-  check("DD bg HST starters", f("D").pieces[1].count, 36);
-  check("DD bg inches", f("D").totalInches, 21 + 15.5);
+  check("DD sage inches", f("C").totalInches, 7.75);
+  check("DD bg big starters", f("D").pieces[0].count, 18);
+  check("DD bg HST starters", f("D").pieces[1].count, 18);
+  check("DD bg plain squares", f("D").pieces[2].count, 36);
+  check("DD bg inches", f("D").totalInches, 20.625 + 7.75 + 10.5);
   const sash = calculateYardage({ ...s, quiltWidth: 50, quiltHeight: 50, sashingWidth: 2 });
   check("DD sashed blocks", f("E").pieces[0].count > 0 && (sash.fabrics.find(x => x.fabric === "E")?.pieces[0].count ?? 0), 18);
   check("DD sashing strips", sash.fabrics.find(x => x.fabric === "A")?.pieces[0].count ?? 0, 12);
