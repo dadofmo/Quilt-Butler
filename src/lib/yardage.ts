@@ -508,6 +508,41 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}\" × ${sashCutL.toFixed(2)}\" from Fabric ${sashFab} — ${vSash} vertical and ${hSash} horizontal. Sew strips only between blocks, then add the optional outer border last.`,
       );
     }
+  } else if (s.pattern === "duck-and-duckling") {
+    const d = duckAndDucklingDimensions(s.blockSize);
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Duck and Duckling section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const coral = fabric("coral"), bg = fabric("background");
+    const ochre = fabric("ochre"), sage = fabric("sage");
+    // Per block: 2 coral starter squares (cut once diagonally → 4 large
+    // triangles), 8 pale plain squares (4 corners + 4 cross spacers),
+    // 5 ochre cross/centre squares, and 4 sage + 4 pale HST starters
+    // (two-at-a-time pairs → 8 small HSTs).
+    addSquares(reqs[coral], "Large triangle starting squares||cut ONCE diagonally; two starters make four large triangles per block", 2 * blockCount, d.coralStarter, s.fabricWidth);
+    addSquares(reqs[bg], "Plain squares||four outer corner squares and four cross spacers per block", 8 * blockCount, d.unitUnfinished, s.fabricWidth);
+    addSquares(reqs[ochre], "Cross and centre squares||four cross ends plus the solid centre per block", 5 * blockCount, d.unitUnfinished, s.fabricWidth);
+    addSquares(reqs[sage], "Corner HST starting squares||pair with background; two HSTs per pair", 4 * blockCount, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[bg], "Corner HST starting squares||pair with sage; two HSTs per pair", 4 * blockCount, d.hstStarter, s.fabricWidth);
+    notes.push(
+      `Duck and Duckling: a 5 × 5 draft with ${d.unit.toFixed(4)}" finished cells. Each corner is a 2 × 2 unit: one large Fabric ${coral} triangle plus two small Fabric ${sage}/${bg} triangle squares. A Fabric ${ochre} cross runs through the middle around a solid centre square. Cream lines in the reference mark seams, not extra fabric. All assembly uses straight seams; no Y-seams or templates.`,
+      `Cutting per block: 2 Fabric ${coral} squares at ${d.coralStarter.toFixed(4)}" (each cut ONCE diagonally for four large triangles total); 8 Fabric ${bg} and 5 Fabric ${ochre} plain squares at ${d.unitUnfinished.toFixed(4)}"; 4 Fabric ${sage} and 4 Fabric ${bg} HST starting squares at ${d.hstStarter.toFixed(4)}". These are starter-square counts, not finished triangle counts.`,
+      `Small HSTs: pair each Fabric ${sage} starter with a Fabric ${bg} starter, right sides together. Draw one diagonal, sew 1/4" on both sides, cut on the line, open and press without stretching. Each pair makes two HSTs; four pairs make the eight per block. Trim each to ${d.unitUnfinished.toFixed(4)}" UNFINISHED square with the seam exactly corner to corner.`,
+      `Large triangles: cut each Fabric ${coral} starter square once diagonally for two triangles. Each large triangle fills half of a 2 × 2 corner unit; handle the bias edges gently and do not stretch them.`,
+      `Corner units: for each corner, sew the two small HSTs and the large Fabric ${coral} triangle into a 2 × 2 arrangement — the large triangle's right angle points at the centre cross, and the sage triangles sit against the outer corner and beside the cross arm. Join with straight 1/4" seams and trim each unit to ${(2 * d.unit + 0.5).toFixed(4)}" unfinished square. Rotate the four units so each large triangle faces the block centre.`,
+      `Rows: row 1 is corner unit, Fabric ${ochre} square, corner unit; row 2 is corner unit, Fabric ${bg} square, corner unit... lay out the full 5 × 5 grid first: cross cells alternate Fabric ${ochre} and Fabric ${bg}, with Fabric ${ochre} at both ends of each arm and at the centre. Sew the five rows, then join the rows, matching the cross seams.`,
+      `Check the block is ${(s.blockSize + 0.5).toFixed(4)}" UNFINISHED and ${s.blockSize}" finished. Make and measure one test block before chain-piecing.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing");
+      const vertical = (blocksAcross - 1) * blocksDown, horizontal = (blocksDown - 1) * blocksAcross;
+      const count = vertical + horizontal, intersections = (blocksAcross - 1) * (blocksDown - 1);
+      if (count > 0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize + SEAM, sashWidth + SEAM, s.fabricWidth);
+      if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
+      notes.push(`Sashing: join block rows with ${vertical} vertical Fabric ${sash} strips, then piece ${horizontal} horizontal strips with ${intersections} intersection squares into full-width rows. Strips are ${(sashWidth + 0.5).toFixed(4)}" × ${(s.blockSize + 0.5).toFixed(4)}"; intersection squares are ${(sashWidth + 0.5).toFixed(4)}". Add sashing only between blocks, then the optional border last.`);
+    } else notes.push("Join Duck and Duckling blocks edge to edge, keeping the reference orientation. Add the optional outer border last.");
   } else if (s.pattern === "bird-nest") {
     const d = birdNestDimensions(s.blockSize);
     const fabric = (id: string): FabricKey => {
