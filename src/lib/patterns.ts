@@ -2162,6 +2162,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
 export const PATTERN_META: Record<string, PatternMeta> = {
   "bird-nest": { skill: "intermediate", fabricCount: 6, techniques: ["squares", "hst", "onpoint"] },
   "contrary-wife": { skill: "beginner", fabricCount: 4, techniques: ["squares", "hst"] },
+  "duck-and-duckling": { skill: "intermediate", fabricCount: 4, techniques: ["squares", "hst"] },
   "nine-patch": { skill: "beginner", fabricCount: 2, techniques: ["squares"] },
   "hst": { skill: "beginner", fabricCount: 2, techniques: ["hst"] },
   "simple-squares": { skill: "beginner", fabricCount: 1, techniques: ["squares"], precut: "fat-quarter" },
