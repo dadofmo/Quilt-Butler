@@ -95,6 +95,7 @@ describe("Duck and Duckling reference and construction", () => {
     const assignments = Object.fromEntries(["coral", "background", "ochre", "sage"].map(id => [id, "C" as const]));
     const r = calculateYardage({ ...base, assignments });
     expect(r.fabrics).toHaveLength(1);
-    expect(r.fabrics[0].pieces.reduce((a, p) => a + p.count, 0)).toBe(15);
+    // 2 coral + 2 bg big starters, 2 sage + 2 bg HST starters, 5 ochre + 4 bg squares.
+    expect(r.fabrics[0].pieces.reduce((a, p) => a + p.count, 0)).toBe(17);
   });
 });
