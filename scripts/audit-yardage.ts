@@ -533,7 +533,7 @@ console.log("\n=== Duck and Duckling: 50×50, 15-inch block ===");
   check("DD bg big starters", f("A").pieces[0].count, 18);
   check("DD bg HST starters", f("A").pieces[1].count, 18);
   check("DD bg plain squares", f("A").pieces[2].count, 36);
-  check("DD bg inches", f("D").totalInches, 20.625 + 7.75 + 10.5);
+  check("DD bg inches", f("A").totalInches, 20.625 + 7.75 + 10.5);
   const sash = calculateYardage({ ...s, quiltWidth: 50, quiltHeight: 50, sashingWidth: 2 });
   check("DD sashed blocks", f("E").pieces[0].count > 0 && (sash.fabrics.find(x => x.fabric === "E")?.pieces[0].count ?? 0), 18);
   check("DD sashing strips", sash.fabrics.find(x => x.fabric === "D")?.pieces[0].count ?? 0, 12);
