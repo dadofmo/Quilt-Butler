@@ -20,6 +20,7 @@ import { brickWorkDimensions } from "./brick-work";
 import { studioPair } from "./studio-pairs";
 import { CONTRARY_WIFE_CELLS } from "./contrary-wife";
 import { BIRD_NEST_DIAMONDS, birdNestDimensions } from "./bird-nest";
+import { duckAndDucklingDimensions } from "./duck-and-duckling";
 
 /** Round an inch measurement to 2dp so cut sizes stay tidy. */
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -230,6 +231,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
+  const isDuckAndDuckling = s.pattern === "duck-and-duckling";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
   const isFiftyFourForty = s.pattern === "fifty-four-forty-or-fight";
@@ -239,7 +241,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isXChain = !!studioPair(s.pattern);
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isContraryWife || isArtSquare || isXChain || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isContraryWife || isDuckAndDuckling || isArtSquare || isXChain || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -247,7 +249,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const innerH = s.quiltHeight - 2 * s.borderWidth;
   // Attic Window fits optional between-block sashing inside the requested top,
   // matching the shared Size, Fabrics, and Results page grid calculation.
-  const windowSash = (isContraryWife || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
+  const windowSash = (isContraryWife || isDuckAndDuckling || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
   const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (s.blockSize + windowSash)));
   const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (s.blockSize + windowSash)));
   const blockCount = blocksAcross * blocksDown;
@@ -506,6 +508,41 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}\" × ${sashCutL.toFixed(2)}\" from Fabric ${sashFab} — ${vSash} vertical and ${hSash} horizontal. Sew strips only between blocks, then add the optional outer border last.`,
       );
     }
+  } else if (s.pattern === "duck-and-duckling") {
+    const d = duckAndDucklingDimensions(s.blockSize);
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Duck and Duckling section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const coral = fabric("coral"), bg = fabric("background");
+    const ochre = fabric("ochre"), sage = fabric("sage");
+    // Per block: 2 coral + 2 background big-triangle starters (each cut once
+    // diagonally → 4 large HSTs), 2 sage + 2 background small HST starters
+    // (two-at-a-time → 4 small HSTs), 5 ochre and 4 background plain squares.
+    addSquares(reqs[coral], "Large triangle starting squares||cut ONCE diagonally; two starters make four large triangles per block", 2 * blockCount, d.bigTriangleStarter, s.fabricWidth);
+    addSquares(reqs[bg], "Large triangle starting squares||cut ONCE diagonally; two starters make four large triangles per block", 2 * blockCount, d.bigTriangleStarter, s.fabricWidth);
+    addSquares(reqs[sage], "Corner HST starting squares||pair with background; two HSTs per pair", 2 * blockCount, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[bg], "Corner HST starting squares||pair with sage; two HSTs per pair", 2 * blockCount, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[ochre], "Cross and centre squares||four cross ends plus the solid centre per block", 5 * blockCount, d.unitUnfinished, s.fabricWidth);
+    addSquares(reqs[bg], "Cross spacer squares||four pale squares between the cross arms per block", 4 * blockCount, d.unitUnfinished, s.fabricWidth);
+    notes.push(
+      `Duck and Duckling: a 5 × 5 draft with ${d.unit.toFixed(4)}" finished cells. Each corner is a 2 × 2 unit: one large Fabric ${coral}/Fabric ${bg} half-square triangle with a small Fabric ${sage}/Fabric ${bg} triangle square at the outer corner. A Fabric ${ochre} cross runs through the middle around a solid centre square. Cream lines in the reference mark seams, not extra fabric. All assembly uses straight seams; no Y-seams or templates.`,
+      `Cutting per block: 2 Fabric ${coral} and 2 Fabric ${bg} squares at ${d.bigTriangleStarter.toFixed(4)}" (each cut ONCE diagonally for four large triangles of each fabric); 2 Fabric ${sage} and 2 Fabric ${bg} HST starting squares at ${d.hstStarter.toFixed(4)}"; 5 Fabric ${ochre} and 4 Fabric ${bg} plain squares at ${d.unitUnfinished.toFixed(4)}". These are starter-square counts, not finished triangle counts.`,
+      `Large corner HSTs: pair each Fabric ${coral} starter with a Fabric ${bg} starter, right sides together. Draw one diagonal, sew 1/4" on both sides, cut on the line, open and press without stretching the bias. Each pair makes two large HSTs; two pairs make the four per block. Trim each to ${(2 * d.unit + 0.5).toFixed(4)}" UNFINISHED square with the seam exactly corner to corner.`,
+      `Small corner HSTs: pair each Fabric ${sage} starter with a Fabric ${bg} starter the same way. Each pair makes two small HSTs; two pairs make the four per block. Trim each to ${d.unitUnfinished.toFixed(4)}" UNFINISHED square.`,
+      `Corner units: sew one small HST to each large HST at the outer corner — the small HST's Fabric ${bg} half continues the large triangle's Fabric ${bg} field, and Fabric ${sage} sits at the block's outer corner with its right angle pointing inward. Join with straight 1/4" seams. Rotate the four units so each large Fabric ${coral} triangle faces the block centre.`,
+      `Lay out the full 5 × 5 grid: corner units at the corners; the cross cells alternate Fabric ${ochre} and Fabric ${bg}, with Fabric ${ochre} at both ends of each arm and at the centre. Sew the five rows, then join the rows, matching the cross seams.`,
+      `Check the block is ${(s.blockSize + 0.5).toFixed(4)}" UNFINISHED and ${s.blockSize}" finished. Make and measure one test block before chain-piecing.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing");
+      const vertical = (blocksAcross - 1) * blocksDown, horizontal = (blocksDown - 1) * blocksAcross;
+      const count = vertical + horizontal, intersections = (blocksAcross - 1) * (blocksDown - 1);
+      if (count > 0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize + SEAM, sashWidth + SEAM, s.fabricWidth);
+      if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
+      notes.push(`Sashing: join block rows with ${vertical} vertical Fabric ${sash} strips, then piece ${horizontal} horizontal strips with ${intersections} intersection squares into full-width rows. Strips are ${(sashWidth + 0.5).toFixed(4)}" × ${(s.blockSize + 0.5).toFixed(4)}"; intersection squares are ${(sashWidth + 0.5).toFixed(4)}". Add sashing only between blocks, then the optional border last.`);
+    } else notes.push("Join Duck and Duckling blocks edge to edge, keeping the reference orientation. Add the optional outer border last.");
   } else if (s.pattern === "bird-nest") {
     const d = birdNestDimensions(s.blockSize);
     const fabric = (id: string): FabricKey => {
@@ -5140,6 +5177,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "weathervane" ||
     s.pattern === "art-square" ||
     s.pattern === "bird-nest" ||
+    s.pattern === "duck-and-duckling" ||
     s.pattern === "brick-work" ||
     s.pattern === "album-five-patch" ||
     s.pattern === "alaska" ||

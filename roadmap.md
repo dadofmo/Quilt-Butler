@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Add Duck and Duckling as a standard pattern (5×5 draft: coral corner fields, ochre cross, sage corner HSTs) with shared geometry, previews, cutting and sewing.
+- [x] Verify Duck and Duckling cutting, sewing, print views, math audit, tests and live planner.
 - [x] Add Bird Nest as a standard pattern with shared reference geometry and construction-aware cuts.
 - [x] Verify Bird Nest previews, fabric choices, cutting, sewing, print, sizing and math; 1,278 tests and math audit passed, live fabric reassignment and printed plan checked.
 - [x] Add Contrary Wife with reference-image geometry, standard palette, straight and alternating layouts.

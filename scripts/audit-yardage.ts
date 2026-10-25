@@ -513,6 +513,33 @@ console.log("\n=== Contrary Wife: 48×48, 12-inch block ===");
   check("CW sashing intersections", sash.fabrics.find(f => f.fabric === "E")?.pieces[1].count ?? 0, 4);
 }
 
+console.log("\n=== Duck and Duckling: 50×50, 15-inch block ===");
+{
+  const s = { ...base(), pattern: "duck-and-duckling" as const, quiltWidth: 50, quiltHeight: 50, blockSize: 15, borderWidth: 0, sashingWidth: 0 };
+  // 9 blocks. Unit 3" → plain squares 3.5" (12/strip), small HST starters
+  // 3.875" (10/strip), big-triangle starters 6.875" (6/strip). Per block:
+  // 2 coral + 2 background big starters, 2 sage + 2 background small HST
+  // starters, 5 ochre + 4 background plain squares.
+  const r = calculateYardage(s);
+  const f = (k: string) => r.fabrics.find(x => x.fabric === k)!;
+  check("DD coral starters", f("E").pieces[0].count, 18);
+  check("DD coral size", f("E").pieces[0].w, 6.875);
+  check("DD coral inches", f("E").totalInches, 20.625);
+  check("DD ochre squares", f("B").pieces[0].count, 45);
+  check("DD ochre inches", f("B").totalInches, 14);
+  check("DD sage HST starters", f("C").pieces[0].count, 18);
+  check("DD sage size", f("C").pieces[0].w, 3.875);
+  check("DD sage inches", f("C").totalInches, 7.75);
+  check("DD bg big starters", f("A").pieces[0].count, 18);
+  check("DD bg HST starters", f("A").pieces[1].count, 18);
+  check("DD bg plain squares", f("A").pieces[2].count, 36);
+  check("DD bg inches", f("A").totalInches, 20.625 + 7.75 + 10.5);
+  const sash = calculateYardage({ ...s, quiltWidth: 50, quiltHeight: 50, sashingWidth: 2 });
+  check("DD sashed blocks", f("E").pieces[0].count > 0 && (sash.fabrics.find(x => x.fabric === "E")?.pieces[0].count ?? 0), 18);
+  check("DD sashing strips", sash.fabrics.find(x => x.fabric === "D")?.pieces[0].count ?? 0, 12);
+  check("DD sashing intersections", sash.fabrics.find(x => x.fabric === "D")?.pieces[1].count ?? 0, 4);
+}
+
 console.log("\n=== Arkansas Crossroads: 48×48, 12\" block ===");
 {
   const s = { ...base(), pattern: "arkansas-crossroads" as const, quiltWidth: 48, quiltHeight: 48, blockSize: 12, borderWidth: 0, sashingWidth: 0 };

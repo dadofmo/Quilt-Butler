@@ -1,5 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BirdNestBlock } from "./BirdNestBlock";
+import { DuckAndDucklingBlock } from "./DuckAndDucklingBlock";
 import { ContraryWifeBlock } from "./ContraryWifeBlock";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
 import { FiftyFourFortyBlock, fiftyFourFortyFills } from "./FiftyFourFortyBlock";
@@ -30,6 +31,7 @@ const C = {
 
 
 const PATTERN_ALT: Record<PatternId, string> = {
+  "duck-and-duckling": "Duck and Duckling: a five-by-five block with four large coral corner triangles, small sage accent triangles, and a warm cross of squares around a solid centre",
   "bird-nest": "Bird Nest: nine edge-touching diamonds in a five-by-five cross, a distinct centre diamond, four large dark diagonal fields and pieced outer corners",
   "contrary-wife": "Contrary Wife: a three-by-three block with five solid squares and four same-slant half-square triangles around the centre",
   "brick-work": "Brick Work: four diagonal brick bars framing an on-point centre of accent squares and a long background bar, with accent squares pointing out from each side",
@@ -169,6 +171,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     "aria-label": label,
   };
   switch (pattern) {
+    case "duck-and-duckling":
+      return <svg {...common}><DuckAndDucklingBlock size={90} /></svg>;
     case "bird-nest":
       return <svg {...common}><BirdNestBlock size={90} /></svg>;
     case "contrary-wife":

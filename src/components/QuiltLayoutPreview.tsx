@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BirdNestBlock } from "./BirdNestBlock";
 import { ContraryWifeBlock } from "./ContraryWifeBlock";
+import { DuckAndDucklingBlock } from "./DuckAndDucklingBlock";
 import type { PatternId, SectionAssignments, FabricKey, BlockLayout } from "@/lib/planner-store";
 import { rotationFor } from "@/lib/block-layouts";
 import { FABRIC_COLORS } from "@/lib/planner-store";
@@ -1504,6 +1505,8 @@ function MiniBlock({
       return <DominoChickenFootBlock size={200} bg={get("bg", "A")} primary={get("primary", "B")} accent={get("accent", "C")} />;
     case "arkansas-crossroads":
       return <ArkansasCrossroadsBlock size={200} diag={get("diag", "A")} light={get("patchLight", "B")} dark={get("patchDark", "C")} point={get("point", "D")} hstBg={get("hstBg", "E")} />;
+    case "duck-and-duckling":
+      return <DuckAndDucklingBlock size={200} assignments={assignments} photos={photos} />;
     case "contrary-wife":
       return <ContraryWifeBlock size={200} assignments={assignments} photos={photos} />;
     case "bird-nest":

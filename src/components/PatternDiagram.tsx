@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import { BirdNestBlock } from "./BirdNestBlock";
 import { ContraryWifeBlock } from "./ContraryWifeBlock";
+import { DuckAndDucklingBlock } from "./DuckAndDucklingBlock";
 import type { FabricKey, PatternId, SectionAssignments } from "@/lib/planner-store";
 import { fabricFill, fabricTileBackgroundStyle } from "@/lib/fabric-fill";
 import { getPattern } from "@/lib/patterns";
@@ -85,6 +86,8 @@ function renderInner(
 ) {
   const get = (k: string, fb: FabricKey) => fillFor(pattern, a, k, fb, photos);
   switch (pattern) {
+    case "duck-and-duckling":
+      return <DuckAndDucklingBlock size={200} assignments={a} photos={photos} />;
     case "bird-nest":
       return <BirdNestBlock size={200} assignments={a} photos={photos} />;
     case "contrary-wife":
