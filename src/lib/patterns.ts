@@ -73,7 +73,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
       { id: "background", label: "Pale background", defaultFabric: "A", hint: "The pale field in each corner unit, the cross spacers and the pale half of each small triangle square." },
       { id: "ochre", label: "Cross squares & centre", defaultFabric: "B", hint: "Five squares: the four cross ends and the solid centre." },
       { id: "sage", label: "Corner accent triangles", defaultFabric: "C", hint: "The small accent half of each corner triangle square; sage green in the reference." },
-      { id: "sashing", label: "Sashing between blocks", defaultFabric: "A", hint: "Optional; set to zero for edge-to-edge blocks." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "D", hint: "Optional; set to zero for edge-to-edge blocks." },
       { ...borderSection, defaultFabric: "F" },
     ],
   },
