@@ -67,7 +67,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
     id: "duck-and-duckling",
     name: "Duck and Duckling",
     hasMath: true,
-    intro: "A classic 5×5 draft: four corner units pair a large coral diagonal triangle with two small sage-and-pale triangle squares, while a warm ochre cross runs through the middle around a solid centre square. Sew the corner units and cross squares, then join rows with straight seams — no Y-seams or templates. Optional sashing and border.",
+    intro: "A classic 5×5 draft: each corner unit pairs a large coral-and-pale diagonal triangle with a small sage-and-pale triangle square at the outer corner, while a warm ochre cross runs through the middle around a solid centre square. Sew the corner units and cross squares, then join rows with straight seams — no Y-seams or templates. Optional sashing and border.",
     sections: [
       { id: "coral", label: "Large corner triangles", defaultFabric: "E", hint: "Four big diagonal triangles, one in each corner unit." },
       { id: "background", label: "Pale background", defaultFabric: "A", hint: "The pale field in each corner unit, the cross spacers and the pale half of each small triangle square." },
