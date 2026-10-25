@@ -536,8 +536,8 @@ console.log("\n=== Duck and Duckling: 50×50, 15-inch block ===");
   check("DD bg inches", f("D").totalInches, 20.625 + 7.75 + 10.5);
   const sash = calculateYardage({ ...s, quiltWidth: 50, quiltHeight: 50, sashingWidth: 2 });
   check("DD sashed blocks", f("E").pieces[0].count > 0 && (sash.fabrics.find(x => x.fabric === "E")?.pieces[0].count ?? 0), 18);
-  check("DD sashing strips", sash.fabrics.find(x => x.fabric === "A")?.pieces[0].count ?? 0, 12);
-  check("DD sashing intersections", sash.fabrics.find(x => x.fabric === "A")?.pieces[1].count ?? 0, 4);
+  check("DD sashing strips", sash.fabrics.find(x => x.fabric === "D")?.pieces[0].count ?? 0, 12);
+  check("DD sashing intersections", sash.fabrics.find(x => x.fabric === "D")?.pieces[1].count ?? 0, 4);
 }
 
 console.log("\n=== Arkansas Crossroads: 48×48, 12\" block ===");

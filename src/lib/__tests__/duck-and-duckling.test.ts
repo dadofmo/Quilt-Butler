@@ -88,7 +88,7 @@ describe("Duck and Duckling reference and construction", () => {
   it("fits a 3×3 quilt with between-block sashing and a border", () => {
     const r = calculateYardage({ ...base, quiltWidth: 53, quiltHeight: 53, borderWidth: 2, sashingWidth: 2 });
     expect(r.fabrics.find(f => f.fabric === "E")?.pieces[0].count).toBe(18);
-    expect(r.fabrics.find(f => f.fabric === "C")?.pieces.map(p => [p.count, p.w, p.h])).toEqual([[12, 15.5, 2.5], [4, 2.5, 2.5]]);
+    expect(r.fabrics.find(f => f.fabric === "D")?.pieces.map(p => [p.count, p.w, p.h])).toEqual([[12, 15.5, 2.5], [4, 2.5, 2.5]]);
     expect(r.fabrics.find(f => f.fabric === "F")?.pieces[0].label).toBe("Border strips");
   });
   it("keeps all cuts when fabrics are reassigned to one shared bolt", () => {
