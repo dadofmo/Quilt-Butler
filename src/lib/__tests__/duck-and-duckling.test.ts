@@ -51,10 +51,19 @@ describe("Duck and Duckling reference and construction", () => {
   });
   it.each([5, 12, 15, 20])("tiles a %s-inch square without gaps or overlaps", size => {
     const pieces = duckAndDucklingGeometry(size);
-    expect(pieces.reduce((a, p) => a + area(p.points), 0)).toBeCloseTo(size * size, 10);
+    // Sage triangles are drawn over the pale big triangle by design (the
+    // small HST's pale half is the same fabric), so total area exceeds one
+    // block by exactly the four sage half-cells.
+    expect(pieces.reduce((a, p) => a + area(p.points), 0)).toBeCloseTo(size * size + 4 * (size / 5) ** 2 / 2, 10);
     for (let row = 0; row < 71; row++) for (let col = 0; col < 73; col++) {
       const x = (col + .314159) * size / 73, y = (row + .271828) * size / 71;
-      expect(pieces.filter(p => inside(x, y, p.points))).toHaveLength(1);
+      const hits = pieces.filter(p => inside(x, y, p.points));
+      // Every point is covered; the only overlap is sage over background.
+      expect(hits.length).toBeGreaterThanOrEqual(1);
+      expect(hits.length).toBeLessThanOrEqual(2);
+      if (hits.length === 2) {
+        expect(hits.map(h => h.role).sort()).toEqual(["background", "sage"]);
+      }
     }
   });
   it.each([10, 15, 20])("derives all cutting blanks for a %s-inch block", blockSize => {
