@@ -70,7 +70,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
     intro: "A classic 5×5 draft: four corner units pair a large coral diagonal triangle with two small sage-and-pale triangle squares, while a warm ochre cross runs through the middle around a solid centre square. Sew the corner units and cross squares, then join rows with straight seams — no Y-seams or templates. Optional sashing and border.",
     sections: [
       { id: "coral", label: "Large corner triangles", defaultFabric: "E", hint: "Four big diagonal triangles, one in each corner unit." },
-      { id: "background", label: "Pale background", defaultFabric: "D", hint: "Corner squares, cross spacers and the pale half of each small triangle square." },
+      { id: "background", label: "Pale background", defaultFabric: "A", hint: "The pale field in each corner unit, the cross spacers and the pale half of each small triangle square." },
       { id: "ochre", label: "Cross squares & centre", defaultFabric: "B", hint: "Five squares: the four cross ends and the solid centre." },
       { id: "sage", label: "Corner accent triangles", defaultFabric: "C", hint: "The small accent half of each corner triangle square; sage green in the reference." },
       { id: "sashing", label: "Sashing between blocks", defaultFabric: "A", hint: "Optional; set to zero for edge-to-edge blocks." },
