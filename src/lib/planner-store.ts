@@ -22,6 +22,7 @@ export type BlockLayout =
 
 
 export type PatternId =
+  | "duck-and-duckling"
   | "bird-nest"
   | "contrary-wife"
   | "simple-squares"
