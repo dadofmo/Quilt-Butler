@@ -22,8 +22,8 @@ function cornerPieces(turn: number, add: (role: DuckRole, pts: DuckPoint[]) => v
   // large coral triangle fills the inner half, diagonal from (2,0) to (0,2).
   p("coral", [[2, 0], [2, 2], [0, 2]]);
   // Outer edge HST (top edge, cols 0–1): sage at the outer corner.
-  p("background", [[0, 0], [1, 0], [0, 1]]);
-  p("sage", [[0, 0], [1, 0], [1, 1]]);
+  p("sage", [[0, 0], [1, 0], [0, 1]]);
+  p("background", [[1, 0], [1, 1], [0, 1]]);
   // HST against the cross arm (rows 0–1, col 1): sage faces the coral field.
   p("background", [[1, 0], [2, 0], [1, 1]]);
   p("sage", [[2, 0], [2, 1], [1, 1]]);

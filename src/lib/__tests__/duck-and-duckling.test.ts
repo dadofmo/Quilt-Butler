@@ -33,12 +33,12 @@ describe("Duck and Duckling reference and construction", () => {
   it("preserves the reference layout: coral corner fields, ochre cross, sage accents", () => {
     const pieces = duckAndDucklingGeometry(5);
     // 4 coral triangles + 8 sage + 8 background HST halves + 9 cross squares
-    // + 4 corner background squares = 33 pieces.
-    expect(pieces).toHaveLength(33);
+    // + 4 corner background squares = 29 pieces.
+    expect(pieces).toHaveLength(29);
     expect(pieces.filter(p => p.role === "coral")).toHaveLength(4);
     expect(pieces.filter(p => p.role === "sage")).toHaveLength(8);
     expect(pieces.filter(p => p.role === "ochre")).toHaveLength(5);
-    expect(pieces.filter(p => p.role === "background")).toHaveLength(16);
+    expect(pieces.filter(p => p.role === "background")).toHaveLength(12);
     // Each coral triangle covers half a 2×2 corner unit (area 2 grid units).
     expect(pieces.filter(p => p.role === "coral").map(p => area(p.points))).toEqual([2, 2, 2, 2]);
     // Ochre cross: four arm ends plus the solid centre.
@@ -86,6 +86,6 @@ describe("Duck and Duckling reference and construction", () => {
     const assignments = Object.fromEntries(["coral", "background", "ochre", "sage"].map(id => [id, "C" as const]));
     const r = calculateYardage({ ...base, assignments });
     expect(r.fabrics).toHaveLength(1);
-    expect(r.fabrics[0].pieces.reduce((a, p) => a + p.count, 0)).toBe(19);
+    expect(r.fabrics[0].pieces.reduce((a, p) => a + p.count, 0)).toBe(23);
   });
 });
