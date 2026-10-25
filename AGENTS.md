@@ -51,3 +51,6 @@
 
 ## Bird Nest
 - Share diamond/corner geometry and dimensions across views and cuts; assemble nine square-in-a-square diamonds and four pieced setting corners as three bands. Why: preserves continuous dark fields and avoids Y-seams and needless seams.
+
+## Duck and Duckling construction
+- Share the 5×5 geometry across previews and cuts; each corner unit is one large coral/pale HST (2×2) plus one small sage/pale HST at the outer corner, with the sage triangle overlaid on the pale field in renders. Why: matches the reference exactly and keeps assembly to straight seams with no Y-seams.
