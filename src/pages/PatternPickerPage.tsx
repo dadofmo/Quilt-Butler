@@ -31,18 +31,18 @@ export default function PatternPicker() {
     <>
       <Helmet>
         <title>QuiltButler — Free Quilt Planner & Fabric Calculator</title>
-        <meta name="description" content="Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 60+ patterns + design your own block. No login." />
+        <meta name="description" content="Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 70+ patterns + design your own block. No login." />
         <link rel="canonical" href="https://quiltbutler.com/" />
         <link rel="preload" as="image" href={quiltButlerLogo} fetchPriority="high" />
         <meta property="og:title" content="QuiltButler — Free Quilt Planner & Fabric Calculator" />
-        <meta property="og:description" content="Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 60+ patterns + design your own block. No login." />
+        <meta property="og:description" content="Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 70+ patterns + design your own block. No login." />
         <meta property="og:url" content="https://quiltbutler.com/" />
         <script type="application/ld+json">{JSON.stringify({
           "@context": "https://schema.org",
           "@type": "WebApplication",
           "name": "QuiltButler",
           "url": "https://quiltbutler.com/",
-          "description": "Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 60+ patterns + design your own block. No login.",
+          "description": "Free quilt planner with exact yardage, cutting diagrams, cost estimates, and a fabric visualizer. 70+ patterns + design your own block. No login.",
           "applicationCategory": "DesignApplication",
           "operatingSystem": "Any",
           "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
@@ -79,7 +79,7 @@ function PatternPickerInner() {
       if (s.id === "border") return;
       assignments[s.id] = s.defaultFabric;
     });
-    setPlanner({ pattern: id, assignments });
+    setPlanner({ pattern: id, assignments, ...(id === "kansas-star" ? { sashingWidth: 0, borderWidth: 0, alternateBlocks: false, blockLayout: "straight" as const } : {}) });
     // The custom block is drawn first, then sized — everything else starts
     // with the quilt size.
     navigate(id === CUSTOM_BLOCK_ID ? "/design" : "/size");

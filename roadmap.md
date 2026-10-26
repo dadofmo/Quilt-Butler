@@ -1,4 +1,6 @@
 # Roadmap
+- [x] Add Kansas Star with intrinsic two-colorway checkerboard, standard palette, actual cuts and sewing instructions.
+- [x] Verify Kansas Star counts, sizing, optional finishing, photo fills, printed guides and live planner; 1,414 tests and math audit passed.
 - [x] Align Duck and Duckling and Bird Nest picker colours and record the universal thumbnail palette rule.
 - [x] Derive fabric counts across complete patterns and show both X Marks the Chain blocks; verify live filters, all 1,378 tests and math audit.
 - [x] Add Duck and Duckling as a standard pattern (5×5 draft: coral corner fields, ochre cross, sage corner HSTs) with shared geometry, previews, cutting and sewing.

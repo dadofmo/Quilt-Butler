@@ -496,6 +496,25 @@ console.log("\n=== Attic Window: 48×48, 12\" block ===");
 }
 
 console.log("\n=== Contrary Wife: 48×48, 12-inch block ===");
+console.log("\n=== Kansas Star: 3×3, 12-inch square-in-a-square blocks ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "kansas-star", quiltWidth: 36, quiltHeight: 36 });
+  const a = r.fabrics.find(f => f.fabric === "A"), b = r.fabrics.find(f => f.fabric === "B"), c = r.fabrics.find(f => f.fabric === "C");
+  check("KS A centres", a?.pieces[0].count ?? 0, 5);
+  check("KS B centres", b?.pieces[0].count ?? 0, 4);
+  check("KS B triangles", (b?.pieces[1].count ?? 0) * 2, 20);
+  check("KS C triangles", (c?.pieces[0].count ?? 0) * 2, 16);
+  check("KS centre cut", a?.pieces[0].w ?? 0, 12 / Math.sqrt(2) + .5);
+  check("KS corner starting cut", c?.pieces[0].w ?? 0, 6.875);
+  // 42.5 usable inches: four centres or six triangle blanks per strip.
+  check("KS A length", a?.totalInches ?? 0, 2 * (12 / Math.sqrt(2) + .5));
+  check("KS pooled B length", b?.totalInches ?? 0, 12 / Math.sqrt(2) + .5 + 2 * 6.875);
+  check("KS C length", c?.totalInches ?? 0, 13.75);
+  const sash = calculateYardage({ ...base(), pattern: "kansas-star", quiltWidth: 44, quiltHeight: 44, borderWidth: 2, sashingWidth: 2 });
+  check("KS sashed A blocks", sash.fabrics.find(f => f.fabric === "A")?.pieces[0].count ?? 0, 5);
+  check("KS sashing segments", sash.fabrics.find(f => f.fabric === "D")?.pieces[0].count ?? 0, 12);
+  check("KS sashing intersections", sash.fabrics.find(f => f.fabric === "D")?.pieces[1].count ?? 0, 4);
+}
 {
   const s = { ...base(), pattern: "contrary-wife" as const, quiltWidth: 48, quiltHeight: 48 };
   const result = calculateYardage(s);

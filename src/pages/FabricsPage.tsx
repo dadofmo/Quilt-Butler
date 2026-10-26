@@ -245,7 +245,7 @@ function FabricsStepInner() {
             const sashing = isSashed ? Math.max(0, planner.sashingWidth || 0) : 0;
             const innerW = planner.quiltWidth - 2 * planner.borderWidth;
             const innerH = planner.quiltHeight - 2 * planner.borderWidth;
-            const windowSash = (pattern.id === "bird-nest" || pattern.id === "duck-and-duckling" || pattern.id === "contrary-wife" || pattern.id === "art-square" || pattern.id === "brick-work" || pattern.id === "album-five-patch" || pattern.id === "alaska" || pattern.id === "attic-window" || pattern.id === "fifty-four-forty-or-fight" || pattern.id === "chocolate-cake") ? sashing : 0;
+            const windowSash = (pattern.id === "kansas-star" || pattern.id === "bird-nest" || pattern.id === "duck-and-duckling" || pattern.id === "contrary-wife" || pattern.id === "art-square" || pattern.id === "brick-work" || pattern.id === "album-five-patch" || pattern.id === "alaska" || pattern.id === "attic-window" || pattern.id === "fifty-four-forty-or-fight" || pattern.id === "chocolate-cake") ? sashing : 0;
             const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (planner.blockSize + windowSash)));
             const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (planner.blockSize + windowSash)));
             const hasCornerstones = isBearPaw && sashing > 0;
@@ -279,7 +279,9 @@ function FabricsStepInner() {
                   customSwapPair={planner.customSwapPair}
                 />
                 <p className="text-muted-foreground mt-4 text-center text-xs leading-relaxed">
-                  {studioPair(pattern.id) ? (
+                  {pattern.id === "kansas-star" ? (
+                    <>Two colorways alternate checkerboard-style, beginning with A at the upper left — <strong>{blocksAcross * blocksDown} blocks</strong> in a {blocksAcross} × {blocksDown} grid.</>
+                  ) : studioPair(pattern.id) ? (
                     <>
                       This quilt alternates <strong>two blocks</strong> checkerboard-style — the {studioPair(pattern.id)!.names.a} and the {studioPair(pattern.id)!.names.b} —{" "}
                       <strong>{blocksAcross * blocksDown} blocks</strong> in a{" "}

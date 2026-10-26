@@ -151,6 +151,7 @@ function ResultsStepInner() {
             hasBorder={planner.borderWidth > 0}
             borderFabric={(planner.assignments.border ?? (pattern ? getEffectiveBorderDefault(pattern, useSashedMath, isBearPaw && useSashedMath) : "C")) as FabricKey}
             photos={planner.fabricPhotos}
+            sashingWidth={sashing}
           />
 
           {sizeMismatch && (

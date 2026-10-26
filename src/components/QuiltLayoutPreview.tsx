@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { BirdNestBlock } from "./BirdNestBlock";
+import { KansasStarBlock } from "./KansasStarBlock";
+import { kansasColorway, type KansasColorway } from "@/lib/kansas-star";
 import { ContraryWifeBlock } from "./ContraryWifeBlock";
 import { DuckAndDucklingBlock } from "./DuckAndDucklingBlock";
 import type { PatternId, SectionAssignments, FabricKey, BlockLayout } from "@/lib/planner-store";
@@ -92,11 +94,11 @@ export function QuiltLayoutPreview({
   // full-screen link, so the user can check both drawings. X Marks the Chain
   // is always a two-block set with fixed Studio designs.
   const xChainBlocks = studioPairDesigns(pattern, assignments);
-  const showTwoBlocks = (pattern === "custom-block" && !!useBlockB && !!customBlockB) || !!xChainBlocks;
+  const showTwoBlocks = pattern === "kansas-star" || (pattern === "custom-block" && !!useBlockB && !!customBlockB) || !!xChainBlocks;
   const blockA = xChainBlocks ? xChainBlocks.a : customBlock;
   const blockB = xChainBlocks ? xChainBlocks.b : customBlockB;
 
-  const renderBlock = (size: number, design: CustomBlockDesign | null = blockA) =>
+  const renderBlock = (size: number, design: CustomBlockDesign | null = blockA, colorway: KansasColorway = "A") =>
     pattern === "rail-fence" ? (
       <div className="flex items-stretch gap-2">
         <div className="flex flex-col justify-around py-[5px] text-right">
@@ -138,6 +140,7 @@ export function QuiltLayoutPreview({
         size={size}
         photos={photos}
         customBlock={design}
+        colorway={colorway}
       />
     );
 
@@ -181,7 +184,7 @@ export function QuiltLayoutPreview({
                 See block full screen
               </button>
             </div>
-            {renderBlock(showTwoBlocks ? 170 : 220, which === "B" ? blockB : blockA)}
+            {renderBlock(showTwoBlocks ? 170 : 220, which === "B" ? blockB : blockA, which)}
           </div>
         ))}
       </div>
@@ -243,7 +246,7 @@ export function QuiltLayoutPreview({
             </DialogTitle>
           </DialogHeader>
           <div className="flex items-center justify-center">
-            {renderBlock(fullMax, blockFullOpen === "B" ? blockB : blockA)}
+            {renderBlock(fullMax, blockFullOpen === "B" ? blockB : blockA, blockFullOpen ?? "A")}
           </div>
           <p className="text-muted-foreground text-center text-xs">
             One {getPattern(pattern)?.name ?? "quilt"} block
@@ -1507,6 +1510,8 @@ function MiniBlock({
       return <ArkansasCrossroadsBlock size={200} diag={get("diag", "A")} light={get("patchLight", "B")} dark={get("patchDark", "C")} point={get("point", "D")} hstBg={get("hstBg", "E")} />;
     case "duck-and-duckling":
       return <DuckAndDucklingBlock size={200} assignments={assignments} photos={photos} />;
+    case "kansas-star":
+      return <KansasStarBlock size={200} assignments={assignments} photos={photos} colorway={kansasColorway(row, col)} />;
     case "contrary-wife":
       return <ContraryWifeBlock size={200} assignments={assignments} photos={photos} />;
     case "bird-nest":

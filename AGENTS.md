@@ -19,7 +19,7 @@
 
 ## Fabric photo rendering
 - Uploads/camera shots go through `prepareFabricPhoto` (downscaled JPEG) before storage. Why: raw phone photos overflow saved planner storage and alias fine weaves.
-- `buildFabricTile` evens lighting with a quadratic fit, builds candidate tiles (exact-edge seamless, averaged-edge seamless, detected print-repeat crop), measures each with `tileArtifacts`, and keeps the cleanest faithful one; never trust one method for every print. Delivered tiles are box-halved to at most 256 px. Why: every single-method fix failed on some fabric (dots, gingham, florals, knits); the battery test in fabric-tile-battery.test.ts must pass for all fabric types, lights and framings.
+- `buildFabricTile` fits lighting, scores seamless/repeat candidates with `tileArtifacts`, and box-halves to 256px; run the full fabric battery. Why: no one tiling method suits every print.
 - FabricPatternDefs scopes photo IDs and cancels shape-to-root transforms before paint so adjoining translated or rotated units sample one continuous fabric plane; quilt patterns use the pixel-scaled tile size. Why: local SVG transforms and duplicate IDs otherwise restart or distort prints at piece edges.
 
 ## Attic Window construction
@@ -58,3 +58,6 @@
 ## Picker consistency
 - Use `thumbnailAssignments` for default-driven picker renderers, not planning views. Why: cohesive thumbnails without changing saved fabric choices.
 - Derive counts from distinct default block fabrics across both blocks, excluding finishing sections, and show both designs in two-block thumbnails. Why: count fabrics, not roles or only the first block.
+
+## Kansas Star
+- Share square-in-a-square geometry, dimensions and parity counts across both colorways and views; attach four diagonal-cut triangles to a whole centre, then trim with point allowances. Why: accurate diamonds, straight seams, no templates.

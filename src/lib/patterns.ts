@@ -64,6 +64,19 @@ const borderSection: PatternSection = {
 
 const BASE_PATTERNS: PatternDefBase[] = [
   {
+    id: "kansas-star",
+    name: "Kansas Star",
+    hasMath: true,
+    intro: "Two square-in-a-square colorways alternate in a fixed checkerboard: navy diamonds with gold corners, then gold diamonds with sage corners. Each block is one whole centre square and four corner triangles, pieced with straight seams. Optional sashing and border; no Y-seams or templates.",
+    sections: [
+      { id: "navy", label: "Colorway A diamond centres", defaultFabric: "A", hint: "One centre diamond in each colorway A block; starts at the upper left." },
+      { id: "ochre", label: "Colorway B centres & A corners", defaultFabric: "B", hint: "The diamond in colorway B and all four corner triangles in colorway A." },
+      { id: "sage", label: "Colorway B corner triangles", defaultFabric: "C", hint: "All four corners of each colorway B block." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "D", hint: "Optional; zero gives the reference’s edge-to-edge checkerboard." },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+  {
     id: "duck-and-duckling",
     name: "Duck and Duckling",
     hasMath: true,
@@ -2160,6 +2173,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
  * equal the distinct default fabrics across both blocks, excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
+  "kansas-star": { skill: "confident", fabricCount: 3, techniques: ["squares", "onpoint"] },
   "bird-nest": { skill: "intermediate", fabricCount: 6, techniques: ["squares", "hst", "onpoint"] },
   "contrary-wife": { skill: "beginner", fabricCount: 4, techniques: ["squares", "hst"] },
   "duck-and-duckling": { skill: "intermediate", fabricCount: 4, techniques: ["squares", "hst"] },

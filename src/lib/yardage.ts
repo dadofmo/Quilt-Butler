@@ -21,6 +21,7 @@ import { studioPair } from "./studio-pairs";
 import { CONTRARY_WIFE_CELLS } from "./contrary-wife";
 import { BIRD_NEST_DIAMONDS, birdNestDimensions } from "./bird-nest";
 import { duckAndDucklingDimensions } from "./duck-and-duckling";
+import { kansasCounts, kansasDimensions } from "./kansas-star";
 
 /** Round an inch measurement to 2dp so cut sizes stay tidy. */
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -231,7 +232,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isDuckAndDuckling = s.pattern === "duck-and-duckling";
+  const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
   const isFiftyFourForty = s.pattern === "fifty-four-forty-or-fight";
@@ -508,6 +509,34 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}\" × ${sashCutL.toFixed(2)}\" from Fabric ${sashFab} — ${vSash} vertical and ${hSash} horizontal. Sew strips only between blocks, then add the optional outer border last.`,
       );
     }
+  } else if (s.pattern === "kansas-star") {
+    const d = kansasDimensions(s.blockSize), counts = kansasCounts(blocksDown, blocksAcross);
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Kansas Star section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const navy = fabric("navy"), ochre = fabric("ochre"), sage = fabric("sage");
+    addSquares(reqs[navy], "Colorway A centre squares", counts.a, d.centerCut, s.fabricWidth);
+    if (counts.b > 0) addSquares(reqs[ochre], "Colorway B centre squares", counts.b, d.centerCut, s.fabricWidth);
+    addSquares(reqs[ochre], "Colorway A corner triangle squares||cut each ONCE diagonally; two triangles per square", 2 * counts.a, d.triangleStarter, s.fabricWidth);
+    if (counts.b > 0) addSquares(reqs[sage], "Colorway B corner triangle squares||cut each ONCE diagonally; two triangles per square", 2 * counts.b, d.triangleStarter, s.fabricWidth);
+    notes.push(
+      `Kansas Star: ${counts.a} colorway A blocks (Fabric ${navy} diamond, Fabric ${ochre} corners) and ${counts.b} colorway B blocks (Fabric ${ochre} diamond, Fabric ${sage} corners). Every block uses one whole centre square and four corner triangles.`,
+      `Cut ${counts.a} Fabric ${navy} centre squares and ${counts.b} Fabric ${ochre} centre squares at ${d.centerCut.toFixed(4)}". The centre's finished side is block size ÷ √2 (${d.centerFinished.toFixed(4)}"), plus 1/2" seam allowance. Preserve this measurement rather than rounding the centre up to an eighth; use a decimal-inch ruler or mark the precise size. Make a test block first.`,
+      `Cut ${2 * counts.a} Fabric ${ochre} and ${2 * counts.b} Fabric ${sage} corner starting squares at ${d.triangleStarter.toFixed(3)}", then cut each square ONCE diagonally: ${counts.ochreTriangles} Fabric ${ochre} triangles and ${counts.sageTriangles} Fabric ${sage} triangles. Starting squares use half the finished block size + 7/8", rounded UP to an eighth for trimming allowance; do not sew these as two-at-a-time HSTs.`,
+      `Piece each colorway consistently: crease the midpoint of each centre-square side and each triangle's long edge. Match midpoints right sides together; the triangle tips overhang. Sew a 1/4" seam on two opposite sides, open and press toward the corners, then add the remaining two triangles. Support the bias edges and press without stretching. All four corners in a block use the same fabric; no Y-seams or templates.`,
+      `Square each assembled block to ${d.unfinished.toFixed(3)}" UNFINISHED, leaving 1/4" beyond every diamond point. The block finishes at ${s.blockSize}" after joining, with its diamond points at the four side midpoints.`,
+      `Arrange the ${blocksAcross} × ${blocksDown} grid as a fixed checkerboard beginning with colorway A at the upper left. Alternate A/B within each row and start successive rows B/A. Do not rotate blocks or reverse individual triangles. Sew blocks into rows, then join rows, matching diamond points and pressing row seams in opposite directions.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing");
+      const vertical = (blocksAcross - 1) * blocksDown, horizontal = (blocksDown - 1) * blocksAcross;
+      const intersections = (blocksAcross - 1) * (blocksDown - 1);
+      if (vertical + horizontal > 0) addRails(reqs[sash], "Sashing strips between blocks", vertical + horizontal, d.unfinished, sashWidth + SEAM, s.fabricWidth);
+      if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
+      notes.push(`Optional sashing: cut ${vertical + horizontal} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${d.unfinished.toFixed(3)}" and ${intersections} intersection squares at ${(sashWidth + SEAM).toFixed(3)}". Sew ${vertical} vertical strips between blocks in each row; join ${horizontal} horizontal segments with the intersection squares into sashing rows. Preserve the A/B checkerboard; add the optional border last.`);
+    } else notes.push("Join Kansas Star blocks edge to edge without sashing; the reference's white lines are not fabric. Add the optional border last.");
   } else if (s.pattern === "duck-and-duckling") {
     const d = duckAndDucklingDimensions(s.blockSize);
     const fabric = (id: string): FabricKey => {
@@ -5178,6 +5207,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "art-square" ||
     s.pattern === "bird-nest" ||
     s.pattern === "duck-and-duckling" ||
+    s.pattern === "kansas-star" ||
     s.pattern === "brick-work" ||
     s.pattern === "album-five-patch" ||
     s.pattern === "alaska" ||
