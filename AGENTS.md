@@ -55,5 +55,6 @@
 ## Duck and Duckling construction
 - Share the 5×5 geometry across previews and cuts; each corner unit is one large coral/pale HST (2×2) plus one small sage/pale HST at the outer corner, with the sage triangle overlaid on the pale field in renders. Why: matches the reference exactly and keeps assembly to straight seams with no Y-seams.
 
-## Duck and Duckling construction
-- Share the 5×5 geometry across previews and cuts; each corner unit is one large coral/pale HST (2×2) plus one small sage/pale HST at the outer corner, with the sage triangle overlaid on the pale field in renders. Why: matches the reference exactly and keeps assembly to straight seams with no Y-seams.
+## Picker consistency
+- Use `thumbnailAssignments` for default-driven picker renderers, not planning views. Why: cohesive thumbnails without changing saved fabric choices.
+- Derive counts from distinct default block fabrics across both blocks, excluding finishing sections, and show both designs in two-block thumbnails. Why: count fabrics, not roles or only the first block.
