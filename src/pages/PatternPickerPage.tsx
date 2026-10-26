@@ -79,7 +79,7 @@ function PatternPickerInner() {
       if (s.id === "border") return;
       assignments[s.id] = s.defaultFabric;
     });
-    setPlanner({ pattern: id, assignments });
+    setPlanner({ pattern: id, assignments, ...(id === "kansas-star" ? { sashingWidth: 0, borderWidth: 0, alternateBlocks: false, blockLayout: "straight" as const } : {}) });
     // The custom block is drawn first, then sized — everything else starts
     // with the quilt size.
     navigate(id === CUSTOM_BLOCK_ID ? "/design" : "/size");
