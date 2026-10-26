@@ -10,6 +10,7 @@ interface Props {
   hasBorder: boolean;
   borderFabric: FabricKey;
   photos?: Partial<Record<FabricKey, string>>;
+  sashingWidth?: number;
 }
 
 /**
@@ -24,6 +25,7 @@ export function PrintBlockLegend({
   hasBorder,
   borderFabric,
   photos,
+  sashingWidth = 0,
 }: Props) {
   const def = getPattern(pattern);
   if (!def) return null;
@@ -34,6 +36,7 @@ export function PrintBlockLegend({
   const items: Array<{ fabric: FabricKey; role: string }> = [];
   for (const section of def.sections) {
     if (section.id === "border") continue;
+    if (pattern === "kansas-star" && section.id === "sashing" && sashingWidth === 0) continue;
     const fabric = (assignments[section.id] ?? section.defaultFabric) as FabricKey;
     if (seen.has(fabric)) continue;
     seen.add(fabric);
