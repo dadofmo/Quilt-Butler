@@ -1,4 +1,6 @@
 # Roadmap
+- [ ] Align Duck and Duckling and Bird Nest picker colours and record the universal thumbnail palette rule.
+- [ ] Audit fabric filters and clarify the two-block X Marks the Chain preview; verify the live picker and tests.
 - [x] Add Duck and Duckling as a standard pattern (5×5 draft: coral corner fields, ochre cross, sage corner HSTs) with shared geometry, previews, cutting and sewing.
 - [x] Verify Duck and Duckling cutting, sewing, print views, math audit, tests and live planner.
 - [x] Add Bird Nest as a standard pattern with shared reference geometry and construction-aware cuts.
