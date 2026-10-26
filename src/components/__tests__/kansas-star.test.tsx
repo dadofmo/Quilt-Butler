@@ -29,7 +29,9 @@ describe("Kansas Star colorways in planning views", () => {
     const { container } = render(<PatternDiagram pattern="kansas-star" assignments={{ ochre: "E", sage: "D" }} hasBorder={false} colorway="B" photos={{ E: "data:image/jpeg;base64,test" }} />);
     const shapes = container.querySelectorAll("[data-kansas-colorway] polygon");
     expect(shapes).toHaveLength(5);
-    expect(shapes[0].getAttribute("fill")).toContain("url(#fabric-E");
+    const fill = shapes[0].getAttribute("fill");
+    expect(fill).toContain("fabric-E");
+    expect(container.querySelector(`pattern[id="${fill?.slice(5, -1)}"]`)).not.toBeNull();
     expect(shapes[1].getAttribute("fill")).toBe("var(--fabric-d)");
   });
 });
