@@ -26,7 +26,7 @@ export type PrecutTag = "jelly-roll" | "fat-quarter";
 /** Filterable metadata, kept in one table (PATTERN_META) so it's easy to audit. */
 export interface PatternMeta {
   skill: PatternSkill;
-  /** Distinct block fabrics, excluding sashing & border. */
+  /** Distinct default block fabrics across the entire pattern, excluding sashing & border. */
   fabricCount: number;
   techniques: TechniqueTag[];
   precut?: PrecutTag;
@@ -2157,7 +2157,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
 /**
  * Filter metadata for every pattern, kept in one table so it can be audited
  * at a glance (and unit-tested against the section list). `fabricCount` must
- * equal the number of block sections excluding sashing/cornerstone/border.
+ * equal the distinct default fabrics across both blocks, excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
   "bird-nest": { skill: "intermediate", fabricCount: 6, techniques: ["squares", "hst", "onpoint"] },
@@ -2243,9 +2243,17 @@ const FALLBACK_META: PatternMeta = { skill: "confident", fabricCount: 3, techniq
  *  part of the browsable pattern grid — it has its own entry point. */
 export const CUSTOM_BLOCK_ID = "custom-block" as const;
 
+/** Count fabrics, not separately adjustable roles or only the first block. */
+export function countBlockFabrics(sections: PatternSection[]): number {
+  return new Set(sections
+    .filter((s) => !["sashing", "cornerstone", "border"].includes(s.id))
+    .map((s) => s.defaultFabric)).size;
+}
+
 const ALL_PATTERNS: PatternDef[] = BASE_PATTERNS.map((p) => ({
   ...p,
   ...(PATTERN_META[p.id] ?? FALLBACK_META),
+  fabricCount: p.id === CUSTOM_BLOCK_ID ? FALLBACK_META.fabricCount : countBlockFabrics(p.sections),
 }));
 
 /** Every browsable pattern — what the picker grid and filters iterate. */

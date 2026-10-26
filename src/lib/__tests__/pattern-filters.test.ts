@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { PATTERNS } from "@/lib/patterns";
+import { PATTERNS, countBlockFabrics, getPattern } from "@/lib/patterns";
+import { xChainDesigns } from "@/lib/x-marks-the-chain";
 import {
   EMPTY_FILTERS,
   FABRIC_OPTIONS,
@@ -50,6 +51,17 @@ describe("pattern metadata", () => {
 });
 
 describe("fabricBucket", () => {
+  it("counts shared fabrics once and excludes sashing, cornerstones and border", () => {
+    expect(countBlockFabrics([
+      { id: "center", label: "Centre", defaultFabric: "A" },
+      { id: "arms", label: "Arms", defaultFabric: "B" },
+      { id: "chainCenter", label: "Chain centre", defaultFabric: "A" },
+      { id: "background", label: "Background", defaultFabric: "C" },
+      { id: "sashing", label: "Sashing", defaultFabric: "D" },
+      { id: "cornerstone", label: "Cornerstones", defaultFabric: "E" },
+      { id: "border", label: "Border", defaultFabric: "F" },
+    ])).toBe(3);
+  });
   it("buckets counts", () => {
     expect(fabricBucket(1)).toBe("1-2");
     expect(fabricBucket(2)).toBe("1-2");
@@ -106,6 +118,16 @@ describe("filterPatterns", () => {
     filterPatterns(PATTERNS, f({ fabrics: ["4+"] })).forEach((p) =>
       expect(p.fabricCount).toBeGreaterThanOrEqual(4),
     );
+  });
+
+  it("counts all six X Marks the Chain fabrics across both blocks, not just the three in X", () => {
+    const { a, b } = xChainDesigns();
+    const fabrics = (design: typeof a) => Object.values(design.cells).flatMap(c => c.fabrics);
+    expect(new Set(fabrics(a)).size).toBe(3);
+    expect(new Set([...fabrics(a), ...fabrics(b)]).size).toBe(6);
+    expect(getPattern("x-marks-the-chain")?.fabricCount).toBe(6);
+    expect(filterPatterns(PATTERNS, f({ fabrics: ["3"] })).map(p => p.id)).not.toContain("x-marks-the-chain");
+    expect(filterPatterns(PATTERNS, f({ fabrics: ["4+"] })).map(p => p.id)).toContain("x-marks-the-chain");
   });
 
   it("filters by features (all selected features must be present)", () => {

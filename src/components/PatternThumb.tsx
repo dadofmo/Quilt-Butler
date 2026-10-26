@@ -9,7 +9,8 @@ import { AlaskaBlock, alaskaFills } from "./AlaskaBlock";
 import { AlbumFivePatchBlock, albumFivePatchFills } from "./AlbumFivePatchBlock";
 import { ArtSquareBlock, artSquareFills } from "./ArtSquareBlock";
 import { BrickWorkBlock, brickWorkFills } from "./BrickWorkBlock";
-import { CustomBlockSvg } from "./CustomBlockSvg";
+import { CustomBlockSvg, CustomBlockShapes } from "./CustomBlockSvg";
+import { thumbnailAssignments } from "@/lib/pattern-thumbnail-palette";
 import { xChainDesigns } from "@/lib/x-marks-the-chain";
 import { whirlwindDesigns } from "@/lib/whirlwind-waltz";
 import { IdahoBeautyBlock, CheckerboardBlock, CabinInTheCottonBlock, FancyStripeBlock, MapleStarBlock, LoveInAMistBlock, FourXStarBlock, AntiqueTileBlock, EconomyBlock, CaliforniaQuiltBlock, ClownsChoiceBlock, CornerBeamBlock, FourQueensBlock, FourXsBlock, BrokenDishesBlock, RollingStoneBlock, SummerWindsBlock, SwingInTheCenterBlock, TippecanoeBlock, TulipLadyFingersBlock, WeathervaneBlock, WishingRingBlock, AlaskaHomesteadBlock, BlazingArrowsBlock, ApplePieBlock, AlbumCrossBlock, DoublePinwheelBlock, ArkansasCrossroadsBlock, DominoChickenFootBlock, AtticWindowBlock, atticWindowFills, ButlersTrellisBlock, butlersTrellisFills } from "./PatternDiagram";
@@ -172,9 +173,9 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
   };
   switch (pattern) {
     case "duck-and-duckling":
-      return <svg {...common}><DuckAndDucklingBlock size={90} /></svg>;
+      return <svg {...common}><DuckAndDucklingBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "bird-nest":
-      return <svg {...common}><BirdNestBlock size={90} /></svg>;
+      return <svg {...common}><BirdNestBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "contrary-wife":
       return <svg {...common}><ContraryWifeBlock size={90} /></svg>;
     case "simple-squares":
@@ -1099,8 +1100,15 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return <svg {...common}><ArtSquareBlock size={90} {...artSquareFills({})} /></svg>;
     case "brick-work":
       return <svg {...common}><BrickWorkBlock size={90} {...brickWorkFills({})} /></svg>;
-    case "x-marks-the-chain":
-      return <CustomBlockSvg design={xChainDesigns().a} size={s} />;
+    case "x-marks-the-chain": {
+      const { a, b } = xChainDesigns(thumbnailAssignments(pattern));
+      return <svg {...common}>
+        {[a, b, b, a].map((design, i) =>
+          <g key={i} transform={`translate(${(i % 2) * 45},${Math.floor(i / 2) * 45}) scale(0.225)`}>
+            <CustomBlockShapes design={design} />
+          </g>)}
+      </svg>;
+    }
     case "whirlwind-waltz":
       return <CustomBlockSvg design={whirlwindDesigns().a} size={s} />;
     case "album-five-patch":
