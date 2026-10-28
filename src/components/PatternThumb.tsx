@@ -176,10 +176,10 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
   };
   switch (pattern) {
     case "kansas-star":
-      // Reference shows visible gutters between blocks (visual only, not fabric).
+      // Blocks butt up flush like every other pattern — no gutters.
       return <svg {...common}>{Array.from({ length: 9 }, (_, i) =>
-        <g key={i} transform={`translate(${(i % 3) * 31.5},${Math.floor(i / 3) * 31.5})`}>
-          <KansasStarBlock size={27} colorway={kansasColorway(Math.floor(i / 3), i % 3)} assignments={thumbnailAssignments(pattern)} />
+        <g key={i} transform={`translate(${(i % 3) * 30},${Math.floor(i / 3) * 30})`}>
+          <KansasStarBlock size={30} colorway={kansasColorway(Math.floor(i / 3), i % 3)} assignments={thumbnailAssignments(pattern)} />
         </g>)}</svg>;
     case "duck-and-duckling":
       return <svg {...common}><DuckAndDucklingBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
