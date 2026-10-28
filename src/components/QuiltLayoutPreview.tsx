@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { BirdNestBlock } from "./BirdNestBlock";
 import { KansasStarBlock } from "./KansasStarBlock";
-import { kansasColorway, type KansasColorway } from "@/lib/kansas-star";
 import { ContraryWifeBlock } from "./ContraryWifeBlock";
 import { DuckAndDucklingBlock } from "./DuckAndDucklingBlock";
 import type { PatternId, SectionAssignments, FabricKey, BlockLayout } from "@/lib/planner-store";
@@ -94,11 +93,11 @@ export function QuiltLayoutPreview({
   // full-screen link, so the user can check both drawings. X Marks the Chain
   // is always a two-block set with fixed Studio designs.
   const xChainBlocks = studioPairDesigns(pattern, assignments);
-  const showTwoBlocks = pattern === "kansas-star" || (pattern === "custom-block" && !!useBlockB && !!customBlockB) || !!xChainBlocks;
+  const showTwoBlocks = (pattern === "custom-block" && !!useBlockB && !!customBlockB) || !!xChainBlocks;
   const blockA = xChainBlocks ? xChainBlocks.a : customBlock;
   const blockB = xChainBlocks ? xChainBlocks.b : customBlockB;
 
-  const renderBlock = (size: number, design: CustomBlockDesign | null = blockA, colorway: KansasColorway = "A") =>
+  const renderBlock = (size: number, design: CustomBlockDesign | null = blockA) =>
     pattern === "rail-fence" ? (
       <div className="flex items-stretch gap-2">
         <div className="flex flex-col justify-around py-[5px] text-right">
@@ -1511,7 +1510,7 @@ function MiniBlock({
     case "duck-and-duckling":
       return <DuckAndDucklingBlock size={200} assignments={assignments} photos={photos} />;
     case "kansas-star":
-      return <KansasStarBlock size={200} assignments={assignments} photos={photos} colorway={kansasColorway(row, col)} />;
+      return <KansasStarBlock size={200} assignments={assignments} photos={photos} />;
     case "contrary-wife":
       return <ContraryWifeBlock size={200} assignments={assignments} photos={photos} />;
     case "bird-nest":

@@ -56,7 +56,6 @@ export function PrintBlockLegend({
           size={140}
           photos={photos}
         />
-        {pattern === "kansas-star" && <PatternDiagram pattern={pattern} assignments={assignments} hasBorder={false} size={140} photos={photos} colorway="B" />}
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-foreground text-sm font-semibold">

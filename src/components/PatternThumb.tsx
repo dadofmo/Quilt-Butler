@@ -1,7 +1,6 @@
 import type { PatternId } from "@/lib/planner-store";
 import { BirdNestBlock } from "./BirdNestBlock";
 import { KansasStarBlock } from "./KansasStarBlock";
-import { kansasColorway } from "@/lib/kansas-star";
 import { DuckAndDucklingBlock } from "./DuckAndDucklingBlock";
 import { ContraryWifeBlock } from "./ContraryWifeBlock";
 import { BearPawBlockSvg } from "./BearPawBlockSvg";
@@ -34,7 +33,7 @@ const C = {
 
 
 const PATTERN_ALT: Record<PatternId, string> = {
-  "kansas-star": "Kansas Star: navy and gold centre diamonds alternating with gold and green corner triangles in a three-by-three checkerboard",
+  "kansas-star": "Kansas Star: one block of nine square-in-a-square units, blue diamonds with yellow corners at the corners and centre alternating with yellow diamonds with green corners on the sides",
   "duck-and-duckling": "Duck and Duckling: a five-by-five block with four large coral corner triangles, small sage accent triangles, and a warm cross of squares around a solid centre",
   "bird-nest": "Bird Nest: nine edge-touching diamonds in a five-by-five cross, a distinct centre diamond, four large dark diagonal fields and pieced outer corners",
   "contrary-wife": "Contrary Wife: a three-by-three block with five solid squares and four same-slant half-square triangles around the centre",
@@ -176,11 +175,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
   };
   switch (pattern) {
     case "kansas-star":
-      // Blocks butt up flush like every other pattern — no gutters.
-      return <svg {...common}>{Array.from({ length: 9 }, (_, i) =>
-        <g key={i} transform={`translate(${(i % 3) * 30},${Math.floor(i / 3) * 30})`}>
-          <KansasStarBlock size={30} colorway={kansasColorway(Math.floor(i / 3), i % 3)} assignments={thumbnailAssignments(pattern)} />
-        </g>)}</svg>;
+      // One 3×3 block, flush like every other pattern — no gutters.
+      return <svg {...common}><KansasStarBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "duck-and-duckling":
       return <svg {...common}><DuckAndDucklingBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "bird-nest":
