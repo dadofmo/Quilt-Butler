@@ -510,24 +510,26 @@ export function calculateYardage(s: PlannerState): CalcResult {
       );
     }
   } else if (s.pattern === "kansas-star") {
-    const d = kansasDimensions(s.blockSize), counts = kansasCounts(blocksDown, blocksAcross);
+    const blockCount = blocksDown * blocksAcross;
+    const d = kansasDimensions(s.blockSize), counts = kansasCounts(blockCount);
     const fabric = (id: string): FabricKey => {
       const section = pattern.sections.find(section => section.id === id);
       if (!section) throw new Error(`Missing Kansas Star section: ${id}`);
       return s.assignments[id] ?? section.defaultFabric;
     };
     const navy = fabric("navy"), ochre = fabric("ochre"), sage = fabric("sage");
-    addSquares(reqs[navy], "Colorway A centre squares", counts.a, d.centerCut, s.fabricWidth);
-    if (counts.b > 0) addSquares(reqs[ochre], "Colorway B centre squares", counts.b, d.centerCut, s.fabricWidth);
-    addSquares(reqs[ochre], "Colorway A corner triangle squares||cut each ONCE diagonally; two triangles per square", 2 * counts.a, d.triangleStarter, s.fabricWidth);
-    if (counts.b > 0) addSquares(reqs[sage], "Colorway B corner triangle squares||cut each ONCE diagonally; two triangles per square", 2 * counts.b, d.triangleStarter, s.fabricWidth);
+    const unitIn = d.unit.toFixed(3);
+    addSquares(reqs[navy], "Corner & centre unit diamond squares||5 per block (colorway A units)", counts.a, d.centerCut, s.fabricWidth);
+    addSquares(reqs[ochre], "Side unit diamond squares||4 per block (colorway B units)", counts.b, d.centerCut, s.fabricWidth);
+    addSquares(reqs[ochre], "Colorway A corner triangle squares||cut each ONCE diagonally; 10 squares → 20 triangles per block", 2 * counts.a, d.triangleStarter, s.fabricWidth);
+    addSquares(reqs[sage], "Colorway B corner triangle squares||cut each ONCE diagonally; 8 squares → 16 triangles per block", 2 * counts.b, d.triangleStarter, s.fabricWidth);
     notes.push(
-      `Kansas Star: ${counts.a} colorway A blocks (Fabric ${navy} diamond, Fabric ${ochre} corners) and ${counts.b} colorway B blocks (Fabric ${ochre} diamond, Fabric ${sage} corners). Every block uses one whole centre square and four corner triangles.`,
-      `Cut ${counts.a} Fabric ${navy} centre squares and ${counts.b} Fabric ${ochre} centre squares at ${d.centerCut.toFixed(4)}". The centre's finished side is block size ÷ √2 (${d.centerFinished.toFixed(4)}"), plus 1/2" seam allowance. Preserve this measurement rather than rounding the centre up to an eighth; use a decimal-inch ruler or mark the precise size. Make a test block first.`,
-      `Cut ${2 * counts.a} Fabric ${ochre} and ${2 * counts.b} Fabric ${sage} corner starting squares at ${d.triangleStarter.toFixed(3)}", then cut each square ONCE diagonally: ${counts.ochreTriangles} Fabric ${ochre} triangles and ${counts.sageTriangles} Fabric ${sage} triangles. Starting squares use half the finished block size + 7/8", rounded UP to an eighth for trimming allowance; do not sew these as two-at-a-time HSTs.`,
-      `Piece each colorway consistently: crease the midpoint of each centre-square side and each triangle's long edge. Match midpoints right sides together; the triangle tips overhang. Sew a 1/4" seam on two opposite sides, open and press toward the corners, then add the remaining two triangles. Support the bias edges and press without stretching. All four corners in a block use the same fabric; no Y-seams or templates.`,
-      `Square each assembled block to ${d.unfinished.toFixed(3)}" UNFINISHED, leaving 1/4" beyond every diamond point. The block finishes at ${s.blockSize}" after joining, with its diamond points at the four side midpoints.`,
-      `Arrange the ${blocksAcross} × ${blocksDown} grid as a fixed checkerboard beginning with colorway A at the upper left. Alternate A/B within each row and start successive rows B/A. Do not rotate blocks or reverse individual triangles. Sew blocks into rows, then join rows, matching diamond points and pressing row seams in opposite directions.`,
+      `Kansas Star: each ${s.blockSize}" block is a 3 × 3 grid of nine ${unitIn}" square-in-a-square units. Five colorway A units (Fabric ${navy} diamond, Fabric ${ochre} corners) sit at the four corners and the centre; four colorway B units (Fabric ${ochre} diamond, Fabric ${sage} corners) sit on the four sides. ${blockCount} blocks = ${counts.a} A units and ${counts.b} B units.`,
+      `Cut ${counts.a} Fabric ${navy} and ${counts.b} Fabric ${ochre} centre squares at ${d.centerCut.toFixed(4)}" (5 and 4 per block). The centre's finished side is the unit size ÷ √2 (${d.centerFinished.toFixed(4)}"), plus 1/2" seam allowance. Preserve this measurement rather than rounding it up to an eighth; use a decimal-inch ruler or mark the precise size. Make a test unit first.`,
+      `Cut ${2 * counts.a} Fabric ${ochre} and ${2 * counts.b} Fabric ${sage} corner starting squares at ${d.triangleStarter.toFixed(3)}" (10 and 8 per block), then cut each ONCE diagonally: ${counts.ochreTriangles} Fabric ${ochre} and ${counts.sageTriangles} Fabric ${sage} triangles. Starting squares are half the finished unit + 7/8", rounded UP to an eighth for trimming allowance; do not sew these as two-at-a-time HSTs.`,
+      `Piece each unit: crease the midpoint of each centre-square side and each triangle's long edge. Match midpoints right sides together; the triangle tips overhang. Sew a 1/4" seam on two opposite sides, open and press toward the corners, then add the remaining two triangles. All four corners of a unit use the same fabric; no Y-seams or templates. Square each unit to ${d.unitUnfinished.toFixed(3)}" UNFINISHED, leaving 1/4" beyond every diamond point.`,
+      `Assemble each block in three rows of three units: top row A–B–A, middle row B–A–B, bottom row A–B–A. Diamond points meet at every unit seam, so pin at the points. Press row seams in alternating directions, then join the rows. The block measures ${d.unfinished.toFixed(3)}" unfinished and finishes at ${s.blockSize}".`,
+      `Set all ${blockCount} blocks the same way up in a ${blocksAcross} × ${blocksDown} grid; every block is identical, so colorway A corner units meet where blocks touch.`,
     );
     if (sashWidth > 0) {
       const sash = fabric("sashing");
@@ -535,8 +537,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
       const intersections = (blocksAcross - 1) * (blocksDown - 1);
       if (vertical + horizontal > 0) addRails(reqs[sash], "Sashing strips between blocks", vertical + horizontal, d.unfinished, sashWidth + SEAM, s.fabricWidth);
       if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
-      notes.push(`Optional sashing: cut ${vertical + horizontal} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${d.unfinished.toFixed(3)}" and ${intersections} intersection squares at ${(sashWidth + SEAM).toFixed(3)}". Sew ${vertical} vertical strips between blocks in each row; join ${horizontal} horizontal segments with the intersection squares into sashing rows. Preserve the A/B checkerboard; add the optional border last.`);
-    } else notes.push("Join Kansas Star blocks edge to edge without sashing; the reference's white lines are not fabric. Add the optional border last.");
+      notes.push(`Optional sashing: cut ${vertical + horizontal} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${d.unfinished.toFixed(3)}" and ${intersections} intersection squares at ${(sashWidth + SEAM).toFixed(3)}". Sew ${vertical} vertical strips between blocks in each row; join ${horizontal} horizontal segments with the intersection squares into sashing rows. Add the optional border last.`);
+    } else notes.push("Join Kansas Star blocks edge to edge without sashing; the reference's white lines are seam guides, not fabric. Add the optional border last.");
   } else if (s.pattern === "duck-and-duckling") {
     const d = duckAndDucklingDimensions(s.blockSize);
     const fabric = (id: string): FabricKey => {
