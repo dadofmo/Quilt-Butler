@@ -139,7 +139,6 @@ export function QuiltLayoutPreview({
         size={size}
         photos={photos}
         customBlock={design}
-        colorway={colorway}
       />
     );
 
@@ -183,7 +182,7 @@ export function QuiltLayoutPreview({
                 See block full screen
               </button>
             </div>
-            {renderBlock(showTwoBlocks ? 170 : 220, which === "B" ? blockB : blockA, which)}
+            {renderBlock(showTwoBlocks ? 170 : 220, which === "B" ? blockB : blockA)}
           </div>
         ))}
       </div>
