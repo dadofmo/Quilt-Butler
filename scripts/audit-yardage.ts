@@ -496,22 +496,26 @@ console.log("\n=== Attic Window: 48×48, 12\" block ===");
 }
 
 console.log("\n=== Contrary Wife: 48×48, 12-inch block ===");
-console.log("\n=== Kansas Star: 3×3, 12-inch square-in-a-square blocks ===");
+console.log("\n=== Kansas Star: 9 × 12-inch blocks, each a 3×3 grid of 4-inch square-in-a-square units ===");
 {
+  const one = calculateYardage({ ...base(), pattern: "kansas-star", quiltWidth: 12, quiltHeight: 12 });
+  const oa = one.fabrics.find(f => f.fabric === "A"), ob = one.fabrics.find(f => f.fabric === "B"), oc = one.fabrics.find(f => f.fabric === "C");
+  check("KS per-block A centres", oa?.pieces[0].count ?? 0, 5);
+  check("KS per-block B centres", ob?.pieces[0].count ?? 0, 4);
+  check("KS per-block B triangles", (ob?.pieces[1].count ?? 0) * 2, 20);
+  check("KS per-block C triangles", (oc?.pieces[0].count ?? 0) * 2, 16);
   const r = calculateYardage({ ...base(), pattern: "kansas-star", quiltWidth: 36, quiltHeight: 36 });
   const a = r.fabrics.find(f => f.fabric === "A"), b = r.fabrics.find(f => f.fabric === "B"), c = r.fabrics.find(f => f.fabric === "C");
-  check("KS A centres", a?.pieces[0].count ?? 0, 5);
-  check("KS B centres", b?.pieces[0].count ?? 0, 4);
-  check("KS B triangles", (b?.pieces[1].count ?? 0) * 2, 20);
-  check("KS C triangles", (c?.pieces[0].count ?? 0) * 2, 16);
-  check("KS centre cut", a?.pieces[0].w ?? 0, 12 / Math.sqrt(2) + .5);
-  check("KS corner starting cut", c?.pieces[0].w ?? 0, 6.875);
-  // 42.5 usable inches: four centres or six triangle blanks per strip.
-  check("KS A length", a?.totalInches ?? 0, 2 * (12 / Math.sqrt(2) + .5));
-  check("KS pooled B length", b?.totalInches ?? 0, 12 / Math.sqrt(2) + .5 + 2 * 6.875);
-  check("KS C length", c?.totalInches ?? 0, 13.75);
+  check("KS A centres", a?.pieces[0].count ?? 0, 45);
+  check("KS C triangles", (c?.pieces[0].count ?? 0) * 2, 144);
+  check("KS centre cut", a?.pieces[0].w ?? 0, 4 / Math.sqrt(2) + .5);
+  check("KS corner starting cut", c?.pieces[0].w ?? 0, 2.875);
+  // 42.5 usable inches: twelve centres or fourteen triangle blanks per strip.
+  check("KS A length", a?.totalInches ?? 0, 4 * (4 / Math.sqrt(2) + .5));
+  check("KS pooled B length", b?.totalInches ?? 0, 3 * (4 / Math.sqrt(2) + .5) + 7 * 2.875);
+  check("KS C length", c?.totalInches ?? 0, 6 * 2.875);
   const sash = calculateYardage({ ...base(), pattern: "kansas-star", quiltWidth: 44, quiltHeight: 44, borderWidth: 2, sashingWidth: 2 });
-  check("KS sashed A blocks", sash.fabrics.find(f => f.fabric === "A")?.pieces[0].count ?? 0, 5);
+  check("KS sashed A centres", sash.fabrics.find(f => f.fabric === "A")?.pieces[0].count ?? 0, 45);
   check("KS sashing segments", sash.fabrics.find(f => f.fabric === "D")?.pieces[0].count ?? 0, 12);
   check("KS sashing intersections", sash.fabrics.find(f => f.fabric === "D")?.pieces[1].count ?? 0, 4);
 }

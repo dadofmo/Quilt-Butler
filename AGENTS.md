@@ -60,4 +60,4 @@
 - Derive counts from distinct default block fabrics across both blocks, excluding finishing sections, and show both designs in two-block thumbnails. Why: count fabrics, not roles or only the first block.
 
 ## Kansas Star
-- Share square-in-a-square geometry, dimensions and parity counts across both colorways and views; attach four diagonal-cut triangles to a whole centre, then trim with point allowances. Why: accurate diamonds, straight seams, no templates.
+- One block is a 3×3 grid of square-in-a-square units; share unit geometry, dimensions and per-block counts across all views; attach four diagonal-cut triangles to a whole centre, trim units, sew three rows of three. Why: matches the reference block, straight seams, no templates.

@@ -279,9 +279,7 @@ function FabricsStepInner() {
                   customSwapPair={planner.customSwapPair}
                 />
                 <p className="text-muted-foreground mt-4 text-center text-xs leading-relaxed">
-                  {pattern.id === "kansas-star" ? (
-                    <>Two colorways alternate checkerboard-style, beginning with A at the upper left — <strong>{blocksAcross * blocksDown} blocks</strong> in a {blocksAcross} × {blocksDown} grid.</>
-                  ) : studioPair(pattern.id) ? (
+                  {studioPair(pattern.id) ? (
                     <>
                       This quilt alternates <strong>two blocks</strong> checkerboard-style — the {studioPair(pattern.id)!.names.a} and the {studioPair(pattern.id)!.names.b} —{" "}
                       <strong>{blocksAcross * blocksDown} blocks</strong> in a{" "}

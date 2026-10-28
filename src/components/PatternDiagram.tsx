@@ -1,7 +1,6 @@
 import type { ReactElement } from "react";
 import { BirdNestBlock } from "./BirdNestBlock";
 import { KansasStarBlock } from "./KansasStarBlock";
-import type { KansasColorway } from "@/lib/kansas-star";
 import { ContraryWifeBlock } from "./ContraryWifeBlock";
 import { DuckAndDucklingBlock } from "./DuckAndDucklingBlock";
 import type { FabricKey, PatternId, SectionAssignments } from "@/lib/planner-store";
@@ -28,7 +27,6 @@ interface Props {
   photos?: Partial<Record<FabricKey, string>>;
   /** Required when `pattern` is "custom-block": the user's own design. */
   customBlock?: CustomBlockDesign | null;
-  colorway?: KansasColorway;
 }
 
 /**
@@ -50,7 +48,7 @@ function fillFor(
   return fabricFill(f, photos);
 }
 
-export function PatternDiagram({ pattern, assignments, hasBorder, size = 280, photos, customBlock, colorway = "A" }: Props) {
+export function PatternDiagram({ pattern, assignments, hasBorder, size = 280, photos, customBlock }: Props) {
   const def = getPattern(pattern);
   const borderDefault = (def?.sections.find((s) => s.id === "border")?.defaultFabric ?? "C") as FabricKey;
   const borderKey = (assignments["border"] ?? borderDefault) as FabricKey;
@@ -72,7 +70,7 @@ export function PatternDiagram({ pattern, assignments, hasBorder, size = 280, ph
           {/* Fabric photos share one fixed scale across every piece. */}
           <FabricPatternDefs photos={photos} />
           {pattern === "kansas-star"
-            ? <KansasStarBlock size={200} assignments={assignments} photos={photos} colorway={colorway} />
+            ? <KansasStarBlock size={200} assignments={assignments} photos={photos} />
             : pattern === "custom-block"
             ? customBlock && <CustomBlockShapes design={customBlock} photos={photos} />
             : studioPairDesigns(pattern)

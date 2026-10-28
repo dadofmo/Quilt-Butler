@@ -27,56 +27,64 @@ describe("Kansas Star reference and construction", () => {
     expect(getPattern("kansas-star")?.layouts).toBeUndefined();
     expect(filterPatterns(PATTERNS, { ...EMPTY_FILTERS, query: "Kansas Star" }).map(p => p.id)).toEqual(["kansas-star"]);
   });
-  it.each([6, 12, 15.25])("preserves the diamond and four disjoint corners at %s inches", size => {
-    for (const colorway of ["A", "B"] as const) {
-      const pieces = kansasGeometry(size, colorway);
-      expect(pieces).toHaveLength(5);
-      expect(pieces[0].points).toEqual([[size / 2, 0], [size, size / 2], [size / 2, size], [0, size / 2]]);
-      expect(pieces.map(p => p.role)).toEqual(colorway === "A" ? ["navy", "ochre", "ochre", "ochre", "ochre"] : ["ochre", "sage", "sage", "sage", "sage"]);
-      expect(area(pieces[0].points)).toBeCloseTo(size * size / 2, 10);
-      expect(pieces.slice(1).map(p => area(p.points))).toEqual(Array(4).fill(size * size / 8));
-      expect(pieces.reduce((n, p) => n + area(p.points), 0)).toBeCloseTo(size * size, 10);
+  it.each([6, 12, 15.25])("builds one block as a flush 3×3 grid of square-in-a-square units at %s inches", size => {
+    const pieces = kansasGeometry(size), u = size / 3;
+    expect(pieces).toHaveLength(45);
+    for (let i = 0; i < 9; i++) {
+      const r = Math.floor(i / 3), c = i % 3, unit = pieces.slice(i * 5, i * 5 + 5);
+      const colorway = kansasColorway(r, c);
+      expect(unit.map(p => p.role)).toEqual(colorway === "A" ? ["navy", "ochre", "ochre", "ochre", "ochre"] : ["ochre", "sage", "sage", "sage", "sage"]);
+      const x = c * u, y = r * u, h = u / 2;
+      expect(unit[0].points).toEqual([[x + h, y], [x + u, y + h], [x + h, y + u], [x, y + h]]);
+      expect(area(unit[0].points)).toBeCloseTo(u * u / 2, 10);
+      unit.slice(1).forEach(p => expect(area(p.points)).toBeCloseTo(u * u / 8, 10));
     }
+    expect(pieces.reduce((n, p) => n + area(p.points), 0)).toBeCloseTo(size * size, 8);
   });
-  it("matches the reference's five A centres, four B centres, twenty B corners and sixteen C corners", () => {
-    expect(kansasCounts(3, 3)).toEqual({ a: 5, b: 4, navyCenters: 5, ochreCenters: 4, ochreTriangles: 20, sageTriangles: 16 });
+  it("matches the reference block: A units at corners and centre, B units on the sides", () => {
     expect(Array.from({ length: 3 }, (_, r) => Array.from({ length: 3 }, (_, c) => kansasColorway(r, c)))).toEqual([["A", "B", "A"], ["B", "A", "B"], ["A", "B", "A"]]);
+    expect(kansasCounts(1)).toEqual({ blocks: 1, a: 5, b: 4, navyCenters: 5, ochreCenters: 4, ochreTriangles: 20, sageTriangles: 16 });
   });
-  it.each([[4, 4, 8, 8], [3, 4, 6, 6], [5, 3, 8, 7], [4, 3, 6, 6]])("counts a %s×%s grid consistently with parity", (rows, cols, a, b) => {
-    const variants = Array.from({ length: rows }, (_, r) => Array.from({ length: cols }, (_, c) => kansasColorway(r, c))).flat();
-    expect(variants.filter(v => v === "A")).toHaveLength(a);
-    expect(variants.filter(v => v === "B")).toHaveLength(b);
+  it.each([[4, 4], [3, 4], [5, 3], [1, 1]])("counts every block identically in a %s×%s quilt", (rows, cols) => {
+    const n = rows * cols;
     const result = calculateYardage({ ...base, quiltWidth: cols * 12, quiltHeight: rows * 12 });
-    expect(result.fabrics.find(f => f.fabric === "A")?.pieces[0].count).toBe(a);
-    expect(result.fabrics.find(f => f.fabric === "B")?.pieces.map(p => p.count)).toEqual([b, 2 * a]);
-    expect(result.fabrics.find(f => f.fabric === "C")?.pieces[0].count).toBe(2 * b);
+    expect(result.fabrics.find(f => f.fabric === "A")?.pieces.map(p => p.count)).toEqual([5 * n]);
+    expect(result.fabrics.find(f => f.fabric === "B")?.pieces.map(p => p.count)).toEqual([4 * n, 10 * n]);
+    expect(result.fabrics.find(f => f.fabric === "C")?.pieces.map(p => p.count)).toEqual([8 * n]);
   });
-  it.each([6, 12, 15.25])("includes all cut-edge allowances at %s inches", block => {
-    const d = kansasDimensions(block);
-    expect((d.centerCut - .5) * Math.SQRT2).toBeCloseTo(block, 12);
-    expect(d.triangleStarter).toBeGreaterThanOrEqual(block / 2 + .875);
-    expect(d.triangleStarter - (block / 2 + .875)).toBeLessThan(.125);
+  it.each([6, 12, 15.25])("sizes units at a third of the %s inch block with all cut-edge allowances", block => {
+    const d = kansasDimensions(block), u = block / 3;
+    expect(d.unit).toBeCloseTo(u, 12);
+    expect((d.centerCut - .5) * Math.SQRT2).toBeCloseTo(u, 12);
+    expect(d.triangleStarter).toBeGreaterThanOrEqual(u / 2 + .875);
+    expect(d.triangleStarter - (u / 2 + .875)).toBeLessThan(.125);
+    expect(d.unitUnfinished - .5).toBeCloseTo(u, 12);
     expect(d.unfinished - .5).toBe(block);
-    const r = calculateYardage({ ...base, blockSize: block, quiltWidth: block * 3, quiltHeight: block * 3 });
+    const r = calculateYardage({ ...base, blockSize: block, quiltWidth: block, quiltHeight: block });
     expect(r.fabrics.find(f => f.fabric === "A")?.pieces.map(p => [p.count, p.w])).toEqual([[5, d.centerCut]]);
     expect(r.fabrics.find(f => f.fabric === "B")?.pieces.map(p => [p.count, p.w])).toEqual([[4, d.centerCut], [10, d.triangleStarter]]);
     expect(r.fabrics.find(f => f.fabric === "C")?.pieces.map(p => [p.count, p.w])).toEqual([[8, d.triangleStarter]]);
   });
+  it("tells the quilter to sew three rows of three units per block", () => {
+    const notes = calculateYardage(base).notes.join(" ");
+    expect(notes).toContain("3 × 3 grid of nine 4.000\" square-in-a-square units");
+    expect(notes).toContain("top row A–B–A, middle row B–A–B, bottom row A–B–A");
+  });
   it("pools centres and corners on the shared bolt using usable fabric width and safety rounding", () => {
     const d = kansasDimensions(12), r = calculateYardage(base);
     const b = r.fabrics.find(f => f.fabric === "B");
-    const inches = Math.ceil(4 / piecesPerStrip(d.centerCut, 44)) * d.centerCut + Math.ceil(10 / piecesPerStrip(d.triangleStarter, 44)) * d.triangleStarter;
+    const inches = Math.ceil(36 / piecesPerStrip(d.centerCut, 44)) * d.centerCut + Math.ceil(90 / piecesPerStrip(d.triangleStarter, 44)) * d.triangleStarter;
     expect(b?.totalInches).toBeCloseTo(inches, 10);
     expect(b?.yards).toBe(Math.ceil(inches / 36 * 4) / 4);
     expect(calculateYardage({ ...base, safetyBuffer: true }).fabrics.find(f => f.fabric === "B")?.yards).toBe(Math.ceil(inches * 1.1 / 36 * 4) / 4);
     expect(calculateYardage({ ...base, fabricWidth: 20 }).fabrics.find(f => f.fabric === "B")?.totalInches).toBeGreaterThan(inches);
     const pooled = calculateYardage({ ...base, assignments: { navy: "C", ochre: "C", sage: "C" } });
     expect(pooled.fabrics).toHaveLength(1);
-    expect(pooled.fabrics[0].pieces.reduce((n, p) => n + p.count, 0)).toBe(27);
+    expect(pooled.fabrics[0].pieces.reduce((n, p) => n + p.count, 0)).toBe(9 * 27);
   });
-  it("fits optional sashing and border without altering the checkerboard counts", () => {
+  it("fits optional sashing and border without altering per-block counts", () => {
     const r = calculateYardage({ ...base, quiltWidth: 44, quiltHeight: 44, borderWidth: 2, sashingWidth: 2 });
-    expect(r.fabrics.find(f => f.fabric === "A")?.pieces[0].count).toBe(5);
+    expect(r.fabrics.find(f => f.fabric === "A")?.pieces[0].count).toBe(45);
     expect(r.fabrics.find(f => f.fabric === "D")?.pieces.map(p => [p.count, p.w, p.h])).toEqual([[12, 12.5, 2.5], [4, 2.5, 2.5]]);
     expect(r.fabrics.find(f => f.fabric === "E")?.pieces[0].label).toBe("Border strips");
     expect(calculateYardage(base).fabrics.some(f => ["D", "E"].includes(f.fabric))).toBe(false);
