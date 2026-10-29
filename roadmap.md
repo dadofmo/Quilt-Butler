@@ -73,3 +73,5 @@
 - [x] Make every fabric photo (camera or upload) render seamlessly: measured multi-method tiles, safe photo storage, fabric battery tests.
 - [x] Add Brick Work (on-point bars, accent squares, continuous centre bar) with previews, cutting, sewing steps and tests.
 - [x] Move Whirlwind Waltz starting colours onto the standard page-1 palette.
+
+- [x] Add Walls of Jericho (7×7 cross with 20 HST corner bands) with previews, cutting, sewing steps and tests.

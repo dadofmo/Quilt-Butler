@@ -61,3 +61,6 @@
 
 ## Kansas Star
 - One block is a 3×3 grid of square-in-a-square units; share unit geometry, dimensions and per-block counts across all views; attach four diagonal-cut triangles to a whole centre, trim units, sew three rows of three. Why: matches the reference block, straight seams, no templates.
+
+## Walls of Jericho construction
+- 7×7: four continuous 1×3 cross arms, background centre, 20 two-at-a-time HSTs; each 3×3 corner sewn in rows with its outer-row background pair cut as one 1×2 rectangle; three-band assembly, no layouts. Why: straight seams, fewest pieces.
