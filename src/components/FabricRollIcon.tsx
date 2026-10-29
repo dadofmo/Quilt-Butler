@@ -8,6 +8,7 @@ export const PATTERN_DIFFICULTY: Record<PatternId, 1 | 2 | 3 | 4 | 5> = {
   "kansas-star": 2,
   "bird-nest": 3,
   "contrary-wife": 2,
+  "walls-of-jericho": 3,
   "duck-and-duckling": 3,
   "custom-block": 3,
   "simple-squares": 1,

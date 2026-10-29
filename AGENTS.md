@@ -1,4 +1,6 @@
 
+Subdirectories may have their own `AGENTS.md`; read it before changing files there.
+
 ## Grid-cutting optimizer
 - `optimizeGrid` uses symmetric frames or rectangles, never L-shapes; keep merged cuts and co-pack equal heights via `addOptimizedGridPieces`. Why: fewer seams and honest yardage.
 
@@ -18,8 +20,6 @@
 - 5x5 row-by-row: 12 HSTs made two at a time (A/B, A/C, B/C), rows 2 and 4 centre B cells cut as one continuous 1x3 bar, other cells plain squares; rotation layouts only. Why: fewer seams without breaking straight-row assembly.
 
 ## Fabric photo rendering
-- Uploads/camera shots go through `prepareFabricPhoto` (downscaled JPEG) before storage. Why: raw phone photos overflow saved planner storage and alias fine weaves.
-- `buildFabricTile` fits lighting, scores seamless/repeat candidates with `tileArtifacts`, and box-halves to 256px; run the full fabric battery. Why: no one tiling method suits every print.
 - FabricPatternDefs scopes photo IDs and cancels shape-to-root transforms before paint so adjoining translated or rotated units sample one continuous fabric plane; quilt patterns use the pixel-scaled tile size. Why: local SVG transforms and duplicate IDs otherwise restart or distort prints at piece edges.
 
 ## Attic Window construction
@@ -61,3 +61,6 @@
 
 ## Kansas Star
 - One block is a 3×3 grid of square-in-a-square units; share unit geometry, dimensions and per-block counts across all views; attach four diagonal-cut triangles to a whole centre, trim units, sew three rows of three. Why: matches the reference block, straight seams, no templates.
+
+## Walls of Jericho construction
+- 7×7: four continuous 1×3 arms, 20 two-at-a-time HSTs, corners sewn in rows with the outer-row background pair as one 1×2 rect; three bands, no layouts. Why: straight seams, fewest pieces.

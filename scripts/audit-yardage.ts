@@ -536,6 +536,20 @@ console.log("\n=== Kansas Star: 9 × 12-inch blocks, each a 3×3 grid of 4-inch 
   check("CW sashing intersections", sash.fabrics.find(f => f.fabric === "E")?.pieces[1].count ?? 0, 4);
 }
 
+console.log("\n=== Walls of Jericho: 42×42, 14-inch block (2-inch units) ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "walls-of-jericho", quiltWidth: 42, quiltHeight: 42, blockSize: 14, borderWidth: 0, sashingWidth: 0 });
+  const a = r.fabrics.find(f => f.fabric === "A"), b = r.fabrics.find(f => f.fabric === "B"), c = r.fabrics.find(f => f.fabric === "C");
+  check("WJ cross arms", b?.pieces[0].count ?? 0, 36);
+  check("WJ arm length", b?.pieces[0].w ?? 0, 6.5);
+  // 42.5" usable: 6 arms per 2.5" strip → 6 strips.
+  check("WJ B inches", b?.totalInches ?? 0, 15);
+  check("WJ dark HST starters", c?.pieces[0].count ?? 0, 90);
+  check("WJ C inches", c?.totalInches ?? 0, 7 * 2.875);
+  // A: 36 rects (9/strip→4×2.5) + 81 squares (17/strip→5×2.5) + 90 starters (14/strip→7×2.875)
+  check("WJ A inches", a?.totalInches ?? 0, 10 + 12.5 + 7 * 2.875);
+}
+
 console.log("\n=== Duck and Duckling: 50×50, 15-inch block ===");
 {
   const s = { ...base(), pattern: "duck-and-duckling" as const, quiltWidth: 50, quiltHeight: 50, blockSize: 15, borderWidth: 0, sashingWidth: 0 };
