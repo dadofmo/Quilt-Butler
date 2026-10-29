@@ -66,7 +66,7 @@ describe("Kansas Star reference and construction", () => {
     expect(r.fabrics.find(f => f.fabric === "C")?.pieces.map(p => [p.count, p.w])).toEqual([[8, d.triangleStarter]]);
   });
   it("tells the quilter to sew three rows of three units per block", () => {
-    const notes = calculateYardage(base).notes.join(" ");
+    const notes = calculateYardage(base).notes?.join(" ") ?? "";
     expect(notes).toContain("3 × 3 grid of nine 4.000\" square-in-a-square units");
     expect(notes).toContain("top row A–B–A, middle row B–A–B, bottom row A–B–A");
   });
