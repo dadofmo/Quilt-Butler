@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BirdNestBlock } from "./BirdNestBlock";
 import { KansasStarBlock } from "./KansasStarBlock";
 import { ContraryWifeBlock } from "./ContraryWifeBlock";
+import { WallsOfJerichoBlock } from "./WallsOfJerichoBlock";
 import { DuckAndDucklingBlock } from "./DuckAndDucklingBlock";
 import type { PatternId, SectionAssignments, FabricKey, BlockLayout } from "@/lib/planner-store";
 import { rotationFor } from "@/lib/block-layouts";
@@ -1512,6 +1513,8 @@ function MiniBlock({
       return <KansasStarBlock size={200} assignments={assignments} photos={photos} />;
     case "contrary-wife":
       return <ContraryWifeBlock size={200} assignments={assignments} photos={photos} />;
+    case "walls-of-jericho":
+      return <WallsOfJerichoBlock size={200} assignments={assignments} photos={photos} />;
     case "bird-nest":
       return <BirdNestBlock size={200} assignments={assignments} photos={photos} />;
     case "double-pinwheel": {

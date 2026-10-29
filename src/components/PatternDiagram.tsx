@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import { BirdNestBlock } from "./BirdNestBlock";
 import { KansasStarBlock } from "./KansasStarBlock";
 import { ContraryWifeBlock } from "./ContraryWifeBlock";
+import { WallsOfJerichoBlock } from "./WallsOfJerichoBlock";
 import { DuckAndDucklingBlock } from "./DuckAndDucklingBlock";
 import type { FabricKey, PatternId, SectionAssignments } from "@/lib/planner-store";
 import { fabricFill, fabricTileBackgroundStyle } from "@/lib/fabric-fill";
@@ -95,6 +96,8 @@ function renderInner(
       return <BirdNestBlock size={200} assignments={a} photos={photos} />;
     case "contrary-wife":
       return <ContraryWifeBlock size={200} assignments={a} photos={photos} />;
+    case "walls-of-jericho":
+      return <WallsOfJerichoBlock size={200} assignments={a} photos={photos} />;
     case "simple-squares": {
       const c = get("squares", "A");
       return <rect x={0} y={0} width={200} height={200} fill={c} />;

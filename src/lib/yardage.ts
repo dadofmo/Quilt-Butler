@@ -19,6 +19,7 @@ import { artSquareDimensions } from "./art-square";
 import { brickWorkDimensions } from "./brick-work";
 import { studioPair } from "./studio-pairs";
 import { CONTRARY_WIFE_CELLS } from "./contrary-wife";
+import { jerichoCounts } from "./walls-of-jericho";
 import { BIRD_NEST_DIAMONDS, birdNestDimensions } from "./bird-nest";
 import { duckAndDucklingDimensions } from "./duck-and-duckling";
 import { kansasCounts, kansasDimensions } from "./kansas-star";
@@ -232,6 +233,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
+  const isJericho = s.pattern === "walls-of-jericho";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -242,7 +244,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isXChain = !!studioPair(s.pattern);
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isContraryWife || isDuckAndDuckling || isArtSquare || isXChain || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isJericho || isContraryWife || isDuckAndDuckling || isArtSquare || isXChain || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -250,7 +252,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const innerH = s.quiltHeight - 2 * s.borderWidth;
   // Attic Window fits optional between-block sashing inside the requested top,
   // matching the shared Size, Fabrics, and Results page grid calculation.
-  const windowSash = (isContraryWife || isDuckAndDuckling || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
+  const windowSash = (isJericho || isContraryWife || isDuckAndDuckling || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
   const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (s.blockSize + windowSash)));
   const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (s.blockSize + windowSash)));
   const blockCount = blocksAcross * blocksDown;
@@ -610,6 +612,41 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
       notes.push(`Sashing: join block rows with ${vertical} vertical Fabric ${sash} strips, then piece ${horizontal} horizontal strips with ${intersections} intersection squares into full-width rows. Strips are ${(sashWidth+.5).toFixed(4)}" × ${(s.blockSize+.5).toFixed(4)}"; intersection squares are ${(sashWidth+.5).toFixed(4)}". Add sashing only between blocks, then the optional border last.`);
     } else notes.push("Join Bird Nest blocks edge to edge, keeping the reference orientation. Add the optional outer border last.");
+  } else if (s.pattern === "walls-of-jericho") {
+    // 7×7 grid: four continuous 1×3 cross arms, 20 HSTs (two at a time), and
+    // background squares with each corner's outer-row pair cut as one 1×2 rect.
+    const unit = s.blockSize / 7;
+    const sq = unit + SEAM, hstCut = unit + HST_EXTRA;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Walls of Jericho section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const bg = fabric("background"), cross = fabric("cross"), dark = fabric("triangles");
+    const c = jerichoCounts();
+    addRails(reqs[cross], "Cross arm rectangles", c.crossArms * blockCount, 3 * unit + SEAM, sq, s.fabricWidth);
+    addRails(reqs[bg], "Corner outer-row background rectangles", c.backgroundRects * blockCount, 2 * unit + SEAM, sq, s.fabricWidth);
+    addSquares(reqs[bg], "Background squares", c.backgroundSquares * blockCount, sq, s.fabricWidth);
+    const starters = new Map<FabricKey, number>();
+    for (const f of [bg, dark]) starters.set(f, (starters.get(f) ?? 0) + c.hstStarterPairs * blockCount);
+    for (const [f, count] of starters) addSquares(reqs[f], "HST starting squares||two matched starter squares make two HST units", count, hstCut, s.fabricWidth);
+    const u3 = unit.toFixed(3), sq3 = sq.toFixed(3);
+    notes.push(
+      `Walls of Jericho: each block is a 7 × 7 grid of ${u3}" finished units — a Fabric ${cross} cross of four 1 × 3 arms around a Fabric ${bg} centre square, and a diagonal band of five Fabric ${dark}/${bg} half-square triangles in each 3 × 3 corner (20 HSTs per block).`,
+      `Cutting per block: 4 Fabric ${cross} cross arms at ${sq3}" × ${(3 * unit + SEAM).toFixed(3)}"; 4 Fabric ${bg} rectangles at ${sq3}" × ${(2 * unit + SEAM).toFixed(3)}" and 9 Fabric ${bg} squares at ${sq3}" (2 per corner plus the centre); 10 Fabric ${bg} and 10 Fabric ${dark} HST starting squares at ${hstCut.toFixed(3)}".`,
+      `Make 20 HSTs per block, two at a time: pair one Fabric ${bg} and one Fabric ${dark} starting square right sides together, draw one diagonal, sew 1/4" on both sides, cut on the line and press toward the dark. Trim each HST to ${sq3}" unfinished with the seam exactly corner to corner.`,
+      `Top-left corner unit, sewn in three rows (the other three corners are mirror images, so the dark band always runs parallel to the nearest cross arm): row 1 — the ${sq3}" × ${(2 * unit + SEAM).toFixed(3)}" background rectangle along the outer edge, then an HST with Fabric ${dark} toward the bottom-right; row 2 — a background square, an HST dark toward the bottom-right, an HST dark toward the top-left; row 3 — an HST dark toward the bottom-right, an HST dark toward the top-left, a background square. The triangles form one continuous two-triangle-wide band from the block's outer corner side to the cross. Join the rows, nesting seams; each corner unit measures ${(3 * unit + SEAM).toFixed(3)}" unfinished.`,
+      `Top-right, bottom-left and bottom-right corners: mirror the top-left layout left-to-right and/or top-to-bottom so the background rectangle always sits on the block's outer edge and every band points toward the cross arm beside it.`,
+      `Assemble in three bands with straight seams: top band = top-left corner, vertical cross arm, top-right corner; middle band = horizontal arm, ${sq3}" Fabric ${bg} centre square, horizontal arm; bottom band = bottom-left corner, vertical arm, bottom-right corner. Join the bands, matching the cross arm seams. Check the block measures ${(s.blockSize + SEAM).toFixed(3)}" unfinished and ${s.blockSize}" finished. No Y-seams or templates.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing");
+      const vertical = (blocksAcross - 1) * blocksDown, horizontal = (blocksDown - 1) * blocksAcross;
+      const count = vertical + horizontal, intersections = (blocksAcross - 1) * (blocksDown - 1);
+      if (count > 0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize + SEAM, sashWidth + SEAM, s.fabricWidth);
+      if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${(s.blockSize + SEAM).toFixed(3)}" (${vertical} vertical, ${horizontal} horizontal) and ${intersections} intersection squares at ${(sashWidth + SEAM).toFixed(3)}". Join blocks into rows with vertical strips, sew full-width sashing rows between block rows, then add the optional border last.`);
+    } else notes.push("Join Walls of Jericho blocks edge to edge, all facing the same way. Add the optional outer border last.");
   } else if (s.pattern === "contrary-wife") {
     const unit = s.blockSize / 3;
     const squareCut = unit + SEAM, hstCut = unit + HST_EXTRA;
@@ -5158,6 +5195,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   // glossary would be overkill there.
   const showBasics =
     isContraryWife ||
+    isJericho ||
     s.pattern === "hst" ||
     s.pattern === "nine-patch" ||
     s.pattern === "rail-fence" ||

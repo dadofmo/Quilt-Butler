@@ -122,6 +122,19 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "walls-of-jericho",
+    name: "Walls of Jericho",
+    hasMath: true,
+    intro: "A 7×7 block: a continuous cross of four 1×3 arms around a background centre square, with a diagonal band of five dark half-square triangles in each 3×3 corner, so the bands frame the cross like a set of walls. Sew three bands — corner, vertical arm, corner; arm, centre, arm; corner, vertical arm, corner — with straight seams only. Optional sashing and border.",
+    sections: [
+      { id: "background", label: "Background", defaultFabric: "A", hint: "Centre square, corner squares and the light half of all 20 triangle squares." },
+      { id: "cross", label: "Cross arms", defaultFabric: "B", hint: "Four continuous 1×3 rectangles from the centre to each edge." },
+      { id: "triangles", label: "Diagonal band triangles", defaultFabric: "C", hint: "The dark half of the 20 triangle squares — choose strong contrast with the background." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "D", hint: "Optional; set to zero for edge-to-edge blocks." },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+  {
     id: "nine-patch",
     name: "Nine Patch",
     hasMath: true,
@@ -2175,6 +2188,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
 export const PATTERN_META: Record<string, PatternMeta> = {
   "kansas-star": { skill: "confident", fabricCount: 3, techniques: ["squares", "onpoint"] },
   "bird-nest": { skill: "intermediate", fabricCount: 6, techniques: ["squares", "hst", "onpoint"] },
+  "walls-of-jericho": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst", "strips"] },
   "contrary-wife": { skill: "beginner", fabricCount: 4, techniques: ["squares", "hst"] },
   "duck-and-duckling": { skill: "intermediate", fabricCount: 4, techniques: ["squares", "hst"] },
   "nine-patch": { skill: "beginner", fabricCount: 2, techniques: ["squares"] },
