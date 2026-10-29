@@ -58,7 +58,7 @@ describe("Walls of Jericho cutting", () => {
     expect(A.pieces.find(p => p.label === "Background squares")).toMatchObject({ count: 81, w: 2.5 });
     expect(A.pieces.find(p => p.label.startsWith("HST"))).toMatchObject({ count: 90, w: 2.875 });
     expect(C.pieces).toEqual([expect.objectContaining({ count: 90, w: 2.875 })]);
-    expect(r.notes.join(" ")).toContain("20 HSTs per block");
+    expect((r.notes ?? []).join(" ")).toContain("20 HSTs per block");
   });
   it("adds sashing only when requested", () => {
     const r = calculateYardage({ ...base, quiltWidth: 46, quiltHeight: 46, sashingWidth: 2 });
