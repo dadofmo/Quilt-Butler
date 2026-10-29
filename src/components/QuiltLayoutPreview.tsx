@@ -244,7 +244,7 @@ export function QuiltLayoutPreview({
             </DialogTitle>
           </DialogHeader>
           <div className="flex items-center justify-center">
-            {renderBlock(fullMax, blockFullOpen === "B" ? blockB : blockA, blockFullOpen ?? "A")}
+            {renderBlock(fullMax, blockFullOpen === "B" ? blockB : blockA)}
           </div>
           <p className="text-muted-foreground text-center text-xs">
             One {getPattern(pattern)?.name ?? "quilt"} block

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { PATTERNS } from "@/lib/patterns";
 
 /**
- * The site advertises a pattern count in metadata ("60+ patterns"). That number
+ * The site advertises a pattern count in metadata ("70+ patterns"). That number
  * goes stale whenever a pattern is added, and Google keeps showing the old one.
  * The rule: always advertise the largest multiple of ten that the real library
  * actually contains — never round up past what ships.
