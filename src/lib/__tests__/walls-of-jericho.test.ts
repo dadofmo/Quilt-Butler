@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { JERICHO_CELLS, jerichoCell, jerichoPolygons } from "../walls-of-jericho";
 import { getPattern, PATTERNS } from "../patterns";
 import { calculateYardage } from "../yardage";
+import { EMPTY_FILTERS, filterPatterns } from "../pattern-filters";
 import type { PlannerState } from "../planner-store";
 
 const base: PlannerState = {
@@ -42,10 +43,19 @@ describe("Walls of Jericho geometry", () => {
     expect(new Set(polys.map(p => p.role))).toEqual(new Set(["background", "cross", "triangles"]));
   });
   it("is registered with standard fabrics and Nine Patch stays first", () => {
-    const p = getPattern("walls-of-jericho")!;
+    const p = getPattern("walls-of-jericho");
+    if (!p) throw new Error("Walls of Jericho is missing");
+    expect(PATTERNS).toHaveLength(71);
+    expect(PATTERNS[0].id).toBe("nine-patch");
     expect(p.sections.map(s => [s.id, s.defaultFabric])).toEqual([["background", "A"], ["cross", "B"], ["triangles", "C"], ["sashing", "D"], ["border", "E"]]);
     expect(p.layouts).toBeUndefined();
     expect(PATTERNS.filter(x => x.id === "walls-of-jericho")).toHaveLength(1);
+  });
+  it("appears in the three-fabric HST/sashing filter, not four-plus or alternate layouts", () => {
+    const ids = (filters: Partial<typeof EMPTY_FILTERS>) => filterPatterns(PATTERNS, { ...EMPTY_FILTERS, query: "Walls of Jericho", ...filters }).map(p => p.id);
+    expect(ids({ fabrics: ["3"], techniques: ["hst"], features: ["sashing"] })).toEqual(["walls-of-jericho"]);
+    expect(ids({ fabrics: ["4+"] })).toEqual([]);
+    expect(ids({ features: ["alternate"] })).toEqual([]);
   });
 });
 
@@ -66,5 +76,20 @@ describe("Walls of Jericho cutting", () => {
     expect(D.pieces[0].count).toBe(12);
     expect(D.pieces[1].count).toBe(4);
     expect(calculateYardage(base).fabrics.find(f => f.fabric === "D")).toBeUndefined();
+  });
+  it.each([7, 10.5, 21])("scales the same construction to a %s-inch finished block", blockSize => {
+    const r = calculateYardage({ ...base, blockSize, quiltWidth: blockSize, quiltHeight: blockSize });
+    const unit = blockSize / 7;
+    const cross = r.fabrics.find(f => f.fabric === "B");
+    const dark = r.fabrics.find(f => f.fabric === "C");
+    expect(cross?.pieces).toEqual([{ label: "Cross arm rectangles", count: 4, w: 3 * unit + 0.5, h: unit + 0.5 }]);
+    expect(dark?.pieces[0]).toMatchObject({ count: 10, w: unit + 0.875, h: unit + 0.875 });
+  });
+  it("combines matching assignments without dropping triangle starters or adding finishing fabric", () => {
+    const r = calculateYardage({ ...base, quiltWidth: 14, quiltHeight: 14, assignments: { background: "E", cross: "E", triangles: "E" } });
+    expect(r.fabrics.map(f => f.fabric)).toEqual(["E"]);
+    const pieces = r.fabrics[0].pieces;
+    expect(pieces.find(p => p.label.startsWith("HST"))).toMatchObject({ count: 20, w: 2.875 });
+    expect(pieces.find(p => p.label === "Cross arm rectangles")).toMatchObject({ count: 4, w: 6.5, h: 2.5 });
   });
 });
