@@ -1,5 +1,5 @@
 # Roadmap
-- [ ] Complete Walls of Jericho’s app verification as pattern 71, correct inactive finishing entries in print, and check the live cutting/sewing flow.
+- [x] Complete Walls of Jericho’s app verification as pattern 71, correct inactive finishing entries in print, and check the live cutting/sewing flow; all 1,442 tests and math audit passed.
 - [x] Add Kansas Star with intrinsic two-colorway checkerboard, standard palette, actual cuts and sewing instructions.
 - [x] Verify Kansas Star counts, sizing, optional finishing, photo fills, printed guides and live planner; 1,414 tests and math audit passed.
 - [x] Align Duck and Duckling and Bird Nest picker colours and record the universal thumbnail palette rule.
