@@ -3137,3 +3137,15 @@ if (failures.length === 0) {
   failures.forEach(f => console.log("  " + f));
   process.exit(1);
 }
+
+console.log("\n=== Fool's Square: 45×45, 15-inch block (3-inch units) ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "fools-square", quiltWidth: 45, quiltHeight: 45, blockSize: 15, borderWidth: 0, sashingWidth: 0 });
+  const f = (k: string) => r.fabrics.find(x => x.fabric === k)!;
+  // 9 blocks. 3.5" squares 12/strip, 3.875" starters 11/strip (42.5" usable).
+  check("FS bg squares", f("A").pieces[0].count, 36);
+  check("FS bg starters", f("A").pieces[1].count, 54);
+  check("FS accent squares", f("D").pieces[0].count, 9);
+  check("FS accent starters", f("D").pieces[1].count, 18);
+  check("FS cross inches", f("C").totalInches, 3 * 3.5);
+}
