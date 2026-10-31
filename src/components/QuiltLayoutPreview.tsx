@@ -702,10 +702,10 @@ function MiniBlock({
       return (
         <>
           <rect width={200} height={200} fill={bg} />
-          {qst(1, 0, "v", "top")}
-          {qst(2, 1, "h", "right")}
-          {qst(1, 2, "v", "bottom")}
-          {qst(0, 1, "h", "left")}
+          {qst(1, 0, "h", "top")}
+          {qst(2, 1, "v", "right")}
+          {qst(1, 2, "h", "bottom")}
+          {qst(0, 1, "v", "left")}
           <rect x={u} y={u} width={u} height={u} fill={center} />
         </>
       );
