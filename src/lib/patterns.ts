@@ -135,6 +135,20 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "fools-square",
+    name: "Fool's Square",
+    hasMath: true,
+    intro: "A 5×5 star block: an accent centre square framed by a cross of four squares, star-point squares at the inner corners, eight half-square-triangle star points, and accent triangle tips at each outer corner. Sew five rows of five with straight seams only. Optional sashing and border.",
+    sections: [
+      { id: "background", label: "Background", defaultFabric: "A", hint: "Four edge-centre squares and the light half of all 12 triangle squares." },
+      { id: "points", label: "Star points & inner corners", defaultFabric: "B", hint: "Four inner corner squares and the star-point half of eight triangle squares." },
+      { id: "cross", label: "Cross squares", defaultFabric: "C", hint: "The four squares touching the centre on each side." },
+      { id: "accent", label: "Centre & corner tips", defaultFabric: "D", hint: "The centre square and the triangle tip in each outer corner." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "E", hint: "Optional; set to zero for edge-to-edge blocks." },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
+  {
     id: "nine-patch",
     name: "Nine Patch",
     hasMath: true,
@@ -2188,6 +2202,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
 export const PATTERN_META: Record<string, PatternMeta> = {
   "kansas-star": { skill: "confident", fabricCount: 3, techniques: ["squares", "onpoint"] },
   "bird-nest": { skill: "intermediate", fabricCount: 6, techniques: ["squares", "hst", "onpoint"] },
+  "fools-square": { skill: "confident", fabricCount: 4, techniques: ["squares", "hst"] },
   "walls-of-jericho": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst", "strips"] },
   "contrary-wife": { skill: "beginner", fabricCount: 4, techniques: ["squares", "hst"] },
   "duck-and-duckling": { skill: "intermediate", fabricCount: 4, techniques: ["squares", "hst"] },
