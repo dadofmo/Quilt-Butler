@@ -20,6 +20,7 @@ import { brickWorkDimensions } from "./brick-work";
 import { studioPair } from "./studio-pairs";
 import { CONTRARY_WIFE_CELLS } from "./contrary-wife";
 import { jerichoCounts } from "./walls-of-jericho";
+import { foolsCounts } from "./fools-square";
 import { BIRD_NEST_DIAMONDS, birdNestDimensions } from "./bird-nest";
 import { duckAndDucklingDimensions } from "./duck-and-duckling";
 import { kansasCounts, kansasDimensions } from "./kansas-star";
@@ -233,7 +234,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "walls-of-jericho";
+  const isJericho = s.pattern === "walls-of-jericho" || s.pattern === "fools-square";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -612,6 +613,41 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
       notes.push(`Sashing: join block rows with ${vertical} vertical Fabric ${sash} strips, then piece ${horizontal} horizontal strips with ${intersections} intersection squares into full-width rows. Strips are ${(sashWidth+.5).toFixed(4)}" × ${(s.blockSize+.5).toFixed(4)}"; intersection squares are ${(sashWidth+.5).toFixed(4)}". Add sashing only between blocks, then the optional border last.`);
     } else notes.push("Join Bird Nest blocks edge to edge, keeping the reference orientation. Add the optional outer border last.");
+  } else if (s.pattern === "fools-square") {
+    // 5×5 grid sewn in five rows: 13 plain squares and 12 HSTs made two at a time.
+    const unit = s.blockSize / 5;
+    const sq = unit + SEAM, hstCut = unit + HST_EXTRA;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Fool's Square section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const bg = fabric("background"), pts = fabric("points"), cross = fabric("cross"), acc = fabric("accent");
+    const c = foolsCounts();
+    const squares = new Map<FabricKey, number>();
+    for (const [f, n] of [[bg, c.backgroundSquares], [pts, c.pointSquares], [cross, c.crossSquares], [acc, c.accentSquares]] as const)
+      squares.set(f, (squares.get(f) ?? 0) + n * blockCount);
+    for (const [f, n] of squares) addSquares(reqs[f], "Plain squares", n, sq, s.fabricWidth);
+    const starters = new Map<FabricKey, number>();
+    for (const [f, n] of [[bg, c.pointHst / 2], [pts, c.pointHst / 2], [bg, c.accentHst / 2], [acc, c.accentHst / 2]] as const)
+      starters.set(f, (starters.get(f) ?? 0) + n * blockCount);
+    for (const [f, n] of starters) addSquares(reqs[f], "HST starting squares||two matched starter squares make two HST units", n, hstCut, s.fabricWidth);
+    const sq3 = sq.toFixed(3), h3 = hstCut.toFixed(3);
+    notes.push(
+      `Fool's Square: each block is a 5 × 5 grid of ${unit.toFixed(3)}" finished units — a Fabric ${acc} centre framed by four Fabric ${cross} cross squares, four Fabric ${pts} inner corner squares, eight Fabric ${pts}/${bg} star-point HSTs and four Fabric ${acc}/${bg} corner HSTs.`,
+      `Cutting per block (all squares ${sq3}"): 4 Fabric ${bg}, 4 Fabric ${pts}, 4 Fabric ${cross} and 1 Fabric ${acc}. HST starting squares at ${h3}": 6 Fabric ${bg} (4 for star points, 2 for corners), 4 Fabric ${pts} and 2 Fabric ${acc}.`,
+      `Make HSTs two at a time: pair a Fabric ${bg} starter with a Fabric ${pts} starter (4 pairs → 8 star-point HSTs) or with a Fabric ${acc} starter (2 pairs → 4 corner HSTs). Draw one diagonal, sew 1/4" on both sides, cut on the line, press toward the darker fabric and trim each HST to ${sq3}".`,
+      `Lay out five rows (each star-point triangle touches the neighbouring inner corner square; each corner tip points to the block corner): row 1 — corner HST, star-point HST, Fabric ${bg} square, star-point HST, corner HST; row 2 — star-point HST, Fabric ${pts} square, Fabric ${cross} square, Fabric ${pts} square, star-point HST; row 3 — Fabric ${bg}, Fabric ${cross}, Fabric ${acc} centre, Fabric ${cross}, Fabric ${bg}; rows 4 and 5 mirror rows 2 and 1.`,
+      `Sew each row, pressing alternate rows in opposite directions so seams nest, then join the five rows. Check the block measures ${(s.blockSize + SEAM).toFixed(3)}" unfinished and ${s.blockSize}" finished. Straight seams only — no Y-seams or templates.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing");
+      const vertical = (blocksAcross - 1) * blocksDown, horizontal = (blocksDown - 1) * blocksAcross;
+      const count = vertical + horizontal, intersections = (blocksAcross - 1) * (blocksDown - 1);
+      if (count > 0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize + SEAM, sashWidth + SEAM, s.fabricWidth);
+      if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${(s.blockSize + SEAM).toFixed(3)}" and ${intersections} intersection squares at ${(sashWidth + SEAM).toFixed(3)}". Join blocks into rows with vertical strips, sew full-width sashing rows between block rows, then add the optional border last.`);
+    } else notes.push("Join Fool's Square blocks edge to edge. Add the optional outer border last.");
   } else if (s.pattern === "walls-of-jericho") {
     // 7×7 grid: four continuous 1×3 cross arms, 20 HSTs (two at a time), and
     // background squares with each corner's outer-row pair cut as one 1×2 rect.
