@@ -281,10 +281,10 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return (
         <svg {...common}>
           <rect width={90} height={90} fill={C.b} />
-          {qst(1, 0, "v", "t")}
-          {qst(2, 1, "h", "r")}
-          {qst(1, 2, "v", "btm")}
-          {qst(0, 1, "h", "l")}
+          {qst(1, 0, "h", "t")}
+          {qst(2, 1, "v", "r")}
+          {qst(1, 2, "h", "btm")}
+          {qst(0, 1, "v", "l")}
           <rect x={u} y={u} width={u} height={u} fill={C.d} />
         </svg>
       );

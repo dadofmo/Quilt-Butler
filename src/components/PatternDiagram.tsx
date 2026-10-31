@@ -203,10 +203,10 @@ function renderInner(
       // QST at grid (gx, gy) — `axis` controls which diagonal the star
       // triangles sit on. For Ohio Star, every edge QST has its star points
       // pointing INWARD toward the block center, so:
-      //   top edge (1,0):    star points down  → vertical bowtie
-      //   right edge (2,1):  star points left  → horizontal bowtie
-      //   bottom edge (1,2): star points up    → vertical bowtie
-      //   left edge (0,1):   star points right → horizontal bowtie
+      //   top edge (1,0): star triangles on left+right sides, points outward
+      //   right edge (2,1): star triangles on top+bottom
+      //   bottom edge (1,2): star triangles on left+right sides
+      //   left edge (0,1): star triangles on top+bottom
       const qst = (gx: number, gy: number, axis: "v" | "h", key: string) => {
         const x = gx * u;
         const y = gy * u;
@@ -257,10 +257,10 @@ function renderInner(
           <rect x={0} y={2 * u} width={u} height={u} fill={bg} />
           <rect x={2 * u} y={2 * u} width={u} height={u} fill={bg} />
           {/* 4 QST edge units — star points pointing INWARD */}
-          {qst(1, 0, "v", "top")}
-          {qst(2, 1, "h", "right")}
-          {qst(1, 2, "v", "bottom")}
-          {qst(0, 1, "h", "left")}
+          {qst(1, 0, "h", "top")}
+          {qst(2, 1, "v", "right")}
+          {qst(1, 2, "h", "bottom")}
+          {qst(0, 1, "v", "left")}
           {/* Center square */}
           <rect x={u} y={u} width={u} height={u} fill={center} />
           {/* Subtle 3×3 unit grid lines so beginners can see the construction */}
