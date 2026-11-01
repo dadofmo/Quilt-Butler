@@ -45,6 +45,8 @@ describe("Fool's Square geometry", () => {
   });
   it("keeps Nine Patch first", () => {
     expect(PATTERNS.find(p => p.id === "fools-square")).toBeTruthy();
+    expect(PATTERNS[0].id).toBe("nine-patch");
+    expect(PATTERNS).toHaveLength(72);
   });
 });
 
