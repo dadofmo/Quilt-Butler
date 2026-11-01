@@ -63,7 +63,7 @@ Subdirectories may have their own `AGENTS.md`; read it before changing files the
 - One block is a 3×3 grid of square-in-a-square units; share unit geometry, dimensions and per-block counts across all views; attach four diagonal-cut triangles to a whole centre, trim units, sew three rows of three. Why: matches the reference block, straight seams, no templates.
 
 ## Walls of Jericho construction
-- 7×7: four continuous 1×3 arms, 20 two-at-a-time HSTs, corners sewn in rows with the outer-row background pair as one 1×2 rect; three bands, no layouts. Why: straight seams, fewest pieces.
+- 7×7: 1×3 arms, 20 HSTs, corner outer pair as one 1×2 rect; three bands. Why: fewest pieces.
 
 - Printed keys omit inactive sashing/cornerstones. Why: avoid unused fabric purchases.
 
