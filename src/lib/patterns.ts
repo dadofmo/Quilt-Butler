@@ -135,6 +135,19 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "dumbbell",
+    name: "Dumbbell",
+    hasMath: true,
+    intro: "A 6×6 star block built as nine 2×2 units: four corner units of a solid square and three triangle squares, four edge units of two stacked flying geese pointing to the centre, and a square-in-a-square diamond in the middle. Straight seams only. Optional sashing and border.",
+    sections: [
+      { id: "background", label: "Background", defaultFabric: "A", hint: "Light half of the 12 corner triangle squares, the wings of the inner geese, the body of the outer geese and the four triangles around the centre diamond." },
+      { id: "main", label: "Star (corners, geese & diamond)", defaultFabric: "B", hint: "Four corner squares, 12 corner triangles, four inner geese and the centre diamond." },
+      { id: "accent", label: "Outer wing accents", defaultFabric: "C", hint: "The eight small triangles on the outer edge of each side unit." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "D", hint: "Optional; set to zero for edge-to-edge blocks." },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+  {
     id: "fools-square",
     name: "Fool's Square",
     hasMath: true,
@@ -2202,6 +2215,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
 export const PATTERN_META: Record<string, PatternMeta> = {
   "kansas-star": { skill: "confident", fabricCount: 3, techniques: ["squares", "onpoint"] },
   "bird-nest": { skill: "intermediate", fabricCount: 6, techniques: ["squares", "hst", "onpoint"] },
+  "dumbbell": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst", "geese", "onpoint"] },
   "fools-square": { skill: "confident", fabricCount: 4, techniques: ["squares", "hst"] },
   "walls-of-jericho": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst", "strips"] },
   "contrary-wife": { skill: "beginner", fabricCount: 4, techniques: ["squares", "hst"] },

@@ -21,6 +21,7 @@ import { studioPair } from "./studio-pairs";
 import { CONTRARY_WIFE_CELLS } from "./contrary-wife";
 import { jerichoCounts } from "./walls-of-jericho";
 import { foolsCounts } from "./fools-square";
+import { DUMBBELL_COUNTS, dumbbellDimensions } from "./dumbbell";
 import { BIRD_NEST_DIAMONDS, birdNestDimensions } from "./bird-nest";
 import { duckAndDucklingDimensions } from "./duck-and-duckling";
 import { kansasCounts, kansasDimensions } from "./kansas-star";
@@ -234,7 +235,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "walls-of-jericho" || s.pattern === "fools-square";
+  const isJericho = s.pattern === "walls-of-jericho" || s.pattern === "fools-square" || s.pattern === "dumbbell";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -613,6 +614,43 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
       notes.push(`Sashing: join block rows with ${vertical} vertical Fabric ${sash} strips, then piece ${horizontal} horizontal strips with ${intersections} intersection squares into full-width rows. Strips are ${(sashWidth+.5).toFixed(4)}" × ${(s.blockSize+.5).toFixed(4)}"; intersection squares are ${(sashWidth+.5).toFixed(4)}". Add sashing only between blocks, then the optional border last.`);
     } else notes.push("Join Bird Nest blocks edge to edge, keeping the reference orientation. Add the optional outer border last.");
+  } else if (s.pattern === "dumbbell") {
+    // 3×3 macro layout of 2×2 units; geese four-at-a-time, HSTs two-at-a-time.
+    const d = dumbbellDimensions(s.blockSize), c = DUMBBELL_COUNTS, n = blockCount;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Dumbbell section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const bg = fabric("background"), main = fabric("main"), acc = fabric("accent");
+    addSquares(reqs[main], "Corner squares", c.mainSquares * n, d.square, s.fabricWidth);
+    addSquares(reqs[main], "HST starting squares||two matched starter squares make two HST units", (c.cornerHst / 2) * n, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[bg], "HST starting squares||two matched starter squares make two HST units", (c.cornerHst / 2) * n, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[main], "Flying geese large squares||one large + four small squares make four geese", n, d.geeseLarge, s.fabricWidth);
+    addSquares(reqs[bg], "Flying geese small squares||wings for the inner geese", 4 * n, d.geeseSmall, s.fabricWidth);
+    addSquares(reqs[bg], "Flying geese large squares||one large + four small squares make four geese", n, d.geeseLarge, s.fabricWidth);
+    addSquares(reqs[acc], "Flying geese small squares||wings for the outer geese", 4 * n, d.geeseSmall, s.fabricWidth);
+    addSquares(reqs[main], "Centre diamond squares", n, d.centreCut, s.fabricWidth);
+    addSquares(reqs[bg], "Centre setting triangle squares||cut each ONCE diagonally; 2 squares → 4 triangles", c.settingStarters * n, d.settingStarter, s.fabricWidth);
+    const f3 = (x: number) => x.toFixed(3);
+    notes.push(
+      `Dumbbell: each ${s.blockSize}" block is a 6 × 6 grid of ${f3(d.unit)}" finished units, assembled as a 3 × 3 layout of ${f3(2 * d.unit)}" units: four corner units, four side units and one centre diamond.`,
+      `Cutting per block — Fabric ${main}: 4 corner squares at ${f3(d.square)}", 6 HST starting squares at ${f3(d.hstStarter)}", 1 flying-geese large square at ${f3(d.geeseLarge)}" and 1 centre square at ${d.centreCut.toFixed(4)}". Fabric ${bg}: 6 HST starting squares at ${f3(d.hstStarter)}", 4 small geese squares at ${f3(d.geeseSmall)}", 1 large geese square at ${f3(d.geeseLarge)}" and 2 setting squares at ${f3(d.settingStarter)}" cut once diagonally. Fabric ${acc}: 4 small geese squares at ${f3(d.geeseSmall)}".`,
+      `Corner HSTs (12 per block): pair each Fabric ${main} starter with a Fabric ${bg} starter, draw one diagonal, sew 1/4" on both sides, cut apart and trim to ${f3(d.square)}". Six pairs make 12 HSTs.`,
+      `Flying geese, four at a time: lay two small squares on opposite corners of the large square, diagonals lined up; sew 1/4" each side of the line and cut apart. Press, add a small square to the remaining corner of each piece, sew, cut and press. Trim each goose to ${f3(2 * d.unit + 0.5)}" × ${f3(d.square)}". Use Fabric ${main} large + Fabric ${bg} small for the 4 inner geese, and Fabric ${bg} large + Fabric ${acc} small for the 4 outer geese.`,
+      `Centre: the diamond's finished side is ${d.centreFinished.toFixed(4)}"; cut it at the decimal size above rather than rounding. Sew Fabric ${bg} triangles to two opposite sides, press out, then the other two. Trim to ${f3(d.unitUnfinished)}", leaving 1/4" beyond each point.`,
+      `Corner units: row 1 — Fabric ${main} square, then an HST with its Fabric ${main} triangle at the lower-left; row 2 — HST with Fabric ${main} at the upper-right, HST with Fabric ${main} at the upper-left. All four ${main} triangles meet at the unit's centre. Make four, turning each so its solid square sits at a block corner.`,
+      `Side units: sew an outer goose (Fabric ${bg} body, Fabric ${acc} wings) to an inner goose (Fabric ${main} body); both point to the block centre and the outer goose sits on the block edge. Make four.`,
+      `Assemble three rows: corner – side – corner; side – centre – side; corner – side – corner. Press rows in alternate directions so seams nest, pin at the goose and diamond points, then join rows. The block measures ${f3(s.blockSize + SEAM)}" unfinished. Straight seams only — no Y-seams or templates.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing");
+      const vertical = (blocksAcross - 1) * blocksDown, horizontal = (blocksDown - 1) * blocksAcross;
+      const count = vertical + horizontal, intersections = (blocksAcross - 1) * (blocksDown - 1);
+      if (count > 0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize + SEAM, sashWidth + SEAM, s.fabricWidth);
+      if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${f3(sashWidth + SEAM)}" × ${f3(s.blockSize + SEAM)}" and ${intersections} intersection squares at ${f3(sashWidth + SEAM)}". Join blocks into rows with vertical strips, sew full-width sashing rows between block rows, then add the optional border last.`);
+    } else notes.push("Join Dumbbell blocks edge to edge. Add the optional outer border last.");
   } else if (s.pattern === "fools-square") {
     // 5×5 grid sewn in five rows: 13 plain squares and 12 HSTs made two at a time.
     const unit = s.blockSize / 5;
@@ -5284,6 +5322,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "bird-nest" ||
     s.pattern === "duck-and-duckling" ||
     s.pattern === "kansas-star" ||
+    s.pattern === "dumbbell" ||
     s.pattern === "brick-work" ||
     s.pattern === "album-five-patch" ||
     s.pattern === "alaska" ||
