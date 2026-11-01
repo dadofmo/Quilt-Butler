@@ -4,6 +4,7 @@ import { KansasStarBlock } from "./KansasStarBlock";
 import { ContraryWifeBlock } from "./ContraryWifeBlock";
 import { WallsOfJerichoBlock } from "./WallsOfJerichoBlock";
 import { FoolsSquareBlock } from "./FoolsSquareBlock";
+import { DumbbellBlock } from "./DumbbellBlock";
 import { DuckAndDucklingBlock } from "./DuckAndDucklingBlock";
 import type { FabricKey, PatternId, SectionAssignments } from "@/lib/planner-store";
 import { fabricFill, fabricTileBackgroundStyle } from "@/lib/fabric-fill";
@@ -99,6 +100,8 @@ function renderInner(
       return <ContraryWifeBlock size={200} assignments={a} photos={photos} />;
     case "fools-square":
       return <FoolsSquareBlock size={200} assignments={a} photos={photos} />;
+    case "dumbbell":
+      return <DumbbellBlock size={200} assignments={a} photos={photos} />;
     case "walls-of-jericho":
       return <WallsOfJerichoBlock size={200} assignments={a} photos={photos} />;
     case "simple-squares": {

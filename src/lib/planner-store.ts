@@ -28,6 +28,7 @@ export type PatternId =
   | "contrary-wife"
   | "walls-of-jericho"
   | "fools-square"
+  | "dumbbell"
   | "simple-squares"
   | "nine-patch"
   | "hst"
