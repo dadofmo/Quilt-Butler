@@ -66,3 +66,6 @@ Subdirectories may have their own `AGENTS.md`; read it before changing files the
 - 7×7: four continuous 1×3 arms, 20 two-at-a-time HSTs, corners sewn in rows with the outer-row background pair as one 1×2 rect; three bands, no layouts. Why: straight seams, fewest pieces.
 
 - Printed keys omit inactive sashing/cornerstones. Why: avoid unused fabric purchases.
+
+## Fool's Square
+- 5×5 rows: 13 plain squares, 12 two-at-a-time HSTs; shared cell map. Why: straight seams.
