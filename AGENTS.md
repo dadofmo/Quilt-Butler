@@ -62,12 +62,12 @@ Subdirectories may have their own `AGENTS.md`; read it before changing files the
 ## Kansas Star
 - One block is a 3×3 grid of square-in-a-square units; share unit geometry, dimensions and per-block counts across all views; attach four diagonal-cut triangles to a whole centre, trim units, sew three rows of three. Why: matches the reference block, straight seams, no templates.
 
-## Walls of Jericho construction
-- 7×7: 1×3 arms, 20 HSTs, corner outer pair as one 1×2 rect; three bands. Why: fewest pieces.
+## Walls of Jericho
+- 7×7: 1×3 arms, 20 HSTs, outer pair one 1×2 rect. Why: fewest pieces.
 
 - Printed keys omit inactive sashing/cornerstones. Why: avoid unused fabric purchases.
 
-## Fool's Square
+## Fool's Square / Dumbbell
 - 5×5 rows: 13 squares, 12 two-at-a-time HSTs. Why: straight seams.
-- Dumbbell: 3×3 macro; HST corners, stacked geese sides, diamond centre.
+- Dumbbell 3×3 macro; HST corners, stacked geese sides, diamond centre.
 
