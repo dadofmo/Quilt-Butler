@@ -3138,6 +3138,12 @@ if (failures.length === 0) {
   process.exit(1);
 }
 
+console.log("\n=== Dumbbell: 36×36, 12-inch block ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "dumbbell", quiltWidth: 36, quiltHeight: 36, blockSize: 12, borderWidth: 0, sashingWidth: 0 });
+  for (const f of r.fabrics) console.log(f.fabric, f.pieces.map(p => `${p.label.split("||")[0]} ${p.count}@${p.w}`).join("; "));
+}
+
 console.log("\n=== Fool's Square: 45×45, 15-inch block (3-inch units) ===");
 {
   const r = calculateYardage({ ...base(), pattern: "fools-square", quiltWidth: 45, quiltHeight: 45, blockSize: 15, borderWidth: 0, sashingWidth: 0 });
