@@ -5,6 +5,7 @@ import { ContraryWifeBlock } from "./ContraryWifeBlock";
 import { WallsOfJerichoBlock } from "./WallsOfJerichoBlock";
 import { FoolsSquareBlock } from "./FoolsSquareBlock";
 import { DumbbellBlock } from "./DumbbellBlock";
+import { BrokenWheelBlock } from "./BrokenWheelBlock";
 import { DuckAndDucklingBlock } from "./DuckAndDucklingBlock";
 import type { PatternId, SectionAssignments, FabricKey, BlockLayout } from "@/lib/planner-store";
 import { rotationFor } from "@/lib/block-layouts";
@@ -1517,6 +1518,8 @@ function MiniBlock({
       return <ContraryWifeBlock size={200} assignments={assignments} photos={photos} />;
     case "fools-square":
       return <FoolsSquareBlock size={200} assignments={assignments} photos={photos} />;
+    case "broken-wheel":
+      return <BrokenWheelBlock size={200} assignments={assignments} photos={photos} />;
     case "dumbbell":
       return <DumbbellBlock size={200} assignments={assignments} photos={photos} />;
     case "walls-of-jericho":

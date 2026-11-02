@@ -22,6 +22,7 @@ import { CONTRARY_WIFE_CELLS } from "./contrary-wife";
 import { jerichoCounts } from "./walls-of-jericho";
 import { foolsCounts } from "./fools-square";
 import { DUMBBELL_COUNTS, dumbbellDimensions } from "./dumbbell";
+import { BROKEN_WHEEL_COUNTS, brokenWheelDimensions } from "./broken-wheel";
 import { BIRD_NEST_DIAMONDS, birdNestDimensions } from "./bird-nest";
 import { duckAndDucklingDimensions } from "./duck-and-duckling";
 import { kansasCounts, kansasDimensions } from "./kansas-star";
@@ -235,7 +236,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "walls-of-jericho" || s.pattern === "fools-square" || s.pattern === "dumbbell";
+  const isJericho = s.pattern === "walls-of-jericho" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -614,6 +615,37 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
       notes.push(`Sashing: join block rows with ${vertical} vertical Fabric ${sash} strips, then piece ${horizontal} horizontal strips with ${intersections} intersection squares into full-width rows. Strips are ${(sashWidth+.5).toFixed(4)}" × ${(s.blockSize+.5).toFixed(4)}"; intersection squares are ${(sashWidth+.5).toFixed(4)}". Add sashing only between blocks, then the optional border last.`);
     } else notes.push("Join Bird Nest blocks edge to edge, keeping the reference orientation. Add the optional outer border last.");
+  } else if (s.pattern === "broken-wheel") {
+    // 3×3 macro layout: square-in-a-square corners, two-bar sides, plain centre.
+    const d = brokenWheelDimensions(s.blockSize), c = BROKEN_WHEEL_COUNTS, n = blockCount;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Broken Wheel section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const bg = fabric("background"), ring = fabric("ring"), dark = fabric("dark");
+    const f3 = (x: number) => x.toFixed(3);
+    addSquares(reqs[dark], "Corner diamond squares", c.diamonds * n, d.diamondCut, s.fabricWidth);
+    addSquares(reqs[dark], "Centre squares", c.centres * n, d.centre, s.fabricWidth);
+    addRails(reqs[dark], "Outer side bars", c.darkBars * n, d.barLength, d.barWidth, s.fabricWidth);
+    addRails(reqs[ring], "Inner side bars", c.ringBars * n, d.barLength, d.barWidth, s.fabricWidth);
+    addSquares(reqs[ring], "Ring triangle squares||cut each ONCE diagonally; 1 square → 2 triangles", c.ringTriangleSquares * n, d.triangleStarter, s.fabricWidth);
+    addSquares(reqs[bg], "Corner triangle squares||cut each ONCE diagonally; 1 square → 2 triangles", c.backgroundTriangleSquares * n, d.triangleStarter, s.fabricWidth);
+    notes.push(
+      `Broken Wheel: each ${s.blockSize}" block is a 3 × 3 layout of ${f3(d.unit)}" finished units (${f3(d.unitUnfinished)}" unfinished): four square-in-a-square corner units, four two-bar side units and one centre square.`,
+      `Cutting per block — Fabric ${dark}: 4 diamond squares at ${d.diamondCut.toFixed(4)}" (cut at the decimal size; do not round down), 1 centre square at ${f3(d.centre)}" and 4 outer bars at ${f3(d.barWidth)}" × ${f3(d.barLength)}". Fabric ${ring}: 4 inner bars at ${f3(d.barWidth)}" × ${f3(d.barLength)}" and 2 squares at ${f3(d.triangleStarter)}" cut once diagonally (4 triangles). Fabric ${bg}: 6 squares at ${f3(d.triangleStarter)}" cut once diagonally (12 triangles).`,
+      `Corner units: the diamond's finished side is ${d.diamondFinished.toFixed(4)}". Sew a Fabric ${bg} triangle to two opposite sides of a diamond square, press out, then add one Fabric ${bg} and one Fabric ${ring} triangle to the remaining sides. Trim to ${f3(d.unitUnfinished)}", keeping 1/4" beyond each diamond point. Make four; place each so its Fabric ${ring} triangle points to the block centre.`,
+      `Side units: sew a Fabric ${dark} bar to a Fabric ${ring} bar along the long edge; the unit measures ${f3(d.unitUnfinished)}" square. Make four, with the Fabric ${dark} bar on the outer edge of the block and the Fabric ${ring} bar against the centre.`,
+      `Assemble three rows: corner – side – corner; side – centre – side; corner – side – corner. Press rows in alternate directions so seams nest, pin at the diamond points and the ring seams, then join rows. The block measures ${f3(s.blockSize + SEAM)}" unfinished. Straight seams only — no Y-seams or templates.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing");
+      const vertical = (blocksAcross - 1) * blocksDown, horizontal = (blocksDown - 1) * blocksAcross;
+      const count = vertical + horizontal, intersections = (blocksAcross - 1) * (blocksDown - 1);
+      if (count > 0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize + SEAM, sashWidth + SEAM, s.fabricWidth);
+      if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${f3(sashWidth + SEAM)}" × ${f3(s.blockSize + SEAM)}" and ${intersections} intersection squares at ${f3(sashWidth + SEAM)}". Join blocks into rows with vertical strips, sew full-width sashing rows between block rows, then add the optional border last.`);
+    } else notes.push("Join Broken Wheel blocks edge to edge. Add the optional outer border last.");
   } else if (s.pattern === "dumbbell") {
     // 3×3 macro layout of 2×2 units; geese four-at-a-time, HSTs two-at-a-time.
     const d = dumbbellDimensions(s.blockSize), c = DUMBBELL_COUNTS, n = blockCount;
@@ -5323,6 +5355,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "duck-and-duckling" ||
     s.pattern === "kansas-star" ||
     s.pattern === "dumbbell" ||
+    s.pattern === "broken-wheel" ||
     s.pattern === "brick-work" ||
     s.pattern === "album-five-patch" ||
     s.pattern === "alaska" ||

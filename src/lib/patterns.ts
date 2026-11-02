@@ -148,6 +148,19 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "broken-wheel",
+    name: "Broken Wheel",
+    hasMath: true,
+    intro: "A 3×3 block of equal units: four square-in-a-square corners with dark diamonds, four two-bar side units and a solid dark centre. One ring triangle in each corner joins the inner side bars into a broken wheel around the centre. Straight seams only. Optional sashing and border.",
+    sections: [
+      { id: "background", label: "Corner triangles", defaultFabric: "A", hint: "The three outer triangles around each corner diamond (12 per block)." },
+      { id: "ring", label: "Wheel ring", defaultFabric: "B", hint: "The inner bar of each side unit and the corner triangle facing the centre." },
+      { id: "dark", label: "Diamonds, outer bars & centre", defaultFabric: "C", hint: "Four corner diamonds, the four outer side bars and the centre square." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "D", hint: "Optional; set to zero for edge-to-edge blocks." },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+  {
     id: "fools-square",
     name: "Fool's Square",
     hasMath: true,
@@ -2215,6 +2228,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
 export const PATTERN_META: Record<string, PatternMeta> = {
   "kansas-star": { skill: "confident", fabricCount: 3, techniques: ["squares", "onpoint"] },
   "bird-nest": { skill: "intermediate", fabricCount: 6, techniques: ["squares", "hst", "onpoint"] },
+  "broken-wheel": { skill: "confident", fabricCount: 3, techniques: ["squares", "onpoint", "strips"] },
   "dumbbell": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst", "geese", "onpoint"] },
   "fools-square": { skill: "confident", fabricCount: 4, techniques: ["squares", "hst"] },
   "walls-of-jericho": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst", "strips"] },
