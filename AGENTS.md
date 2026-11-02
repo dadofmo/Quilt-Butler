@@ -65,9 +65,11 @@ Subdirectories may have their own `AGENTS.md`; read it before changing files the
 ## Walls of Jericho
 - 7×7: 1×3 arms, 20 HSTs, outer pair one 1×2 rect. Why: fewest pieces.
 
-- Printed keys omit inactive sashing/cornerstones. Why: no unused purchases.
+- Print keys skip inactive sashing.
 
 ## Fool's Square / Dumbbell
 - 5×5 rows: 13 squares, 12 two-at-a-time HSTs. Why: straight seams.
-- Dumbbell 3×3: HST corners, stacked geese sides, diamond centre
+- Dumbbell 3×3: HST corners, geese sides, diamond centre
 
+
+- Broken Wheel 3×3: sq-in-sq corners, bar sides

@@ -11,6 +11,7 @@ export const PATTERN_DIFFICULTY: Record<PatternId, 1 | 2 | 3 | 4 | 5> = {
   "walls-of-jericho": 3,
   "fools-square": 4,
   dumbbell: 3,
+  "broken-wheel": 2,
   "duck-and-duckling": 3,
   "custom-block": 3,
   "simple-squares": 1,

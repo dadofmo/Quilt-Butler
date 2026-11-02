@@ -3144,6 +3144,15 @@ console.log("\n=== Dumbbell: 36×36, 12-inch block ===");
   for (const f of r.fabrics) console.log(f.fabric, f.pieces.map(p => `${p.label.split("||")[0]} ${p.count}@${p.w}`).join("; "));
 }
 
+console.log("\n=== Broken Wheel: 36×36, 12-inch block ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "broken-wheel", quiltWidth: 36, quiltHeight: 36, blockSize: 12, borderWidth: 0, sashingWidth: 0 });
+  const f = (k: string) => r.fabrics.find(x => x.fabric === k)!;
+  check("BW bg triangle squares", f("A").pieces[0].count, 54);
+  check("BW ring bars", f("B").pieces[0].count, 36);
+  check("BW centre squares", f("C").pieces[1].count, 9);
+}
+
 console.log("\n=== Fool's Square: 45×45, 15-inch block (3-inch units) ===");
 {
   const r = calculateYardage({ ...base(), pattern: "fools-square", quiltWidth: 45, quiltHeight: 45, blockSize: 15, borderWidth: 0, sashingWidth: 0 });

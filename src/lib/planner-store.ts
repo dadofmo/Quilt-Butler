@@ -29,6 +29,7 @@ export type PatternId =
   | "walls-of-jericho"
   | "fools-square"
   | "dumbbell"
+  | "broken-wheel"
   | "simple-squares"
   | "nine-patch"
   | "hst"
