@@ -67,9 +67,9 @@ Subdirectories may have their own `AGENTS.md`; read it before changing files the
 
 - Print keys skip inactive sashing.
 
-## Fool's Square / Dumbbell / Broken Wheel
+## Fool's Square / Dumbbell
 - 5×5 rows: 13 squares, 12 two-at-a-time HSTs. Why: straight seams.
 - Dumbbell 3×3: HST corners, stacked geese sides, diamond centre
 
 
-- Broken Wheel 3×3: sq-in-sq corners, two-bar sides, plain centre
+- Broken Wheel 3×3: sq-in-sq corners, bar sides
