@@ -69,5 +69,5 @@ Subdirectories may have their own `AGENTS.md`; read it before changing files the
 
 ## Fool's Square / Dumbbell
 - 5×5 rows: 13 squares, 12 two-at-a-time HSTs. Why: straight seams.
-- Dumbbell 3×3 macro; HST corners, stacked geese sides, diamond centre.
+- Dumbbell 3×3 macro: HST corners, stacked geese sides, diamond centre
 
