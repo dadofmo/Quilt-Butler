@@ -68,7 +68,6 @@ Subdirectories may have their own `AGENTS.md`; read it before changing files the
 - Printed keys omit inactive sashing/cornerstones. Why: avoid unused fabric purchases.
 
 ## Fool's Square
-- 5×5 rows: 13 plain squares, 12 two-at-a-time HSTs; shared cell map. Why: straight seams.
+- 5×5 rows: 13 squares, 12 two-at-a-time HSTs. Why: straight seams.
+- Dumbbell: 3×3 macro; HST corners, stacked geese sides, diamond centre.
 
-## Dumbbell
-- 3×3 macro of 2×2 units: corner square+3 HSTs, stacked four-at-a-time geese sides, square-in-a-square centre. Why: straight seams.
