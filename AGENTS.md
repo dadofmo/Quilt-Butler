@@ -71,3 +71,6 @@ Subdirectories may have their own `AGENTS.md`; read it before changing files the
 - 5×5 rows: 13 squares, 12 two-at-a-time HSTs. Why: straight seams.
 - Dumbbell 3×3: HST corners, stacked geese sides, diamond centre
 
+
+## Broken Wheel
+- 3×3 units: square-in-a-square corners (1 ring triangle facing centre), dark/ring two-bar sides, plain centre. Why: straight seams.
