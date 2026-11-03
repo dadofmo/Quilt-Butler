@@ -77,3 +77,16 @@ export const BROKEN_WHEEL_COUNTS = {
   ringBars: 4,
   centres: 1,
 } as const;
+
+/** Nearest 1/16" ruler mark for a decimal cut, with whether the exact size sits a hair over or under it. */
+export function rulerMark(inches: number): { label: string; mark: number; relation: "exactly" | "a hair over" | "a hair under" } {
+  const sixteenths = Math.round(inches * 16);
+  const mark = sixteenths / 16;
+  const whole = Math.floor(sixteenths / 16);
+  let num = sixteenths % 16, den = 16;
+  while (num > 0 && num % 2 === 0) { num /= 2; den /= 2; }
+  const label = num === 0 ? `${whole}"` : whole > 0 ? `${whole} ${num}/${den}"` : `${num}/${den}"`;
+  const diff = inches - mark;
+  const relation = Math.abs(diff) < 1e-4 ? "exactly" : diff > 0 ? "a hair over" : "a hair under";
+  return { label, mark, relation };
+}
