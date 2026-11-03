@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import { rulerMark, brokenWheelDimensions } from "../broken-wheel";
-import { calculateYardage } from "../yardage";
 
 describe("Broken Wheel ruler marks", () => {
   it("12in block diamond 3.3284 is a hair over 3 5/16", () => {
