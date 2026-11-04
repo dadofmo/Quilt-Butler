@@ -5,7 +5,7 @@ import { PrintBlockLegend } from "@/components/PrintBlockLegend";
 import { FABRIC_COLORS, FABRIC_LABELS, setPlanner, usePlanner, type FabricKey } from "@/lib/planner-store";
 import { fabricBackgroundStyle } from "@/lib/fabric-fill";
 import { getPattern, getEffectiveBorderDefault, patternHasSashingSection } from "@/lib/patterns";
-import { calculateYardage, computePrecutPlan, computeFatQuarterPlan, describePieceShape, piecesPerStrip, usableFabricWidth, JELLY_ROLL_USABLE_LENGTH, type FabricRequirement, type MaterialsRequirement, type PrecutPlan, type FatQuarterPlan } from "@/lib/yardage";
+import { calculateYardage, computePrecutPlan, computeFatQuarterPlan, describePieceShape, describePieceSet, piecesPerStrip, usableFabricWidth, JELLY_ROLL_USABLE_LENGTH, type FabricRequirement, type MaterialsRequirement, type PrecutPlan, type FatQuarterPlan } from "@/lib/yardage";
 import { Printer } from "lucide-react";
 import { ArtSquareTemplateDownload } from "@/components/ArtSquareTemplateDownload";
 import { AlbumFivePatchTemplateDownload } from "@/components/AlbumFivePatchTemplateDownload";
@@ -833,14 +833,10 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
   const subCutPieces = req.pieces.filter((p) => p.w !== fabricWidth);
   const totalSquares = subCutPieces.reduce((sum, p) => sum + p.count, 0);
   const firstSubCut = subCutPieces[0];
-  const shape = firstSubCut
-    ? describePieceShape(firstSubCut.w, firstSubCut.h)
-    : describePieceShape(0, 0);
-  // A fabric can mix squares and rectangles (e.g. Broken Wheel's diamonds and
-  // bars); then the summary must not call every piece a square/rectangle.
-  const mixedShapes = subCutPieces.some((p) => describePieceShape(p.w, p.h).isSquare !== shape.isSquare);
-  const pieceNoun = mixedShapes ? "piece" : shape.noun;
-  const pieceNounPlural = mixedShapes ? "pieces" : shape.nounPlural;
+  // Mixed squares + rectangles (e.g. Broken Wheel diamonds and bars) read as "pieces".
+  const shape = describePieceSet(subCutPieces);
+  const pieceNoun = shape.noun;
+  const pieceNounPlural = shape.nounPlural;
 
   return (
     <div className="bg-card rounded-xl border-2 border-border p-4">
