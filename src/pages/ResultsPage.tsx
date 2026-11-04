@@ -836,8 +836,11 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
   const shape = firstSubCut
     ? describePieceShape(firstSubCut.w, firstSubCut.h)
     : describePieceShape(0, 0);
-  const pieceNoun = shape.noun;
-  const pieceNounPlural = shape.nounPlural;
+  // A fabric can mix squares and rectangles (e.g. Broken Wheel's diamonds and
+  // bars); then the summary must not call every piece a square/rectangle.
+  const mixedShapes = subCutPieces.some((p) => describePieceShape(p.w, p.h).isSquare !== shape.isSquare);
+  const pieceNoun = mixedShapes ? "piece" : shape.noun;
+  const pieceNounPlural = mixedShapes ? "pieces" : shape.nounPlural;
 
   return (
     <div className="bg-card rounded-xl border-2 border-border p-4">
