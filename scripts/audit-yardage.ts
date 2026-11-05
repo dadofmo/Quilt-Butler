@@ -1199,28 +1199,28 @@ console.log("\n=== Churn Dash: 50×65, 12\" block, no border ===");
 {
   const s = { ...base(), pattern: "churn-dash" as const, blockSize: 12 };
   // 4×5=20 blocks. unit=4. centerCut=4.5, hstCut=4.875, barLong=4.5, barShort=2.5.
-  // Default assignments: center=A, corners=A, bars=A, bg=B.
-  // A: 20 center @4.5 sq + 40 HST @4.875 sq + 40 bar rect (4.5×2.5)
-  // B: 40 HST @4.875 sq + 40 bar rect (4.5×2.5)
+  // Default assignments (4 fabrics, per reference): corners=A, bg=B, bars=C, center=D.
   const r = calculateYardage(s);
-  const a = r.fabrics.find(f => f.fabric === "A")!;
-  const b = r.fabrics.find(f => f.fabric === "B")!;
-  // A buckets (in order): center, HST corners, bar rectangles → 3
-  check("CD A bucket count", a.pieces.length, 3);
-  check("CD A center count", a.pieces[0].count, 20);
-  check("CD A HST count", a.pieces[1].count, 40);
-  check("CD A bar count", a.pieces[2].count, 80);
-  check("CD B bucket count", b.pieces.length, 2);
-  check("CD B HST count", b.pieces[0].count, 40);
-  check("CD B bar count", b.pieces[1].count, 80);
+  const f = (k: string) => r.fabrics.find(x => x.fabric === k)!;
+  check("CD A bucket count", f("A").pieces.length, 1);
+  check("CD A HST count", f("A").pieces[0].count, 40);
+  check("CD A HST size", f("A").pieces[0].w, 4.875);
+  check("CD B bucket count", f("B").pieces.length, 2);
+  check("CD B HST count", f("B").pieces[0].count, 40);
+  check("CD B bar count", f("B").pieces[1].count, 80);
+  check("CD C bar count", f("C").pieces[0].count, 80);
+  check("CD C bar long", f("C").pieces[0].w, 4.5);
+  check("CD C bar short", f("C").pieces[0].h, 2.5);
+  check("CD D center count", f("D").pieces[0].count, 20);
+  check("CD D center size", f("D").pieces[0].w, 4.5);
 }
 
 console.log("\n=== Churn Dash: 50×65, 12\" block, no border, 2\" sashing ===");
 {
   const s = { ...base(), pattern: "churn-dash" as const, blockSize: 12, sashingWidth: 2 };
-  // Sashing C: vSash=15, hSash=16, total=31 strips at 2.5"×12.5".
+  // Sashing E: vSash=15, hSash=16, total=31 strips at 2.5"×12.5".
   const r = calculateYardage(s);
-  const c = r.fabrics.find(f => f.fabric === "C")!;
+  const c = r.fabrics.find(f => f.fabric === "E")!;
   check("CD(sash) C strip count", c.pieces[0].count, 31);
   check("CD(sash) C strip width", c.pieces[0].h, 2.5);
   check("CD(sash) C strip length", c.pieces[0].w, 12.5);

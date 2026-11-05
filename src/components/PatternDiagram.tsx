@@ -394,13 +394,13 @@ function renderInner(
       );
     }
     case "churn-dash": {
-      const center = get("center", "A");
+      const center = get("center", "D");
       const corners = get("corners", "A");
-      const bars = get("bars", "A");
+      const bars = get("bars", "C");
       const bg = get("bg", "B");
       const u = 200 / 3;
-      // Corner HSTs: diagonal from outer corner to inner corner, dark on outer.
-      // Side bars: rectangle split into dark+light halves with dark on outside.
+      // Corner HSTs: diagonal from outer corner to inner corner, feature triangle on the inner (centre) side, matching the reference.
+      // Side bars: rectangle split into background outer half + bar-fabric inner half.
       const cornerHst = (gx: number, gy: number, key: string) => {
         const x = gx * u;
         const y = gy * u;
@@ -418,11 +418,11 @@ function renderInner(
           <g key={key}>
             <polygon
               points={`${outerX},${outerY} ${edgeAX},${edgeAY} ${edgeBX},${edgeBY}`}
-              fill={corners}
+              fill={bg}
             />
             <polygon
               points={`${innerX},${innerY} ${edgeAX},${edgeAY} ${edgeBX},${edgeBY}`}
-              fill={bg}
+              fill={corners}
             />
           </g>
         );
@@ -433,18 +433,18 @@ function renderInner(
           {cornerHst(2, 0, "tr")}
           {cornerHst(0, 2, "bl")}
           {cornerHst(2, 2, "br")}
-          {/* Top bar (1,0): dark top half */}
-          <rect x={u} y={0} width={u} height={u / 2} fill={bars} />
-          <rect x={u} y={u / 2} width={u} height={u / 2} fill={bg} />
-          {/* Bottom bar (1,2): dark bottom half */}
-          <rect x={u} y={2 * u + u / 2} width={u} height={u / 2} fill={bars} />
-          <rect x={u} y={2 * u} width={u} height={u / 2} fill={bg} />
-          {/* Left bar (0,1): dark left half */}
-          <rect x={0} y={u} width={u / 2} height={u} fill={bars} />
-          <rect x={u / 2} y={u} width={u / 2} height={u} fill={bg} />
-          {/* Right bar (2,1): dark right half */}
-          <rect x={2 * u + u / 2} y={u} width={u / 2} height={u} fill={bars} />
-          <rect x={2 * u} y={u} width={u / 2} height={u} fill={bg} />
+          {/* Top bar (1,0): bar fabric on inner half */}
+          <rect x={u} y={0} width={u} height={u / 2} fill={bg} />
+          <rect x={u} y={u / 2} width={u} height={u / 2} fill={bars} />
+          {/* Bottom bar (1,2): bar fabric on inner half */}
+          <rect x={u} y={2 * u + u / 2} width={u} height={u / 2} fill={bg} />
+          <rect x={u} y={2 * u} width={u} height={u / 2} fill={bars} />
+          {/* Left bar (0,1): bar fabric on inner half */}
+          <rect x={0} y={u} width={u / 2} height={u} fill={bg} />
+          <rect x={u / 2} y={u} width={u / 2} height={u} fill={bars} />
+          {/* Right bar (2,1): bar fabric on inner half */}
+          <rect x={2 * u + u / 2} y={u} width={u / 2} height={u} fill={bg} />
+          <rect x={2 * u} y={u} width={u / 2} height={u} fill={bars} />
           {/* Center */}
           <rect x={u} y={u} width={u} height={u} fill={center} />
           {/* Subtle 3×3 grid lines */}

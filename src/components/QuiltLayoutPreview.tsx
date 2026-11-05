@@ -772,9 +772,9 @@ function MiniBlock({
       );
     }
     case "churn-dash": {
-      const center = get("center", "A");
+      const center = get("center", "D");
       const corners = get("corners", "A");
-      const bars = get("bars", "A");
+      const bars = get("bars", "C");
       const bg = get("bg", "B");
       const u = 200 / 3;
       const cornerHst = (gx: number, gy: number, key: string) => {
@@ -792,11 +792,11 @@ function MiniBlock({
           <g key={key}>
             <polygon
               points={`${outerX},${outerY} ${edgeAX},${edgeAY} ${edgeBX},${edgeBY}`}
-              fill={corners}
+              fill={bg}
             />
             <polygon
               points={`${innerX},${innerY} ${edgeAX},${edgeAY} ${edgeBX},${edgeBY}`}
-              fill={bg}
+              fill={corners}
             />
           </g>
         );
@@ -807,14 +807,14 @@ function MiniBlock({
           {cornerHst(2, 0, "tr")}
           {cornerHst(0, 2, "bl")}
           {cornerHst(2, 2, "br")}
-          <rect x={u} y={0} width={u} height={u / 2} fill={bars} />
-          <rect x={u} y={u / 2} width={u} height={u / 2} fill={bg} />
-          <rect x={u} y={2 * u + u / 2} width={u} height={u / 2} fill={bars} />
-          <rect x={u} y={2 * u} width={u} height={u / 2} fill={bg} />
-          <rect x={0} y={u} width={u / 2} height={u} fill={bars} />
-          <rect x={u / 2} y={u} width={u / 2} height={u} fill={bg} />
-          <rect x={2 * u + u / 2} y={u} width={u / 2} height={u} fill={bars} />
-          <rect x={2 * u} y={u} width={u / 2} height={u} fill={bg} />
+          <rect x={u} y={0} width={u} height={u / 2} fill={bg} />
+          <rect x={u} y={u / 2} width={u} height={u / 2} fill={bars} />
+          <rect x={u} y={2 * u + u / 2} width={u} height={u / 2} fill={bg} />
+          <rect x={u} y={2 * u} width={u} height={u / 2} fill={bars} />
+          <rect x={0} y={u} width={u / 2} height={u} fill={bg} />
+          <rect x={u / 2} y={u} width={u / 2} height={u} fill={bars} />
+          <rect x={2 * u + u / 2} y={u} width={u / 2} height={u} fill={bg} />
+          <rect x={2 * u} y={u} width={u / 2} height={u} fill={bars} />
           <rect x={u} y={u} width={u} height={u} fill={center} />
         </>
       );
