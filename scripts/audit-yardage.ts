@@ -1209,7 +1209,8 @@ console.log("\n=== Churn Dash: 50×65, 12\" block, no border ===");
   check("CD B HST count", f("B").pieces[0].count, 40);
   check("CD B bar count", f("B").pieces[1].count, 80);
   check("CD C bar count", f("C").pieces[0].count, 80);
-  check("CD C bar size", `${f("C").pieces[0].w}x${f("C").pieces[0].h}`, "4.5x2.5");
+  check("CD C bar long", f("C").pieces[0].w, 4.5);
+  check("CD C bar short", f("C").pieces[0].h, 2.5);
   check("CD D center count", f("D").pieces[0].count, 20);
   check("CD D center size", f("D").pieces[0].w, 4.5);
 }
