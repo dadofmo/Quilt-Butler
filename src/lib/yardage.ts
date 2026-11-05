@@ -1761,9 +1761,9 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const barCutLong = unitFinished + SEAM;
     const barCutShort = unitFinished / 2 + SEAM;
 
-    const centerFab = (s.assignments["center"] ?? "A") as FabricKey;
+    const centerFab = (s.assignments["center"] ?? "D") as FabricKey;
     const cornerFab = (s.assignments["corners"] ?? "A") as FabricKey;
-    const barFab = (s.assignments["bars"] ?? "A") as FabricKey;
+    const barFab = (s.assignments["bars"] ?? "C") as FabricKey;
     const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
 
     // Counts per block: center 1, HST starting squares 2 dark + 2 bg
@@ -1773,30 +1773,30 @@ export function calculateYardage(s: PlannerState): CalcResult {
     const barRectEach = 4 * blockCount;
 
     addSquares(reqs[centerFab], "Center squares", centerCount, centerCut, s.fabricWidth);
-    addSquares(reqs[cornerFab], "HST corner starting squares (dark)", hstSquaresEach, hstCut, s.fabricWidth);
+    addSquares(reqs[cornerFab], "HST corner starting squares (triangle fabric)", hstSquaresEach, hstCut, s.fabricWidth);
     addSquares(reqs[bgFab], "HST corner starting squares (background)", hstSquaresEach, hstCut, s.fabricWidth);
-    addRails(reqs[barFab], "Side bar rectangles (dark)", barRectEach, barCutLong, barCutShort, s.fabricWidth);
+    addRails(reqs[barFab], "Side bar rectangles (bar fabric)", barRectEach, barCutLong, barCutShort, s.fabricWidth);
     addRails(reqs[bgFab], "Side bar rectangles (background)", barRectEach, barCutLong, barCutShort, s.fabricWidth);
 
     notes.push(
-      `Each block uses 1 center square (${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}"), 4 HST corner units (starting squares ${hstCut.toFixed(2)}" × ${hstCut.toFixed(2)}"), and 4 side bar units — each made of 1 dark + 1 background rectangle cut ${barCutShort.toFixed(2)}" × ${barCutLong.toFixed(2)}".`,
+      `Each block uses 1 center square (${centerCut.toFixed(2)}" × ${centerCut.toFixed(2)}"), 4 HST corner units (starting squares ${hstCut.toFixed(2)}" × ${hstCut.toFixed(2)}"), and 4 side bar units — each made of 1 bar-fabric + 1 background rectangle cut ${barCutShort.toFixed(2)}" × ${barCutLong.toFixed(2)}".`,
     );
     notes.push(
-      `Across all ${blockCount} blocks: ${centerCount} center squares of Fabric ${centerFab}; ${hstSquaresEach} starting squares each of Fabric ${cornerFab} (corners) and Fabric ${bgFab} (background) for the HSTs (each pair yields 2 HST units → 4 corners per block); ${barRectEach} dark side-bar rectangles of Fabric ${barFab} and ${barRectEach} background rectangles of Fabric ${bgFab}.`,
+      `Across all ${blockCount} blocks: ${centerCount} center squares of Fabric ${centerFab}; ${hstSquaresEach} starting squares each of Fabric ${cornerFab} (corners) and Fabric ${bgFab} (background) for the HSTs (each pair yields 2 HST units → 4 corners per block); ${barRectEach} side-bar rectangles of Fabric ${barFab} and ${barRectEach} background rectangles of Fabric ${bgFab}.`,
     );
     notes.push(
-      `To make the HST corners: pair one Fabric ${cornerFab} square with one Fabric ${bgFab} square right sides together (RST). On the back of the top square, draw a diagonal from corner to corner. Sew a 1/4" seam down each side of the line, then cut on the line. Each pair yields 2 HST units. Press toward the darker fabric and trim each unit to ${(unitFinished + SEAM).toFixed(2)}" square.`,
+      `To make the HST corners: pair one Fabric ${cornerFab} square with one Fabric ${bgFab} square right sides together (RST). On the back of the top square, draw a diagonal from corner to corner. Sew a 1/4" seam down each side of the line, then cut on the line. Each pair yields 2 HST units. Press toward Fabric ${cornerFab} and trim each unit to ${(unitFinished + SEAM).toFixed(2)}" square.`,
     );
     notes.push(
-      `To make the side bars: pair one dark and one background rectangle right sides together along their long edge. Sew a 1/4" seam, unfold, and press toward the darker fabric. Each finished bar should measure ${(unitFinished + SEAM).toFixed(2)}" square (unfinished). Rotate the bars so the dark half always sits on the OUTSIDE of the block — that's what creates the spinning churn-dash handle effect.`,
+      `To make the side bars: pair one Fabric ${barFab} and one Fabric ${bgFab} rectangle right sides together along their long edge. Sew a 1/4" seam, unfold, and press toward Fabric ${barFab}. Each finished bar should measure ${(unitFinished + SEAM).toFixed(2)}" square (unfinished). Turn each bar so the Fabric ${barFab} half sits on the INSIDE, against the center square, and the Fabric ${bgFab} half is on the outer edge of the block.`,
     );
     notes.push(
-      `Block assembly: lay out the 9 units in a 3×3 grid — corner HST, top bar, corner HST across the top row; left bar, center square, right bar in the middle; corner HST, bottom bar, corner HST on the bottom. Make sure all dark pieces face the OUTSIDE of the block. Sew each row, then sew the rows together. Press seams in opposite directions on alternating rows so they nest at intersections.`,
+      `Block assembly: lay out the 9 units in a 3×3 grid — corner HST, top bar, corner HST across the top row; left bar, center square, right bar in the middle; corner HST, bottom bar, corner HST on the bottom. Turn each corner so its Fabric ${cornerFab} triangle is on the inner side (right angle pointing toward the center, background at the outer block corner), and each bar so its Fabric ${barFab} half touches the Fabric ${centerFab} center square. Sew each row, then sew the rows together. Press seams in opposite directions on alternating rows so they nest at intersections.`,
     );
 
     // Optional sashing between blocks (Churn Dash).
     if (sashWidth > 0) {
-      const sashFab = (s.assignments["sashing"] ?? "C") as FabricKey;
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
       const sashCutW = sashWidth + SEAM;
       const sashCutL = s.blockSize + SEAM;
       const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
