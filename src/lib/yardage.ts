@@ -1,3 +1,4 @@
+import { churnDimensions } from "./churn-dash";
 import { ALL_FABRIC_KEYS, type FabricKey, type PlannerState } from "./planner-store";
 import { getPattern, getEffectiveBorderDefault } from "./patterns";
 import { layoutAssemblyNote } from "./block-layouts";
@@ -262,7 +263,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const innerH = s.quiltHeight - 2 * s.borderWidth;
   // Attic Window fits optional between-block sashing inside the requested top,
   // matching the shared Size, Fabrics, and Results page grid calculation.
-  const windowSash = (isJericho || isContraryWife || isDuckAndDuckling || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
+  const windowSash = (isChurnDash || isJericho || isContraryWife || isDuckAndDuckling || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
   const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (s.blockSize + windowSash)));
   const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (s.blockSize + windowSash)));
   const blockCount = blocksAcross * blocksDown;
@@ -1155,7 +1156,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
     // Optional sashing between blocks (Rail Fence).
     if (sashWidth > 0) {
-      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
+      const sashFab = fabric("sashing");
       const sashCutW = sashWidth + SEAM;
       const sashCutL = s.blockSize + SEAM;
       const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
@@ -1740,31 +1741,17 @@ export function calculateYardage(s: PlannerState): CalcResult {
       );
     }
   } else if (s.pattern === "churn-dash") {
-    // Churn Dash construction:
-    //   3×3 grid. unitFinished = blockSize / 3.
-    //   - Center square: 1 per block, cut (unit + 0.5)" square.
-    //   - 4 corner HST units: 4 starting squares of dark + 4 of bg per block,
-    //     cut (unit + 0.875)" — each square pair yields 2 HSTs, so we need
-    //     4 pairs per block to make 4 corner units (which actually yields 8
-    //     HSTs — half are spares, OR pair efficiently across blocks). To
-    //     match the spec literally we cut 4 dark + 4 bg starting squares per
-    //     block (one pair per HST → 2 HSTs, only 1 used → wasteful but the
-    //     spec calls for it). We use the standard efficient approach: 2
-    //     dark + 2 bg starting squares per block (each pair yields 2 HSTs,
-    //     so 2 pairs = 4 HSTs = the 4 corners).
-    //   - 4 side bar units per block. Each bar = 1 dark rectangle + 1 bg
-    //     rectangle, finished (unit/2) × unit. Cut = (unit/2 + 0.5)" tall ×
-    //     (unit + 0.5)" long. Per block: 4 dark + 4 bg bar rectangles.
-    const unitFinished = s.blockSize / 3;
-    const centerCut = unitFinished + SEAM;
-    const hstCut = unitFinished + HST_EXTRA;
-    const barCutLong = unitFinished + SEAM;
-    const barCutShort = unitFinished / 2 + SEAM;
-
-    const centerFab = (s.assignments["center"] ?? "D") as FabricKey;
-    const cornerFab = (s.assignments["corners"] ?? "A") as FabricKey;
-    const barFab = (s.assignments["bars"] ?? "C") as FabricKey;
-    const bgFab = (s.assignments["bg"] ?? "B") as FabricKey;
+    // Two HST pairs yield four corners; each side uses two continuous bars.
+    const { unit: unitFinished, square: centerCut, hst: hstCut, barLength: barCutLong, barWidth: barCutShort } = churnDimensions(s.blockSize);
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(sec => sec.id === id);
+      if (!section) throw new Error(`Missing Churn Dash section ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const centerFab = fabric("center");
+    const cornerFab = fabric("corners");
+    const barFab = fabric("bars");
+    const bgFab = fabric("bg");
 
     // Counts per block: center 1, HST starting squares 2 dark + 2 bg
     // (each pair → 2 HSTs, 2 pairs → 4 corners), bar rectangles 4 dark + 4 bg.
@@ -1791,8 +1778,9 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `To make the side bars: pair one Fabric ${barFab} and one Fabric ${bgFab} rectangle right sides together along their long edge. Sew a 1/4" seam, unfold, and press toward Fabric ${barFab}. Each finished bar should measure ${(unitFinished + SEAM).toFixed(2)}" square (unfinished). Turn each bar so the Fabric ${barFab} half sits on the INSIDE, against the center square, and the Fabric ${bgFab} half is on the outer edge of the block.`,
     );
     notes.push(
-      `Block assembly: lay out the 9 units in a 3×3 grid — corner HST, top bar, corner HST across the top row; left bar, center square, right bar in the middle; corner HST, bottom bar, corner HST on the bottom. Turn each corner so its Fabric ${cornerFab} triangle is on the inner side (right angle pointing toward the center, background at the outer block corner), and each bar so its Fabric ${barFab} half touches the Fabric ${centerFab} center square. Sew each row, then sew the rows together. Press seams in opposite directions on alternating rows so they nest at intersections.`,
+      `Block assembly: lay out the 9 units in a 3×3 grid — corner HST, top bar, corner HST across the top row; left bar, center square, right bar in the middle; corner HST, bottom bar, corner HST on the bottom. Turn each corner so its Fabric ${cornerFab} triangle is on the inner side (right angle pointing toward the center, background at the outer block corner), and each bar so its Fabric ${barFab} half touches the Fabric ${centerFab} center square. Sew each row, then sew the rows together. Press the top and bottom row seams toward the side units and the middle row seams away from the center so they nest; pin the intersections and press the row-joining seams open. Check the block measures ${(s.blockSize + SEAM).toFixed(4)}" unfinished.`,
     );
+    notes.push(`For fractional block sizes, cut from the exact formulas: unit = block size / 3; center and HST trim = unit + 1/2; HST starter = unit + 7/8; bar width = unit / 2 + 1/2 and length = unit + 1/2. Decimal labels in cutting pictures are rounded for display, not alternative cutting targets. Make and measure one test block first; do not ease a mismatched bar unit or stretch the HST bias edges.`);
 
     // Optional sashing between blocks (Churn Dash).
     if (sashWidth > 0) {
@@ -1805,6 +1793,11 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (totalSash > 0) {
         addRails(reqs[sashFab], "Sashing strips between blocks", totalSash, sashCutL, sashCutW, s.fabricWidth);
       }
+      const intersections = Math.max(0, blocksAcross - 1) * Math.max(0, blocksDown - 1);
+      if (intersections > 0) addSquares(reqs[sashFab], "Sashing intersection squares", intersections, sashCutW, s.fabricWidth);
+      notes.push(
+        `Sashing intersections: cut ${intersections} squares of Fabric ${sashFab} at ${sashCutW.toFixed(2)}". Join each horizontal row of ${blocksAcross} sashing segments with ${Math.max(0, blocksAcross - 1)} of these same-fabric squares. This fills the gaps between the vertical strips without adding a contrasting cornerstone.`,
+      );
       notes.push(
         `Sashing between blocks: cut ${totalSash} strips at ${sashCutW.toFixed(2)}" × ${sashCutL.toFixed(2)}" (Fabric ${sashFab}) — ${vSash} vertical (${Math.max(0, blocksAcross - 1)} × ${blocksDown}) and ${hSash} horizontal (${Math.max(0, blocksDown - 1)} × ${blocksAcross}). Strips run only between blocks — not around the outer edge.`,
       );

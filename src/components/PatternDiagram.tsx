@@ -1,3 +1,4 @@
+import { ChurnDashBlock } from "./ChurnDashBlock";
 import type { ReactElement } from "react";
 import { BirdNestBlock } from "./BirdNestBlock";
 import { KansasStarBlock } from "./KansasStarBlock";
@@ -393,65 +394,8 @@ function renderInner(
         </>
       );
     }
-    case "churn-dash": {
-      const center = get("center", "D");
-      const corners = get("corners", "A");
-      const bars = get("bars", "C");
-      const bg = get("bg", "B");
-      const u = 200 / 3;
-      // Corner HSTs: diagonal from outer corner to inner corner, feature triangle on the inner (centre) side, matching the reference.
-      // Side bars: rectangle split into background outer half + bar-fabric inner half.
-      const cornerHst = (gx: number, gy: number, key: string) => {
-        const x = gx * u;
-        const y = gy * u;
-        // Outer corner of this cell (away from block center)
-        const outerX = gx === 0 ? x : x + u;
-        const outerY = gy === 0 ? y : y + u;
-        const innerX = gx === 0 ? x + u : x;
-        const innerY = gy === 0 ? y + u : y;
-        // Two adjacent edge corners along the diagonal axis
-        const edgeAX = outerX;
-        const edgeAY = innerY;
-        const edgeBX = innerX;
-        const edgeBY = outerY;
-        return (
-          <g key={key}>
-            <polygon
-              points={`${outerX},${outerY} ${edgeAX},${edgeAY} ${edgeBX},${edgeBY}`}
-              fill={bg}
-            />
-            <polygon
-              points={`${innerX},${innerY} ${edgeAX},${edgeAY} ${edgeBX},${edgeBY}`}
-              fill={corners}
-            />
-          </g>
-        );
-      };
-      return (
-        <>
-          {cornerHst(0, 0, "tl")}
-          {cornerHst(2, 0, "tr")}
-          {cornerHst(0, 2, "bl")}
-          {cornerHst(2, 2, "br")}
-          {/* Top bar (1,0): bar fabric on inner half */}
-          <rect x={u} y={0} width={u} height={u / 2} fill={bg} />
-          <rect x={u} y={u / 2} width={u} height={u / 2} fill={bars} />
-          {/* Bottom bar (1,2): bar fabric on inner half */}
-          <rect x={u} y={2 * u + u / 2} width={u} height={u / 2} fill={bg} />
-          <rect x={u} y={2 * u} width={u} height={u / 2} fill={bars} />
-          {/* Left bar (0,1): bar fabric on inner half */}
-          <rect x={0} y={u} width={u / 2} height={u} fill={bg} />
-          <rect x={u / 2} y={u} width={u / 2} height={u} fill={bars} />
-          {/* Right bar (2,1): bar fabric on inner half */}
-          <rect x={2 * u + u / 2} y={u} width={u / 2} height={u} fill={bg} />
-          <rect x={2 * u} y={u} width={u / 2} height={u} fill={bars} />
-          {/* Center */}
-          <rect x={u} y={u} width={u} height={u} fill={center} />
-          {/* Subtle 3×3 grid lines */}
-          
-        </>
-      );
-    }
+    case "churn-dash":
+      return <ChurnDashBlock size={200} assignments={a} photos={photos} />;
     case "bear-paw": {
       const pad = get("pad", "A");
       const claw = get("claws", "B");
