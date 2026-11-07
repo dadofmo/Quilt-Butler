@@ -51,7 +51,7 @@ export function PrintBlockLegend({
       <div className="shrink-0">
         <PatternDiagram
           pattern={pattern}
-          assignments={assignments}
+          assignments={{ ...assignments, border: borderFabric }}
           hasBorder={hasBorder}
           size={140}
           photos={photos}
