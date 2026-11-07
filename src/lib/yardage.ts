@@ -1156,7 +1156,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
     // Optional sashing between blocks (Rail Fence).
     if (sashWidth > 0) {
-      const sashFab = fabric("sashing");
+      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
       const sashCutW = sashWidth + SEAM;
       const sashCutL = s.blockSize + SEAM;
       const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
@@ -1784,7 +1784,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
 
     // Optional sashing between blocks (Churn Dash).
     if (sashWidth > 0) {
-      const sashFab = (s.assignments["sashing"] ?? "E") as FabricKey;
+      const sashFab = fabric("sashing");
       const sashCutW = sashWidth + SEAM;
       const sashCutL = s.blockSize + SEAM;
       const vSash = Math.max(0, blocksAcross - 1) * blocksDown;
