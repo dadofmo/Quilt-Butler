@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Verify and correct four-fabric Churn Dash against the uploaded reference, including fit, finishing cuts, sewing, all previews and printed results.
 - [x] Complete Walls of Jericho’s app verification as pattern 71, correct inactive finishing entries in print, and check the live cutting/sewing flow; all 1,442 tests and math audit passed.
 - [x] Add Kansas Star with intrinsic two-colorway checkerboard, standard palette, actual cuts and sewing instructions.
 - [x] Verify Kansas Star counts, sizing, optional finishing, photo fills, printed guides and live planner; 1,414 tests and math audit passed.
