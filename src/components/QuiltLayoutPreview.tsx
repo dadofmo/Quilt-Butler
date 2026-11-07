@@ -773,7 +773,7 @@ function MiniBlock({
       );
     }
     case "churn-dash":
-      return <ChurnDashBlock size={200} assignments={a} photos={photos} />;
+      return <ChurnDashBlock size={200} assignments={assignments} photos={photos} />;
     case "pinwheel": {
       const bladeFab = get("blades", "A");
       const bgFab = get("bg", "B");
