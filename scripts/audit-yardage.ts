@@ -1218,10 +1218,11 @@ console.log("\n=== Churn Dash: 50×65, 12\" block, no border ===");
 console.log("\n=== Churn Dash: 50×65, 12\" block, no border, 2\" sashing ===");
 {
   const s = { ...base(), pattern: "churn-dash" as const, blockSize: 12, sashingWidth: 2 };
-  // Sashing E: vSash=15, hSash=16, total=31 strips at 2.5"×12.5".
+  // 3×4 blocks fit: 17 segments and 6 same-fabric intersection squares.
   const r = calculateYardage(s);
   const c = r.fabrics.find(f => f.fabric === "E")!;
-  check("CD(sash) C strip count", c.pieces[0].count, 31);
+  check("CD(sash) E strip count", c.pieces[0].count, 17);
+  check("CD(sash) E intersections", c.pieces[1].count, 6);
   check("CD(sash) C strip width", c.pieces[0].h, 2.5);
   check("CD(sash) C strip length", c.pieces[0].w, 12.5);
 }

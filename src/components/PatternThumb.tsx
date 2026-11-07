@@ -1,3 +1,4 @@
+import { ChurnDashBlock } from "./ChurnDashBlock";
 import type { PatternId } from "@/lib/planner-store";
 import { BirdNestBlock } from "./BirdNestBlock";
 import { KansasStarBlock } from "./KansasStarBlock";
@@ -370,32 +371,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
         </svg>
       );
     }
-    case "churn-dash": {
-      // 3×3 grid, unit=30, matching the reference: background at the outer
-      // corners/edges, feature triangles (A) and bars (C) on the inner side,
-      // centre square (D), background (B).
-      return (
-        <svg {...common}>
-          <polygon points="0,0 30,0 0,30" fill={C.b} />
-          <polygon points="30,0 30,30 0,30" fill={C.a} />
-          <polygon points="60,0 90,0 90,30" fill={C.b} />
-          <polygon points="60,0 90,30 60,30" fill={C.a} />
-          <polygon points="0,60 30,90 0,90" fill={C.b} />
-          <polygon points="0,60 30,60 30,90" fill={C.a} />
-          <polygon points="90,60 90,90 60,90" fill={C.b} />
-          <polygon points="60,60 90,60 60,90" fill={C.a} />
-          <rect x={30} y={0} width={30} height={15} fill={C.b} />
-          <rect x={30} y={15} width={30} height={15} fill={C.c} />
-          <rect x={30} y={75} width={30} height={15} fill={C.b} />
-          <rect x={30} y={60} width={30} height={15} fill={C.c} />
-          <rect x={0} y={30} width={15} height={30} fill={C.b} />
-          <rect x={15} y={30} width={15} height={30} fill={C.c} />
-          <rect x={75} y={30} width={15} height={30} fill={C.b} />
-          <rect x={60} y={30} width={15} height={30} fill={C.c} />
-          <rect x={30} y={30} width={30} height={30} fill={C.d} />
-        </svg>
-      );
-    }
+    case "churn-dash":
+      return <svg {...common}><ChurnDashBlock size={90} assignments={thumbnailAssignments("churn-dash")} /></svg>;
     case "bear-paw":
       return (
         <svg {...common}>
