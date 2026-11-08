@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Add Wedding Rings from the 5×5 reference; verify geometry, three fabrics, cuts, sewing, finishing, tests, math and live fabrics/results/print.
 - [x] Verify four-fabric Churn Dash reference geometry, cutting/sewing, yardage, sashing intersections, border, independent reassignment and live 10/12/18-inch fabrics/results/print; fix printed-border resolution; all 1,522 tests, math audit and preview build passed; not republished.
 - [x] Complete Walls of Jericho’s app verification as pattern 71, correct inactive finishing entries in print, and check the live cutting/sewing flow; all 1,442 tests and math audit passed.
 - [x] Add Kansas Star with intrinsic two-colorway checkerboard, standard palette, actual cuts and sewing instructions.
