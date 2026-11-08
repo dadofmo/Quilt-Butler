@@ -64,6 +64,19 @@ const borderSection: PatternSection = {
 
 const BASE_PATTERNS: PatternDefBase[] = [
   {
+    id: "wedding-rings",
+    name: "Wedding Rings",
+    hasMath: true,
+    intro: "A straight-seam 5×5 block with nine whole squares and sixteen half-square triangles forming a linked ring design. Three fabrics distinguish the ring, cross-shaped field and corner accents. Sew five rows of five; no curves, Y-seams or templates. Optional sashing and border.",
+    sections: [
+      { id: "ring", label: "Ring & centre", defaultFabric: "B", hint: "Five whole squares and one half of every triangle square." },
+      { id: "field", label: "Cross & outer triangle halves", defaultFabric: "A", hint: "Four squares beside the centre and eight triangle halves." },
+      { id: "accent", label: "Corner accent triangles", defaultFabric: "C", hint: "Eight triangle halves: four at the block corners and four at the inner diagonal corners." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "D", hint: "Optional; set to zero for edge-to-edge blocks." },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+  {
     id: "kansas-star",
     name: "Kansas Star",
     hasMath: true,
@@ -2226,6 +2239,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
  * equal the distinct default fabrics across both blocks, excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
+  "wedding-rings": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst"] },
   "kansas-star": { skill: "confident", fabricCount: 3, techniques: ["squares", "onpoint"] },
   "bird-nest": { skill: "intermediate", fabricCount: 6, techniques: ["squares", "hst", "onpoint"] },
   "broken-wheel": { skill: "confident", fabricCount: 3, techniques: ["squares", "onpoint", "strips"] },

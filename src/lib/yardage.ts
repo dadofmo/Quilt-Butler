@@ -22,6 +22,7 @@ import { studioPair } from "./studio-pairs";
 import { CONTRARY_WIFE_CELLS } from "./contrary-wife";
 import { jerichoCounts } from "./walls-of-jericho";
 import { foolsCounts } from "./fools-square";
+import { WEDDING_ROWS, weddingCounts } from "./wedding-rings";
 import { DUMBBELL_COUNTS, dumbbellDimensions } from "./dumbbell";
 import { BROKEN_WHEEL_COUNTS, brokenWheelDimensions, rulerMark } from "./broken-wheel";
 import { BIRD_NEST_DIAMONDS, birdNestDimensions } from "./bird-nest";
@@ -244,7 +245,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "walls-of-jericho" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
+  const isJericho = s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -691,6 +692,41 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
       notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${f3(sashWidth + SEAM)}" × ${f3(s.blockSize + SEAM)}" and ${intersections} intersection squares at ${f3(sashWidth + SEAM)}". Join blocks into rows with vertical strips, sew full-width sashing rows between block rows, then add the optional border last.`);
     } else notes.push("Join Dumbbell blocks edge to edge. Add the optional outer border last.");
+  } else if (s.pattern === "wedding-rings") {
+    const unit = s.blockSize / 5, square = unit + SEAM;
+    // Round starters UP to an eighth, never the final unit's trim target.
+    const starter = Math.ceil((unit + HST_EXTRA) * 8 - 1e-9) / 8;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Wedding Rings section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const ring = fabric("ring"), field = fabric("field"), accent = fabric("accent");
+    const c = weddingCounts();
+    const squares = new Map<FabricKey, number>(), starters = new Map<FabricKey, number>();
+    for (const [f, count] of [[ring, c.ringSquares], [field, c.fieldSquares]] as const)
+      squares.set(f, (squares.get(f) ?? 0) + count * blockCount);
+    for (const [f, count] of [[ring, (c.fieldHst + c.accentHst) / 2], [field, c.fieldHst / 2], [accent, c.accentHst / 2]] as const)
+      starters.set(f, (starters.get(f) ?? 0) + count * blockCount);
+    for (const [f, count] of squares) addSquares(reqs[f], "Plain squares", count, square, s.fabricWidth);
+    for (const [f, count] of starters) addSquares(reqs[f], "HST starting squares||pair, sew both sides of diagonal, cut and trim; two units per pair", count, starter, s.fabricWidth);
+    const mark = rulerMark(square);
+    const cut = `${square.toFixed(4)}" (${mark.relation} ${mark.label} ruler mark)`;
+    notes.push(
+      `Wedding Rings: each ${s.blockSize}" block is a 5 × 5 grid of ${unit.toFixed(4)}" finished units: 5 Fabric ${ring} squares, 4 Fabric ${field} squares, 8 Fabric ${ring}/${field} HSTs and 8 Fabric ${ring}/${accent} HSTs. This reference is straight-seam piecing, not curved double-wedding-ring construction.`,
+      `Cutting per block: 5 Fabric ${ring} and 4 Fabric ${field} plain squares at ${cut}. HST starting squares: 8 Fabric ${ring}, 4 Fabric ${field}, 4 Fabric ${accent}, all at ${starter.toFixed(3)}". Starters are rounded up to the next 1/8" for trimming; plain squares and final trim targets retain the exact size. The ruler mark is approximate if the exact cut falls between marks; do not round individual units and expect the same finished block size.`,
+      `Make HSTs two at a time: pair 4 Fabric ${ring} starters with 4 Fabric ${field} starters, and 4 Fabric ${ring} starters with 4 Fabric ${accent} starters. Place each pair right sides together, draw one diagonal, sew an accurate 1/4" on both sides, cut on the line and gently press open without stretching the bias. Trim each of the 16 HSTs to ${cut}, with the diagonal seam corner to corner.`,
+      ...WEDDING_ROWS.map((row, i) => `Row ${i + 1}, left to right: ${row.map(cell => cell.kind === "square" ? `Fabric ${fabric(cell.role)} square` : `Fabric ${ring}/${fabric(cell.partner)} HST (Fabric ${ring} at ${cell.ringCorner})`).join("; ")}.`),
+      `Check all triangle orientations against the block diagram before joining. Sew five units into each row with accurate 1/4" seams. Each row measures ${(s.blockSize + SEAM).toFixed(4)}" × ${square.toFixed(4)}" unfinished. Press row seams open to reduce bulk at HST joins, pin matching intersections and join the five rows. Press gently; the block measures ${(s.blockSize + SEAM).toFixed(4)}" unfinished, ${s.blockSize}" finished. No curved seams, Y-seams or templates.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing");
+      const vertical = (blocksAcross - 1) * blocksDown, horizontal = (blocksDown - 1) * blocksAcross;
+      const count = vertical + horizontal, intersections = (blocksAcross - 1) * (blocksDown - 1);
+      if (count > 0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize + SEAM, sashWidth + SEAM, s.fabricWidth);
+      if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${(s.blockSize + SEAM).toFixed(3)}" (${vertical} vertical, ${horizontal} horizontal) and ${intersections} same-fabric intersection squares at ${(sashWidth + SEAM).toFixed(3)}". Join block rows with vertical strips; assemble full-width sashing rows with intersection squares between their horizontal strips. Join rows, then add the optional border last.`);
+    } else notes.push("Join Wedding Rings blocks edge to edge, all facing the same way. Add the optional outer border last.");
   } else if (s.pattern === "fools-square") {
     // 5×5 grid sewn in five rows: 13 plain squares and 12 HSTs made two at a time.
     const unit = s.blockSize / 5;

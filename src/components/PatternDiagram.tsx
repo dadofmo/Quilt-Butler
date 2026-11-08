@@ -1,4 +1,5 @@
 import { ChurnDashBlock } from "./ChurnDashBlock";
+import { WeddingRingsBlock } from "./WeddingRingsBlock";
 import type { ReactElement } from "react";
 import { BirdNestBlock } from "./BirdNestBlock";
 import { KansasStarBlock } from "./KansasStarBlock";
@@ -94,6 +95,8 @@ function renderInner(
 ) {
   const get = (k: string, fb: FabricKey) => fillFor(pattern, a, k, fb, photos);
   switch (pattern) {
+    case "wedding-rings":
+      return <WeddingRingsBlock size={200} assignments={a} photos={photos} />;
     case "duck-and-duckling":
       return <DuckAndDucklingBlock size={200} assignments={a} photos={photos} />;
     case "bird-nest":

@@ -1,4 +1,5 @@
 import { ChurnDashBlock } from "./ChurnDashBlock";
+import { WeddingRingsBlock } from "./WeddingRingsBlock";
 import { useEffect, useState } from "react";
 import { BirdNestBlock } from "./BirdNestBlock";
 import { KansasStarBlock } from "./KansasStarBlock";
@@ -1473,6 +1474,8 @@ function MiniBlock({
       return <ContraryWifeBlock size={200} assignments={assignments} photos={photos} />;
     case "fools-square":
       return <FoolsSquareBlock size={200} assignments={assignments} photos={photos} />;
+    case "wedding-rings":
+      return <WeddingRingsBlock size={200} assignments={assignments} photos={photos} />;
     case "broken-wheel":
       return <BrokenWheelBlock size={200} assignments={assignments} photos={photos} />;
     case "dumbbell":
