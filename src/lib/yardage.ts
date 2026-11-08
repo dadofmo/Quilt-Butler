@@ -710,7 +710,8 @@ export function calculateYardage(s: PlannerState): CalcResult {
       starters.set(f, (starters.get(f) ?? 0) + count * blockCount);
     for (const [f, count] of squares) addSquares(reqs[f], "Plain squares", count, square, s.fabricWidth);
     for (const [f, count] of starters) addSquares(reqs[f], "HST starting squares||pair, sew both sides of diagonal, cut and trim; two units per pair", count, starter, s.fabricWidth);
-    const cut = `${square.toFixed(4)}" (${rulerMark(square)})`;
+    const mark = rulerMark(square);
+    const cut = `${square.toFixed(4)}" (${mark.relation} ${mark.label} ruler mark)`;
     notes.push(
       `Wedding Rings: each ${s.blockSize}" block is a 5 × 5 grid of ${unit.toFixed(4)}" finished units: 5 Fabric ${ring} squares, 4 Fabric ${field} squares, 8 Fabric ${ring}/${field} HSTs and 8 Fabric ${ring}/${accent} HSTs. This reference is straight-seam piecing, not curved double-wedding-ring construction.`,
       `Cutting per block: 5 Fabric ${ring} and 4 Fabric ${field} plain squares at ${cut}. HST starting squares: 8 Fabric ${ring}, 4 Fabric ${field}, 4 Fabric ${accent}, all at ${starter.toFixed(3)}". Starters are rounded up to the next 1/8" for trimming; plain squares and final trim targets retain the exact size. The ruler mark is approximate if the exact cut falls between marks; do not round individual units and expect the same finished block size.`,

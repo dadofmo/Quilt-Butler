@@ -3165,3 +3165,16 @@ console.log("\n=== Fool's Square: 45×45, 15-inch block (3-inch units) ===");
   check("FS accent starters", f("D").pieces[1].count, 18);
   check("FS cross inches", f("C").totalInches, 3 * 3.5);
 }
+
+console.log("\n=== Wedding Rings: 45×45, 15-inch blocks ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "wedding-rings", quiltWidth: 45, quiltHeight: 45, blockSize: 15, borderWidth: 0, sashingWidth: 0 });
+  const a = r.fabrics.find(f => f.fabric === "A"), b = r.fabrics.find(f => f.fabric === "B"), c = r.fabrics.find(f => f.fabric === "C");
+  check("WR field squares", a?.pieces[0].count ?? -1, 36);
+  check("WR ring squares", b?.pieces[0].count ?? -1, 45);
+  check("WR ring HST starters", b?.pieces[1].count ?? -1, 72);
+  check("WR accent HST starters", c?.pieces[0].count ?? -1, 36);
+  check("WR field inches", a?.totalInches ?? -1, 26);
+  check("WR ring inches", b?.totalInches ?? -1, 45);
+  check("WR accent inches", c?.totalInches ?? -1, 15.5);
+}

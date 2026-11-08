@@ -40,7 +40,7 @@ describe("Wedding Rings reference and construction", () => {
   });
   it("registers three block fabrics and preserves Nine Patch first", () => {
     const p = getPattern("wedding-rings");
-    expect(countBlockFabrics(p)).toBe(3);
+    expect(countBlockFabrics(p?.sections ?? [])).toBe(3);
     expect(p?.sections.slice(0,3).map(s=>s.defaultFabric)).toEqual(["B","A","C"]);
     expect(PATTERNS[0].id).toBe("nine-patch");
     expect(PATTERNS).toHaveLength(75);
