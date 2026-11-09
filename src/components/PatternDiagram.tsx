@@ -1,5 +1,6 @@
 import { ChurnDashBlock } from "./ChurnDashBlock";
 import { WeddingRingsBlock } from "./WeddingRingsBlock";
+import { EightHandsAroundBlock } from "./EightHandsAroundBlock";
 import type { ReactElement } from "react";
 import { BirdNestBlock } from "./BirdNestBlock";
 import { KansasStarBlock } from "./KansasStarBlock";
@@ -95,6 +96,8 @@ function renderInner(
 ) {
   const get = (k: string, fb: FabricKey) => fillFor(pattern, a, k, fb, photos);
   switch (pattern) {
+    case "eight-hands-around":
+      return <EightHandsAroundBlock size={200} assignments={a} photos={photos} />;
     case "wedding-rings":
       return <WeddingRingsBlock size={200} assignments={a} photos={photos} />;
     case "duck-and-duckling":

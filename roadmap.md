@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Add Eight Hands Around from the mixed-scale reference; verify geometry, four roles, cuts, sewing, finishing totals, all views, full tests and math audit; do not republish.
 - [x] Add Wedding Rings (75th standard pattern) from the 5×5 reference; verify three-fabric geometry, cuts, exact trim/ruler guidance, sewing, sashing/border totals, independent reassignments, live 10/12/15/18-inch fabrics/results/printed PDFs and phone layout; all 1,547 tests, math audit and preview build passed; not republished.
 - [x] Verify four-fabric Churn Dash reference geometry, cutting/sewing, yardage, sashing intersections, border, independent reassignment and live 10/12/18-inch fabrics/results/print; fix printed-border resolution; all 1,522 tests, math audit and preview build passed; not republished.
 - [x] Complete Walls of Jericho’s app verification as pattern 71, correct inactive finishing entries in print, and check the live cutting/sewing flow; all 1,442 tests and math audit passed.
