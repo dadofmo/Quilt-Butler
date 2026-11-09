@@ -3178,3 +3178,13 @@ console.log("\n=== Wedding Rings: 45×45, 15-inch blocks ===");
   check("WR ring inches", b?.totalInches ?? -1, 45);
   check("WR accent inches", c?.totalInches ?? -1, 15.5);
 }
+
+console.log("\n=== Eight Hands Around: 36×36, 12-inch blocks ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "eight-hands-around", quiltWidth: 36, quiltHeight: 36, blockSize: 12, borderWidth: 0, sashingWidth: 0 });
+  const f = (k: string) => r.fabrics.find(x => x.fabric === k);
+  check("EHA outer inches: 6 four-inch strips", f("A")?.totalInches ?? -1, 24);
+  check("EHA background inches: 8 + 15 + 4.5 + 4", f("B")?.totalInches ?? -1, 31.5);
+  check("EHA inner inches: 3 two-and-a-half-inch strips", f("C")?.totalInches ?? -1, 7.5);
+  check("EHA centre inches: one three-and-a-half-inch strip", f("D")?.totalInches ?? -1, 3.5);
+}
