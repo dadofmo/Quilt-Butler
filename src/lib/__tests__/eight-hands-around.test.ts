@@ -71,6 +71,9 @@ describe("Eight Hands Around practical cutting",()=>{
     expect(d.innerLarge).toBe(2*d.innerSmall-.5);
     expect(d.outerSmall-.375-d.outerHeight).toBeGreaterThanOrEqual(.125-1e-9);
     expect(d.innerSmall-.375-d.innerHeight).toBeGreaterThanOrEqual(.125-1e-9);
+    // Two-at-a-time HST: 1/4-inch diagonal seam offset removes sqrt(2)/4
+    // from the starter side; 7/8 is added to FINISHED size, not unfinished.
+    expect(d.hstStarter-Math.SQRT2/4-d.corner).toBeGreaterThanOrEqual(.125);
     const r=calculateYardage({...base,blockSize:size,quiltWidth:size*3,quiltHeight:size*3});
     expect(piece(r,"A","Corner HST")).toMatchObject({count:18,w:outerSmall,h:outerSmall});
     expect(piece(r,"B","Outer geese large")).toMatchObject({count:9,w:outerLarge,h:outerLarge});
