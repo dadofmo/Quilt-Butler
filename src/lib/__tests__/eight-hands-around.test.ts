@@ -38,7 +38,7 @@ describe("Eight Hands Around reference geometry",()=>{
     expect(p).toContainEqual({role:"background",points:[[2,0],[6,0],[4,2]]});
     expect(p).toContainEqual({role:"background",points:[[3,2],[5,2],[4,3]]});
     expect(p).toContainEqual({role:"background",points:[[8,2],[8,6],[6,4]]});
-    expect(p).toContainEqual({role:"background",points:[[6,2],[6,4],[5,3]]});
+    expect(p).toContainEqual({role:"background",points:[[6,3],[6,5],[5,4]]});
     expect(p.reduce((s,x)=>s+area(x.points),0)).toBeCloseTo(64);
     for(const [role,total] of [["outer",24],["background",32],["inner",4],["center",4]])
       expect(p.filter(x=>x.role===role).reduce((s,x)=>s+area(x.points),0)).toBeCloseTo(total);
