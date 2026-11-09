@@ -23,6 +23,7 @@ import { CONTRARY_WIFE_CELLS } from "./contrary-wife";
 import { jerichoCounts } from "./walls-of-jericho";
 import { foolsCounts } from "./fools-square";
 import { WEDDING_ROWS, weddingCounts } from "./wedding-rings";
+import { eightHandsDimensions, EIGHT_HANDS_COUNTS } from "./eight-hands-around";
 import { DUMBBELL_COUNTS, dumbbellDimensions } from "./dumbbell";
 import { BROKEN_WHEEL_COUNTS, brokenWheelDimensions, rulerMark } from "./broken-wheel";
 import { BIRD_NEST_DIAMONDS, birdNestDimensions } from "./bird-nest";
@@ -245,7 +246,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
+  const isJericho = s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -692,6 +693,40 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
       notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${f3(sashWidth + SEAM)}" × ${f3(s.blockSize + SEAM)}" and ${intersections} intersection squares at ${f3(sashWidth + SEAM)}". Join blocks into rows with vertical strips, sew full-width sashing rows between block rows, then add the optional border last.`);
     } else notes.push("Join Dumbbell blocks edge to edge. Add the optional outer border last.");
+  } else if (s.pattern === "eight-hands-around") {
+    const d = eightHandsDimensions(s.blockSize), c = EIGHT_HANDS_COUNTS, n = blockCount;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Eight Hands Around section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const outer = fabric("outer"), bg = fabric("background"), inner = fabric("inner"), center = fabric("center");
+    addSquares(reqs[outer], "Corner HST starting squares||two matched squares make two HSTs", c.cornerHsts / 2 * n, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[bg], "Corner HST starting squares||two matched squares make two HSTs", c.cornerHsts / 2 * n, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[bg], "Outer geese large squares||one large + four small squares make four geese", c.outerGeese / 4 * n, d.outerLarge, s.fabricWidth);
+    addSquares(reqs[outer], "Outer geese wing squares||four small squares per large square", c.outerGeese * n, d.outerSmall, s.fabricWidth);
+    addSquares(reqs[bg], "Inner geese large squares||one large + four small squares make four geese", c.innerGeese / 4 * n, d.innerLarge, s.fabricWidth);
+    addSquares(reqs[inner], "Inner geese wing squares||four small squares per large square", c.innerGeese * n, d.innerSmall, s.fabricWidth);
+    addSquares(reqs[bg], "Small background squares", c.smallSquares * n, d.smallSquare, s.fabricWidth);
+    addSquares(reqs[center], "Whole centre squares", c.centers * n, d.center, s.fabricWidth);
+    const exact = (v: number) => { const m = rulerMark(v); return `${v.toFixed(4)}" (${m.relation} ${m.label} ruler mark)`; };
+    notes.push(
+      `Eight Hands Around: an 8 × 8 draft with ${d.u.toFixed(4)}" finished small cells. Assemble 2 + 4 + 2 cell bands: four large corner HSTs, four large inward-pointing flying geese and a central nine-patch with four small background squares, four small inward-pointing geese and one whole centre. No narrow strips, curved seams, Y-seams or templates.`,
+      `Cutting per block: Fabric ${outer} — 2 corner HST starters at ${d.hstStarter.toFixed(3)}" and 4 outer wing squares at ${d.outerSmall.toFixed(3)}". Fabric ${bg} — 2 corner HST starters at ${d.hstStarter.toFixed(3)}", 1 outer geese large square at ${d.outerLarge.toFixed(3)}", 1 inner geese large square at ${d.innerLarge.toFixed(3)}", and 4 small squares at ${exact(d.smallSquare)}. Fabric ${inner} — 4 inner wing squares at ${d.innerSmall.toFixed(3)}". Fabric ${center} — 1 whole centre square at ${exact(d.center)}.`,
+      `Cut plain squares at the exact decimal size; the nearby ruler mark is only a guide if between marks. Starters are deliberately oversized and rounded up for trimming. Final unit sizes are not rounded: rounding each small cell changes the block size. Make and measure one test block before chain-piecing.`,
+      `Corner HSTs: pair each Fabric ${outer} starter with Fabric ${bg}, right sides together. Draw a diagonal; sew an accurate 1/4" on both sides, cut on the line and press open gently without stretching bias edges. Two pairs make four HSTs. Trim to ${exact(d.corner)} square with the seam corner to corner. Place Fabric ${outer} at the outer right-angle corner of each block corner; the background half faces the centre.`,
+      `Flying geese, four at a time: use the Fabric ${bg} outer large square with four Fabric ${outer} wing squares; repeat with the Fabric ${bg} inner large square and four Fabric ${inner} wing squares. For each set draw a diagonal on all four small squares. Place two small squares on opposite corners of the large square, RST, with drawn lines aligned and overlapping in the middle. Sew 1/4" either side, cut on the line and press wings outward. Place one remaining small square on the unsewn corner of each half, sew both sides, cut and press outward again. Each set makes four geese; do not split the continuous background body into HSTs.`,
+      `Trim the four outer geese to ${exact(d.outerWidth)} × ${exact(d.outerHeight)}, and four inner geese to ${exact(d.innerWidth)} × ${exact(d.innerHeight)}. Centre each background triangle, keep 1/4" beyond its apex and align the diagonal seams with the two opposite raw corners. Do not trim away the point allowance or stretch a unit to fit.`,
+      `Central nine-patch: top row — small background square, small goose pointing down, small background square. Middle row — small goose pointing right, whole centre square, small goose pointing left. Bottom row — small background square, small goose pointing up, small background square. The background goose bodies point toward the centre; the Fabric ${inner} wings frame it. Sew each row with 1/4" seams, press row joins open, pin matching seams and join rows. The central unit measures ${exact(d.middle)} square unfinished.`,
+      `Outer assembly: top band — top-left HST, large goose pointing down, top-right HST. Middle band — large goose pointing right, central nine-patch, large goose pointing left. Bottom band — bottom-left HST, large goose pointing up, bottom-right HST. Sew units within bands, press joins open to reduce bulk, then pin intersections and join the bands. Check ${exact(d.unfinished)} square unfinished (${s.blockSize}" finished). All background triangle bodies point inward; compare with the diagram before joining.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing"), vertical = (blocksAcross-1)*blocksDown, horizontal = (blocksDown-1)*blocksAcross;
+      const count = vertical + horizontal, intersections = (blocksAcross-1)*(blocksDown-1);
+      if (count > 0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize+SEAM, sashWidth+SEAM, s.fabricWidth);
+      if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
+      notes.push(`Sashing: ${count} Fabric ${sash} strips at ${exact(sashWidth+SEAM)} × ${exact(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${exact(sashWidth+SEAM)}. Join block rows with vertical strips; piece full-width sashing rows using horizontal strips and intersections. Sashing sits only between blocks. Add the optional border last.`);
+    } else notes.push("Join Eight Hands Around blocks edge to edge, with the reference orientation. Add the optional border last.");
   } else if (s.pattern === "wedding-rings") {
     const unit = s.blockSize / 5, square = unit + SEAM;
     // Round starters UP to an eighth, never the final unit's trim target.

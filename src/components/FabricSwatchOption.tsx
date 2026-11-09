@@ -100,7 +100,7 @@ export function FabricSwatchOption({
       />
 
       {photo ? (
-        <div className="flex items-center justify-between gap-1 text-[11px]">
+        <div className="flex flex-wrap items-center justify-between gap-1 text-[11px]">
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
@@ -117,7 +117,7 @@ export function FabricSwatchOption({
           </button>
         </div>
       ) : (
-        <div className="flex items-center justify-between gap-1 text-[11px]">
+        <div className="flex flex-wrap items-center justify-between gap-1 text-[11px]">
           <button
             type="button"
             onClick={() => inputRef.current?.click()}

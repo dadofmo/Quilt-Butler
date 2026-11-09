@@ -1,5 +1,6 @@
 import { ChurnDashBlock } from "./ChurnDashBlock";
 import { WeddingRingsBlock } from "./WeddingRingsBlock";
+import { EightHandsAroundBlock } from "./EightHandsAroundBlock";
 import type { PatternId } from "@/lib/planner-store";
 import { BirdNestBlock } from "./BirdNestBlock";
 import { KansasStarBlock } from "./KansasStarBlock";
@@ -39,6 +40,7 @@ const C = {
 
 
 const PATTERN_ALT: Record<PatternId, string> = {
+  "eight-hands-around": "Eight Hands Around: nested stars with large corner triangles and flying geese surrounding smaller geese, four background squares and a whole centre",
   "wedding-rings": "Wedding Rings: a five-by-five linked ring block with nine squares and sixteen half-square triangles in three fabrics",
   "kansas-star": "Kansas Star: one block of nine square-in-a-square units, blue diamonds with yellow corners at the corners and centre alternating with yellow diamonds with green corners on the sides",
   "duck-and-duckling": "Duck and Duckling: a five-by-five block with four large coral corner triangles, small sage accent triangles, and a warm cross of squares around a solid centre",
@@ -185,6 +187,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     "aria-label": label,
   };
   switch (pattern) {
+    case "eight-hands-around":
+      return <svg {...common}><EightHandsAroundBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "wedding-rings":
       return <svg {...common}><WeddingRingsBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "kansas-star":

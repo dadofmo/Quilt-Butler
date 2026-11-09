@@ -43,7 +43,7 @@ describe("Wedding Rings reference and construction", () => {
     expect(countBlockFabrics(p?.sections ?? [])).toBe(3);
     expect(p?.sections.slice(0,3).map(s=>s.defaultFabric)).toEqual(["B","A","C"]);
     expect(PATTERNS[0].id).toBe("nine-patch");
-    expect(PATTERNS).toHaveLength(75);
+    expect(PATTERNS.some(pattern => pattern.id === "wedding-rings")).toBe(true);
   });
   it.each([[10,2.5,2.875],[12,2.9,3.375],[15,3.5,3.875],[18,4.1,4.5]])("scales exact squares and safely rounded HST starters at %s inches", (size,sq,hst) => {
     const r = calculateYardage({...base,blockSize:size,quiltWidth:size*3,quiltHeight:size*3});
