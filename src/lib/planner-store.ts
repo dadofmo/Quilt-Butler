@@ -29,6 +29,7 @@ export type PatternId =
   | "bird-nest"
   | "contrary-wife"
   | "walls-of-jericho"
+  | "country-roads"
   | "fools-square"
   | "dumbbell"
   | "broken-wheel"

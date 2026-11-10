@@ -147,6 +147,20 @@ const BASE_PATTERNS: PatternDefBase[] = [
     ],
   },
   {
+    id: "country-roads",
+    name: "Country Roads",
+    hasMath: true,
+    intro: "A 7×7 block: four continuous 1×3 light bars run from a contrasting centre square to each edge, and each 3×3 corner is a nine-patch of dark squares and four half-square triangles whose light halves all touch its middle square, with an accent square at each outer corner. Sew four corner nine-patches, then three bands with straight seams only. Optional sashing and border.",
+    sections: [
+      { id: "main", label: "Dark squares & triangles", defaultFabric: "A", hint: "16 squares (four per corner unit) and the dark half of all 16 triangle squares." },
+      { id: "light", label: "Roads (bars & light triangles)", defaultFabric: "B", hint: "Four continuous 1×3 bars and the light half of all 16 triangle squares." },
+      { id: "centre", label: "Centre square", defaultFabric: "C", hint: "The single square where the four bars meet." },
+      { id: "corners", label: "Block corner squares", defaultFabric: "D", hint: "The four squares at the block's outer corners." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "E", hint: "Optional; set to zero for edge-to-edge blocks." },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
+  {
     id: "walls-of-jericho",
     name: "Walls of Jericho",
     hasMath: true,
@@ -2258,6 +2272,7 @@ export const PATTERN_META: Record<string, PatternMeta> = {
   "broken-wheel": { skill: "confident", fabricCount: 3, techniques: ["squares", "onpoint", "strips"] },
   "dumbbell": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst", "geese", "onpoint"] },
   "fools-square": { skill: "confident", fabricCount: 4, techniques: ["squares", "hst"] },
+  "country-roads": { skill: "confident", fabricCount: 4, techniques: ["squares", "hst", "strips"] },
   "walls-of-jericho": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst", "strips"] },
   "contrary-wife": { skill: "beginner", fabricCount: 4, techniques: ["squares", "hst"] },
   "duck-and-duckling": { skill: "intermediate", fabricCount: 4, techniques: ["squares", "hst"] },

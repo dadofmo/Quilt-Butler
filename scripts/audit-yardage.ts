@@ -550,6 +550,18 @@ console.log("\n=== Walls of Jericho: 42×42, 14-inch block (2-inch units) ===");
   check("WJ A inches", a?.totalInches ?? 0, 10 + 12.5 + 7 * 2.875);
 }
 
+console.log("\n=== Country Roads: 42×42, 14-inch block (2-inch units) ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "country-roads", quiltWidth: 42, quiltHeight: 42, blockSize: 14, borderWidth: 0, sashingWidth: 0 });
+  const inch = (f: string) => r.fabrics.find(x => x.fabric === f)?.totalInches ?? 0;
+  // 42.5" usable. B: 36 bars 2.5×6.5 (6/strip → 6 × 2.5) + 72 starters 2.875 (14/strip → 6 strips).
+  check("CR B inches", inch("B"), 15 + 6 * 2.875);
+  // A: 144 squares 2.5 (17/strip → 9 strips) + 72 starters (6 strips).
+  check("CR A inches", inch("A"), 22.5 + 6 * 2.875);
+  check("CR C inches", inch("C"), 2.5);
+  check("CR D inches", inch("D"), 7.5);
+}
+
 console.log("\n=== Duck and Duckling: 50×50, 15-inch block ===");
 {
   const s = { ...base(), pattern: "duck-and-duckling" as const, quiltWidth: 50, quiltHeight: 50, blockSize: 15, borderWidth: 0, sashingWidth: 0 };
