@@ -49,7 +49,7 @@ describe("Country Roads", () => {
     expect(total(r, "B", "HST starting squares")).toBe(72);
     const bar = r.fabrics.find(f => f.fabric === "B")!.pieces.find(p => p.label.startsWith("Road bars"))!;
     expect([bar.w, bar.h].sort()).toEqual([2.5, 6.5]);
-    expect(r.notes.join(" ")).toContain('2.875"');
+    expect((r.notes ?? []).join(" ")).toContain('2.875"');
   });
   it("adds sashing strips and intersections when sashed", () => {
     const r = calculateYardage({ ...base, quiltWidth: 46, quiltHeight: 46, blockSize: 14, sashingWidth: 2, assignments: {} });
