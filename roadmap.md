@@ -79,3 +79,4 @@
 - [x] Move Whirlwind Waltz starting colours onto the standard page-1 palette.
 
 - [x] Add Walls of Jericho (7×7 cross with 20 HST corner bands) with previews, cutting, sewing steps and tests.
+- [x] Add Country Roads (7×7, centre Fabric C, block corners Fabric D) with previews, cutting, sewing steps and tests.
