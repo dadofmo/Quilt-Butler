@@ -21,6 +21,7 @@ import { brickWorkDimensions } from "./brick-work";
 import { studioPair } from "./studio-pairs";
 import { CONTRARY_WIFE_CELLS } from "./contrary-wife";
 import { jerichoCounts } from "./walls-of-jericho";
+import { COUNTRY_ROADS_COUNTS } from "./country-roads";
 import { foolsCounts } from "./fools-square";
 import { WEDDING_ROWS, weddingCounts } from "./wedding-rings";
 import { eightHandsDimensions, EIGHT_HANDS_COUNTS } from "./eight-hands-around";
@@ -246,7 +247,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
+  const isJericho = s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -797,6 +798,42 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
       notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${(s.blockSize + SEAM).toFixed(3)}" and ${intersections} intersection squares at ${(sashWidth + SEAM).toFixed(3)}". Join blocks into rows with vertical strips, sew full-width sashing rows between block rows, then add the optional border last.`);
     } else notes.push("Join Fool's Square blocks edge to edge. Add the optional outer border last.");
+  } else if (s.pattern === "country-roads") {
+    // 7×7 grid: four continuous 1×3 bars, one centre square, four corner
+    // nine-patches (16 two-at-a-time HSTs, 16 dark squares, 4 corner squares).
+    const unit = s.blockSize / 7;
+    const sq = unit + SEAM, hstCut = unit + HST_EXTRA, bar = 3 * unit + SEAM;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Country Roads section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const main = fabric("main"), light = fabric("light"), centre = fabric("centre"), corner = fabric("corners");
+    const c = COUNTRY_ROADS_COUNTS;
+    addRails(reqs[light], "Road bars", c.bars * blockCount, bar, sq, s.fabricWidth);
+    addSquares(reqs[centre], "Centre squares", c.centre * blockCount, sq, s.fabricWidth);
+    addSquares(reqs[corner], "Block corner squares", c.cornerSquares * blockCount, sq, s.fabricWidth);
+    addSquares(reqs[main], "Corner-unit squares", c.mainSquares * blockCount, sq, s.fabricWidth);
+    const starters = new Map<FabricKey, number>();
+    for (const f of [main, light]) starters.set(f, (starters.get(f) ?? 0) + c.hstStarterPairs * blockCount);
+    for (const [f, count] of starters) addSquares(reqs[f], "HST starting squares||two matched starter squares make two HST units", count, hstCut, s.fabricWidth);
+    const u3 = unit.toFixed(3), sq3 = sq.toFixed(3), bar3 = bar.toFixed(3);
+    notes.push(
+      `Country Roads: each block is a 7 × 7 grid of ${u3}" finished units — four continuous Fabric ${light} bars (1 × 3 units) meeting at a Fabric ${centre} centre square, and a 3 × 3 corner unit in each quarter made of four Fabric ${main} squares, four Fabric ${main}/${light} half-square triangles and one Fabric ${corner} square at the block's outer corner.`,
+      `Cutting per block: 4 Fabric ${light} bars at ${sq3}" × ${bar3}"; 1 Fabric ${centre} square at ${sq3}"; 4 Fabric ${corner} squares at ${sq3}"; 16 Fabric ${main} squares at ${sq3}"; 8 Fabric ${main} and 8 Fabric ${light} HST starting squares at ${hstCut.toFixed(3)}".`,
+      `Make 16 HSTs per block, two at a time: pair one Fabric ${main} and one Fabric ${light} starting square right sides together, draw one diagonal, sew 1/4" on both sides, cut on the line and press toward the Fabric ${main}. Trim each HST to ${sq3}" unfinished with the seam exactly corner to corner.`,
+      `Top-left corner unit, sewn in three rows: row 1 — Fabric ${corner} square, HST with Fabric ${main} toward the top-right, Fabric ${main} square; row 2 — HST with Fabric ${main} toward the bottom-left, Fabric ${main} square, HST with Fabric ${main} toward the top-right; row 3 — Fabric ${main} square, HST with Fabric ${main} toward the bottom-left, Fabric ${main} square. The light halves of all four HSTs touch the middle square. Press row seams in alternate directions, join the rows nesting seams; the unit measures ${bar3}" unfinished.`,
+      `Make the other three corner units as mirror images: top-right mirrors left-to-right, bottom-left mirrors top-to-bottom, bottom-right mirrors both, so the Fabric ${corner} square always sits at the block's outer corner and the light triangle halves always face that unit's middle square.`,
+      `Assemble in three bands with straight seams: top band = top-left unit, vertical bar, top-right unit; middle band = horizontal bar, Fabric ${centre} centre square, horizontal bar; bottom band = bottom-left unit, vertical bar, bottom-right unit. Press toward the bars, join the bands matching the centre seams. The block measures ${(s.blockSize + SEAM).toFixed(3)}" unfinished and ${s.blockSize}" finished. No Y-seams or templates.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing");
+      const vertical = (blocksAcross - 1) * blocksDown, horizontal = (blocksDown - 1) * blocksAcross;
+      const count = vertical + horizontal, intersections = (blocksAcross - 1) * (blocksDown - 1);
+      if (count > 0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize + SEAM, sashWidth + SEAM, s.fabricWidth);
+      if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${(s.blockSize + SEAM).toFixed(3)}" (${vertical} vertical, ${horizontal} horizontal) and ${intersections} intersection squares at ${(sashWidth + SEAM).toFixed(3)}". Join blocks into rows with vertical strips, sew full-width sashing rows between block rows, then add the optional border last.`);
+    } else notes.push("Join Country Roads blocks edge to edge, all facing the same way. Add the optional outer border last.");
   } else if (s.pattern === "walls-of-jericho") {
     // 7×7 grid: four continuous 1×3 cross arms, 20 HSTs (two at a time), and
     // background squares with each corner's outer-row pair cut as one 1×2 rect.

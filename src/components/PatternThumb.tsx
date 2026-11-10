@@ -7,6 +7,7 @@ import { KansasStarBlock } from "./KansasStarBlock";
 import { DuckAndDucklingBlock } from "./DuckAndDucklingBlock";
 import { ContraryWifeBlock } from "./ContraryWifeBlock";
 import { WallsOfJerichoBlock } from "./WallsOfJerichoBlock";
+import { CountryRoadsBlock } from "./CountryRoadsBlock";
 import { FoolsSquareBlock } from "./FoolsSquareBlock";
 import { DumbbellBlock } from "./DumbbellBlock";
 import { BrokenWheelBlock } from "./BrokenWheelBlock";
@@ -48,6 +49,7 @@ const PATTERN_ALT: Record<PatternId, string> = {
   "broken-wheel": "Broken Wheel: a three-by-three block with square-in-a-square corner diamonds, two-bar side units and a solid centre framed by a ring",
   dumbbell: "Dumbbell: a six-by-six star block with corner triangle units, paired flying geese on each side and a centre diamond",
   "fools-square": "Fool's Square: a five-by-five star block with a centre square framed by a cross, star-point triangles and corner triangle tips",
+  "country-roads": "Country Roads: a seven-by-seven block with light bars crossing to a contrasting centre square, triangle-and-square corner units and accent squares at the four corners",
   "walls-of-jericho": "Walls of Jericho: a seven-by-seven block with a yellow cross on a blue background and a diagonal band of green triangles in each corner",
   "contrary-wife": "Contrary Wife: a three-by-three block with five solid squares and four same-slant half-square triangles around the centre",
   "brick-work": "Brick Work: four diagonal brick bars framing an on-point centre of accent squares and a long background bar, with accent squares pointing out from each side",
@@ -206,6 +208,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return <svg {...common}><BrokenWheelBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "dumbbell":
       return <svg {...common}><DumbbellBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
+    case "country-roads":
+      return <svg {...common}><CountryRoadsBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "walls-of-jericho":
       return <svg {...common}><WallsOfJerichoBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "simple-squares":

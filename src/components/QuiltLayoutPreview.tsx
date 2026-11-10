@@ -6,6 +6,7 @@ import { BirdNestBlock } from "./BirdNestBlock";
 import { KansasStarBlock } from "./KansasStarBlock";
 import { ContraryWifeBlock } from "./ContraryWifeBlock";
 import { WallsOfJerichoBlock } from "./WallsOfJerichoBlock";
+import { CountryRoadsBlock } from "./CountryRoadsBlock";
 import { FoolsSquareBlock } from "./FoolsSquareBlock";
 import { DumbbellBlock } from "./DumbbellBlock";
 import { BrokenWheelBlock } from "./BrokenWheelBlock";
@@ -1483,6 +1484,8 @@ function MiniBlock({
       return <BrokenWheelBlock size={200} assignments={assignments} photos={photos} />;
     case "dumbbell":
       return <DumbbellBlock size={200} assignments={assignments} photos={photos} />;
+    case "country-roads":
+      return <CountryRoadsBlock size={200} assignments={assignments} photos={photos} />;
     case "walls-of-jericho":
       return <WallsOfJerichoBlock size={200} assignments={assignments} photos={photos} />;
     case "bird-nest":

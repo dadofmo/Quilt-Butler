@@ -23,7 +23,7 @@ describe("Eight Hands Around reference geometry",()=>{
     const p=getPattern("eight-hands-around");
     expect(p?.sections.slice(0,4).map(s=>s.defaultFabric)).toEqual(["A","B","C","D"]);
     expect(countBlockFabrics(p?.sections ?? [])).toBe(4);
-    expect(PATTERNS).toHaveLength(76);
+    expect(PATTERNS).toHaveLength(77);
     expect(PATTERNS[0].id).toBe("nine-patch");
     expect(EIGHT_HANDS_COUNTS).toEqual({cornerHsts:4,outerGeese:4,innerGeese:4,smallSquares:4,centers:1});
   });
