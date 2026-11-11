@@ -22,6 +22,7 @@ export type BlockLayout =
 
 
 export type PatternId =
+  | "five-spot"
   | "eight-hands-around"
   | "wedding-rings"
   | "kansas-star"

@@ -1,3 +1,4 @@
+import { fiveSpotDimensions, FIVE_SPOT_COUNTS } from "./five-spot";
 import { churnDimensions } from "./churn-dash";
 import { ALL_FABRIC_KEYS, type FabricKey, type PlannerState } from "./planner-store";
 import { getPattern, getEffectiveBorderDefault } from "./patterns";
@@ -247,7 +248,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
+  const isJericho = s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -798,6 +799,38 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
       notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${(s.blockSize + SEAM).toFixed(3)}" and ${intersections} intersection squares at ${(sashWidth + SEAM).toFixed(3)}". Join blocks into rows with vertical strips, sew full-width sashing rows between block rows, then add the optional border last.`);
     } else notes.push("Join Fool's Square blocks edge to edge. Add the optional outer border last.");
+  } else if (s.pattern === "five-spot") {
+    const d = fiveSpotDimensions(s.blockSize), c = FIVE_SPOT_COUNTS, n = blockCount;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Five Spot section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const dark = fabric("dark"), bg = fabric("background"), spots = fabric("spots"), inner = fabric("inner"), centre = fabric("centreCorners");
+    addSquares(reqs[spots], "Side diamond squares||whole straight-grain squares, turned on point", c.spotDiamonds*n, d.diamondCut, s.fabricWidth);
+    addSquares(reqs[bg], "Centre diamond squares||whole straight-grain squares, turned on point", c.backgroundDiamonds*n, d.diamondCut, s.fabricWidth);
+    addSquares(reqs[spots], "Outer corner squares", c.cornerSquares*n, d.smallSquare, s.fabricWidth);
+    addSquares(reqs[bg], "Background triangle starters||cut each ONCE diagonally: 8 side and 8 corner triangles per block", c.backgroundStarters*n, d.settingStarter, s.fabricWidth);
+    addSquares(reqs[inner], "Inner side triangle starters||cut each ONCE diagonally: 8 triangles per block", c.innerStarters*n, d.settingStarter, s.fabricWidth);
+    addSquares(reqs[centre], "Centre framing triangle starters||cut each ONCE diagonally: 4 triangles per block", c.centreCornerStarters*n, d.settingStarter, s.fabricWidth);
+    addSquares(reqs[dark], "Large corner triangle starters||cut each ONCE diagonally: 4 continuous triangles per block", c.darkStarters*n, d.darkStarter, s.fabricWidth);
+    const exact = (v: number) => { const m = rulerMark(v); return `${v.toFixed(4)}" (${m.relation} ${m.label} ruler mark)`; };
+    notes.push(
+      `Five Spot: a 3 × 3 layout of ${exact(d.unit)} finished square units, mapped to a 6 × 6 half-unit grid. Five whole diamonds form a cross; four pieced corner units complete the block. White reference lines are seams, not strips.`,
+      `Cutting per block: Fabric ${spots} — 4 diamond squares at ${exact(d.diamondCut)} and 4 outer corner squares at ${exact(d.smallSquare)}. Fabric ${bg} — 1 centre diamond at ${exact(d.diamondCut)} and 8 triangle starter squares at ${d.settingStarter.toFixed(3)}". Fabric ${inner} — 4 triangle starter squares at ${d.settingStarter.toFixed(3)}". Fabric ${centre} — 2 triangle starter squares at ${d.settingStarter.toFixed(3)}". Fabric ${dark} — 2 large triangle starter squares at ${d.darkStarter.toFixed(3)}". Cut every triangle starter ONCE diagonally; these are loose triangles, not two-at-a-time HSTs.`,
+      `Cut the five diamonds and four plain squares at the exact decimal sizes. The nearby ruler mark is only a guide when the cut falls between marks. Triangle starters are deliberately oversized and rounded UP to an eighth for trimming. Do not round final units or stretch them to fit; make and measure one test block before chain-piecing.`,
+      `Side diamond units: each whole Fabric ${spots} diamond receives two Fabric ${bg} triangles on its outward-facing adjacent sides and two Fabric ${inner} triangles on its inward-facing adjacent sides. Sew triangles to two opposite diamond edges first, then the remaining opposite edges, matching midpoints and letting dog ears overhang. Use accurate 1/4" seams; press outward gently without stretching bias. Make four units, rotating them so the two ${inner} triangles face the block centre.`,
+      `Centre diamond: sew four Fabric ${centre} triangles around the whole Fabric ${bg} diamond, two opposite sides first, then the other two. Trim all five diamond units to ${exact(d.unfinished)} square, centring the diamonds and preserving 1/4" beyond each point. Trim excess setting fabric, not the diamond points.`,
+      `Corner units: start with a Fabric ${spots} square. Sew a small Fabric ${bg} triangle to each of its two adjacent inward-facing edges, one seam at a time, with triangle right-angle corners at the square's inward corner and dog ears extending beyond the square. This makes a pieced large triangle with the square at its outside right-angle corner. Sew one continuous Fabric ${dark} large triangle to its full long diagonal; match the square's inward point at the diagonal midpoint. Press the small joins toward the background and the long join toward the dark triangle, or open if bulky. Trim to ${exact(d.unfinished)} square, keeping the outer square ${exact(d.smallSquare)} across the raw outside edges and 1/4" beyond its inward point. Make four; rotate so the square is at the block's outside corner and the dark triangle faces inward. Do not split the large dark triangle into HSTs.`,
+      `Lay out three rows: corner – side diamond – corner; side diamond – centre diamond – side diamond; corner – side diamond – corner. Match the diagram before sewing; the green-role triangles surround the centre's framing triangles. Sew units into rows with 1/4" seams, press joins open to reduce bulk at points, pin matching intersections and join rows. Each row is ${exact(d.blockUnfinished)} long; the block measures ${exact(d.blockUnfinished)} square unfinished (${s.blockSize}" finished). No Y-seams, curved seams or templates.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing"), vertical = (blocksAcross-1)*blocksDown, horizontal = (blocksDown-1)*blocksAcross;
+      const count = vertical+horizontal, intersections = (blocksAcross-1)*(blocksDown-1);
+      if (count>0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize+SEAM, sashWidth+SEAM, s.fabricWidth);
+      if (intersections>0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
+      notes.push(`Sashing: ${count} Fabric ${sash} strips at ${exact(sashWidth+SEAM)} × ${exact(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${exact(sashWidth+SEAM)}. Join block rows with vertical strips; piece full-width sashing rows from horizontal strips and intersections. Sashing is only between blocks; add the optional border last.`);
+    } else notes.push("Join Five Spot blocks edge to edge in the reference orientation. Add the optional outer border last.");
   } else if (s.pattern === "country-roads") {
     // 7×7 grid: four continuous 1×3 bars, one centre square, four corner
     // nine-patches (16 two-at-a-time HSTs, 16 dark squares, 4 corner squares).

@@ -1,3 +1,4 @@
+import { FiveSpotBlock } from "./FiveSpotBlock";
 import { ChurnDashBlock } from "./ChurnDashBlock";
 import { WeddingRingsBlock } from "./WeddingRingsBlock";
 import { EightHandsAroundBlock } from "./EightHandsAroundBlock";
@@ -1484,6 +1485,8 @@ function MiniBlock({
       return <BrokenWheelBlock size={200} assignments={assignments} photos={photos} />;
     case "dumbbell":
       return <DumbbellBlock size={200} assignments={assignments} photos={photos} />;
+    case "five-spot":
+      return <FiveSpotBlock size={200} assignments={assignments} photos={photos} />;
     case "country-roads":
       return <CountryRoadsBlock size={200} assignments={assignments} photos={photos} />;
     case "walls-of-jericho":
