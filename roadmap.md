@@ -1,4 +1,5 @@
 # Roadmap
+- [ ] Add Five Spot from the reference: five whole diamonds, four pieced corners, five adjustable fabrics; verify straight-seam cuts/sewing, sizing, yardage, finishing, all previews and print.
 - [x] Add Eight Hands Around from the mixed-scale reference; verify geometry, four roles, oversized HST/geese cuts, sewing, finishing totals, independent fabric reassignment, live 10/12/15/18-inch fabrics/results/print/PDF and phone layout; all 1,575 tests, math audit and preview build passed; not republished.
 - [x] Add Wedding Rings (75th standard pattern) from the 5×5 reference; verify three-fabric geometry, cuts, exact trim/ruler guidance, sewing, sashing/border totals, independent reassignments, live 10/12/15/18-inch fabrics/results/printed PDFs and phone layout; all 1,547 tests, math audit and preview build passed; not republished.
 - [x] Verify four-fabric Churn Dash reference geometry, cutting/sewing, yardage, sashing intersections, border, independent reassignment and live 10/12/18-inch fabrics/results/print; fix printed-border resolution; all 1,522 tests, math audit and preview build passed; not republished.
