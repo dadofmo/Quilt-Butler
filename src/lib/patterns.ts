@@ -64,6 +64,19 @@ const borderSection: PatternSection = {
 
 const BASE_PATTERNS: PatternDefBase[] = [
   {
+    id: "five-spot", name: "Five Spot", hasMath: true,
+    intro: "Five whole square-in-a-square diamonds and four pieced corner units form a straight-seam nine-patch. Five adjustable fabrics; no curves, Y-seams or templates. Optional sashing and border.",
+    sections: [
+      { id: "dark", label: "Large corner triangles", defaultFabric: "A" },
+      { id: "background", label: "Background & centre diamond", defaultFabric: "B" },
+      { id: "spots", label: "Four diamonds & outer corner squares", defaultFabric: "E" },
+      { id: "inner", label: "Inner side triangles", defaultFabric: "C" },
+      { id: "centreCorners", label: "Triangles framing the centre", defaultFabric: "D" },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "B" },
+      { ...borderSection, defaultFabric: "A" },
+    ],
+  },
+  {
     id: "eight-hands-around", name: "Eight Hands Around", hasMath: true,
     intro: "A nested star on an 8×8 draft: four large corner half-square triangles and four large flying geese surround a smaller nine-patch of four squares, four small flying geese and a whole centre. Four adjustable fabrics; straight seams, no Y-seams or templates. Optional sashing and border.",
     sections: [
@@ -2265,6 +2278,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
  * equal the distinct default fabrics across both blocks, excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
+  "five-spot": { skill: "intermediate", fabricCount: 5, techniques: ["squares", "onpoint"] },
   "eight-hands-around": { skill: "intermediate", fabricCount: 4, techniques: ["squares", "hst", "geese"] },
   "wedding-rings": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst"] },
   "kansas-star": { skill: "confident", fabricCount: 3, techniques: ["squares", "onpoint"] },

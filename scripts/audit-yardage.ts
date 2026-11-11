@@ -3143,6 +3143,16 @@ console.log("\n=== Bird Nest: one 15-inch block, straight-grain diamonds and who
   check("Bird Nest setting total inches", r.fabrics.find(f => f.fabric === "H")?.totalInches ?? -1, 12.5);
 }
 
+console.log("\n=== Five Spot: nine 12-inch blocks ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "five-spot", quiltWidth: 36, quiltHeight: 36, blockSize: 12, borderWidth: 0, sashingWidth: 0 });
+  const inches: Record<string, number> = { A: 15, B: 18 + 4 / Math.SQRT2 + .5, C: 9, D: 6, E: 3 * (4 / Math.SQRT2 + .5) + 7.5 };
+  for (const [fabric, expected] of Object.entries(inches)) check(`Five Spot ${fabric} bolt inches`, r.fabrics.find(f => f.fabric === fabric)?.totalInches ?? -1, expected);
+  const finished = calculateYardage({ ...base(), pattern: "five-spot", quiltWidth: 46, quiltHeight: 46, blockSize: 12, borderWidth: 3, sashingWidth: 2, assignments: { sashing: "F", border: "G" } });
+  check("Five Spot 12 sashes and four intersections: five 2.5-inch strips", finished.fabrics.find(f => f.fabric === "F")?.totalInches ?? -1, 12.5);
+  check("Five Spot 40-inch inner top border: five 3.5-inch strips", finished.fabrics.find(f => f.fabric === "G")?.totalInches ?? -1, 17.5);
+}
+
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {

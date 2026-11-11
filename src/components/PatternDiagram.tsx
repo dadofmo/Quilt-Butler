@@ -1,3 +1,4 @@
+import { FiveSpotBlock } from "./FiveSpotBlock";
 import { ChurnDashBlock } from "./ChurnDashBlock";
 import { WeddingRingsBlock } from "./WeddingRingsBlock";
 import { EightHandsAroundBlock } from "./EightHandsAroundBlock";
@@ -97,6 +98,8 @@ function renderInner(
 ) {
   const get = (k: string, fb: FabricKey) => fillFor(pattern, a, k, fb, photos);
   switch (pattern) {
+    case "five-spot":
+      return <FiveSpotBlock size={200} assignments={a} photos={photos} />;
     case "eight-hands-around":
       return <EightHandsAroundBlock size={200} assignments={a} photos={photos} />;
     case "wedding-rings":
