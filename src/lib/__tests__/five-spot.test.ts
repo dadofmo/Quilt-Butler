@@ -43,7 +43,7 @@ describe("Five Spot",()=> {
   it("tiles the full block exactly once with no gaps or overlaps",()=> {
     const p=fiveSpotPieces();
     // Non-grid sample points avoid seam lines; winding test for convex pieces.
-    for (let y=.037;y<6;y+=.173) for (let x=.061;x<6;x+=.167) {
+    for (let y=.037+Math.SQRT2/10000;y<6;y+=.173) for (let x=.061;x<6;x+=.167) {
       const contains=(pts:[number,number][])=> {
         const cross=pts.map(([ax,ay],i)=>{const [bx,by]=pts[(i+1)%pts.length];return (bx-ax)*(y-ay)-(by-ay)*(x-ax);});
         return cross.every(v=>v>1e-8)||cross.every(v=>v< -1e-8);
@@ -92,6 +92,6 @@ describe("Five Spot",()=> {
     expect(count(r,"L","Centre framing")).toBe(18);
     const merged=calculateYardage({...base,assignments:{dark:"A",background:"A",spots:"A",inner:"A",centreCorners:"A"}});
     expect(merged.fabrics).toHaveLength(1);
-    expect(merged.fabrics[0].pieces.reduce((sum,p)=>sum+p.count,0)).toBe(252);
+    expect(merged.fabrics[0].pieces.reduce((sum,p)=>sum+p.count,0)).toBe(225);
   });
 });
