@@ -1,4 +1,5 @@
 ## Fabric photo rendering
+- Fancy Contrary Wife shares its mirrored corner/hourglass geometry and dimensions across views and cuts; use two-at-a-time HSTs and two-stage QSTs around one whole centre. Why: preserves continuous triangles and straight-seam construction.
 - Five Spot shares 6×6 geometry and exact dimensions across all views and cuts; assemble five whole diamonds and four pieced corner triangles joined to continuous large triangles as a nine-patch. Why: matches the reference with straight seams and no unnecessary piecing.
 - Eight Hands Around shares its 8×8 geometry and two unit scales across all previews and cuts; use oversized four-at-a-time geese, two-at-a-time corner HSTs and a nested nine-patch. Why: continuous triangles and straight seams match the reference without needless seams.
 - Wedding Rings shares its 5×5 cell map across rendering, counts and row instructions; use nine squares and sixteen two-at-a-time HSTs. Why: the reference uses straight seams, not curved wedding-ring piecing.

@@ -1,3 +1,4 @@
+import { fancyContraryDimensions } from "./fancy-contrary-wife";
 import { fiveSpotDimensions, FIVE_SPOT_COUNTS } from "./five-spot";
 import { churnDimensions } from "./churn-dash";
 import { ALL_FABRIC_KEYS, type FabricKey, type PlannerState } from "./planner-store";
@@ -248,7 +249,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
+  const isJericho = s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -799,6 +800,37 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
       notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${(s.blockSize + SEAM).toFixed(3)}" and ${intersections} intersection squares at ${(sashWidth + SEAM).toFixed(3)}". Join blocks into rows with vertical strips, sew full-width sashing rows between block rows, then add the optional border last.`);
     } else notes.push("Join Fool's Square blocks edge to edge. Add the optional outer border last.");
+  } else if (s.pattern === "fancy-contrary-wife") {
+    const d = fancyContraryDimensions(s.blockSize), n = blockCount;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Fancy Contrary Wife section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const dark = fabric("dark"), bg = fabric("background"), centre = fabric("centre");
+    for (const f of [dark, bg]) {
+      addSquares(reqs[f], "Corner plain squares", 4*n, d.smallCut, s.fabricWidth);
+      addSquares(reqs[f], "Corner HST starter squares||pair dark/background; two HSTs per pair", 4*n, d.hstStarter, s.fabricWidth);
+      addSquares(reqs[f], "Hourglass QST starter squares||two stages; two hourglasses per dark/background pair", 2*n, d.qstStarter, s.fabricWidth);
+    }
+    addSquares(reqs[centre], "Whole centre squares", n, d.unitTrim, s.fabricWidth);
+    const exact = (v: number) => { const m = rulerMark(v); return `${v.toFixed(4)}" (${m.relation} ${m.label} ruler mark)`; };
+    notes.push(
+      `Fancy Contrary Wife: a 3 × 3 layout of ${exact(d.unit)} finished macro units, drafted on a 6 × 6 small-cell grid. Four corner four-patches, four two-colour hourglasses and one whole Fabric ${centre} centre. Reference lines are seams, not fabric strips.`,
+      `Cutting per block: each of Fabric ${dark} and Fabric ${bg} needs 4 plain squares at ${exact(d.smallCut)}, 4 HST starters at ${d.hstStarter.toFixed(3)}" square and 2 QST/hourglass starters at ${d.qstStarter.toFixed(3)}" square. Fabric ${centre}: 1 whole square at ${exact(d.unitTrim)}. Starter counts are squares, not finished units. Final plain-square cuts and trim targets are exact; nearby ruler marks are guides, not permission to round down. Starters are oversized and rounded UP to an eighth for trimming. Make one test block before chain-piecing.`,
+      `Corner HSTs: pair the four small Fabric ${dark} starters with four Fabric ${bg} starters, right sides together. Draw a diagonal, sew 1/4" on both sides, cut on the line, open and press gently. Four pairs make eight HSTs. Trim to ${exact(d.smallCut)} unfinished square with the diagonal seam exactly corner to corner.`,
+      `Corner four-patches, listed left to right in each small row: top-left = background square / HST dark lower-left; HST dark upper-right / dark square. Top-right = HST dark lower-right / background square; dark square / HST dark upper-left. Bottom-left = HST dark lower-right / dark square; background square / HST dark upper-left. Bottom-right = dark square / HST dark upper-right; HST dark lower-left / background square. All background squares sit at the block's outside corners, and all dark plain squares face the centre. Sew each pair with 1/4" seams, press the two rows in opposite directions, nest and join. Each corner unit measures ${exact(d.unitTrim)} square unfinished.`,
+      `Hourglasses (quarter-square triangles, not four small HSTs): pair one large Fabric ${dark} starter with one large Fabric ${bg} starter. Make two oversized HSTs by sewing 1/4" either side of a drawn diagonal and cutting on it. Trim these intermediate HSTs to ${exact(d.qstIntermediate)} square. Place the two HSTs right sides together with dark touching background and their diagonal seams nested. Draw the other diagonal PERPENDICULAR to the first seam; sew 1/4" either side and cut on that line. Open to yield two hourglasses. Repeat with the second large pair to make four. Press gently without stretching bias; trim each to ${exact(d.unitTrim)} square with the intersection centred ${exact(d.unitTrim/2)} from each raw edge and all four seam ends at the corners. The first-stage and final trims include a trimming margin; do not substitute corner-HST starter sizes.`,
+      `Arrange the top and bottom hourglasses with Fabric ${dark} triangles on the LEFT and RIGHT; arrange the left and right hourglasses with Fabric ${dark} triangles on the TOP and BOTTOM. Keep the centre a single uncut Fabric ${centre} square. Lay out: top-left corner / horizontal-dark hourglass / top-right corner; vertical-dark hourglass / centre / vertical-dark hourglass; bottom-left corner / horizontal-dark hourglass / bottom-right corner.`,
+      `Sew the three macro units in each row using accurate 1/4" seams. Press row joins in alternating directions or open if bulky, pin intersections and join the three rows. Check ${exact(d.blockTrim)} square unfinished (${s.blockSize}" finished). Straight seams only; no Y-seams, templates, extra centre seams or strips along reference guide lines.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing"), vertical = (blocksAcross-1)*blocksDown, horizontal = (blocksDown-1)*blocksAcross;
+      const count = vertical+horizontal, intersections = (blocksAcross-1)*(blocksDown-1);
+      if (count>0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize+SEAM, sashWidth+SEAM, s.fabricWidth);
+      if (intersections>0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${exact(sashWidth+SEAM)} × ${exact(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${exact(sashWidth+SEAM)}. Join block rows with vertical strips, piece full-width horizontal sashing rows with intersection squares, then add the optional border last. No outer sashing frame.`);
+    } else notes.push("Join Fancy Contrary Wife blocks edge to edge in the reference orientation; add the optional border last.");
   } else if (s.pattern === "five-spot") {
     const d = fiveSpotDimensions(s.blockSize), c = FIVE_SPOT_COUNTS, n = blockCount;
     const fabric = (id: string): FabricKey => {

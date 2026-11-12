@@ -3153,6 +3153,16 @@ console.log("\n=== Five Spot: nine 12-inch blocks ===");
   check("Five Spot 40-inch inner top border: five 3.5-inch strips", finished.fabrics.find(f => f.fabric === "G")?.totalInches ?? -1, 17.5);
 }
 
+console.log("\n=== Fancy Contrary Wife: nine 12-inch blocks ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "fancy-contrary-wife", quiltWidth: 36, quiltHeight: 36 });
+  // A/B: 3×2.5-inch plain-square strips + 3×3-inch HST strips + 3×5.5-inch QST strips.
+  for (const f of ["A", "B"]) check(`Fancy Contrary Wife ${f} bolt inches`, r.fabrics.find(x => x.fabric === f)?.totalInches ?? -1, 33);
+  check("Fancy Contrary Wife centre bolt inches", r.fabrics.find(x => x.fabric === "C")?.totalInches ?? -1, 4.5);
+  const finished = calculateYardage({ ...base(), pattern: "fancy-contrary-wife", quiltWidth: 46, quiltHeight: 46, borderWidth: 3, sashingWidth: 2, assignments: { sashing: "F", border: "G" } });
+  check("Fancy Contrary Wife sashing bolt inches", finished.fabrics.find(x => x.fabric === "F")?.totalInches ?? -1, 12.5);
+  check("Fancy Contrary Wife border bolt inches", finished.fabrics.find(x => x.fabric === "G")?.totalInches ?? -1, 17.5);
+}
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {
