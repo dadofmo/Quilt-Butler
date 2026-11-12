@@ -52,10 +52,10 @@ describe("Fancy Contrary Wife reference and construction",()=> {
     const d=fancyContraryDimensions(block);
     expect(d.smallCut*2-.5).toBeCloseTo(d.unitTrim,12);
     expect(d.unitTrim*3-1).toBeCloseTo(d.blockTrim,12);
-    // Two diagonal seam operations consume sqrt(2)/2 in blank-side length each.
-    expect(d.hstStarter-Math.SQRT1_2).toBeGreaterThan(d.smallCut);
-    expect(d.qstStarter-Math.SQRT1_2).toBeGreaterThan(d.qstIntermediate);
-    expect(d.qstIntermediate-Math.SQRT1_2).toBeGreaterThan(d.unitTrim);
+    // Each diagonal seam operation reduces the square side by sqrt(2)/4.
+    expect(d.hstStarter-Math.SQRT2/4).toBeGreaterThan(d.smallCut);
+    expect(d.qstStarter-Math.SQRT2/4).toBeGreaterThan(d.qstIntermediate);
+    expect(d.qstIntermediate-Math.SQRT2/4).toBeGreaterThan(d.unitTrim);
     const r=calculateYardage({...base,blockSize:block,quiltWidth:block*3,quiltHeight:block*3});
     for(const f of ["A","B"]) {
       expect(count(r,f,"Corner plain")).toBe(36);
