@@ -1,3 +1,4 @@
+import { FancyContraryWifeBlock } from "./FancyContraryWifeBlock";
 import { FiveSpotBlock } from "./FiveSpotBlock";
 import { ChurnDashBlock } from "./ChurnDashBlock";
 import { WeddingRingsBlock } from "./WeddingRingsBlock";
@@ -98,6 +99,8 @@ function renderInner(
 ) {
   const get = (k: string, fb: FabricKey) => fillFor(pattern, a, k, fb, photos);
   switch (pattern) {
+    case "fancy-contrary-wife":
+      return <FancyContraryWifeBlock size={200} assignments={a} photos={photos} />;
     case "five-spot":
       return <FiveSpotBlock size={200} assignments={a} photos={photos} />;
     case "eight-hands-around":
