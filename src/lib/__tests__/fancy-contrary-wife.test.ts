@@ -33,7 +33,6 @@ describe("Fancy Contrary Wife reference and construction",()=> {
     }
     expect(areas).toEqual({background:16,dark:16,centre:4});
     expect(p.filter(x=>x.role==="dark" && x.points.length===4)).toHaveLength(4);
-    expect(p.filter(x=>x.role==="dark" && x.points.includes([3,1]))).toHaveLength(0);
     expect(p[25]).toEqual({role:"dark",points:[[4,0],[4,2],[3,1]]});
     expect(p[28]).toEqual({role:"dark",points:[[0,2],[2,2],[1,3]]});
   });
