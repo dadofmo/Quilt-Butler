@@ -1,3 +1,4 @@
+import { EccentricStarBlock } from "./EccentricStarBlock";
 import { FancyContraryWifeBlock } from "./FancyContraryWifeBlock";
 import { FiveSpotBlock } from "./FiveSpotBlock";
 import { ChurnDashBlock } from "./ChurnDashBlock";
@@ -43,6 +44,7 @@ const C = {
 
 
 const PATTERN_ALT: Record<PatternId, string> = {
+  "eccentric-star": "Eccentric Star: eight half-square triangles turning around a whole centre square in three fabrics",
   "fancy-contrary-wife": "Fancy Contrary Wife: four mirrored square-and-triangle corners and four hourglasses frame a whole centre square",
   "five-spot": "Five Spot: five whole diamonds with pieced square-and-triangle corners in five fabrics",
   "eight-hands-around": "Eight Hands Around: nested stars with large corner triangles and flying geese surrounding smaller geese, four background squares and a whole centre",
@@ -193,6 +195,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     "aria-label": label,
   };
   switch (pattern) {
+    case "eccentric-star":
+      return <svg {...common}><EccentricStarBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "fancy-contrary-wife":
       return <svg {...common}><FancyContraryWifeBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "five-spot":
