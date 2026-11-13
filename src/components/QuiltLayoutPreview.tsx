@@ -1,3 +1,4 @@
+import { EccentricStarBlock } from "./EccentricStarBlock";
 import { FancyContraryWifeBlock } from "./FancyContraryWifeBlock";
 import { FiveSpotBlock } from "./FiveSpotBlock";
 import { ChurnDashBlock } from "./ChurnDashBlock";
@@ -1488,6 +1489,8 @@ function MiniBlock({
       return <DumbbellBlock size={200} assignments={assignments} photos={photos} />;
     case "fancy-contrary-wife":
       return <FancyContraryWifeBlock size={200} assignments={assignments} photos={photos} />;
+    case "eccentric-star":
+      return <EccentricStarBlock size={200} assignments={assignments} photos={photos} />;
     case "five-spot":
       return <FiveSpotBlock size={200} assignments={assignments} photos={photos} />;
     case "country-roads":

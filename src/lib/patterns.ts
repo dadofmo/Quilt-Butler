@@ -64,6 +64,17 @@ const borderSection: PatternSection = {
 
 const BASE_PATTERNS: PatternDefBase[] = [
   {
+    id: "eccentric-star", name: "Eccentric Star", hasMath: true,
+    intro: "Eight half-square triangles turn around one whole centre square in a three-by-three block. Three adjustable fabrics; straight seams, no templates or Y-seams. Optional sashing and border.",
+    sections: [
+      { id: "dark", label: "Centre & dark triangle halves", defaultFabric: "A", hint: "One whole centre and one half of every triangle unit." },
+      { id: "background", label: "Outer corner triangle halves", defaultFabric: "B", hint: "Four background halves at the block corners." },
+      { id: "points", label: "Turning star-point triangles", defaultFabric: "C", hint: "Four accent halves in the side units." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "D" },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+  {
     id: "fancy-contrary-wife", name: "Fancy Contrary Wife", hasMath: true,
     intro: "Four mirrored corner four-patches and four hourglass units surround one whole centre square. Three adjustable fabrics, straight seams, no templates or Y-seams. Optional sashing and border.",
     sections: [
@@ -2289,6 +2300,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
  * equal the distinct default fabrics across both blocks, excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
+  "eccentric-star": { skill: "beginner", fabricCount: 3, techniques: ["squares", "hst"] },
   "fancy-contrary-wife": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst"] },
   "five-spot": { skill: "intermediate", fabricCount: 5, techniques: ["squares", "onpoint"] },
   "eight-hands-around": { skill: "intermediate", fabricCount: 4, techniques: ["squares", "hst", "geese"] },

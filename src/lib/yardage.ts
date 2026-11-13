@@ -1,3 +1,4 @@
+import { ECCENTRIC_STAR_CELLS, ECCENTRIC_STAR_COUNTS, eccentricStarDimensions } from "./eccentric-star";
 import { fancyContraryDimensions } from "./fancy-contrary-wife";
 import { fiveSpotDimensions, FIVE_SPOT_COUNTS } from "./five-spot";
 import { churnDimensions } from "./churn-dash";
@@ -249,7 +250,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
+  const isJericho = s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -800,6 +801,33 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
       notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${(s.blockSize + SEAM).toFixed(3)}" and ${intersections} intersection squares at ${(sashWidth + SEAM).toFixed(3)}". Join blocks into rows with vertical strips, sew full-width sashing rows between block rows, then add the optional border last.`);
     } else notes.push("Join Fool's Square blocks edge to edge. Add the optional outer border last.");
+  } else if (s.pattern === "eccentric-star") {
+    const d = eccentricStarDimensions(s.blockSize), c = ECCENTRIC_STAR_COUNTS, n = blockCount;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Eccentric Star section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const dark = fabric("dark"), bg = fabric("background"), pts = fabric("points");
+    addSquares(reqs[dark], "Whole centre squares", c.centre*n, d.unitTrim, s.fabricWidth);
+    addSquares(reqs[dark], "Dark HST starter squares||two background pairs and two star-point pairs per block", c.darkStarters*n, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[bg], "Background HST starter squares||two-at-a-time corner units", c.backgroundStarters*n, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[pts], "Star-point HST starter squares||two-at-a-time side units", c.pointStarters*n, d.hstStarter, s.fabricWidth);
+    const exact = (v: number) => { const m = rulerMark(v); return `${v.toFixed(4)}" (${m.relation} ${m.label} ruler mark)`; };
+    notes.push(
+      `Eccentric Star: a 3 × 3 grid of ${exact(d.unit)} finished units: four Fabric ${dark}/${bg} corner HSTs, four Fabric ${dark}/${pts} side HSTs, and one whole Fabric ${dark} centre square. Reference white lines are seams, not fabric strips.`,
+      `Cutting per block: Fabric ${dark}, one centre square at ${exact(d.unitTrim)} and four HST starter squares at ${d.hstStarter.toFixed(3)}"; Fabric ${bg}, two HST starters at ${d.hstStarter.toFixed(3)}"; Fabric ${pts}, two HST starters at ${d.hstStarter.toFixed(3)}". All cuts are squares; starter counts are not finished HST counts. Starters are oversized and rounded UP to an eighth for trimming. Centre cuts and final trim targets are exact; nearby ruler marks are guides, not permission to round down. Make one test block before chain-piecing.`,
+      `Make eight HSTs two at a time: pair two Fabric ${dark} starters with two Fabric ${bg} starters (two pairs yield four corner HSTs), and the remaining two Fabric ${dark} starters with two Fabric ${pts} starters (two pairs yield four side HSTs). Place each pair right sides together, draw one diagonal, sew 1/4" on both sides and cut on the drawn line. Open, press gently toward the darker fabric or open to reduce bulk; avoid stretching bias edges. Trim all eight HSTs to ${exact(d.unitTrim)} UNFINISHED square, with the diagonal seam running exactly corner to corner. Keep the centre a single uncut square of the same size.`,
+      ...[0,1,2].map(row => `Eccentric Star row ${row+1}, left to right: ` + ECCENTRIC_STAR_CELLS.filter(cell => cell.row === row).map(cell => "role" in cell ? `whole Fabric ${dark} centre square` : `HST with Fabric ${dark} at the ${cell.darkCorner} right-angle corner and Fabric ${fabric(cell.opposite)} opposite (seam ${cell.darkCorner === "top-right" || cell.darkCorner === "bottom-left" ? "top-left to bottom-right" : "top-right to bottom-left"})`).join("; ") + "."),
+      `Sew the three units in each row with accurate 1/4" seams, preserving every triangle orientation shown. Press rows 1 and 3 one direction and row 2 the opposite direction, or press open where bulky. Pin intersections, join the three rows and press. Check ${exact(d.blockTrim)} square UNFINISHED (${s.blockSize}" finished). Straight seams only; no Y-seams, templates, extra centre seams or guide-line strips.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing"), vertical = (blocksAcross-1)*blocksDown, horizontal = (blocksDown-1)*blocksAcross;
+      const count = vertical+horizontal, intersections = (blocksAcross-1)*(blocksDown-1);
+      if (count>0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize+SEAM, sashWidth+SEAM, s.fabricWidth);
+      if (intersections>0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${exact(sashWidth+SEAM)} × ${exact(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${exact(sashWidth+SEAM)}. Join block rows with vertical strips, piece full-width horizontal sashing rows with intersections, then add the optional border last. No outer sashing frame.`);
+    } else notes.push("Join Eccentric Star blocks edge to edge in the reference orientation; add the optional border last.");
   } else if (s.pattern === "fancy-contrary-wife") {
     const d = fancyContraryDimensions(s.blockSize), n = blockCount;
     const fabric = (id: string): FabricKey => {

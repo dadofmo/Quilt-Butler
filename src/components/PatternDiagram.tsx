@@ -1,3 +1,4 @@
+import { EccentricStarBlock } from "./EccentricStarBlock";
 import { FancyContraryWifeBlock } from "./FancyContraryWifeBlock";
 import { FiveSpotBlock } from "./FiveSpotBlock";
 import { ChurnDashBlock } from "./ChurnDashBlock";
@@ -99,6 +100,8 @@ function renderInner(
 ) {
   const get = (k: string, fb: FabricKey) => fillFor(pattern, a, k, fb, photos);
   switch (pattern) {
+    case "eccentric-star":
+      return <EccentricStarBlock size={200} assignments={a} photos={photos} />;
     case "fancy-contrary-wife":
       return <FancyContraryWifeBlock size={200} assignments={a} photos={photos} />;
     case "five-spot":
