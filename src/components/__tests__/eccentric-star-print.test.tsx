@@ -22,7 +22,7 @@ describe("Eccentric Star fabric rendering and printed choices",()=> {
     for(const [role,f,n] of [["dark","H",9],["background","I",4],["points","J",4]] as const) {
       const pieces=[...container.querySelectorAll(`[data-role="${role}"]`)];
       expect(pieces).toHaveLength(n);
-      expect(pieces.every(p=>p.getAttribute("fill")===`url(#fp-${f})`)).toBe(true);
+      expect(pieces.every(p=>p.getAttribute("fill")===`url(#fabric-${f})`)).toBe(true);
     }
   });
 });
