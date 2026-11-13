@@ -7,6 +7,7 @@ export function EccentricStarBlock({size, assignments = {}, photos}: {
   size: number; assignments?: SectionAssignments; photos?: Partial<Record<FabricKey,string>>;
 }) {
   const pattern = getPattern("eccentric-star");
+  if (!pattern) throw new Error("Missing Eccentric Star pattern");
   return <g data-eccentric-star-block="">{eccentricStarPolygons(size).map((p,i) => {
     const section = pattern.sections.find(s => s.id === p.role);
     if (!section) throw new Error(`Missing Eccentric Star section: ${p.role}`);

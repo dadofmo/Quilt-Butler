@@ -18,10 +18,11 @@ const count=(r:ReturnType<typeof calculateYardage>,f:string,label:string)=>cuts(
 describe("Eccentric Star reference and construction",()=> {
   it("adds a separate three-fabric pattern and keeps Nine Patch first",()=> {
     const p=getPattern("eccentric-star");
+    if (!p) throw new Error("Missing Eccentric Star pattern");
     expect(countBlockFabrics(p.sections)).toBe(3);
     expect(p.sections.slice(0,3).map(s=>s.defaultFabric)).toEqual(["A","B","C"]);
-    expect(getPattern("contrary-wife").id).toBe("contrary-wife");
-    expect(getPattern("fancy-contrary-wife").id).toBe("fancy-contrary-wife");
+    expect(getPattern("contrary-wife")?.id).toBe("contrary-wife");
+    expect(getPattern("fancy-contrary-wife")?.id).toBe("fancy-contrary-wife");
     expect(PATTERNS[0].id).toBe("nine-patch");
   });
   it("matches all eight reference triangle orientations and the whole dark centre",()=> {
