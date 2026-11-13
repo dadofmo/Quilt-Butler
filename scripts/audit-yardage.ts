@@ -3163,6 +3163,15 @@ console.log("\n=== Fancy Contrary Wife: nine 12-inch blocks ===");
   check("Fancy Contrary Wife sashing bolt inches", finished.fabrics.find(x => x.fabric === "F")?.totalInches ?? -1, 12.5);
   check("Fancy Contrary Wife border bolt inches", finished.fabrics.find(x => x.fabric === "G")?.totalInches ?? -1, 17.5);
 }
+console.log("\n=== Eccentric Star: nine 12-inch blocks ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "eccentric-star", quiltWidth: 36, quiltHeight: 36 });
+  check("Eccentric Star dark: one 4.5-inch centre strip + five 5-inch HST strips", r.fabrics.find(x => x.fabric === "A")?.totalInches ?? -1, 29.5);
+  for (const f of ["B", "C"]) check(`Eccentric Star ${f}: three 5-inch HST strips`, r.fabrics.find(x => x.fabric === f)?.totalInches ?? -1, 15);
+  const finished = calculateYardage({ ...base(), pattern: "eccentric-star", quiltWidth: 46, quiltHeight: 46, borderWidth: 3, sashingWidth: 2, assignments: { sashing: "F", border: "G" } });
+  check("Eccentric Star sashing bolt inches", finished.fabrics.find(x => x.fabric === "F")?.totalInches ?? -1, 12.5);
+  check("Eccentric Star border bolt inches", finished.fabrics.find(x => x.fabric === "G")?.totalInches ?? -1, 17.5);
+}
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {
