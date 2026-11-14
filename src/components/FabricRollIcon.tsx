@@ -5,6 +5,7 @@ import type { PatternId } from "@/lib/planner-store";
  * 1 yard = beginner-friendly, 5 yards = most challenging.
  */
 export const PATTERN_DIFFICULTY: Record<PatternId, 1 | 2 | 3 | 4 | 5> = {
+  "indian-puzzle": 3,
   "eccentric-star": 2,
   "fancy-contrary-wife": 3,
   "five-spot": 3,

@@ -64,6 +64,17 @@ const borderSection: PatternSection = {
 
 const BASE_PATTERNS: PatternDefBase[] = [
   {
+    id: "indian-puzzle", name: "Indian Puzzle", hasMath: true,
+    intro: "Four mirrored square-and-triangle corners and four paired flying-geese sides frame one whole centre diamond. Three adjustable fabrics; straight seams, no Y-seams or templates. Optional sashing and border.",
+    sections: [
+      { id: "dark", label: "Geese & centre framing triangles", defaultFabric: "A" },
+      { id: "background", label: "Background & whole centre diamond", defaultFabric: "B" },
+      { id: "accent", label: "Corner squares & triangle halves", defaultFabric: "E" },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "C" },
+      { ...borderSection, defaultFabric: "D" },
+    ],
+  },
+  {
     id: "eccentric-star", name: "Eccentric Star", hasMath: true,
     intro: "Eight half-square triangles turn around one whole centre square in a three-by-three block. Three adjustable fabrics; straight seams, no templates or Y-seams. Optional sashing and border.",
     sections: [
@@ -2300,6 +2311,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
  * equal the distinct default fabrics across both blocks, excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
+  "indian-puzzle": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst", "geese", "onpoint"] },
   "eccentric-star": { skill: "beginner", fabricCount: 3, techniques: ["squares", "hst"] },
   "fancy-contrary-wife": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst"] },
   "five-spot": { skill: "intermediate", fabricCount: 5, techniques: ["squares", "onpoint"] },
