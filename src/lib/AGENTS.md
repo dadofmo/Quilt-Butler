@@ -8,3 +8,5 @@
 - Uploads/camera shots go through `prepareFabricPhoto` (downscaled JPEG) before storage. Why: raw phone photos overflow saved planner storage and alias fine weaves.
 - `buildFabricTile` fits lighting, scores seamless/repeat candidates with `tileArtifacts`, and box-halves to 256px; run the full fabric battery. Why: no one tiling method suits every print.
 - Country Roads shares its 7×7 cell map across previews and cuts: four continuous 1×3 bars, a separate centre square, and four mirrored corner nine-patches (corner square, four squares, four two-at-a-time HSTs). Why: straight seams, fewest pieces.
+
+- Indian Puzzle shares its mirrored 6×6 geometry and dimensions across all views and cuts; use eight two-at-a-time corner HSTs, eight four-at-a-time geese in reversed colourways, and one whole centre diamond. Why: matches continuous reference triangles with straight seams and no unnecessary piecing.

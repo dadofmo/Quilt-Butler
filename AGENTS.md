@@ -73,3 +73,5 @@ Subdirectories may have their own `AGENTS.md`; read it before changing files the
 
 
 - Broken Wheel 3×3: sq-in-sq corners, bar sides
+
+- Indian Puzzle: follow src/lib/AGENTS.md for consistency.

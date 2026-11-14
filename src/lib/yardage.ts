@@ -1,3 +1,4 @@
+import { indianPuzzleDimensions } from "./indian-puzzle";
 import { ECCENTRIC_STAR_CELLS, ECCENTRIC_STAR_COUNTS, eccentricStarDimensions } from "./eccentric-star";
 import { fancyContraryDimensions } from "./fancy-contrary-wife";
 import { fiveSpotDimensions, FIVE_SPOT_COUNTS } from "./five-spot";
@@ -250,7 +251,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
+  const isJericho = s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -801,6 +802,43 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
       notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${(s.blockSize + SEAM).toFixed(3)}" and ${intersections} intersection squares at ${(sashWidth + SEAM).toFixed(3)}". Join blocks into rows with vertical strips, sew full-width sashing rows between block rows, then add the optional border last.`);
     } else notes.push("Join Fool's Square blocks edge to edge. Add the optional outer border last.");
+  } else if (s.pattern === "indian-puzzle") {
+    const d = indianPuzzleDimensions(s.blockSize), n = blockCount;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Indian Puzzle section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const dark = fabric("dark"), bg = fabric("background"), accent = fabric("accent");
+    for (const f of [bg, accent]) {
+      addSquares(reqs[f], "Corner plain squares", 4*n, d.smallCut, s.fabricWidth);
+      addSquares(reqs[f], "Corner HST starter squares||four background/accent pairs make eight HSTs per block", 4*n, d.hstStarter, s.fabricWidth);
+    }
+    for (const f of [bg, dark]) {
+      addSquares(reqs[f], "Flying-geese large squares||one large plus four opposite-fabric small squares makes four geese", n, d.geeseLarge, s.fabricWidth);
+      addSquares(reqs[f], "Flying-geese wing squares||four per opposite-fabric large square", 4*n, d.geeseSmall, s.fabricWidth);
+    }
+    addSquares(reqs[bg], "Whole centre diamond squares||straight-grain squares turned on point", n, d.diamondCut, s.fabricWidth);
+    addSquares(reqs[dark], "Centre setting-triangle starter squares||cut each ONCE diagonally; four loose triangles per block", 2*n, d.settingStarter, s.fabricWidth);
+    const exact = (v: number) => { const m = rulerMark(v); return `${v.toFixed(4)}" (${m.relation} ${m.label} ruler mark)`; };
+    notes.push(
+      `Indian Puzzle: a 6 × 6 draft assembled as a 3 × 3 layout of ${exact(d.unit)} finished square units. Four mirrored corner four-patches, four paired-geese side units and one whole centre diamond. Reference white lines are seams, not fabric strips.`,
+      `Cutting per block: Fabric ${accent} — 4 plain squares at ${exact(d.smallCut)} and 4 HST starters at ${d.hstStarter.toFixed(3)}". Fabric ${bg} — 4 plain squares at ${exact(d.smallCut)}, 4 HST starters at ${d.hstStarter.toFixed(3)}", 1 geese large square at ${d.geeseLarge.toFixed(3)}", 4 wing squares at ${d.geeseSmall.toFixed(3)}", and 1 whole centre diamond at ${exact(d.diamondCut)}. Fabric ${dark} — 1 geese large square at ${d.geeseLarge.toFixed(3)}", 4 wing squares at ${d.geeseSmall.toFixed(3)}", and 2 centre setting starters at ${d.settingStarter.toFixed(3)}" cut ONCE diagonally for four loose triangles. Starter counts are not finished-unit counts.`,
+      `Cut plain squares and the diamond at their exact decimal sizes; nearby ruler marks are guides if between marks. Starters are oversized and rounded UP to an eighth for trimming, but final trim targets are not rounded. Make and measure one test block before chain-piecing. Use accurate 1/4" seams and avoid stretching bias edges.`,
+      `Corner HSTs: pair the four Fabric ${accent} starters with the four Fabric ${bg} starters, right sides together. Draw a diagonal, sew 1/4" on both sides and cut on the drawn line. Press gently, then trim eight HSTs to ${exact(d.smallCut)} square with the seam corner to corner.`,
+      `Top-left corner: top row — Fabric ${bg} square, HST with Fabric ${accent} at the bottom-left right-angle corner; bottom row — HST with Fabric ${accent} at the top-right right-angle corner, Fabric ${accent} square. Both accent triangles touch the inner accent square. Sew the pairs, press toward the plain squares, nest and join; check ${exact(d.unitTrim)} square unfinished. Make four: mirror left-to-right for top-right, top-to-bottom for bottom-left, and both ways for bottom-right, so each background square is at the outer block corner and each accent square is inward.`,
+      `Flying geese, four at a time: use the Fabric ${bg} large square with four Fabric ${dark} wing squares to make four background-bodied geese; reverse fabrics for four dark-bodied geese. Draw diagonals on the small squares. Place two on opposite corners of a large square, right sides together, diagonals aligned and overlapping at the centre. Sew 1/4" each side, cut on the line and press wings outward. Add one remaining small square at the unsewn corner of each half, sew both sides of its line, cut and press. Trim each of the eight geese to ${exact(d.geeseWidth)} wide × ${exact(d.geeseHeight)} high, centring the body triangle and retaining 1/4" beyond its apex; align diagonal seams to the opposite raw corners. Do not split the continuous geese bodies into HSTs.`,
+      `Side units: sew a background-bodied goose to a dark-bodied goose along their full-width bases, with the background apex pointing OUTWARD and the dark apex pointing INWARD. Top side: background apex up on the outer row, dark apex down on the inner row. The two bodies share the middle base seam and point away from it. Make four units at ${exact(d.unitTrim)} square unfinished; rotate for right (background right, dark left), bottom (background down, dark up), and left (background left, dark right).`,
+      `Centre diamond: cut the Fabric ${dark} setting starters once diagonally. Sew a triangle to each of two opposite sides of the whole Fabric ${bg} diamond, matching midpoints and letting dog ears overhang; press outward gently, then add the remaining two triangles to the other opposite sides. Trim to ${exact(d.unitTrim)} square unfinished, centring the diamond and keeping 1/4" beyond every point. The diamond's exact finished side is ${(d.unit/Math.SQRT2).toFixed(4)}"; never round its cut down or trim off point allowances.`,
+      `Assemble three rows: corner – paired geese – corner; paired geese – centre diamond – paired geese; corner – paired geese – corner. Compare every unit with the block diagram. Sew each row, press row joins open where bulky, pin matching seams and points, then join rows. Check ${exact(d.blockTrim)} square unfinished (${s.blockSize}" finished). No Y-seams, templates, curved seams or added guide-line strips.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing"), vertical = (blocksAcross-1)*blocksDown, horizontal = (blocksDown-1)*blocksAcross;
+      const count = vertical+horizontal, intersections = (blocksAcross-1)*(blocksDown-1);
+      if (count>0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize+SEAM, sashWidth+SEAM, s.fabricWidth);
+      if (intersections>0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${exact(sashWidth+SEAM)} × ${exact(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${exact(sashWidth+SEAM)}. Join block rows with vertical strips; piece full-width horizontal sashing rows with intersections. Sashing is only between blocks; add the optional border last.`);
+    } else notes.push("Join Indian Puzzle blocks edge to edge in the reference orientation; add the optional border last.");
   } else if (s.pattern === "eccentric-star") {
     const d = eccentricStarDimensions(s.blockSize), c = ECCENTRIC_STAR_COUNTS, n = blockCount;
     const fabric = (id: string): FabricKey => {

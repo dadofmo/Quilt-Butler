@@ -3172,6 +3172,18 @@ console.log("\n=== Eccentric Star: nine 12-inch blocks ===");
   check("Eccentric Star sashing bolt inches", finished.fabrics.find(x => x.fabric === "F")?.totalInches ?? -1, 12.5);
   check("Eccentric Star border bolt inches", finished.fabrics.find(x => x.fabric === "G")?.totalInches ?? -1, 17.5);
 }
+console.log("\n=== Indian Puzzle: nine 12-inch blocks ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "indian-puzzle", quiltWidth: 36, quiltHeight: 36 });
+  // A: two large-geese strips at 5.5 + three wing strips at 3 + two setting strips at 3.
+  check("Indian Puzzle dark bolt inches", r.fabrics.find(x => x.fabric === "A")?.totalInches ?? -1, 26);
+  // B: three plain strips at 2.5 + three HST strips at 3 + geese 11+9 + one diamond strip at 3.3284.
+  check("Indian Puzzle background bolt inches", r.fabrics.find(x => x.fabric === "B")?.totalInches ?? -1, 39.82842712474619);
+  check("Indian Puzzle accent bolt inches", r.fabrics.find(x => x.fabric === "E")?.totalInches ?? -1, 16.5);
+  const finished = calculateYardage({ ...base(), pattern: "indian-puzzle", quiltWidth: 46, quiltHeight: 46, borderWidth: 3, sashingWidth: 2, assignments: { sashing: "F", border: "G" } });
+  check("Indian Puzzle sashing bolt inches", finished.fabrics.find(x => x.fabric === "F")?.totalInches ?? -1, 12.5);
+  check("Indian Puzzle border bolt inches", finished.fabrics.find(x => x.fabric === "G")?.totalInches ?? -1, 17.5);
+}
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {
