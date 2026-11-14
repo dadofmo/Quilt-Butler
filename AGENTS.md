@@ -74,5 +74,4 @@ Subdirectories may have their own `AGENTS.md`; read it before changing files the
 
 - Broken Wheel 3×3: sq-in-sq corners, bar sides
 
-## Indian Puzzle construction
-- Share the 6×6 reference geometry and dimensions across previews and cuts; assemble corner four-patches, paired reversed-colourway geese and a whole centre diamond as nine macro units. Why: continuous triangles and straight seams preserve the reference.
+- Indian Puzzle: follow src/lib/AGENTS.md for consistency.
