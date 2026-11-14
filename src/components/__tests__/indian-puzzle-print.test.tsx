@@ -17,9 +17,9 @@ describe("Indian Puzzle fabric rendering and printed choices",()=> {
     expect(container.querySelectorAll("li")).toHaveLength(5);
     expect(container.querySelector(".relative.inline-block")?.getAttribute("style")).toContain("var(--fabric-g)");
   });
-  it("uses fabric photo fills in all eight HSTs and the whole centre",()=> {
+  it("uses fabric photo fills in corners, continuous geese and the whole centre diamond",()=> {
     const {container}=render(<svg><IndianPuzzleBlock size={90} assignments={{dark:"H",background:"I",accent:"J"}} photos={{H:"photo-h",I:"photo-i",J:"photo-j"}} /></svg>);
-    for(const [role,f,n] of [["dark","H",9],["background","I",4],["accent","J",4]] as const) {
+    for(const [role,f,n] of [["dark","H",16],["background","I",25],["accent","J",12]] as const) {
       const pieces=[...container.querySelectorAll(`[data-role="${role}"]`)];
       expect(pieces).toHaveLength(n);
       expect(pieces.every(p=>p.getAttribute("fill")===`url(#fabric-${f})`)).toBe(true);
