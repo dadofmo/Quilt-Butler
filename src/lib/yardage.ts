@@ -271,7 +271,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const innerH = s.quiltHeight - 2 * s.borderWidth;
   // Attic Window fits optional between-block sashing inside the requested top,
   // matching the shared Size, Fabrics, and Results page grid calculation.
-  const windowSash = (isChurnDash || isJericho || isContraryWife || isDuckAndDuckling || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
+  const windowSash = (s.pattern === "hovering-hawks" || isChurnDash || isJericho || isContraryWife || isDuckAndDuckling || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
   const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (s.blockSize + windowSash)));
   const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (s.blockSize + windowSash)));
   const blockCount = blocksAcross * blocksDown;
@@ -5609,6 +5609,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "fifty-four-forty-or-fight" ||
     s.pattern === "chocolate-cake" ||
     s.pattern === "domino-chicken-foot" ||
+    s.pattern === "hovering-hawks" ||
     s.pattern === "x-marks-the-chain" ||
     s.pattern === "whirlwind-waltz" ||
     s.pattern === "custom-block";

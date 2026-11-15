@@ -199,6 +199,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     "aria-label": label,
   };
   switch (pattern) {
+    case "hovering-hawks":
+      return <svg {...common}><HoveringHawksBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "indian-puzzle":
       return <svg {...common}><IndianPuzzleBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "eccentric-star":
