@@ -3184,6 +3184,19 @@ console.log("\n=== Indian Puzzle: nine 12-inch blocks ===");
   check("Indian Puzzle sashing bolt inches", finished.fabrics.find(x => x.fabric === "F")?.totalInches ?? -1, 12.5);
   check("Indian Puzzle border bolt inches", finished.fabrics.find(x => x.fabric === "G")?.totalInches ?? -1, 17.5);
 }
+console.log("\n=== Hovering Hawks: nine 12-inch blocks ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "hovering-hawks", quiltWidth: 36, quiltHeight: 36 });
+  // A: five 3.5-inch plain-square strips + five 4-inch HST starter strips.
+  check("Hovering Hawks background bolt inches", r.fabrics.find(x => x.fabric === "A")?.totalInches ?? -1, 37.5);
+  check("Hovering Hawks hawk bolt inches", r.fabrics.find(x => x.fabric === "B")?.totalInches ?? -1, 12);
+  check("Hovering Hawks accent bolt inches", r.fabrics.find(x => x.fabric === "C")?.totalInches ?? -1, 8);
+  const turned = calculateYardage({ ...base(), pattern: "hovering-hawks", quiltWidth: 36, quiltHeight: 36, blockLayout: "alternating" });
+  check("Hovering Hawks turning leaves background inches unchanged", turned.fabrics.find(x => x.fabric === "A")?.totalInches ?? -1, 37.5);
+  const finished = calculateYardage({ ...base(), pattern: "hovering-hawks", quiltWidth: 46, quiltHeight: 46, borderWidth: 3, sashingWidth: 2, assignments: { sashing: "F", border: "G" } });
+  check("Hovering Hawks sashing bolt inches", finished.fabrics.find(x => x.fabric === "F")?.totalInches ?? -1, 12.5);
+  check("Hovering Hawks border bolt inches", finished.fabrics.find(x => x.fabric === "G")?.totalInches ?? -1, 17.5);
+}
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {

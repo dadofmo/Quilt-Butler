@@ -1,3 +1,4 @@
+import { HOVERING_HAWKS_CELLS, HOVERING_HAWKS_COUNTS, hoveringHawksDimensions } from "./hovering-hawks";
 import { indianPuzzleDimensions } from "./indian-puzzle";
 import { ECCENTRIC_STAR_CELLS, ECCENTRIC_STAR_COUNTS, eccentricStarDimensions } from "./eccentric-star";
 import { fancyContraryDimensions } from "./fancy-contrary-wife";
@@ -251,7 +252,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
+  const isJericho = s.pattern === "hovering-hawks" || s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -270,7 +271,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const innerH = s.quiltHeight - 2 * s.borderWidth;
   // Attic Window fits optional between-block sashing inside the requested top,
   // matching the shared Size, Fabrics, and Results page grid calculation.
-  const windowSash = (isChurnDash || isJericho || isContraryWife || isDuckAndDuckling || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
+  const windowSash = (s.pattern === "hovering-hawks" || isChurnDash || isJericho || isContraryWife || isDuckAndDuckling || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
   const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (s.blockSize + windowSash)));
   const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (s.blockSize + windowSash)));
   const blockCount = blocksAcross * blocksDown;
@@ -802,6 +803,33 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth + SEAM, s.fabricWidth);
       notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${(sashWidth + SEAM).toFixed(3)}" × ${(s.blockSize + SEAM).toFixed(3)}" and ${intersections} intersection squares at ${(sashWidth + SEAM).toFixed(3)}". Join blocks into rows with vertical strips, sew full-width sashing rows between block rows, then add the optional border last.`);
     } else notes.push("Join Fool's Square blocks edge to edge. Add the optional outer border last.");
+  } else if (s.pattern === "hovering-hawks") {
+    const d = hoveringHawksDimensions(s.blockSize), c = HOVERING_HAWKS_COUNTS, n = blockCount;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Hovering Hawks section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const bg = fabric("background"), hawks = fabric("hawks"), accent = fabric("accent");
+    addSquares(reqs[bg], "Background plain squares", c.backgroundSquares*n, d.unitTrim, s.fabricWidth);
+    addSquares(reqs[bg], "Background HST starter squares||three hawk pairs and two accent pairs per block", c.backgroundStarters*n, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[hawks], "Hawk HST starter squares||three two-at-a-time pairs per block", c.hawkStarters*n, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[accent], "Accent HST starter squares||two two-at-a-time pairs per block", c.accentStarters*n, d.hstStarter, s.fabricWidth);
+    const exact = (v: number) => { const m = rulerMark(v); return `${v.toFixed(4)}" (${m.relation} ${m.label} ruler mark)`; };
+    notes.push(
+      `Hovering Hawks: a 4 × 4 grid of ${exact(d.unit)} finished units. Each block has six whole Fabric ${bg} squares, six Fabric ${hawks}/${bg} HSTs and four Fabric ${accent}/${bg} HSTs. The pale lines in the reference are construction seams, not extra fabric strips.`,
+      `Cutting per block: Fabric ${bg} — 6 plain squares at ${exact(d.unitTrim)} and 5 HST starters at ${d.hstStarter.toFixed(3)}"; Fabric ${hawks} — 3 HST starters at ${d.hstStarter.toFixed(3)}"; Fabric ${accent} — 2 HST starters at ${d.hstStarter.toFixed(3)}". Starter counts are squares, not finished HST counts. Plain cuts and final trim targets are exact; nearby ruler marks are guides, not permission to round down. Starters are oversized and rounded UP to an eighth for trimming. Make one test block before chain-piecing.`,
+      `Make ten HSTs two at a time: pair the three Fabric ${hawks} starters with three Fabric ${bg} starters (three pairs yield six hawk HSTs), then pair the two Fabric ${accent} starters with the remaining two Fabric ${bg} starters (two pairs yield four accent HSTs). Place each pair right sides together, draw one diagonal, sew 1/4" on both sides and cut on the drawn line. Open and press gently toward the darker fabric or open to reduce bulk; avoid stretching the bias edges. Trim all ten HSTs to ${exact(d.unitTrim)} UNFINISHED square with the diagonal seam exactly corner to corner.`,
+      ...[0,1,2,3].map(row => `Hovering Hawks row ${row+1}, left to right: ` + HOVERING_HAWKS_CELLS.filter(cell => cell.row === row).map(cell => cell.role === "background" ? `whole Fabric ${bg} square` : `HST with Fabric ${fabric(cell.role)} at the ${cell.corner} right-angle corner and Fabric ${bg} opposite; diagonal seam top-left to bottom-right`).join("; ") + "."),
+      `Sew the four units in each row with accurate 1/4" seams, preserving every orientation listed above. Press rows 1 and 3 one direction and rows 2 and 4 the opposite direction, or press open where bulky. Pin intersections, join the four rows and press. Check ${exact(d.blockTrim)} square UNFINISHED (${s.blockSize}" finished). Straight seams only; no Y-seams, templates, extra seams in whole squares or guide-line strips.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing"), vertical = (blocksAcross-1)*blocksDown, horizontal = (blocksDown-1)*blocksAcross;
+      const count = vertical+horizontal, intersections = (blocksAcross-1)*(blocksDown-1);
+      if (count>0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize+SEAM, sashWidth+SEAM, s.fabricWidth);
+      if (intersections>0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${exact(sashWidth+SEAM)} × ${exact(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${exact(sashWidth+SEAM)}. Join block rows with vertical strips, piece full-width horizontal sashing rows with intersections, then add the optional border last. No outer sashing frame.`);
+    } else notes.push("Join Hovering Hawks blocks edge to edge in the selected straight or alternating-turn setting; add the optional border last.");
   } else if (s.pattern === "indian-puzzle") {
     const d = indianPuzzleDimensions(s.blockSize), n = blockCount;
     const fabric = (id: string): FabricKey => {
@@ -5608,6 +5636,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
     s.pattern === "fifty-four-forty-or-fight" ||
     s.pattern === "chocolate-cake" ||
     s.pattern === "domino-chicken-foot" ||
+    s.pattern === "hovering-hawks" ||
     s.pattern === "x-marks-the-chain" ||
     s.pattern === "whirlwind-waltz" ||
     s.pattern === "custom-block";

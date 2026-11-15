@@ -1,3 +1,4 @@
+import { HoveringHawksBlock } from "./HoveringHawksBlock";
 import { IndianPuzzleBlock } from "./IndianPuzzleBlock";
 import { EccentricStarBlock } from "./EccentricStarBlock";
 import { FancyContraryWifeBlock } from "./FancyContraryWifeBlock";
@@ -1490,6 +1491,8 @@ function MiniBlock({
       return <DumbbellBlock size={200} assignments={assignments} photos={photos} />;
     case "fancy-contrary-wife":
       return <FancyContraryWifeBlock size={200} assignments={assignments} photos={photos} />;
+    case "hovering-hawks":
+      return <HoveringHawksBlock size={200} assignments={assignments} photos={photos} />;
     case "indian-puzzle":
       return <IndianPuzzleBlock size={200} assignments={assignments} photos={photos} />;
     case "eccentric-star":

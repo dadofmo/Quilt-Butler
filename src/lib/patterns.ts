@@ -64,6 +64,18 @@ const borderSection: PatternSection = {
 
 const BASE_PATTERNS: PatternDefBase[] = [
   {
+    id: "hovering-hawks", name: "Hovering Hawks", hasMath: true,
+    layouts: ["alternating"],
+    intro: "A 4×4 block with six background squares and ten half-square triangles: six hawk/background units and four accent/background units. Keep every block facing the same way, or turn every other block a quarter turn checkerboard-style to form the star layout. Three adjustable fabrics; straight seams, no templates or Y-seams. Optional sashing and border.",
+    sections: [
+      { id: "background", label: "Background squares & triangle halves", defaultFabric: "A", hint: "Six whole squares and one half of all ten triangle units." },
+      { id: "hawks", label: "Hovering hawk triangles", defaultFabric: "B", hint: "Six triangle halves forming the main hovering-hawk design." },
+      { id: "accent", label: "Secondary accent triangles", defaultFabric: "C", hint: "Four triangle halves completing the reference geometry." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "D" },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+  {
     id: "indian-puzzle", name: "Indian Puzzle", hasMath: true,
     intro: "Four mirrored square-and-triangle corners and four paired flying-geese sides frame one whole centre diamond. Three adjustable fabrics; straight seams, no Y-seams or templates. Optional sashing and border.",
     sections: [
@@ -2311,6 +2323,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
  * equal the distinct default fabrics across both blocks, excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
+  "hovering-hawks": { skill: "beginner", fabricCount: 3, techniques: ["squares", "hst"] },
   "indian-puzzle": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst", "geese", "onpoint"] },
   "eccentric-star": { skill: "beginner", fabricCount: 3, techniques: ["squares", "hst"] },
   "fancy-contrary-wife": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst"] },
