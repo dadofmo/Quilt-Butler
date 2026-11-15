@@ -1,3 +1,4 @@
+import { HoveringHawksBlock } from "./HoveringHawksBlock";
 import { IndianPuzzleBlock } from "./IndianPuzzleBlock";
 import { EccentricStarBlock } from "./EccentricStarBlock";
 import { FancyContraryWifeBlock } from "./FancyContraryWifeBlock";

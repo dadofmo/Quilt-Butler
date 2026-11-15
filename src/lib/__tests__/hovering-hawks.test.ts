@@ -81,10 +81,12 @@ describe("Hovering Hawks reference geometry and construction", () => {
     expect(pieces.filter((p) => p.role === "background")).toHaveLength(16);
     expect(pieces.filter((p) => p.role === "hawks")).toHaveLength(6);
     expect(pieces.filter((p) => p.role === "accent")).toHaveLength(4);
-    const areas = Object.groupBy(pieces, (p) => p.role);
-    expect(areas.background?.reduce((sum, p) => sum + area(p.points), 0)).toBe(11);
-    expect(areas.hawks?.reduce((sum, p) => sum + area(p.points), 0)).toBe(3);
-    expect(areas.accent?.reduce((sum, p) => sum + area(p.points), 0)).toBe(2);
+    const roleArea = (role: "background" | "hawks" | "accent") => pieces
+      .filter((p) => p.role === role)
+      .reduce((sum, p) => sum + area(p.points), 0);
+    expect(roleArea("background")).toBe(11);
+    expect(roleArea("hawks")).toBe(3);
+    expect(roleArea("accent")).toBe(2);
     expect(pieces.reduce((sum, p) => sum + area(p.points), 0)).toBe(16);
   });
 

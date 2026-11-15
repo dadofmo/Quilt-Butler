@@ -1,3 +1,4 @@
+import { HOVERING_HAWKS_CELLS, HOVERING_HAWKS_COUNTS, hoveringHawksDimensions } from "./hovering-hawks";
 import { indianPuzzleDimensions } from "./indian-puzzle";
 import { ECCENTRIC_STAR_CELLS, ECCENTRIC_STAR_COUNTS, eccentricStarDimensions } from "./eccentric-star";
 import { fancyContraryDimensions } from "./fancy-contrary-wife";
