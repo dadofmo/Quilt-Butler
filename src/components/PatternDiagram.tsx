@@ -102,6 +102,8 @@ function renderInner(
 ) {
   const get = (k: string, fb: FabricKey) => fillFor(pattern, a, k, fb, photos);
   switch (pattern) {
+    case "hovering-hawks":
+      return <HoveringHawksBlock size={200} assignments={a} photos={photos} />;
     case "indian-puzzle":
       return <IndianPuzzleBlock size={200} assignments={a} photos={photos} />;
     case "eccentric-star":

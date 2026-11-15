@@ -46,6 +46,7 @@ const C = {
 
 
 const PATTERN_ALT: Record<PatternId, string> = {
+  "hovering-hawks": "Hovering Hawks: a four-by-four block with six background squares and ten half-square triangles in three fabrics, with an alternating-turn star layout",
   "indian-puzzle": "Indian Puzzle: mirrored square-and-triangle corners, four paired flying-geese sides and a whole centre diamond in three fabrics",
   "eccentric-star": "Eccentric Star: eight half-square triangles turning around a whole centre square in three fabrics",
   "fancy-contrary-wife": "Fancy Contrary Wife: four mirrored square-and-triangle corners and four hourglasses frame a whole centre square",

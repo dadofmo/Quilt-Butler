@@ -252,7 +252,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
+  const isJericho = s.pattern === "hovering-hawks" || s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
