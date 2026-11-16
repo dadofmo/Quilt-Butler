@@ -3254,3 +3254,30 @@ console.log("\n=== Eight Hands Around: 36×36, 12-inch blocks ===");
   check("EHA inner inches: 3 two-and-a-half-inch strips", f("C")?.totalInches ?? -1, 7.5);
   check("EHA centre inches: one three-and-a-half-inch strip", f("D")?.totalInches ?? -1, 3.5);
 }
+
+console.log("\n=== Sawtooth: nine 12-inch blocks, five on-point cells each ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "sawtooth", quiltWidth: 36, quiltHeight: 36, blockSize: 12, borderWidth: 0, sashingWidth: 0 });
+  const f = (k: string) => r.fabrics.find(x => x.fabric === k);
+  const diamond = 4 / Math.SQRT2 + 0.5;
+  check("ST outer HST starters", f("A")?.pieces[0].count ?? -1, 18);
+  check("ST outer setting starters", f("A")?.pieces[1].count ?? -1, 54);
+  check("ST inward HST starters", f("B")?.pieces[0].count ?? -1, 18);
+  check("ST exact diamond count", f("C")?.pieces[0].count ?? -1, 45);
+  check("ST exact diamond cut", f("C")?.pieces[0].w ?? -1, diamond);
+  check("ST light setting starters", f("D")?.pieces[0].count ?? -1, 36);
+  check("ST A inches: 3 HST + 4 setting strips", f("A")?.totalInches ?? -1, 3 * 4.875 + 4 * 2.875);
+  check("ST B inches", f("B")?.totalInches ?? -1, 3 * 4.875);
+  check("ST C inches: four exact-diamond strips", f("C")?.totalInches ?? -1, 4 * diamond);
+  check("ST D inches", f("D")?.totalInches ?? -1, 3 * 2.875);
+  const sash = calculateYardage({ ...base(), pattern: "sawtooth", quiltWidth: 46, quiltHeight: 46, blockSize: 12, sashingWidth: 2, borderWidth: 3 });
+  check("ST sashed diamond count", sash.fabrics.find(x => x.fabric === "C")?.pieces[0].count ?? -1, 45);
+  check("ST sashing strips", sash.fabrics.find(x => x.fabric === "E")?.pieces[0].count ?? -1, 12);
+  check("ST sashing intersections", sash.fabrics.find(x => x.fabric === "E")?.pieces[1].count ?? -1, 4);
+  check("ST sashing inches", sash.fabrics.find(x => x.fabric === "E")?.totalInches ?? -1, 12.5);
+  check("ST border inches", sash.fabrics.find(x => x.fabric === "F")?.totalInches ?? -1, 17.5);
+  const ten = calculateYardage({ ...base(), pattern: "sawtooth", quiltWidth: 10, quiltHeight: 10, blockSize: 10 });
+  check("ST 10-inch HST starter rounds up", ten.fabrics.find(x => x.fabric === "A")?.pieces[0].w ?? -1, 4.25);
+  check("ST 10-inch setting starter rounds up", ten.fabrics.find(x => x.fabric === "D")?.pieces[0].w ?? -1, 2.625);
+  check("ST 10-inch exact diamond", ten.fabrics.find(x => x.fabric === "C")?.pieces[0].w ?? -1, 10 / 3 / Math.SQRT2 + 0.5);
+}
