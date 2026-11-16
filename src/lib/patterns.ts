@@ -64,6 +64,18 @@ const borderSection: PatternSection = {
 
 const BASE_PATTERNS: PatternDefBase[] = [
   {
+    id: "sawtooth", name: "Sawtooth", hasMath: true,
+    intro: "A 3×3 block with four inward-facing half-square-triangle corners and five square-in-a-square cells. Four independently adjustable fabrics preserve the different corner placements around each diamond. Sew nine cells in three rows with straight seams; optional sashing and border.",
+    sections: [
+      { id: "outer", label: "Outer corners & gold-role triangles", defaultFabric: "A", hint: "Four outer HST halves and twelve on-point setting triangles." },
+      { id: "inward", label: "Inward corner triangles", defaultFabric: "B", hint: "Four HST halves pointing toward the block centre." },
+      { id: "diamonds", label: "Five centre diamonds", defaultFabric: "C", hint: "One whole on-point centre square in each of the five square-in-a-square cells." },
+      { id: "light", label: "Light setting triangles", defaultFabric: "D", hint: "Eight individually placed triangles around the five diamonds." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "E", hint: "Optional; set to zero for edge-to-edge blocks." },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
+  {
     id: "hovering-hawks", name: "Hovering Hawks", hasMath: true,
     layouts: ["alternating"],
     intro: "A 4×4 block with six background squares and ten half-square triangles: six hawk/background units and four accent/background units. Keep every block facing the same way, or turn every other block a quarter turn checkerboard-style to form the star layout. Three adjustable fabrics; straight seams, no templates or Y-seams. Optional sashing and border.",
@@ -2323,6 +2335,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
  * equal the distinct default fabrics across both blocks, excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
+  "sawtooth": { skill: "confident", fabricCount: 4, techniques: ["squares", "hst", "onpoint"] },
   "hovering-hawks": { skill: "beginner", fabricCount: 3, techniques: ["squares", "hst"] },
   "indian-puzzle": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst", "geese", "onpoint"] },
   "eccentric-star": { skill: "beginner", fabricCount: 3, techniques: ["squares", "hst"] },
