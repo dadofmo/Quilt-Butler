@@ -1,3 +1,4 @@
+import { SawtoothBlock } from "./SawtoothBlock";
 import { HoveringHawksBlock } from "./HoveringHawksBlock";
 import { IndianPuzzleBlock } from "./IndianPuzzleBlock";
 import { EccentricStarBlock } from "./EccentricStarBlock";
@@ -102,6 +103,8 @@ function renderInner(
 ) {
   const get = (k: string, fb: FabricKey) => fillFor(pattern, a, k, fb, photos);
   switch (pattern) {
+    case "sawtooth":
+      return <SawtoothBlock size={200} assignments={a} photos={photos} />;
     case "hovering-hawks":
       return <HoveringHawksBlock size={200} assignments={a} photos={photos} />;
     case "indian-puzzle":

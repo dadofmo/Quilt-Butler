@@ -1,3 +1,4 @@
+import { SawtoothBlock } from "./SawtoothBlock";
 import { HoveringHawksBlock } from "./HoveringHawksBlock";
 import { IndianPuzzleBlock } from "./IndianPuzzleBlock";
 import { EccentricStarBlock } from "./EccentricStarBlock";
@@ -46,6 +47,7 @@ const C = {
 
 
 const PATTERN_ALT: Record<PatternId, string> = {
+  "sawtooth": "Sawtooth: a three-by-three block with four inward-facing triangle corners and five diamonds with individually placed outer and light corner triangles",
   "hovering-hawks": "Hovering Hawks: a four-by-four block with six background squares and ten half-square triangles in three fabrics, with an alternating-turn star layout",
   "indian-puzzle": "Indian Puzzle: mirrored square-and-triangle corners, four paired flying-geese sides and a whole centre diamond in three fabrics",
   "eccentric-star": "Eccentric Star: eight half-square triangles turning around a whole centre square in three fabrics",
@@ -199,6 +201,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     "aria-label": label,
   };
   switch (pattern) {
+    case "sawtooth":
+      return <svg {...common}><SawtoothBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "hovering-hawks":
       return <svg {...common}><HoveringHawksBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "indian-puzzle":

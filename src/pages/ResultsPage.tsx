@@ -834,7 +834,8 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
   const totalSquares = subCutPieces.reduce((sum, p) => sum + p.count, 0);
   const firstSubCut = subCutPieces[0];
   // Mixed squares + rectangles (e.g. Broken Wheel diamonds and bars) read as "pieces".
-  const shape = describePieceSet(subCutPieces);
+  const shape = describePieceSet(subCutPieces, pattern === "sawtooth" ? 4 : 2);
+  const cut = (value: number) => value.toFixed(pattern === "sawtooth" ? 4 : 2);
   const pieceNoun = shape.noun;
   const pieceNounPlural = shape.nounPlural;
 
@@ -1022,8 +1023,8 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   const shortLabel = r.isBorder
                     ? `Border (full width)`
                     : r.segments
-                      ? `${tag}cut ${r.segments.map((s) => `${s.count} @ ${s.w.toFixed(2)}"`).join(" + ")}`
-                      : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"${gSuffix0 ? `, ${gSuffix0}` : ""}`;
+                      ? `${tag}cut ${r.segments.map((s) => `${s.count} @ ${cut(s.w)}"`).join(" + ")}`
+                      : `${tag}sub-cut ${r.subCutCount} @ ${cut(r.subCutWidth!)}"${gSuffix0 ? `, ${gSuffix0}` : ""}`;
                   const labelOverflows = shortLabel.length * 5 > usedW - 30;
                   return (
                     <>
@@ -1123,7 +1124,7 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   textAnchor="end"
                   className="fill-foreground text-[10px] font-semibold"
                 >
-                  {r.hIn.toFixed(2)}" tall
+                  {cut(r.hIn)}" tall
                 </text>
 
                 {/* Strip number badge — sits at the start of the cuttable
@@ -1161,26 +1162,26 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
                   const tag = gLabel ? `${gLabel} — ` : "";
                   const suf = gSuffix ? `, ${gSuffix}` : "";
                   const segText = r.segments
-                    ? r.segments.map((s) => `${s.count} × ${r.hIn.toFixed(2)}" × ${s.w.toFixed(2)}"`).join(" + ")
+                    ? r.segments.map((s) => `${s.count} × ${cut(r.hIn)}" × ${cut(s.w)}"`).join(" + ")
                     : "";
                   const segShort = r.segments
-                    ? r.segments.map((s) => `${s.count} @ ${s.w.toFixed(2)}"`).join(" + ")
+                    ? r.segments.map((s) => `${s.count} @ ${cut(s.w)}"`).join(" + ")
                     : "";
                   const fullLabel = r.isBorder
                     ? `Border strip — ${fabricWidth}" wide (full fabric width), no sub-cuts`
                     : r.segments
                       ? `${tag}cut ${segText} from this one strip`
-                      : `${tag}sub-cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${r.subCutWidth?.toFixed(2)}" → finished piece ${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}"${suf}`;
+                      : `${tag}sub-cut ${r.subCutCount} ${r.subCutCount === 1 ? pieceNoun : pieceNounPlural} every ${cut(r.subCutWidth!)}" → finished piece ${cut(r.hIn)}" × ${cut(r.subCutWidth!)}"${suf}`;
                   const midLabel = r.isBorder
                     ? `Border — full ${fabricWidth}" width`
                     : r.segments
                       ? `${tag}cut ${segText}`
-                      : `${tag}sub-cut ${r.subCutCount} every ${r.subCutWidth?.toFixed(2)}" (${r.hIn.toFixed(2)}" × ${r.subCutWidth?.toFixed(2)}")${suf}`;
+                      : `${tag}sub-cut ${r.subCutCount} every ${cut(r.subCutWidth!)}" (${cut(r.hIn)}" × ${cut(r.subCutWidth!)}")${suf}`;
                   const shortLabel = r.isBorder
                     ? `Border (full width)`
                     : r.segments
                       ? `cut ${segShort}`
-                      : `${tag}sub-cut ${r.subCutCount} @ ${r.subCutWidth?.toFixed(2)}"${suf}`;
+                      : `${tag}sub-cut ${r.subCutCount} @ ${cut(r.subCutWidth!)}"${suf}`;
                   const CHAR_W = 5; // ~5px per char at 10px font
                   // Prefer in-strip fit at 10px; otherwise allow overflow.
                   let label = shortLabel;
