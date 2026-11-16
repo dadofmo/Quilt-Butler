@@ -65,21 +65,21 @@ export interface FabricRequirement {
  * Pass a piece's cut width and height in inches.
  */
 /** Noun for a group of cut pieces: "pieces" when squares and rectangles mix. */
-export function describePieceSet(pieces: { w: number; h: number }[]) {
-  const first = pieces[0] ? describePieceShape(pieces[0].w, pieces[0].h) : describePieceShape(0, 0);
-  const mixed = pieces.some(p => describePieceShape(p.w, p.h).isSquare !== first.isSquare);
+export function describePieceSet(pieces: { w: number; h: number }[], precision = 2) {
+  const first = pieces[0] ? describePieceShape(pieces[0].w, pieces[0].h, precision) : describePieceShape(0, 0, precision);
+  const mixed = pieces.some(p => describePieceShape(p.w, p.h, precision).isSquare !== first.isSquare);
   return mixed ? { ...first, noun: "piece", nounPlural: "pieces" } : first;
 }
 
-export function describePieceShape(w: number, h: number) {
+export function describePieceShape(w: number, h: number, precision = 2) {
   const isSquare = Math.abs(w - h) < 0.01;
   const noun = isSquare ? "square" : "rectangle";
   // For rectangles we show H × W (height first) because rails are typically
   // cut from a strip H tall, sub-cut every W along the bolt — matching how
   // the user actually cuts it.
   const sizeLabel = isSquare
-    ? `${w.toFixed(2)}" × ${w.toFixed(2)}"`
-    : `${h.toFixed(2)}" × ${w.toFixed(2)}"`;
+    ? `${w.toFixed(precision)}" × ${w.toFixed(precision)}"`
+    : `${h.toFixed(precision)}" × ${w.toFixed(precision)}"`;
   return {
     isSquare,
     noun,

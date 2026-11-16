@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SAWTOOTH_CELLS, SAWTOOTH_COUNTS, sawtoothDimensions, sawtoothPolygons } from "../sawtooth";
-import { calculateYardage } from "../yardage";
+import { calculateYardage, describePieceSet } from "../yardage";
 import { countBlockFabrics, getPattern, PATTERNS } from "../patterns";
 import { EMPTY_FILTERS, filterPatterns } from "../pattern-filters";
 import type { PlannerState } from "../planner-store";
@@ -100,6 +100,13 @@ describe("Sawtooth reference geometry and construction", () => {
     expect(count(result, "A", "Outer setting")).toBe(54);
     expect(count(result, "D", "Light setting")).toBe(36);
     expect(result.fabrics.every((f) => f.pieces.every((p) => p.count > 0 && p.w > 0 && p.h > 0 && Number.isFinite(p.w)))).toBe(true);
+  });
+
+  it("keeps the exact diamond visible instead of rounding an 18-inch block's cut down", () => {
+    const d = sawtoothDimensions(18);
+    expect(d.diamondCut).toBeCloseTo(4.742640687119285, 12);
+    expect(describePieceSet([{ w: d.diamondCut, h: d.diamondCut }], 4).sizeLabel).toBe("4.7426\" × 4.7426\"");
+    expect(describePieceSet([{ w: d.diamondCut, h: d.diamondCut }]).sizeLabel).toBe("4.74\" × 4.74\"");
   });
 
   it("matches hand-calculated nine-block cuts and bolt totals", () => {
