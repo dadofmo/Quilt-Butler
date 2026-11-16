@@ -532,6 +532,35 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}\" × ${sashCutL.toFixed(2)}\" from Fabric ${sashFab} — ${vSash} vertical and ${hSash} horizontal. Sew strips only between blocks, then add the optional outer border last.`,
       );
     }
+  } else if (s.pattern === "sawtooth") {
+    const d = sawtoothDimensions(s.blockSize), c = SAWTOOTH_COUNTS;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Sawtooth section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const outer = fabric("outer"), inward = fabric("inward"), diamonds = fabric("diamonds"), light = fabric("light");
+    addSquares(reqs[outer], "Outer-corner HST starting squares||pair with inward triangles; two HSTs per pair", c.outerHstStarters * blockCount, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[inward], "Inward HST starting squares||pair with outer corners; two HSTs per pair", c.inwardHstStarters * blockCount, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[diamonds], "On-point centre diamond squares||five per block; exact cut — do not round down", c.diamondSquares * blockCount, d.diamondCut, s.fabricWidth);
+    addSquares(reqs[outer], "Outer setting-triangle starting squares||cut each ONCE diagonally; twelve triangles per block", c.outerSettingStarters * blockCount, d.settingStarter, s.fabricWidth);
+    addSquares(reqs[light], "Light setting-triangle starting squares||cut each ONCE diagonally; eight triangles per block", c.lightSettingStarters * blockCount, d.settingStarter, s.fabricWidth);
+    notes.push(
+      `Sawtooth: each ${s.blockSize}" block is a 3 × 3 grid of ${d.unit.toFixed(4)}" finished cells: four Fabric ${outer}/Fabric ${inward} HST corners and five Fabric ${diamonds} square-in-a-square diamonds. Per block: ${c.hstUnits} HSTs, ${c.diamondSquares} whole diamond squares, ${c.outerSettingTriangles} Fabric ${outer} setting triangles and ${c.lightSettingTriangles} Fabric ${light} setting triangles. The white reference lines are construction guides, not fabric or extra pieces.`,
+      `Cutting per block: ${c.outerHstStarters} Fabric ${outer} and ${c.inwardHstStarters} Fabric ${inward} HST starting squares at ${d.hstStarter.toFixed(4)}"; ${c.diamondSquares} Fabric ${diamonds} diamond squares at the EXACT ${d.diamondCut.toFixed(4)}"; ${c.outerSettingStarters} Fabric ${outer} and ${c.lightSettingStarters} Fabric ${light} setting-triangle starters at ${d.settingStarter.toFixed(4)}". Cut each setting starter ONCE diagonally for two triangles. HST and setting starters are rounded UP to an eighth for trimming; the diamond cut is unit ÷ √2 + 1/2" and must not be rounded down. Use a decimal-inch ruler for the exact diamond measurement.`,
+      `Make two Fabric ${outer}/Fabric ${inward} two-at-a-time HST pairs per block. Place one square of each right sides together, draw one diagonal, sew 1/4" on both sides, cut on the drawn line and press. Each pair yields two HSTs. Trim all four to ${d.unitTrim.toFixed(4)}" square unfinished with the diagonal corner to corner.`,
+      `Place the corner HSTs with Fabric ${outer} at the block's outer corner and Fabric ${inward} inward: top-left ${outer} TL / ${inward} BR; top-right ${outer} TR / ${inward} BL; bottom-left ${outer} BL / ${inward} TR; bottom-right ${outer} BR / ${inward} TL.`,
+      `Make five on-point cells. For each, match midpoints and sew the TL and BR setting triangles to two opposite diamond sides; press outward gently, then sew the TR and BL triangles to the remaining opposite sides. Let dog ears overhang and do not stretch the bias. Corner order is clockwise TL, TR, BR, BL: top middle ${outer}/${outer}/${light}/${light}; middle left ${outer}/${light}/${light}/${outer}; centre ${outer}/${outer}/${outer}/${outer}; middle right ${light}/${outer}/${outer}/${light}; bottom middle ${light}/${light}/${outer}/${outer}. Trim every cell to ${d.unitTrim.toFixed(4)}" unfinished, centring the diamond and keeping 1/4" beyond every point.`,
+      `Lay out the exact 3 × 3 map. Sew each row of three cells, pressing row seams in alternating directions, then join the rows and pin every cell intersection. Square the block to ${d.blockTrim.toFixed(4)}" unfinished; it finishes at ${s.blockSize}". Make and measure one test block before chain-piecing all ${blockCount} blocks.`,
+    );
+    if (windowSash > 0) {
+      const sash = fabric("sashing");
+      const vertical = Math.max(0, blocksAcross - 1) * blocksDown, horizontal = Math.max(0, blocksDown - 1) * blocksAcross;
+      const intersections = Math.max(0, blocksAcross - 1) * Math.max(0, blocksDown - 1);
+      if (vertical + horizontal > 0) addRails(reqs[sash], "Sashing strips between blocks", vertical + horizontal, d.blockTrim, windowSash + SEAM, s.fabricWidth);
+      if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, windowSash + SEAM, s.fabricWidth);
+      notes.push(`Optional sashing: cut ${vertical + horizontal} Fabric ${sash} strips at ${(windowSash + SEAM).toFixed(3)}" × ${d.blockTrim.toFixed(3)}" and ${intersections} intersection squares at ${(windowSash + SEAM).toFixed(3)}". Join vertical strips between blocks; piece horizontal sashing rows with the intersection squares. Add the optional border last.`);
+    } else notes.push(`Set all ${blockCount} identical blocks the same way up and join them edge to edge. Add the optional border last.`);
   } else if (s.pattern === "kansas-star") {
     const blockCount = blocksDown * blocksAcross;
     const d = kansasDimensions(s.blockSize), counts = kansasCounts(blockCount);
