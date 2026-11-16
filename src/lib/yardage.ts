@@ -1,3 +1,4 @@
+import { SAWTOOTH_COUNTS, sawtoothDimensions } from "./sawtooth";
 import { HOVERING_HAWKS_CELLS, HOVERING_HAWKS_COUNTS, hoveringHawksDimensions } from "./hovering-hawks";
 import { indianPuzzleDimensions } from "./indian-puzzle";
 import { ECCENTRIC_STAR_CELLS, ECCENTRIC_STAR_COUNTS, eccentricStarDimensions } from "./eccentric-star";
@@ -209,6 +210,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isDoublePinwheel = s.pattern === "double-pinwheel";
   const isPlusBlock = s.pattern === "plus-block";
   const isChurnDash = s.pattern === "churn-dash";
+  const isSawtooth = s.pattern === "sawtooth";
   const isSawtoothStar = s.pattern === "sawtooth-star";
   const isFriendshipStar = s.pattern === "friendship-star";
   const isSnowball = s.pattern === "snowball-block";
@@ -263,7 +265,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isXChain = !!studioPair(s.pattern);
   // Sashing is optional across all patterns that support it — a user-entered 0
   // means "no sashing" and the math collapses to plain blocks.
-  const sashWidth = (isJericho || isContraryWife || isDuckAndDuckling || isArtSquare || isXChain || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
+  const sashWidth = (isSawtooth || isJericho || isContraryWife || isDuckAndDuckling || isArtSquare || isXChain || isAlbumFivePatch || isAlaska || isChocolateCake || isFiftyFourForty || isAtticWindow || isCustomBlock || isButlersTrellis || isArkansasCrossroads || isDominoChickenFoot || isAlbumCross || isApplePie || isAlaskaHomestead || isBlazingArrows || isWishingRing || isBearPaw || isNinePatch || isHst || isSimpleSquares || isRailFence || isLogCabin || isOhioStar || isFlyingGeese || isD9P || isSquaresOnPoint || isPinwheel || isDoublePinwheel || isPlusBlock || isChurnDash || isSawtoothStar || isFriendshipStar || isSnowball || isFourPatch || isStreak || isBowTie || isShoofly || isJacobsLadder || isAutumnTints || isCardTrick || isOhSusannah || isTwinStar || isStarAndCross || isIdahoBeauty || isCheckerboard || isCabinInTheCotton || isFancyStripe || isMapleStar || isLoveInAMist || isFourXStar || isAntiqueTile || isEconomyBlock || isCaliforniaQuilt || isClownsChoice || isCornerBeam || isFourQueens || isFourXs || isBrokenDishes || isRollingStone || isSwingInTheCenter || isTippecanoe || isTulipLadyFingers || isWeathervane)
     ? Math.max(0, s.sashingWidth || 0)
     : 0;
   const isSashed = sashWidth > 0;
@@ -271,7 +273,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const innerH = s.quiltHeight - 2 * s.borderWidth;
   // Attic Window fits optional between-block sashing inside the requested top,
   // matching the shared Size, Fabrics, and Results page grid calculation.
-  const windowSash = (s.pattern === "hovering-hawks" || isChurnDash || isJericho || isContraryWife || isDuckAndDuckling || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
+  const windowSash = (isSawtooth || s.pattern === "hovering-hawks" || isChurnDash || isJericho || isContraryWife || isDuckAndDuckling || isArtSquare || isAlbumFivePatch || isAlaska || isAtticWindow || isFiftyFourForty || isChocolateCake) ? Math.max(0, s.sashingWidth || 0) : 0;
   const blocksAcross = Math.max(1, Math.floor((innerW + windowSash) / (s.blockSize + windowSash)));
   const blocksDown = Math.max(1, Math.floor((innerH + windowSash) / (s.blockSize + windowSash)));
   const blockCount = blocksAcross * blocksDown;
@@ -5567,6 +5569,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   // steps in the notes. Simple Squares is "join squares edge to edge" — the
   // glossary would be overkill there.
   const showBasics =
+    isSawtooth ||
     isContraryWife ||
     isJericho ||
     s.pattern === "hst" ||
