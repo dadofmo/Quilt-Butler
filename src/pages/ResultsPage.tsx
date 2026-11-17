@@ -834,8 +834,9 @@ function CuttingDiagram({ req, fabricWidth, pattern, photo }: { req: FabricRequi
   const totalSquares = subCutPieces.reduce((sum, p) => sum + p.count, 0);
   const firstSubCut = subCutPieces[0];
   // Mixed squares + rectangles (e.g. Broken Wheel diamonds and bars) read as "pieces".
-  const shape = describePieceSet(subCutPieces, pattern === "sawtooth" ? 4 : 2);
-  const cut = (value: number) => value.toFixed(pattern === "sawtooth" ? 4 : 2);
+  const cutPrecision = pattern === "sawtooth" || pattern === "dakota-gold" ? 4 : 2;
+  const shape = describePieceSet(subCutPieces, cutPrecision);
+  const cut = (value: number) => value.toFixed(cutPrecision);
   const pieceNoun = shape.noun;
   const pieceNounPlural = shape.nounPlural;
 
