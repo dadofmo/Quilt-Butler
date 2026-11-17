@@ -3,15 +3,17 @@ import { describe, expect, it } from "vitest";
 import { PATTERNS } from "@/lib/patterns";
 
 /**
- * The site advertises a pattern count in metadata ("70+ patterns"). That number
+ * The site advertises a pattern count ("80+ patterns"). That number
  * goes stale whenever a pattern is added, and Google keeps showing the old one.
  * The rule: always advertise the largest multiple of ten that the real library
  * actually contains — never round up past what ships.
  */
+const CLAIM_PATTERN = /(\d+)\+\s+(?:quilt\s+)?(?:patterns|beginner-friendly blocks)/;
 const CLAIMS: { file: string; pattern: RegExp }[] = [
-  { file: "index.html", pattern: /(\d+)\+ (?:quilt )?patterns/ },
-  { file: "public/llms.txt", pattern: /(\d+)\+ (?:quilt )?patterns/ },
-  { file: "src/pages/PatternPickerPage.tsx", pattern: /(\d+)\+ (?:quilt )?patterns/ },
+  { file: "index.html", pattern: CLAIM_PATTERN },
+  { file: "public/llms.txt", pattern: CLAIM_PATTERN },
+  { file: "src/pages/PatternPickerPage.tsx", pattern: CLAIM_PATTERN },
+  { file: "src/content/blog/quilting-terms-glossary.tsx", pattern: CLAIM_PATTERN },
 ];
 
 describe("advertised pattern count", () => {
