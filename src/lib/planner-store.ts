@@ -22,6 +22,7 @@ export type BlockLayout =
 
 
 export type PatternId =
+  | "dakota-gold"
   | "sawtooth"
   | "hovering-hawks"
   | "indian-puzzle"
