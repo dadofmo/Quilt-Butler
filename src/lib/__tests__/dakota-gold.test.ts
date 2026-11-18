@@ -41,7 +41,7 @@ describe("Dakota Gold reference geometry and construction", () => {
     expect(filterPatterns(PATTERNS, { ...EMPTY_FILTERS, query: "Dakota Gold" }).map((p) => p.id)).toContain("dakota-gold");
     expect(filterPatterns(PATTERNS, { ...EMPTY_FILTERS, fabrics: ["4+"] }).map((p) => p.id)).toContain("dakota-gold");
     expect(filterPatterns(PATTERNS, { ...EMPTY_FILTERS, fabrics: ["3"] }).map((p) => p.id)).not.toContain("dakota-gold");
-    for (const technique of ["squares", "hst", "strips"]) {
+    for (const technique of ["squares", "hst", "strips"] as const) {
       expect(filterPatterns(PATTERNS, { ...EMPTY_FILTERS, techniques: [technique] }).map((p) => p.id)).toContain("dakota-gold");
     }
     expect(filterPatterns(PATTERNS, { ...EMPTY_FILTERS, features: ["sashing"] }).map((p) => p.id)).toContain("dakota-gold");
@@ -98,7 +98,7 @@ describe("Dakota Gold reference geometry and construction", () => {
     expect(d.hstStarter).toBeGreaterThanOrEqual(u + 0.875);
     expect(d.hstStarter - (u + 0.875)).toBeLessThan(0.125);
     expect(2 * (2 * u + 0.5) + (u + 0.5) - 1).toBeCloseTo(d.blockTrim, 12);
-    expect(2 * (2 * u + 0.5) + d.horizontalBarLength - 1).toBeCloseTo(d.blockTrim, 12);
+    expect(2 * d.verticalBarLength + d.barWidth - 1).toBeCloseTo(d.blockTrim, 12);
     expect(describePieceSet([{ w: d.square, h: d.square }], 4).sizeLabel).toBe(`${d.square.toFixed(4)}" × ${d.square.toFixed(4)}"`);
   });
 
@@ -170,6 +170,9 @@ describe("Dakota Gold reference geometry and construction", () => {
     expect(notes).toContain("white reference lines are construction guides, not fabric");
     expect(notes).toContain("Do not cut the cross bars into squares");
     expect(notes).toContain("Trim every HST to 2.9000");
-    expect(notes).toContain("Square the block to 12.5000");
+    expect(notes).toContain("square the block to 12.5000");
+    expect(notes).toContain("Fabric D/C HST with Fabric D at top-right");
+    expect(notes).toContain("Fabric A/D HST with Fabric A at bottom-right");
+    expect(notes).toContain("Fabric A/C HST with Fabric A at bottom-left");
   });
 });

@@ -1,3 +1,4 @@
+import { DakotaGoldBlock } from "./DakotaGoldBlock";
 import { SawtoothBlock } from "./SawtoothBlock";
 import { HoveringHawksBlock } from "./HoveringHawksBlock";
 import { IndianPuzzleBlock } from "./IndianPuzzleBlock";
@@ -47,6 +48,7 @@ const C = {
 
 
 const PATTERN_ALT: Record<PatternId, string> = {
+  "dakota-gold": "Dakota Gold: a five-by-five block with a continuous cross, four plain inner squares and twelve half-square triangles in five fabrics",
   "sawtooth": "Sawtooth: a three-by-three block with four inward-facing triangle corners and five diamonds with individually placed outer and light corner triangles",
   "hovering-hawks": "Hovering Hawks: a four-by-four block with six background squares and ten half-square triangles in three fabrics, with an alternating-turn star layout",
   "indian-puzzle": "Indian Puzzle: mirrored square-and-triangle corners, four paired flying-geese sides and a whole centre diamond in three fabrics",
@@ -201,6 +203,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     "aria-label": label,
   };
   switch (pattern) {
+    case "dakota-gold":
+      return <svg {...common}><DakotaGoldBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "sawtooth":
       return <svg {...common}><SawtoothBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "hovering-hawks":

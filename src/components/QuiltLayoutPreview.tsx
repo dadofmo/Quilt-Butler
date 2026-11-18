@@ -1,3 +1,4 @@
+import { DakotaGoldBlock } from "./DakotaGoldBlock";
 import { SawtoothBlock } from "./SawtoothBlock";
 import { HoveringHawksBlock } from "./HoveringHawksBlock";
 import { IndianPuzzleBlock } from "./IndianPuzzleBlock";
@@ -1492,6 +1493,8 @@ function MiniBlock({
       return <DumbbellBlock size={200} assignments={assignments} photos={photos} />;
     case "fancy-contrary-wife":
       return <FancyContraryWifeBlock size={200} assignments={assignments} photos={photos} />;
+    case "dakota-gold":
+      return <DakotaGoldBlock size={200} assignments={assignments} photos={photos} />;
     case "sawtooth":
       return <SawtoothBlock size={200} assignments={assignments} photos={photos} />;
     case "hovering-hawks":

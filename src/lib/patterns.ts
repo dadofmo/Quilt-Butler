@@ -2348,6 +2348,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
  * equal the distinct default fabrics across both blocks, excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
+  "dakota-gold": { skill: "confident", fabricCount: 5, techniques: ["squares", "hst", "strips"] },
   "sawtooth": { skill: "confident", fabricCount: 4, techniques: ["squares", "hst", "onpoint"] },
   "hovering-hawks": { skill: "beginner", fabricCount: 3, techniques: ["squares", "hst"] },
   "indian-puzzle": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst", "geese", "onpoint"] },

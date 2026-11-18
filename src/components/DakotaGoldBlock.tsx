@@ -1,7 +1,7 @@
 import type { FabricKey, SectionAssignments } from "@/lib/planner-store";
 import { getPattern } from "@/lib/patterns";
 import { fabricFill } from "@/lib/fabric-fill";
-import { DAKOTA_GOLD_PAIR_ROLES, dakotaGoldPieces } from "@/lib/dakota-gold";
+import { dakotaGoldPieces } from "@/lib/dakota-gold";
 
 /** One shared reference renderer: continuous bars and flush pieces, no guides. */
 export function DakotaGoldBlock({ size, assignments = {}, photos }: {
@@ -24,7 +24,6 @@ export function DakotaGoldBlock({ size, assignments = {}, photos }: {
             data-cell={piece.row === undefined ? undefined : `${piece.row}-${piece.col}`}
             data-pair={piece.pair}
             data-corner={piece.corner}
-            data-first-role={piece.pair && piece.corner === DAKOTA_GOLD_CELLS.find((c) => c.row === piece.row && c.col === piece.col && c.kind === "hst" && c.pair === piece.pair && c.firstCorner === piece.corner)?.firstCorner ? DAKOTA_GOLD_PAIR_ROLES[piece.pair][0] : undefined}
             points={piece.points.map(([x, y]) => `${x},${y}`).join(" ")}
             fill={fabricFill(assignments[piece.role] ?? section.defaultFabric, photos)}
           />

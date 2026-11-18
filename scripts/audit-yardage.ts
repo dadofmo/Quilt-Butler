@@ -3281,3 +3281,32 @@ console.log("\n=== Sawtooth: nine 12-inch blocks, five on-point cells each ===")
   check("ST 10-inch setting starter rounds up", ten.fabrics.find(x => x.fabric === "D")?.pieces[0].w ?? -1, 2.625);
   check("ST 10-inch exact diamond", ten.fabrics.find(x => x.fabric === "C")?.pieces[0].w ?? -1, 10 / 3 / Math.SQRT2 + 0.5);
 }
+
+console.log("\n=== Dakota Gold: nine 12-inch blocks, pooled HST pairs and continuous cross ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "dakota-gold", quiltWidth: 36, quiltHeight: 36, blockSize: 12, borderWidth: 0, sashingWidth: 0 });
+  const f = (k: string) => r.fabrics.find(x => x.fabric === k);
+  const total = (k: string) => f(k)?.pieces.reduce((sum, p) => sum + p.count, 0) ?? -1;
+  check("DG dark starters: 23 dark/pale + 14 dark/teal pairs", f("A")?.pieces[0].count ?? -1, 37);
+  check("DG pale starters: 23 dark/pale + 18 pale/teal pairs", f("D")?.pieces[0].count ?? -1, 41);
+  check("DG teal starters: 14 dark/teal + 18 pale/teal pairs", f("C")?.pieces[0].count ?? -1, 32);
+  check("DG plain squares", f("E")?.pieces[0].count ?? -1, 36);
+  check("DG vertical bars", f("B")?.pieces[0].count ?? -1, 18);
+  check("DG horizontal bars", f("B")?.pieces[1].count ?? -1, 9);
+  check("DG vertical bar length", f("B")?.pieces[0].w ?? -1, 5.3);
+  check("DG horizontal bar length", f("B")?.pieces[1].w ?? -1, 12.5);
+  check("DG dark inches", f("A")?.totalInches ?? -1, 13.5);
+  check("DG pale inches", f("D")?.totalInches ?? -1, 13.5);
+  check("DG teal inches", f("C")?.totalInches ?? -1, 10.125);
+  check("DG square inches", f("E")?.totalInches ?? -1, 8.7);
+  check("DG cross inches: three vertical + three horizontal strips", f("B")?.totalInches ?? -1, 17.4);
+  const sash = calculateYardage({ ...base(), pattern: "dakota-gold", quiltWidth: 46, quiltHeight: 46, blockSize: 12, sashingWidth: 2, borderWidth: 3 });
+  check("DG sashing strips", sash.fabrics.find(x => x.fabric === "F")?.pieces[0].count ?? -1, 12);
+  check("DG sashing intersections", sash.fabrics.find(x => x.fabric === "F")?.pieces[1].count ?? -1, 4);
+  check("DG sashing inches", sash.fabrics.find(x => x.fabric === "F")?.totalInches ?? -1, 12.5);
+  check("DG border inches", sash.fabrics.find(x => x.fabric === "G")?.totalInches ?? -1, 17.5);
+  const ten = calculateYardage({ ...base(), pattern: "dakota-gold", quiltWidth: 10, quiltHeight: 10, blockSize: 10 });
+  check("DG 10-inch HST starter", ten.fabrics.find(x => x.fabric === "A")?.pieces[0].w ?? -1, 2.875);
+  check("DG 10-inch vertical bar", ten.fabrics.find(x => x.fabric === "B")?.pieces[0].w ?? -1, 4.5);
+  check("DG nine-block total cut pieces", total("A") + total("B") + total("C") + total("D") + total("E"), 173);
+}

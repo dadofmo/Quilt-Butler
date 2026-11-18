@@ -1,3 +1,4 @@
+import { DAKOTA_GOLD_CELLS, DAKOTA_GOLD_COUNTS, DAKOTA_GOLD_PAIR_ROLES, dakotaGoldDimensions, dakotaGoldPairCounts } from "./dakota-gold";
 import { SAWTOOTH_COUNTS, sawtoothDimensions } from "./sawtooth";
 import { HOVERING_HAWKS_CELLS, HOVERING_HAWKS_COUNTS, hoveringHawksDimensions } from "./hovering-hawks";
 import { indianPuzzleDimensions } from "./indian-puzzle";
@@ -254,7 +255,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "hovering-hawks" || s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
+  const isJericho = s.pattern === "dakota-gold" || s.pattern === "hovering-hawks" || s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -532,6 +533,66 @@ export function calculateYardage(s: PlannerState): CalcResult {
         `Sashing: cut ${totalSash} strips at ${sashCutW.toFixed(2)}\" × ${sashCutL.toFixed(2)}\" from Fabric ${sashFab} — ${vSash} vertical and ${hSash} horizontal. Sew strips only between blocks, then add the optional outer border last.`,
       );
     }
+  } else if (s.pattern === "dakota-gold") {
+    const d = dakotaGoldDimensions(s.blockSize), c = DAKOTA_GOLD_COUNTS, n = blockCount;
+    const pairs = dakotaGoldPairCounts(n);
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Dakota Gold section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const cross = fabric("cross"), dark = fabric("dark"), teal = fabric("teal"), pale = fabric("pale"), squares = fabric("squares");
+    const darkStarters = pairs.darkPale + pairs.darkTeal;
+    const paleStarters = pairs.darkPale + pairs.paleTeal;
+    const tealStarters = pairs.darkTeal + pairs.paleTeal;
+    addSquares(reqs[dark], `Dark HST starting squares||${pairs.darkPale} dark/pale pairs + ${pairs.darkTeal} dark/teal pairs`, darkStarters, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[pale], `Pale HST starting squares||${pairs.darkPale} dark/pale pairs + ${pairs.paleTeal} pale/teal pairs`, paleStarters, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[teal], `Teal HST starting squares||${pairs.darkTeal} dark/teal pairs + ${pairs.paleTeal} pale/teal pairs`, tealStarters, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[squares], "Plain inner squares||four per block", c.plainSquares * n, d.square, s.fabricWidth);
+    addRails(reqs[cross], "Upper & lower vertical cross bars||continuous 1×2 bars; two per block", c.verticalBars * n, d.verticalBarLength, d.barWidth, s.fabricWidth);
+    addRails(reqs[cross], "Full-width centre cross bar||continuous 5×1 bar; one per block", c.horizontalBars * n, d.horizontalBarLength, d.barWidth, s.fabricWidth);
+    const exact = (value: number) => {
+      const mark = rulerMark(value);
+      return `${value.toFixed(4)}" (${mark.relation} ${mark.label} ruler mark)`;
+    };
+    const cellAt = (row: number, col: number) => {
+      const cell = DAKOTA_GOLD_CELLS.find(cell => cell.row === row && cell.col === col);
+      if (!cell) throw new Error(`Missing Dakota Gold cell ${row},${col}`);
+      return cell;
+    };
+    const describeCell = (row: number, col: number) => {
+      const cell = cellAt(row, col);
+      if (cell.kind === "square") return `Fabric ${squares} square`;
+      if (cell.kind !== "hst") throw new Error("A cross bar cannot be sewn as a corner-unit cell");
+      const [first, second] = DAKOTA_GOLD_PAIR_ROLES[cell.pair];
+      const roleFabric = { dark, teal, pale };
+      return `Fabric ${roleFabric[first]}/${roleFabric[second]} HST with Fabric ${roleFabric[first]} at ${cell.firstCorner}`;
+    };
+    const cornerNote = (name: string, cells: readonly (readonly [number, number])[]) =>
+      `${name}: top row — ${describeCell(cells[0][0], cells[0][1])}; ${describeCell(cells[1][0], cells[1][1])}. Bottom row — ${describeCell(cells[2][0], cells[2][1])}; ${describeCell(cells[3][0], cells[3][1])}.`;
+    const spareNote = pairs.darkPaleSpares || pairs.darkTealSpares
+      ? `Set aside ${pairs.darkPaleSpares} spare dark/pale HST and ${pairs.darkTealSpares} spare dark/teal HST for a future block.`
+      : "The even block count uses every HST with no spares.";
+    notes.push(
+      `Dakota Gold: each ${s.blockSize}" block is a 5 × 5 grid of ${d.unit.toFixed(4)}" finished cells: three Fabric ${cross} cross bars, four Fabric ${squares} plain squares and twelve HSTs — five dark/pale, three dark/teal and four pale/teal. The white reference lines are construction guides, not fabric or extra strips.`,
+      `Cutting totals for ${n} ${n === 1 ? "block" : "blocks"}: ${darkStarters} Fabric ${dark}, ${paleStarters} Fabric ${pale} and ${tealStarters} Fabric ${teal} HST starting squares at ${d.hstStarter.toFixed(4)}"; ${c.plainSquares * n} Fabric ${squares} plain squares at ${exact(d.square)}. Starters are rounded UP to an eighth for trimming; final squares and bars retain their exact size.`,
+      `Cross cutting per block: two Fabric ${cross} vertical bars at ${exact(d.barWidth)} × ${exact(d.verticalBarLength)}, and one full-width centre bar at ${exact(d.barWidth)} × ${exact(d.horizontalBarLength)}. Do not cut the cross bars into squares. All three are continuous straight-grain rectangles.`,
+      `Make HSTs two at a time, pooling pairs across all ${n} blocks: ${pairs.darkPale} Fabric ${dark}/${pale} pairs make ${pairs.darkPaleMade} HSTs for the ${c.darkPaleHsts * n} needed; ${pairs.darkTeal} Fabric ${dark}/${teal} pairs make ${pairs.darkTealMade} for ${c.darkTealHsts * n}; ${pairs.paleTeal} Fabric ${pale}/${teal} pairs make ${pairs.paleTealMade} for ${c.paleTealHsts * n}. ${spareNote}`,
+      `For each pair, place squares right sides together, draw one diagonal, sew an accurate 1/4" on both sides, cut on the drawn line and press gently without stretching the bias. Trim every HST to ${d.square.toFixed(4)}" square unfinished with its diagonal exactly corner to corner.`,
+      cornerNote("Top-left corner unit", [[0, 0], [0, 1], [1, 0], [1, 1]]),
+      cornerNote("Top-right corner unit", [[0, 3], [0, 4], [1, 3], [1, 4]]),
+      cornerNote("Bottom-left corner unit", [[3, 0], [3, 1], [4, 0], [4, 1]]),
+      cornerNote("Bottom-right corner unit", [[3, 3], [3, 4], [4, 3], [4, 4]]),
+      `Sew each 2 × 2 corner unit in two rows of two, pressing the row seams in opposite directions before joining them. Sew the top-left unit, upper vertical cross bar and top-right unit into a ${d.blockTrim.toFixed(4)}" × ${d.verticalBarLength.toFixed(4)}" top band; repeat with the bottom-left unit, lower vertical bar and bottom-right unit. Join the full-width centre bar between the top and bottom bands with straight 1/4" seams. Pin every corner-unit intersection, press gently, and square the block to ${d.blockTrim.toFixed(4)}" unfinished (${s.blockSize}" finished). No Y-seams or templates.`,
+    );
+    if (windowSash > 0) {
+      const sash = fabric("sashing");
+      const vertical = Math.max(0, blocksAcross - 1) * blocksDown, horizontal = Math.max(0, blocksDown - 1) * blocksAcross;
+      const intersections = Math.max(0, blocksAcross - 1) * Math.max(0, blocksDown - 1);
+      if (vertical + horizontal > 0) addRails(reqs[sash], "Sashing strips between blocks", vertical + horizontal, d.blockTrim, windowSash + SEAM, s.fabricWidth);
+      if (intersections > 0) addSquares(reqs[sash], "Sashing intersection squares", intersections, windowSash + SEAM, s.fabricWidth);
+      notes.push(`Optional sashing: cut ${vertical + horizontal} Fabric ${sash} strips at ${(windowSash + SEAM).toFixed(4)}" × ${d.blockTrim.toFixed(4)}" and ${intersections} intersection squares at ${(windowSash + SEAM).toFixed(4)}". Join vertical strips between blocks; piece horizontal sashing rows with the intersection squares. Add the optional border last.`);
+    } else notes.push(`Set all ${n} blocks the same way up and join them edge to edge for the multi-block reference layout. Add the optional border last.`);
   } else if (s.pattern === "sawtooth") {
     const d = sawtoothDimensions(s.blockSize), c = SAWTOOTH_COUNTS;
     const fabric = (id: string): FabricKey => {
