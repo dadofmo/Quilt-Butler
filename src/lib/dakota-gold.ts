@@ -1,8 +1,8 @@
 /** Dakota Gold reference: a 5×5 block with three continuous cross bars,
  * four plain inner squares and twelve HSTs. The white construction-reference
- * lines are guides, never fabric. Colour placements are intentionally mapped
- * cell by cell: the reference has five dark/pale, three dark/teal and four
- * pale/teal HSTs, not three symmetric sets of four. */
+ * lines are guides, never fabric. Colour placements are mapped cell by cell:
+ * four dark/pale, four dark/teal and four pale/teal HSTs form the reference's
+ * continuous two-colour diagonal beams beside the inner squares. */
 export type DakotaGoldRole = "cross" | "dark" | "teal" | "pale" | "squares";
 export type DakotaGoldPair = "dark-pale" | "dark-teal" | "pale-teal";
 export type DakotaGoldCorner = "top-left" | "top-right" | "bottom-right" | "bottom-left";
@@ -18,11 +18,11 @@ const Q = { kind: "square" as const, role: "squares" as const };
 const H = (pair: DakotaGoldPair, firstCorner: DakotaGoldCorner) => ({ kind: "hst" as const, pair, firstCorner });
 
 const MAP = [
-  [H("pale-teal", "top-right"), H("dark-pale", "top-right"), X, H("dark-pale", "top-left"), H("pale-teal", "top-left")],
+  [H("pale-teal", "top-right"), H("dark-pale", "top-right"), X, H("dark-teal", "top-left"), H("pale-teal", "bottom-right")],
   [H("dark-teal", "bottom-left"), Q, X, Q, H("dark-pale", "bottom-right")],
   [X, X, X, X, X],
-  [H("dark-pale", "top-left"), Q, X, Q, H("dark-pale", "top-right")],
-  [H("pale-teal", "top-left"), H("dark-teal", "bottom-right"), X, H("dark-teal", "bottom-left"), H("pale-teal", "top-right")],
+  [H("dark-pale", "top-left"), Q, X, Q, H("dark-teal", "top-right")],
+  [H("pale-teal", "top-left"), H("dark-teal", "bottom-right"), X, H("dark-pale", "bottom-left"), H("pale-teal", "bottom-left")],
 ] as const;
 
 export const DAKOTA_GOLD_CELLS: readonly DakotaGoldCell[] = MAP.flatMap((row, r) =>
@@ -37,8 +37,8 @@ export const DAKOTA_GOLD_PAIR_ROLES: Record<DakotaGoldPair, readonly [Exclude<Da
 
 export const DAKOTA_GOLD_COUNTS = {
   hstUnits: 12,
-  darkPaleHsts: 5,
-  darkTealHsts: 3,
+  darkPaleHsts: 4,
+  darkTealHsts: 4,
   paleTealHsts: 4,
   plainSquares: 4,
   verticalBars: 2,

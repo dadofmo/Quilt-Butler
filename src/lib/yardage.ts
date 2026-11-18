@@ -570,11 +570,9 @@ export function calculateYardage(s: PlannerState): CalcResult {
     };
     const cornerNote = (name: string, cells: readonly (readonly [number, number])[]) =>
       `${name}: top row — ${describeCell(cells[0][0], cells[0][1])}; ${describeCell(cells[1][0], cells[1][1])}. Bottom row — ${describeCell(cells[2][0], cells[2][1])}; ${describeCell(cells[3][0], cells[3][1])}.`;
-    const spareNote = pairs.darkPaleSpares || pairs.darkTealSpares
-      ? `Set aside ${pairs.darkPaleSpares} spare dark/pale HST and ${pairs.darkTealSpares} spare dark/teal HST for a future block.`
-      : "The even block count uses every HST with no spares.";
+    const spareNote = "Each pairing has four HSTs per block, so two-at-a-time sewing uses complete pairs with no spares at any block count.";
     notes.push(
-      `Dakota Gold: each ${s.blockSize}" block is a 5 × 5 grid of ${d.unit.toFixed(4)}" finished cells: three Fabric ${cross} cross bars, four Fabric ${squares} plain squares and twelve HSTs — five dark/pale, three dark/teal and four pale/teal. The white reference lines are construction guides, not fabric or extra strips.`,
+      `Dakota Gold: each ${s.blockSize}" block is a 5 × 5 grid of ${d.unit.toFixed(4)}" finished cells: three Fabric ${cross} cross bars, four Fabric ${squares} plain squares and twelve HSTs — four dark/pale, four dark/teal and four pale/teal. The white reference lines are construction guides, not fabric or extra strips.`,
       `Cutting totals for ${n} ${n === 1 ? "block" : "blocks"}: ${darkStarters} Fabric ${dark}, ${paleStarters} Fabric ${pale} and ${tealStarters} Fabric ${teal} HST starting squares at ${d.hstStarter.toFixed(4)}"; ${c.plainSquares * n} Fabric ${squares} plain squares at ${exact(d.square)}. Starters are rounded UP to an eighth for trimming; final squares and bars retain their exact size.`,
       `Cross cutting per block: two Fabric ${cross} vertical bars at ${exact(d.barWidth)} × ${exact(d.verticalBarLength)}, and one full-width centre bar at ${exact(d.barWidth)} × ${exact(d.horizontalBarLength)}. Do not cut the cross bars into squares. All three are continuous straight-grain rectangles.`,
       `Make HSTs two at a time, pooling pairs across all ${n} blocks: ${pairs.darkPale} Fabric ${dark}/${pale} pairs make ${pairs.darkPaleMade} HSTs for the ${c.darkPaleHsts * n} needed; ${pairs.darkTeal} Fabric ${dark}/${teal} pairs make ${pairs.darkTealMade} for ${c.darkTealHsts * n}; ${pairs.paleTeal} Fabric ${pale}/${teal} pairs make ${pairs.paleTealMade} for ${c.paleTealHsts * n}. ${spareNote}`,

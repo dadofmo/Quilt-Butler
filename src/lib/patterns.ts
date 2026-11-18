@@ -68,9 +68,9 @@ const BASE_PATTERNS: PatternDefBase[] = [
     intro: "A 5×5 block with a continuous three-bar cross, four plain inner squares and twelve half-square triangles in three exact reference pairings. Five independently adjustable fabrics preserve the dark, teal, pale and light-square placements. Piece four corner units, join them to the vertical bars, then add the full-width centre bar with straight seams. Optional sashing and border; no Y-seams or templates.",
     sections: [
       { id: "cross", label: "Continuous cross bars", defaultFabric: "B", hint: "Two 1×2 vertical bars and one full-width 5×1 centre bar; do not sub-cut them into squares." },
-      { id: "dark", label: "Dark HST triangles", defaultFabric: "A", hint: "Eight triangle halves: five paired with pale and three paired with teal." },
-      { id: "teal", label: "Teal HST triangles", defaultFabric: "C", hint: "Seven triangle halves: three paired with dark and four paired with pale." },
-      { id: "pale", label: "Pale HST triangles", defaultFabric: "D", hint: "Nine triangle halves: five paired with dark and four paired with teal." },
+      { id: "dark", label: "Dark HST triangles", defaultFabric: "A", hint: "Eight triangle halves: four paired with pale and four paired with teal." },
+      { id: "teal", label: "Teal HST triangles", defaultFabric: "C", hint: "Eight triangle halves: four paired with dark and four paired with pale." },
+      { id: "pale", label: "Pale HST triangles", defaultFabric: "D", hint: "Eight triangle halves: four paired with dark and four paired with teal." },
       { id: "squares", label: "Four plain inner squares", defaultFabric: "E", hint: "One whole square at the inner corner of each 2×2 corner unit." },
       { id: "sashing", label: "Sashing between blocks", defaultFabric: "F", hint: "Optional; set to zero for the edge-to-edge multi-block reference layout." },
       { ...borderSection, defaultFabric: "G" },
