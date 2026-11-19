@@ -114,7 +114,7 @@ export function dakotaGoldDimensions(block: number) {
   };
 }
 
-/** Pool pairs across the whole quilt; odd reference counts can leave spares. */
+/** Pool pairs across the whole quilt; four HSTs of each pairing per block make complete pairs. */
 export function dakotaGoldPairCounts(blockCount: number) {
   if (!Number.isInteger(blockCount) || blockCount < 0) throw new Error("Dakota Gold requires a non-negative whole block count");
   const darkPale = Math.ceil(DAKOTA_GOLD_COUNTS.darkPaleHsts * blockCount / 2);
