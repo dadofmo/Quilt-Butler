@@ -11,7 +11,7 @@ describe("Dakota Gold shared previews, photos and print", () => {
     const { container } = render(<PrintBlockLegend pattern="dakota-gold"
       assignments={{ cross: "F", dark: "D", teal: "C", pale: "B", squares: "A" }}
       hasBorder={false} borderFabric="G" sashingWidth={0} />);
-    for (const [role, fabric, total] of [["cross", "f", 3], ["dark", "d", 8], ["teal", "c", 7], ["pale", "b", 9], ["squares", "a", 4]] as const) {
+    for (const [role, fabric, total] of [["cross", "f", 3], ["dark", "d", 8], ["teal", "c", 8], ["pale", "b", 8], ["squares", "a", 4]] as const) {
       const pieces = [...container.querySelectorAll(`[data-role="${role}"]`)];
       expect(pieces).toHaveLength(total);
       expect(pieces.every((p) => p.getAttribute("fill") === `var(--fabric-${fabric})`)).toBe(true);
@@ -30,7 +30,7 @@ describe("Dakota Gold shared previews, photos and print", () => {
     const { container } = render(<svg><DakotaGoldBlock size={100}
       assignments={{ cross: "H", dark: "I", teal: "J", pale: "K", squares: "L" }}
       photos={{ H: "photo-h", I: "photo-i", J: "photo-j", K: "photo-k", L: "photo-l" }} /></svg>);
-    for (const [role, fabric, total] of [["cross", "H", 3], ["dark", "I", 8], ["teal", "J", 7], ["pale", "K", 9], ["squares", "L", 4]] as const) {
+    for (const [role, fabric, total] of [["cross", "H", 3], ["dark", "I", 8], ["teal", "J", 8], ["pale", "K", 8], ["squares", "L", 4]] as const) {
       const pieces = [...container.querySelectorAll(`[data-role="${role}"]`)];
       expect(pieces).toHaveLength(total);
       expect(pieces.every((p) => p.getAttribute("fill") === `url(#fabric-${fabric})`)).toBe(true);
@@ -44,7 +44,7 @@ describe("Dakota Gold shared previews, photos and print", () => {
     expect(thumb.container.querySelectorAll("polygon")).toHaveLength(31);
     const diagram = render(<PatternDiagram pattern="dakota-gold" assignments={assignments} hasBorder={false} />);
     expect(diagram.container.querySelectorAll("[data-dakota-gold-block]")).toHaveLength(1);
-    expect(diagram.container.querySelectorAll('[data-role="pale"]')).toHaveLength(9);
+    expect(diagram.container.querySelectorAll('[data-role="pale"]')).toHaveLength(8);
     const quilt = render(<QuiltCanvas pattern="dakota-gold" assignments={assignments} hasBorder={false}
       borderFabric="G" blocksAcross={3} blocksDown={2} quiltWidth={36} quiltHeight={24} borderWidth={0}
       sashingWidth={0} sashingFabric="F" alternateBlocks blockLayout="herringbone" maxSize={320} />);
