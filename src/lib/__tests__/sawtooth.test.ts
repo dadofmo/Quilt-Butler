@@ -27,7 +27,7 @@ describe("Sawtooth reference geometry and construction", () => {
     const pattern = getPattern("sawtooth"), star = getPattern("sawtooth-star");
     if (!pattern || !star) throw new Error("Missing Sawtooth pattern registration");
     expect(PATTERNS.filter((p) => p.id === "sawtooth")).toHaveLength(1);
-    expect(PATTERNS).toHaveLength(84);
+    expect(PATTERNS).toHaveLength(85);
     expect(PATTERNS[0].id).toBe("nine-patch");
     expect(star.name).toBe("Sawtooth Star");
     expect(star.fabricCount).toBe(3);

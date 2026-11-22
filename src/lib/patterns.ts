@@ -64,6 +64,21 @@ const borderSection: PatternSection = {
 
 const BASE_PATTERNS: PatternDefBase[] = [
   {
+    id: "pinwheel-parlor", name: "Pinwheel Parlor", hasMath: true,
+    intro: "A four-fabric pinwheel spins at the centre of a ring of twelve on-point diamonds, framed by bold corner squares, half-square triangles and outer edge bars. Drafted on a 12 × 12 grid and sewn as nine straight-seam units in three rows. Seven adjustable fabrics; no Y-seams. Optional sashing and border.",
+    sections: [
+      { id: "dark", label: "Corner squares & pinwheel blades", defaultFabric: "A", hint: "Four outer corner squares and four centre pinwheel triangles." },
+      { id: "background", label: "Background triangles, bars & edge diamonds", defaultFabric: "B", hint: "Eight HST halves, four inner bars and eight on-point edge diamonds." },
+      { id: "sky", label: "Sky triangles", defaultFabric: "C", hint: "Eight HST halves beside the corner squares and four centre triangles." },
+      { id: "accent", label: "Corner-diamond triangles & pinwheel blades", defaultFabric: "D", hint: "Sixteen triangles around the four corner diamonds and four centre pinwheel triangles." },
+      { id: "coral", label: "Edge-diamond triangles", defaultFabric: "E", hint: "Thirty-two triangles around the eight edge diamonds; separate from the corner-diamond triangles." },
+      { id: "frame", label: "Outer edge bars", defaultFabric: "F", hint: "Four continuous bars on the outside edges." },
+      { id: "pale", label: "Corner diamonds & centre triangles", defaultFabric: "G", hint: "Four on-point corner diamonds and four centre triangles." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "H" },
+      { ...borderSection, defaultFabric: "I" },
+    ],
+  },
+  {
     id: "dakota-gold", name: "Dakota Gold", hasMath: true,
     intro: "A 5×5 block with a continuous three-bar cross, four plain inner squares and twelve half-square triangles in three exact reference pairings. Five independently adjustable fabrics preserve the dark, teal, pale and light-square placements. Piece four corner units, join them to the vertical bars, then add the full-width centre bar with straight seams. Optional sashing and border; no Y-seams or templates.",
     sections: [
@@ -2348,6 +2363,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
  * equal the distinct default fabrics across both blocks, excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
+  "pinwheel-parlor": { skill: "intermediate", fabricCount: 7, techniques: ["squares", "hst", "onpoint", "strips"] },
   "dakota-gold": { skill: "confident", fabricCount: 5, techniques: ["squares", "hst", "strips"] },
   "sawtooth": { skill: "confident", fabricCount: 4, techniques: ["squares", "hst", "onpoint"] },
   "hovering-hawks": { skill: "beginner", fabricCount: 3, techniques: ["squares", "hst"] },

@@ -60,7 +60,7 @@ describe("Hovering Hawks reference geometry and construction", () => {
     expect(pattern.sections.slice(0, 3).map((s) => s.defaultFabric)).toEqual(["A", "B", "C"]);
     expect(["straight", ...(pattern.layouts ?? [])]).toEqual(["straight", "alternating"]);
     expect(PATTERNS[0].id).toBe("nine-patch");
-    expect(PATTERNS).toHaveLength(84);
+    expect(PATTERNS).toHaveLength(85);
     expect(getPattern("indian-puzzle")?.id).toBe("indian-puzzle");
   });
 

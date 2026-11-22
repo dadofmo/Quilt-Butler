@@ -3,6 +3,7 @@ import { SawtoothBlock } from "./SawtoothBlock";
 import { HoveringHawksBlock } from "./HoveringHawksBlock";
 import { IndianPuzzleBlock } from "./IndianPuzzleBlock";
 import { EccentricStarBlock } from "./EccentricStarBlock";
+import { PinwheelParlorBlock } from "./PinwheelParlorBlock";
 import { FancyContraryWifeBlock } from "./FancyContraryWifeBlock";
 import { FiveSpotBlock } from "./FiveSpotBlock";
 import { ChurnDashBlock } from "./ChurnDashBlock";
@@ -1501,6 +1502,8 @@ function MiniBlock({
       return <HoveringHawksBlock size={200} assignments={assignments} photos={photos} />;
     case "indian-puzzle":
       return <IndianPuzzleBlock size={200} assignments={assignments} photos={photos} />;
+    case "pinwheel-parlor":
+      return <PinwheelParlorBlock size={200} assignments={assignments} photos={photos} />;
     case "eccentric-star":
       return <EccentricStarBlock size={200} assignments={assignments} photos={photos} />;
     case "five-spot":

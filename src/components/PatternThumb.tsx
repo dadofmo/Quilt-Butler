@@ -3,6 +3,7 @@ import { SawtoothBlock } from "./SawtoothBlock";
 import { HoveringHawksBlock } from "./HoveringHawksBlock";
 import { IndianPuzzleBlock } from "./IndianPuzzleBlock";
 import { EccentricStarBlock } from "./EccentricStarBlock";
+import { PinwheelParlorBlock } from "./PinwheelParlorBlock";
 import { FancyContraryWifeBlock } from "./FancyContraryWifeBlock";
 import { FiveSpotBlock } from "./FiveSpotBlock";
 import { ChurnDashBlock } from "./ChurnDashBlock";
@@ -48,6 +49,7 @@ const C = {
 
 
 const PATTERN_ALT: Record<PatternId, string> = {
+  "pinwheel-parlor": "Pinwheel Parlor: a four-fabric centre pinwheel inside a ring of twelve on-point diamonds, framed by corner squares, triangles and edge bars",
   "dakota-gold": "Dakota Gold: a five-by-five block with a continuous cross, four plain inner squares and twelve half-square triangles in five fabrics",
   "sawtooth": "Sawtooth: a three-by-three block with four inward-facing triangle corners and five diamonds with individually placed outer and light corner triangles",
   "hovering-hawks": "Hovering Hawks: a four-by-four block with six background squares and ten half-square triangles in three fabrics, with an alternating-turn star layout",
@@ -203,6 +205,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
     "aria-label": label,
   };
   switch (pattern) {
+    case "pinwheel-parlor":
+      return <svg {...common}><PinwheelParlorBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "dakota-gold":
       return <svg {...common}><DakotaGoldBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "sawtooth":

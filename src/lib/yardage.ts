@@ -2,6 +2,7 @@ import { DAKOTA_GOLD_CELLS, DAKOTA_GOLD_COUNTS, DAKOTA_GOLD_PAIR_ROLES, dakotaGo
 import { SAWTOOTH_COUNTS, sawtoothDimensions } from "./sawtooth";
 import { HOVERING_HAWKS_CELLS, HOVERING_HAWKS_COUNTS, hoveringHawksDimensions } from "./hovering-hawks";
 import { indianPuzzleDimensions } from "./indian-puzzle";
+import { PINWHEEL_PARLOR_COUNTS, pinwheelParlorDimensions } from "./pinwheel-parlor";
 import { ECCENTRIC_STAR_CELLS, ECCENTRIC_STAR_COUNTS, eccentricStarDimensions } from "./eccentric-star";
 import { fancyContraryDimensions } from "./fancy-contrary-wife";
 import { fiveSpotDimensions, FIVE_SPOT_COUNTS } from "./five-spot";
@@ -255,7 +256,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "dakota-gold" || s.pattern === "hovering-hawks" || s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
+  const isJericho = s.pattern === "pinwheel-parlor" || s.pattern === "dakota-gold" || s.pattern === "hovering-hawks" || s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -957,6 +958,43 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections>0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
       notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${exact(sashWidth+SEAM)} × ${exact(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${exact(sashWidth+SEAM)}. Join block rows with vertical strips; piece full-width horizontal sashing rows with intersections. Sashing is only between blocks; add the optional border last.`);
     } else notes.push("Join Indian Puzzle blocks edge to edge in the reference orientation; add the optional border last.");
+  } else if (s.pattern === "pinwheel-parlor") {
+    const d = pinwheelParlorDimensions(s.blockSize), c = PINWHEEL_PARLOR_COUNTS, n = blockCount;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Pinwheel Parlor section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const dark = fabric("dark"), bg = fabric("background"), sky = fabric("sky"), acc = fabric("accent"), coral = fabric("coral"), frame = fabric("frame"), pale = fabric("pale");
+    const ex = (v: number) => { const m = rulerMark(v); return `${v.toFixed(4)}" (${m.relation} ${m.label} ruler mark)`; };
+    const st = (v: number) => `${v.toFixed(3)}"`;
+    addSquares(reqs[dark], "Whole corner squares", c.darkCornerSquares*n, d.cornerSquare, s.fabricWidth);
+    addSquares(reqs[sky], "HST starter squares||pair with background; two HSTs per pair", c.skyHstStarters*n, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[bg], "HST starter squares||pair with sky; two HSTs per pair", c.backgroundHstStarters*n, d.hstStarter, s.fabricWidth);
+    addRails(reqs[bg], "Inner edge bars", c.backgroundBars*n, d.barLength, d.barWidth, s.fabricWidth);
+    addRails(reqs[frame], "Outer edge bars", c.frameBars*n, d.barLength, d.barWidth, s.fabricWidth);
+    addSquares(reqs[bg], "On-point edge diamond squares", c.backgroundDiamonds*n, d.diamondCut, s.fabricWidth);
+    addSquares(reqs[pale], "On-point corner diamond squares", c.paleDiamonds*n, d.diamondCut, s.fabricWidth);
+    addSquares(reqs[acc], "Setting triangle squares||cut once diagonally; corner-diamond triangles", c.accentSettingSquares*n, d.settingSquare, s.fabricWidth);
+    addSquares(reqs[coral], "Setting triangle squares||cut once diagonally; edge-diamond triangles", c.coralSettingSquares*n, d.settingSquare, s.fabricWidth);
+    for (const f of [dark, sky, acc, pale]) addSquares(reqs[f], "Pinwheel quarter-triangle squares||cut twice diagonally; four quarters, one per centre unit", c.qstSquaresPerFabric*n, d.qstSquare, s.fabricWidth);
+    notes.push(
+      `Pinwheel Parlor: drafted on a 12 × 12 grid (${ex(d.u)} per grid square). Nine ${ex(d.macro)} finished units in three rows: four corner units, four edge units and one pinwheel centre. Every small unit finishes ${ex(d.cell)} and trims to ${ex(d.cellTrim)} unfinished. Fabric ${acc} (corner-diamond triangles) and Fabric ${coral} (edge-diamond triangles) are separate roles.`,
+      `Cutting per block: Fabric ${dark}: 4 corner squares at ${ex(d.cornerSquare)} and 1 square at ${st(d.qstSquare)} cut twice diagonally. Fabric ${sky}: 4 HST starters at ${st(d.hstStarter)} and 1 square at ${st(d.qstSquare)} cut twice diagonally. Fabric ${bg}: 4 HST starters at ${st(d.hstStarter)}, 4 bars at ${ex(d.barWidth)} × ${ex(d.barLength)} and 8 diamond squares at ${ex(d.diamondCut)}. Fabric ${acc}: 8 squares at ${st(d.settingSquare)} cut once diagonally (16 triangles) and 1 square at ${st(d.qstSquare)} cut twice diagonally. Fabric ${coral}: 16 squares at ${st(d.settingSquare)} cut once diagonally (32 triangles). Fabric ${frame}: 4 bars at ${ex(d.barWidth)} × ${ex(d.barLength)}. Fabric ${pale}: 4 diamond squares at ${ex(d.diamondCut)} and 1 square at ${st(d.qstSquare)} cut twice diagonally. Starters and triangle squares are rounded UP to an eighth so units can be trimmed; diamond cuts and trim sizes are exact — ruler marks are guides, never permission to round down. Make one test block first.`,
+      `HSTs (8): pair each Fabric ${sky} starter with a Fabric ${bg} starter, draw one diagonal, sew 1/4" on both sides, cut on the line and press. Four pairs make exactly eight. Trim each to ${ex(d.cellTrim)} with the seam corner to corner.`,
+      `Square-in-a-square units: sew Fabric ${acc} triangles to opposite sides of a Fabric ${pale} diamond, press, then add the other two sides (4 corner units). Make 8 edge units the same way with Fabric ${bg} diamonds and Fabric ${coral} triangles. Trim each to ${ex(d.cellTrim)}, keeping 1/4" beyond every diamond point, centred.`,
+      `Pinwheel centre (4 quarter-square units): for each unit sew one Fabric ${pale} quarter to one Fabric ${acc} quarter, and one Fabric ${sky} quarter to one Fabric ${dark} quarter, then join the halves matching the centre point. Trim to ${ex(d.cellTrim)}. Lay out the top-left unit with ${pale} at the top, ${acc} at the right, ${dark} at the bottom and ${sky} at the left; turn the other three a quarter-turn each clockwise around the block centre so the ${acc} and ${dark} blades spin and the outer edges alternate ${pale} and ${sky}. Sew as a four-patch, nesting seams.`,
+      `Corner units (4): sew a two-by-two of whole Fabric ${dark} square (outer corner), two HSTs and one corner square-in-a-square (toward the block centre). Each HST has its Fabric ${sky} half touching the dark square and the block's outside edge, and its Fabric ${bg} half facing the centre, so the background halves form one large triangle aimed inward. Mirror this for each corner.`,
+      `Edge units (4): sew a Fabric ${frame} bar to a Fabric ${bg} bar along the long edge (a strip set is fine); join two edge square-in-a-squares side by side; sew the bar pair to them with Fabric ${frame} on the block's outside edge and Fabric ${bg} touching the diamonds. Each unit measures ${ex(d.macroTrim)} unfinished.`,
+      `Block: row 1 = corner / top edge / corner; row 2 = left edge / pinwheel centre / right edge (edge units turned so the ${frame} bar is on the outside); row 3 = corner / bottom edge / corner. Pin intersections, press rows in alternating directions, join rows. Check ${ex(d.blockTrim)} square unfinished (${s.blockSize}" finished). Straight seams only; no Y-seams.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing"), vertical = (blocksAcross-1)*blocksDown, horizontal = (blocksDown-1)*blocksAcross;
+      const count = vertical+horizontal, intersections = (blocksAcross-1)*(blocksDown-1);
+      if (count>0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize+SEAM, sashWidth+SEAM, s.fabricWidth);
+      if (intersections>0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${ex(sashWidth+SEAM)} × ${ex(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${ex(sashWidth+SEAM)}. Join block rows with vertical strips, piece full-width horizontal sashing rows with intersections, then add the optional border last.`);
+    } else notes.push("Join Pinwheel Parlor blocks edge to edge, all in the same orientation; add the optional border last.");
   } else if (s.pattern === "eccentric-star") {
     const d = eccentricStarDimensions(s.blockSize), c = ECCENTRIC_STAR_COUNTS, n = blockCount;
     const fabric = (id: string): FabricKey => {
