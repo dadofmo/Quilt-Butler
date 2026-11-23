@@ -70,3 +70,17 @@ describe("Pinwheel Parlor",()=>{
     for(const f of ["A","C","D","G"]) expect(total(r,f,"Pinwheel quarter")).toBe(9);
   });
 });
+
+import { thumbnailAssignments } from "../pattern-thumbnail-palette";
+describe("Pinwheel Parlor picker colours",()=>{
+  it("gives the outer edge bars a colour different from the corner squares and inner bars",()=>{
+    const t=thumbnailAssignments("pinwheel-parlor");
+    expect(t.frame).not.toBe(t.dark);
+    expect(t.frame).not.toBe(t.background);
+  });
+  it("planning defaults keep outer bars separate from corner squares",()=>{
+    const p=getPattern("pinwheel-parlor")!;
+    const def=(id:string)=>p.sections.find(s=>s.id===id)!.defaultFabric;
+    expect(def("frame")).not.toBe(def("dark"));
+  });
+});

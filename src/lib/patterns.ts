@@ -65,7 +65,7 @@ const borderSection: PatternSection = {
 const BASE_PATTERNS: PatternDefBase[] = [
   {
     id: "pinwheel-parlor", name: "Pinwheel Parlor", hasMath: true,
-    intro: "A four-fabric pinwheel spins at the centre of a ring of twelve on-point diamonds, framed by bold corner squares, half-square triangles and outer edge bars. Drafted on a 12 × 12 grid and sewn as nine straight-seam units in three rows. Seven adjustable fabrics; no Y-seams. Optional sashing and border.",
+    intro: "A four-fabric pinwheel spins at the centre of a ring of twelve on-point diamonds, framed by bold corner squares, half-square triangles and outer edge bars. Drafted on a 6 × 6 quilter's grid (2 × 2 corner units, a 2 × 2 pinwheel centre and 2 × 1 edge units with half-unit outer and inner bars) and sewn as nine straight-seam units in three rows. Seven adjustable fabrics; no Y-seams. Optional sashing and border.",
     sections: [
       { id: "dark", label: "Corner squares & pinwheel blades", defaultFabric: "A", hint: "Four outer corner squares and four centre pinwheel triangles." },
       { id: "background", label: "Background triangles, bars & edge diamonds", defaultFabric: "B", hint: "Eight HST halves, four inner bars and eight on-point edge diamonds." },

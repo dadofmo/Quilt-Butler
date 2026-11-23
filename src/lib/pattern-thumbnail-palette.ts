@@ -7,7 +7,7 @@ const NON_BLOCK = new Set(["sashing", "cornerstone", "border"]);
 /** Picker-only colours: preserve shared roles without changing planning defaults. */
 export function thumbnailAssignments(id: PatternId): SectionAssignments {
   // Pinwheel Parlor has seven roles; keep touching roles distinct within A–E.
-  if (id === "pinwheel-parlor") return { dark: "A", background: "C", sky: "B", accent: "E", coral: "D", frame: "A", pale: "D" };
+  if (id === "pinwheel-parlor") return { dark: "A", background: "C", sky: "B", accent: "E", coral: "D", frame: "D", pale: "D" };
   const pattern = getPattern(id);
   if (!pattern) return {};
   const remap = new Map<FabricKey, FabricKey>();
