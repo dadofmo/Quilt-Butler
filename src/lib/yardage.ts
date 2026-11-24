@@ -3,6 +3,7 @@ import { SAWTOOTH_COUNTS, sawtoothDimensions } from "./sawtooth";
 import { HOVERING_HAWKS_CELLS, HOVERING_HAWKS_COUNTS, hoveringHawksDimensions } from "./hovering-hawks";
 import { indianPuzzleDimensions } from "./indian-puzzle";
 import { PINWHEEL_PARLOR_COUNTS, pinwheelParlorDimensions } from "./pinwheel-parlor";
+import { GRECIAN_SQUARE_CORNERS, GRECIAN_SQUARE_COUNTS, GRECIAN_SQUARE_SIDES, grecianSquareDimensions } from "./grecian-square";
 import { ECCENTRIC_STAR_CELLS, ECCENTRIC_STAR_COUNTS, eccentricStarDimensions } from "./eccentric-star";
 import { fancyContraryDimensions } from "./fancy-contrary-wife";
 import { fiveSpotDimensions, FIVE_SPOT_COUNTS } from "./five-spot";
@@ -256,7 +257,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "pinwheel-parlor" || s.pattern === "dakota-gold" || s.pattern === "hovering-hawks" || s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
+  const isJericho = s.pattern === "grecian-square" || s.pattern === "pinwheel-parlor" || s.pattern === "dakota-gold" || s.pattern === "hovering-hawks" || s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -995,6 +996,37 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections>0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
       notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${ex(sashWidth+SEAM)} × ${ex(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${ex(sashWidth+SEAM)}. Join block rows with vertical strips, piece full-width horizontal sashing rows with intersections, then add the optional border last.`);
     } else notes.push("Join Pinwheel Parlor blocks edge to edge, all in the same orientation; add the optional border last.");
+  } else if (s.pattern === "grecian-square") {
+    const d = grecianSquareDimensions(s.blockSize), c = GRECIAN_SQUARE_COUNTS, n = blockCount;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Grecian Square section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const dark = fabric("dark"), corner = fabric("corners"), light = fabric("light"), centre = fabric("centre");
+    addSquares(reqs[dark], "Dark HST starter squares||pair with corner fabric; two HSTs per pair", c.darkStarters*n, d.hstStarter, s.fabricWidth);
+    addSquares(reqs[corner], "Corner HST starter squares||pair with dark; two HSTs per pair", c.cornerStarters*n, d.hstStarter, s.fabricWidth);
+    addRails(reqs[dark], "Outer side bars", c.darkBars*n, d.barLength, d.barWidth, s.fabricWidth);
+    addRails(reqs[light], "Inner side bars", c.lightBars*n, d.barLength, d.barWidth, s.fabricWidth);
+    addSquares(reqs[centre], "Whole centre squares", c.centre*n, d.unitTrim, s.fabricWidth);
+    const exact = (v: number) => { const m = rulerMark(v); return `${v.toFixed(4)}" (${m.relation} ${m.label} ruler mark)`; };
+    const cornerText = GRECIAN_SQUARE_CORNERS.map(k => `${k.outer} corner: Fabric ${corner} triangle in the ${k.outer} half, Fabric ${dark} toward the centre`).join("; ");
+    const sideText = GRECIAN_SQUARE_SIDES.map(k => `${k.outside} side: Fabric ${dark} bar on the ${k.outside} (outside) edge, Fabric ${light} bar against the centre`).join("; ");
+    notes.push(
+      `Grecian Square: a 3 × 3 nine-patch of ${exact(d.unit)} finished units: four Fabric ${dark}/${corner} corner HSTs, four side units of two half-width bars (Fabric ${dark} outside, Fabric ${light} inside) and one whole Fabric ${centre} centre square. Reference white lines are seams, not fabric strips.`,
+      `Cutting per block: Fabric ${dark}, 2 HST starter squares at ${d.hstStarter.toFixed(3)}" and 4 outer bars at ${exact(d.barWidth)} × ${exact(d.barLength)}; Fabric ${corner}, 2 HST starter squares at ${d.hstStarter.toFixed(3)}"; Fabric ${light}, 4 inner bars at ${exact(d.barWidth)} × ${exact(d.barLength)}; Fabric ${centre}, 1 centre square at ${exact(d.unitTrim)}. Starters are oversized and rounded UP to an eighth for trimming; bar and centre cuts are exact — ruler marks are guides, never permission to round down. Shortcut: sew a ${exact(d.barWidth)} Fabric ${dark} strip to a ${exact(d.barWidth)} Fabric ${light} strip and cross-cut ${exact(d.barLength)} segments. Make one test block first.`,
+      `HSTs (4): pair each Fabric ${dark} starter with a Fabric ${corner} starter right sides together, draw one diagonal, sew 1/4" on both sides, cut on the line and press toward Fabric ${dark}. Two pairs make exactly four. Trim each to ${exact(d.unitTrim)} with the seam corner to corner.`,
+      `Side units (4): sew one Fabric ${dark} bar to one Fabric ${light} bar along the long edge; press toward Fabric ${dark}. Each unit measures ${exact(d.unitTrim)} square unfinished.`,
+      `Layout — ${cornerText}. ${sideText}.`,
+      `Block: row 1 = top-left HST / top side unit / top-right HST; row 2 = left side unit / Fabric ${centre} centre / right side unit; row 3 = bottom-left HST / bottom side unit / bottom-right HST. Press rows 1 and 3 toward the side units and row 2 toward the centre so seams nest; pin intersections and join rows. Check ${exact(d.blockTrim)} square unfinished (${s.blockSize}" finished). Straight seams only; no Y-seams.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing"), vertical = (blocksAcross-1)*blocksDown, horizontal = (blocksDown-1)*blocksAcross;
+      const count = vertical+horizontal, intersections = (blocksAcross-1)*(blocksDown-1);
+      if (count>0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize+SEAM, sashWidth+SEAM, s.fabricWidth);
+      if (intersections>0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${exact(sashWidth+SEAM)} × ${exact(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${exact(sashWidth+SEAM)}. Join block rows with vertical strips, piece full-width horizontal sashing rows with intersections, then add the optional border last.`);
+    } else notes.push("Join Grecian Square blocks edge to edge, all in the same orientation; add the optional border last.");
   } else if (s.pattern === "eccentric-star") {
     const d = eccentricStarDimensions(s.blockSize), c = ECCENTRIC_STAR_COUNTS, n = blockCount;
     const fabric = (id: string): FabricKey => {

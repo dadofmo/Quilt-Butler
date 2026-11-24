@@ -3,6 +3,7 @@ import { SawtoothBlock } from "./SawtoothBlock";
 import { HoveringHawksBlock } from "./HoveringHawksBlock";
 import { IndianPuzzleBlock } from "./IndianPuzzleBlock";
 import { EccentricStarBlock } from "./EccentricStarBlock";
+import { GrecianSquareBlock } from "./GrecianSquareBlock";
 import { PinwheelParlorBlock } from "./PinwheelParlorBlock";
 import { FancyContraryWifeBlock } from "./FancyContraryWifeBlock";
 import { FiveSpotBlock } from "./FiveSpotBlock";
@@ -115,6 +116,8 @@ function renderInner(
       return <IndianPuzzleBlock size={200} assignments={a} photos={photos} />;
     case "pinwheel-parlor":
       return <PinwheelParlorBlock size={200} assignments={a} photos={photos} />;
+    case "grecian-square":
+      return <GrecianSquareBlock size={200} assignments={a} photos={photos} />;
     case "eccentric-star":
       return <EccentricStarBlock size={200} assignments={a} photos={photos} />;
     case "fancy-contrary-wife":

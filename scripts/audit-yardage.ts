@@ -3163,6 +3163,15 @@ console.log("\n=== Fancy Contrary Wife: nine 12-inch blocks ===");
   check("Fancy Contrary Wife sashing bolt inches", finished.fabrics.find(x => x.fabric === "F")?.totalInches ?? -1, 12.5);
   check("Fancy Contrary Wife border bolt inches", finished.fabrics.find(x => x.fabric === "G")?.totalInches ?? -1, 17.5);
 }
+console.log("\n=== Grecian Square: nine 12-inch blocks ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "grecian-square", quiltWidth: 36, quiltHeight: 36 });
+  // A: 18 HST starters at 5 (8 per strip -> 3 strips = 15) + 36 bars 2.5x4.5 (9 per strip -> 4 strips = 10).
+  check("Grecian Square dark bolt inches", r.fabrics.find(x => x.fabric === "A")?.totalInches ?? -1, 25);
+  check("Grecian Square centre bolt inches", r.fabrics.find(x => x.fabric === "B")?.totalInches ?? -1, 4.5);
+  check("Grecian Square inner bars bolt inches", r.fabrics.find(x => x.fabric === "C")?.totalInches ?? -1, 10);
+  check("Grecian Square corner bolt inches", r.fabrics.find(x => x.fabric === "D")?.totalInches ?? -1, 15);
+}
 console.log("\n=== Eccentric Star: nine 12-inch blocks ===");
 {
   const r = calculateYardage({ ...base(), pattern: "eccentric-star", quiltWidth: 36, quiltHeight: 36 });

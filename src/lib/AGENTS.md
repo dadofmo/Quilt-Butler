@@ -14,3 +14,4 @@
 
 - Indian Puzzle shares its mirrored 6×6 geometry and dimensions across all views and cuts; use eight two-at-a-time corner HSTs, eight four-at-a-time geese in reversed colourways, and one whole centre diamond. Why: matches continuous reference triangles with straight seams and no unnecessary piecing.
 - Pinwheel Parlor shares its 12×12 map and dimensions across all views and cuts: corner units (whole square, two two-at-a-time HSTs, square-in-a-square), edge units (continuous outer and inner bars over two square-in-a-squares) and a four-unit pinwheel of cut-twice quarter triangles. Why: matches the reference with straight seams and no spare pieces.
+- Grecian Square shares its 3×3 map and dimensions across all views and cuts: four two-at-a-time corner HSTs (corner fabric outside), four two-bar side units (dark bar outside, light bar inside) and one whole centre. Why: matches the reference with straight seams and the fewest pieces.

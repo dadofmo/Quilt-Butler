@@ -64,6 +64,18 @@ const borderSection: PatternSection = {
 
 const BASE_PATTERNS: PatternDefBase[] = [
   {
+    id: "grecian-square", name: "Grecian Square", hasMath: true,
+    intro: "A classic nine-patch: four half-square-triangle corners and four two-bar side units frame one whole centre square. Four adjustable fabrics; straight seams, no templates or Y-seams. Optional sashing and border.",
+    sections: [
+      { id: "dark", label: "Dark triangles & outer bars", defaultFabric: "A", hint: "Four corner HST halves facing the centre and four outer side bars." },
+      { id: "corners", label: "Outer corner triangles", defaultFabric: "D", hint: "Four HST halves at the block's outside corners." },
+      { id: "light", label: "Inner bars", defaultFabric: "C", hint: "Four bars touching the centre square." },
+      { id: "centre", label: "Centre square", defaultFabric: "B", hint: "One whole centre square." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "E" },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
+  {
     id: "pinwheel-parlor", name: "Pinwheel Parlor", hasMath: true,
     intro: "A four-fabric pinwheel spins at the centre of a ring of twelve on-point diamonds, framed by bold corner squares, half-square triangles and outer edge bars. Drafted on a 6 × 6 quilter's grid (2 × 2 corner units, a 2 × 2 pinwheel centre and 2 × 1 edge units with half-unit outer and inner bars) and sewn as nine straight-seam units in three rows. Seven adjustable fabrics; no Y-seams. Optional sashing and border.",
     sections: [
@@ -2363,6 +2375,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
  * equal the distinct default fabrics across both blocks, excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
+  "grecian-square": { skill: "beginner", fabricCount: 4, techniques: ["squares", "hst", "strips"] },
   "pinwheel-parlor": { skill: "intermediate", fabricCount: 7, techniques: ["squares", "hst", "onpoint", "strips"] },
   "dakota-gold": { skill: "confident", fabricCount: 5, techniques: ["squares", "hst", "strips"] },
   "sawtooth": { skill: "confident", fabricCount: 4, techniques: ["squares", "hst", "onpoint"] },
