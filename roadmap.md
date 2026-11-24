@@ -88,3 +88,5 @@
 
 - [x] Add Walls of Jericho (7×7 cross with 20 HST corner bands) with previews, cutting, sewing steps and tests.
 - [x] Add Country Roads (7×7, centre Fabric C, block corners Fabric D) with previews, cutting, sewing steps and tests.
+
+- [ ] Grecian Square: study reference, build as new standard pattern, full SOP verification
