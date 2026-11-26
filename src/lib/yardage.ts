@@ -3,6 +3,7 @@ import { SAWTOOTH_COUNTS, sawtoothDimensions } from "./sawtooth";
 import { HOVERING_HAWKS_CELLS, HOVERING_HAWKS_COUNTS, hoveringHawksDimensions } from "./hovering-hawks";
 import { indianPuzzleDimensions } from "./indian-puzzle";
 import { PINWHEEL_PARLOR_COUNTS, pinwheelParlorDimensions } from "./pinwheel-parlor";
+import { FLYING_DUTCHMAN_CELLS, FLYING_DUTCHMAN_COUNTS, OPPOSITE_CORNER, flyingDutchmanDimensions, seamFor } from "./flying-dutchman";
 import { GRECIAN_SQUARE_CORNERS, GRECIAN_SQUARE_COUNTS, GRECIAN_SQUARE_SIDES, grecianSquareDimensions } from "./grecian-square";
 import { ECCENTRIC_STAR_CELLS, ECCENTRIC_STAR_COUNTS, eccentricStarDimensions } from "./eccentric-star";
 import { fancyContraryDimensions } from "./fancy-contrary-wife";
@@ -257,7 +258,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "grecian-square" || s.pattern === "pinwheel-parlor" || s.pattern === "dakota-gold" || s.pattern === "hovering-hawks" || s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
+  const isJericho = s.pattern === "flying-dutchman" || s.pattern === "grecian-square" || s.pattern === "pinwheel-parlor" || s.pattern === "dakota-gold" || s.pattern === "hovering-hawks" || s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -996,6 +997,46 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections>0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
       notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${ex(sashWidth+SEAM)} × ${ex(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${ex(sashWidth+SEAM)}. Join block rows with vertical strips, piece full-width horizontal sashing rows with intersections, then add the optional border last.`);
     } else notes.push("Join Pinwheel Parlor blocks edge to edge, all in the same orientation; add the optional border last.");
+  } else if (s.pattern === "flying-dutchman") {
+    const d = flyingDutchmanDimensions(s.blockSize), c = FLYING_DUTCHMAN_COUNTS, n = blockCount;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Flying Dutchman section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const bg = fabric("background"), main = fabric("main"), accent = fabric("accent");
+    addSquares(reqs[bg], "Background plain squares", c.backgroundSquares*n, d.unitTrim, s.fabricWidth);
+    // Same-size starters for one fabric are cut together so they share strips.
+    const starters = new Map<FabricKey, { count: number; uses: string[] }>();
+    const addStarter = (f: FabricKey, count: number, use: string) => {
+      const entry = starters.get(f) ?? { count: 0, uses: [] };
+      entry.count += count; entry.uses.push(use); starters.set(f, entry);
+    };
+    addStarter(bg, c.backgroundStarters*n, `${c.backgroundStarters} per block, paired with Fabric ${main} for wing HSTs`);
+    addStarter(main, c.mainWingStarters*n, `${c.mainWingStarters} per block, paired with Fabric ${bg} for wing HSTs`);
+    addStarter(main, c.mainStarStarters*n, `${c.mainStarStarters} per block, paired with Fabric ${accent} for centre-star HSTs`);
+    addStarter(accent, c.accentStarters*n, `${c.accentStarters} per block, paired with Fabric ${main} for centre-star HSTs`);
+    for (const [f, e] of starters) addSquares(reqs[f], `HST starter squares||${e.uses.join("; ")}; two HSTs per pair`, e.count, d.hstStarter, s.fabricWidth);
+    const exact = (v: number) => { const m = rulerMark(v); return `${v.toFixed(4)}" (${m.relation} ${m.label} ruler mark)`; };
+    const describe = (cell: (typeof FLYING_DUTCHMAN_CELLS)[number]) => cell.kind === "square"
+      ? `whole Fabric ${bg} square`
+      : `${cell.kind === "wing" ? "wing" : "centre-star"} HST with Fabric ${main} at the ${cell.dark} right-angle corner and Fabric ${cell.kind === "wing" ? bg : accent} at the ${OPPOSITE_CORNER[cell.dark]}; seam ${seamFor(cell.dark)}`;
+    notes.push(
+      `Flying Dutchman: a 4 × 4 grid of ${exact(d.unit)} finished units. Each block has four whole Fabric ${bg} squares, eight Fabric ${main}/${bg} wing HSTs and four Fabric ${main}/${accent} centre-star HSTs. Reference seam lines are construction guides, not extra fabric.`,
+      `Cutting per block: Fabric ${bg} — 4 plain squares at ${exact(d.unitTrim)} and 4 HST starters at ${d.hstStarter.toFixed(3)}"; Fabric ${main} — 6 HST starters at ${d.hstStarter.toFixed(3)}" (4 for wings, 2 for the centre star); Fabric ${accent} — 2 HST starters at ${d.hstStarter.toFixed(3)}". Starter counts are squares, not finished HST counts. Starters are oversized and rounded UP to an eighth for trimming; plain cuts and trim targets are exact — ruler marks are guides, never permission to round down. Make one test block before chain-piecing.`,
+      `Wing HSTs (8 per block): pair each of the four Fabric ${main} wing starters with a Fabric ${bg} starter, right sides together. Draw one diagonal, sew 1/4" on both sides, cut on the line, open and press toward Fabric ${main}. Four pairs make exactly eight.`,
+      `Centre-star HSTs (4 per block): pair each of the two remaining Fabric ${main} starters with a Fabric ${accent} starter and sew the same way. Two pairs make exactly four. Trim all twelve HSTs to ${exact(d.unitTrim)} UNFINISHED square with the diagonal seam exactly corner to corner; handle bias edges gently.`,
+      ...[0,1,2,3].map(row => `Flying Dutchman row ${row+1}, left to right: ` + FLYING_DUTCHMAN_CELLS.filter(cell => cell.row === row).map(describe).join("; ") + "."),
+      `Sew the four units in each row with accurate 1/4" seams, keeping every orientation listed above. Press rows 1 and 3 to the left and rows 2 and 4 to the right (or press open) so seams nest; pin intersections, especially the four centre-star points, then join the four rows and press. Check ${exact(d.blockTrim)} square UNFINISHED (${s.blockSize}" finished). Straight seams only; no Y-seams or templates.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing"), vertical = (blocksAcross-1)*blocksDown, horizontal = (blocksDown-1)*blocksAcross;
+      const count = vertical+horizontal, intersections = (blocksAcross-1)*(blocksDown-1);
+      if (count>0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize+SEAM, sashWidth+SEAM, s.fabricWidth);
+      if (intersections>0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${exact(sashWidth+SEAM)} × ${exact(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${exact(sashWidth+SEAM)}. Join block rows with vertical strips, piece full-width horizontal sashing rows with intersections, then add the optional border last. No outer sashing frame.`);
+    } else notes.push("Join Flying Dutchman blocks edge to edge in the selected straight or alternating-turn setting; add the optional border last.");
+    if (s.blockLayout === "straight" || !pattern.layouts?.includes(s.blockLayout)) notes.push("Block setting — straight set: keep every Flying Dutchman block facing the same way as the block diagram.");
   } else if (s.pattern === "grecian-square") {
     const d = grecianSquareDimensions(s.blockSize), c = GRECIAN_SQUARE_COUNTS, n = blockCount;
     const fabric = (id: string): FabricKey => {

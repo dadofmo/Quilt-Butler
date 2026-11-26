@@ -4,6 +4,7 @@ import { HoveringHawksBlock } from "./HoveringHawksBlock";
 import { IndianPuzzleBlock } from "./IndianPuzzleBlock";
 import { EccentricStarBlock } from "./EccentricStarBlock";
 import { GrecianSquareBlock } from "./GrecianSquareBlock";
+import { FlyingDutchmanBlock } from "./FlyingDutchmanBlock";
 import { PinwheelParlorBlock } from "./PinwheelParlorBlock";
 import { FancyContraryWifeBlock } from "./FancyContraryWifeBlock";
 import { FiveSpotBlock } from "./FiveSpotBlock";
@@ -1505,6 +1506,8 @@ function MiniBlock({
       return <IndianPuzzleBlock size={200} assignments={assignments} photos={photos} />;
     case "pinwheel-parlor":
       return <PinwheelParlorBlock size={200} assignments={assignments} photos={photos} />;
+    case "flying-dutchman":
+      return <FlyingDutchmanBlock size={200} assignments={assignments} photos={photos} />;
     case "grecian-square":
       return <GrecianSquareBlock size={200} assignments={assignments} photos={photos} />;
     case "eccentric-star":

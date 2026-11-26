@@ -64,6 +64,18 @@ const borderSection: PatternSection = {
 
 const BASE_PATTERNS: PatternDefBase[] = [
   {
+    id: "flying-dutchman", name: "Flying Dutchman", hasMath: true,
+    layouts: ["alternating"],
+    intro: "A 4×4 whirlwind block with four background squares, eight outward-flying wings, and a four-triangle spinning centre star. Pieced entirely from whole squares and two-at-a-time Half Square Triangles with straight seams and zero templates. Three adjustable fabrics; optional sashing and border.",
+    sections: [
+      { id: "background", label: "Background squares & outer triangle halves", defaultFabric: "A", hint: "Four whole squares and one half of the eight outer HST units." },
+      { id: "main", label: "Flying wing & centre dark triangles", defaultFabric: "B", hint: "Eight outer wing triangle halves and four inner star triangle halves." },
+      { id: "accent", label: "Spinning centre star triangles", defaultFabric: "C", hint: "Four central triangle halves forming the spinning pinwheel star." },
+      { id: "sashing", label: "Sashing between blocks", defaultFabric: "D", hint: "Optional; set to zero for edge-to-edge blocks." },
+      { ...borderSection, defaultFabric: "E" },
+    ],
+  },
+  {
     id: "grecian-square", name: "Grecian Square", hasMath: true,
     intro: "A classic nine-patch: four half-square-triangle corners and four two-bar side units frame one whole centre square. Four adjustable fabrics; straight seams, no templates or Y-seams. Optional sashing and border.",
     sections: [
@@ -2375,6 +2387,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
  * equal the distinct default fabrics across both blocks, excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
+  "flying-dutchman": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst"] },
   "grecian-square": { skill: "beginner", fabricCount: 4, techniques: ["squares", "hst", "strips"] },
   "pinwheel-parlor": { skill: "intermediate", fabricCount: 7, techniques: ["squares", "hst", "onpoint", "strips"] },
   "dakota-gold": { skill: "confident", fabricCount: 5, techniques: ["squares", "hst", "strips"] },

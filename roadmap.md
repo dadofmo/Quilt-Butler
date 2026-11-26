@@ -92,3 +92,5 @@
 - [x] Complete Pinwheel Parlor's full reference, construction, math and five-touchpoint audit.
 - [x] Grecian Square: study reference, build as new standard pattern, full SOP verification.
 - [x] Match picker meta/OG/schema descriptions to the requested wording; rerun tests and publish after verification.
+
+- [x] Flying Dutchman: 4×4 block from reference + spec, straight/alternating turns, cuts, sewing, audit, tests, five-page walkthrough.

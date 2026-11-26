@@ -3206,6 +3206,20 @@ console.log("\n=== Hovering Hawks: nine 12-inch blocks ===");
   check("Hovering Hawks sashing bolt inches", finished.fabrics.find(x => x.fabric === "F")?.totalInches ?? -1, 12.5);
   check("Hovering Hawks border bolt inches", finished.fabrics.find(x => x.fabric === "G")?.totalInches ?? -1, 17.5);
 }
+console.log("\n=== Flying Dutchman: nine 12-inch blocks ===");
+{
+  const r = calculateYardage({ ...base(), pattern: "flying-dutchman", quiltWidth: 36, quiltHeight: 36 });
+  // Hand math, 42" usable: A = 36 plain 3.5" squares (12/strip -> 3 strips = 10.5") + 36 4" starters (10/strip -> 4 strips = 16").
+  check("Flying Dutchman background bolt inches", r.fabrics.find(x => x.fabric === "A")?.totalInches ?? -1, 26.5);
+  // B = 54 4" starters (36 wing + 18 star) -> 6 strips = 24"; C = 18 starters -> 2 strips = 8".
+  check("Flying Dutchman main bolt inches", r.fabrics.find(x => x.fabric === "B")?.totalInches ?? -1, 24);
+  check("Flying Dutchman accent bolt inches", r.fabrics.find(x => x.fabric === "C")?.totalInches ?? -1, 8);
+  const turned = calculateYardage({ ...base(), pattern: "flying-dutchman", quiltWidth: 36, quiltHeight: 36, blockLayout: "alternating" });
+  check("Flying Dutchman turning leaves main inches unchanged", turned.fabrics.find(x => x.fabric === "B")?.totalInches ?? -1, 24);
+  const finished = calculateYardage({ ...base(), pattern: "flying-dutchman", quiltWidth: 46, quiltHeight: 46, borderWidth: 3, sashingWidth: 2, assignments: { sashing: "F", border: "G" } });
+  check("Flying Dutchman sashing bolt inches", finished.fabrics.find(x => x.fabric === "F")?.totalInches ?? -1, 12.5);
+  check("Flying Dutchman border bolt inches", finished.fabrics.find(x => x.fabric === "G")?.totalInches ?? -1, 17.5);
+}
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {

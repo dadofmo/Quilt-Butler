@@ -27,7 +27,7 @@ describe("Dakota Gold reference geometry and construction", () => {
     const pattern = getPattern("dakota-gold");
     if (!pattern) throw new Error("Missing Dakota Gold registration");
     expect(PATTERNS.filter((p) => p.id === "dakota-gold")).toHaveLength(1);
-    expect(PATTERNS).toHaveLength(86);
+    expect(PATTERNS).toHaveLength(87);
     expect(PATTERNS[0].id).toBe("nine-patch");
     expect(countBlockFabrics(pattern.sections)).toBe(5);
     expect(pattern.sections.slice(0, 5).map((s) => s.defaultFabric)).toEqual(["B", "A", "C", "D", "E"]);
