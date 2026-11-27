@@ -1,3 +1,4 @@
+import { UNION_SQUARE_COUNTS, unionSquareDimensions } from "./union-square";
 import { DAKOTA_GOLD_CELLS, DAKOTA_GOLD_COUNTS, DAKOTA_GOLD_PAIR_ROLES, dakotaGoldDimensions, dakotaGoldPairCounts } from "./dakota-gold";
 import { SAWTOOTH_COUNTS, sawtoothDimensions } from "./sawtooth";
 import { HOVERING_HAWKS_CELLS, HOVERING_HAWKS_COUNTS, hoveringHawksDimensions } from "./hovering-hawks";
@@ -258,7 +259,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
   const isAlbumCross = s.pattern === "album-cross";
   const isButlersTrellis = s.pattern === "butlers-trellis";
   const isContraryWife = s.pattern === "contrary-wife";
-  const isJericho = s.pattern === "flying-dutchman" || s.pattern === "grecian-square" || s.pattern === "pinwheel-parlor" || s.pattern === "dakota-gold" || s.pattern === "hovering-hawks" || s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
+  const isJericho = s.pattern === "union-square" || s.pattern === "flying-dutchman" || s.pattern === "grecian-square" || s.pattern === "pinwheel-parlor" || s.pattern === "dakota-gold" || s.pattern === "hovering-hawks" || s.pattern === "indian-puzzle" || s.pattern === "eccentric-star" || s.pattern === "fancy-contrary-wife" || s.pattern === "five-spot" || s.pattern === "eight-hands-around" || s.pattern === "wedding-rings" || s.pattern === "walls-of-jericho" || s.pattern === "country-roads" || s.pattern === "fools-square" || s.pattern === "dumbbell" || s.pattern === "broken-wheel";
   const isDuckAndDuckling = s.pattern === "duck-and-duckling" || s.pattern === "kansas-star";
   const isArkansasCrossroads = s.pattern === "arkansas-crossroads";
   const isAtticWindow = s.pattern === "attic-window";
@@ -997,6 +998,49 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (intersections>0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
       notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${ex(sashWidth+SEAM)} × ${ex(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${ex(sashWidth+SEAM)}. Join block rows with vertical strips, piece full-width horizontal sashing rows with intersections, then add the optional border last.`);
     } else notes.push("Join Pinwheel Parlor blocks edge to edge, all in the same orientation; add the optional border last.");
+  } else if (s.pattern === "union-square") {
+    const d = unionSquareDimensions(s.blockSize), c = UNION_SQUARE_COUNTS, n = blockCount;
+    const fabric = (id: string): FabricKey => {
+      const section = pattern.sections.find(section => section.id === id);
+      if (!section) throw new Error(`Missing Union Square section: ${id}`);
+      return s.assignments[id] ?? section.defaultFabric;
+    };
+    const bg = fabric("background"), main = fabric("main"), accent = fabric("accent"), outer = fabric("outer");
+    // Pool identical cuts by actual assigned fabric, preserving the use breakdown.
+    const groups = new Map<string, { fabric: FabricKey; label: string; size: number; count: number; uses: string[] }>();
+    const add = (f: FabricKey, label: string, count: number, size: number, use: string) => {
+      const key = `${f}:${size}`;
+      const e = groups.get(key) ?? { fabric: f, label, size, count: 0, uses: [] };
+      e.count += count*n; e.uses.push(`${count} per block: ${use}`); groups.set(key,e);
+    };
+    add(bg,"Small corner squares",c.backgroundSquares,d.smallCut,"inner background squares");
+    add(main,"Small corner squares",c.mainSquares,d.smallCut,"outer corner accents");
+    add(main,"Whole centre squares",c.centreSquares,d.unitTrim,"uncut centre square");
+    add(bg,"Corner HST starter squares",c.backgroundHstStarters,d.hstStarter,`pair with Fabric ${main}`);
+    add(main,"Corner HST starter squares",c.mainHstStarters,d.hstStarter,`pair with Fabric ${bg}`);
+    add(bg,"Side QST starter squares",c.backgroundQstStarters,d.qstStarter,`one paired with Fabric ${accent}, one with Fabric ${outer}`);
+    add(accent,"Side QST starter squares",c.accentQstStarters,d.qstStarter,`pair with Fabric ${bg}`);
+    add(outer,"Side QST starter squares",c.outerQstStarters,d.qstStarter,`pair with Fabric ${bg}`);
+    for (const e of groups.values()) addSquares(reqs[e.fabric],`${e.label}||${e.uses.join("; ")}`,e.count,e.size,s.fabricWidth);
+    const exact = (v: number) => { const m = rulerMark(v); return `${v.toFixed(4)}" (${m.relation} ${m.label} ruler mark)`; };
+    notes.push(
+      `Union Square: a 3 × 3 macro layout on a 6 × 6 grid. Small units finish at ${exact(d.small)}; macro units finish at ${exact(d.unit)}. Four corner four-patches, four hourglass QST sides and one whole Fabric ${main} centre. Reference pale lines are seams, not extra strips.`,
+      `Cutting per block: Fabric ${bg} — 4 small squares at ${exact(d.smallCut)}, 4 corner HST starter squares at ${d.hstStarter.toFixed(3)}", and 2 side QST starter squares at ${d.qstStarter.toFixed(3)}"; Fabric ${main} — 4 small squares at ${exact(d.smallCut)}, 4 corner HST starters at ${d.hstStarter.toFixed(3)}", and 1 whole centre square at ${exact(d.unitTrim)}; Fabric ${accent} and Fabric ${outer} — 1 side QST starter square each at ${d.qstStarter.toFixed(3)}". Starter counts are cut squares, not finished units. Oversized starters round UP to an eighth; plain cuts and trim targets are exact, not rounded down to ruler marks. Allowance for trimming is intentional. Make a test block before chain-piecing.`,
+      `Corner HSTs (8 per block): pair each of the 4 Fabric ${bg} HST starters with a Fabric ${main} HST starter right sides together. Mark one diagonal, sew 1/4" on both sides, cut on the marked line, open and press toward Fabric ${main}. Four pairs yield eight HSTs. Trim to ${exact(d.smallCut)} square UNFINISHED, keeping the seam corner to corner.`,
+      `Side QSTs, stage 1: pair ONE Fabric ${bg} QST starter with ONE Fabric ${accent} QST starter and the other Fabric ${bg} starter with ONE Fabric ${outer} starter. Mark one diagonal on each pair, sew 1/4" either side, cut on the line and press toward the non-background fabric. This makes TWO ${bg}/${accent} intermediate HSTs and TWO ${bg}/${outer} intermediate HSTs. Trim all four to ${exact(d.qstIntermediate)} square with diagonal seams corner to corner.`,
+      `Side QSTs, stage 2: put one ${bg}/${accent} intermediate HST right sides together with one ${bg}/${outer} intermediate HST. Align their diagonal seams and rotate one so the Fabric ${bg} halves lie on opposite sides of that seam; nest and pin. Mark the OTHER diagonal (perpendicular to the first seam), sew 1/4" on both sides and cut on that marked line. Repeat with the remaining intermediates. Two second-stage pairs yield exactly FOUR hourglass QST units, not eight; each has two opposite Fabric ${bg} triangles and opposite Fabric ${accent}/${outer} triangles. Press the final seams open to reduce bulk, without stretching bias. Trim each to ${exact(d.unitTrim)} square UNFINISHED, centring the four-triangle intersection and aligning both diagonal seams with the corners.`,
+      `Corner four-patches: top-left, row 1 = Fabric ${main} square / HST with Fabric ${main} in the top-right half; row 2 = HST with Fabric ${main} in the bottom-left half / Fabric ${bg} square. Sew each pair, press the pair seams in opposite directions, nest and join. Make four units; rotate this unit 90° clockwise for top-right, 180° for bottom-right, and 270° for bottom-left. The whole Fabric ${main} square always sits at the block's outer corner; the Fabric ${bg} square is nearest the centre. Each corner trims/checks at ${exact(d.unitTrim)} square UNFINISHED.`,
+      `Orient the four QST units: Fabric ${accent} always points inward, touching the centre square along its full base; Fabric ${outer} lies along the block perimeter; Fabric ${bg} forms both flanks. Top side = ${outer} top / ${accent} bottom; right side = ${outer} right / ${accent} left; bottom side = ${outer} bottom / ${accent} top; left side = ${outer} left / ${accent} right.`,
+      `Union Square row 1: top-left corner / top QST / top-right corner. Row 2: left QST / whole Fabric ${main} centre / right QST. Row 3: bottom-left corner / bottom QST / bottom-right corner. Sew the three units in each row with accurate 1/4" seams; press rows 1 and 3 toward the corners and row 2 toward the centre so seams nest. Pin intersections and preserve 1/4" beyond triangle points, join rows and press open. Check ${exact(d.blockTrim)} square UNFINISHED (${s.blockSize}" finished). Straight seams only; no Y-seams or templates.`,
+      `Union Square has fourfold rotational symmetry: straight set keeps all blocks facing the same way; alternating turn rotates every other block 90° clockwise. With solid fabrics both settings look identical and have identical cuts and yardage; directional fabric prints may turn.`,
+    );
+    if (sashWidth > 0) {
+      const sash = fabric("sashing"), vertical = (blocksAcross-1)*blocksDown, horizontal = (blocksDown-1)*blocksAcross;
+      const count = vertical+horizontal, intersections = (blocksAcross-1)*(blocksDown-1);
+      if (count>0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize+SEAM, sashWidth+SEAM, s.fabricWidth);
+      if (intersections>0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
+      notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${exact(sashWidth+SEAM)} × ${exact(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${exact(sashWidth+SEAM)}. Join block rows with vertical strips; piece horizontal sashing rows with intersections. No outer sashing frame. Add the optional border last.`);
+    } else notes.push("Join Union Square blocks edge to edge in the selected setting; add the optional border last.");
   } else if (s.pattern === "flying-dutchman") {
     const d = flyingDutchmanDimensions(s.blockSize), c = FLYING_DUTCHMAN_COUNTS, n = blockCount;
     const fabric = (id: string): FabricKey => {

@@ -64,6 +64,19 @@ const borderSection: PatternSection = {
 
 const BASE_PATTERNS: PatternDefBase[] = [
   {
+    id: "union-square", name: "Union Square", hasMath: true,
+    layouts: ["alternating"],
+    intro: "A striking traditional block drafted on a 6×6 grid: a central framed square surrounded by four quarter-square hourglass units and four corner four-patches. Four adjustable fabrics create a luminous diamond star framing the centre, flanked by outward-pointing edge triangles and corner accents. Pieced with straight seams, zero templates, and zero Y-seams; optional sashing and border.",
+    sections: [
+      { id: "background", defaultFabric: "A", label: "Background squares & triangles", hint: "Four inner corner squares, eight corner HST halves, and eight side QST triangles." },
+      { id: "main", defaultFabric: "B", label: "Centre square & corner accents", hint: "One large centre square, four outer corner squares, and eight corner HST halves." },
+      { id: "accent", defaultFabric: "C", label: "Diamond star points", hint: "Four inward-pointing QST triangles framing the centre square." },
+      { id: "outer", defaultFabric: "D", label: "Outer edge triangles", hint: "Four outward-pointing QST triangles along the block perimeter." },
+      { id: "sashing", defaultFabric: "E", label: "Sashing between blocks", hint: "Optional; set to zero for edge-to-edge blocks." },
+      { ...borderSection, defaultFabric: "F" },
+    ],
+  },
+  {
     id: "flying-dutchman", name: "Flying Dutchman", hasMath: true,
     layouts: ["alternating"],
     intro: "A 4×4 whirlwind block with four background squares, eight outward-flying wings, and a four-triangle spinning centre star. Pieced entirely from whole squares and two-at-a-time Half Square Triangles with straight seams and zero templates. Three adjustable fabrics; optional sashing and border.",
@@ -2387,6 +2400,7 @@ const BASE_PATTERNS: PatternDefBase[] = [
  * equal the distinct default fabrics across both blocks, excluding sashing/cornerstone/border.
  */
 export const PATTERN_META: Record<string, PatternMeta> = {
+  "union-square": { skill: "confident", fabricCount: 4, techniques: ["squares", "hst"] },
   "flying-dutchman": { skill: "confident", fabricCount: 3, techniques: ["squares", "hst"] },
   "grecian-square": { skill: "beginner", fabricCount: 4, techniques: ["squares", "hst", "strips"] },
   "pinwheel-parlor": { skill: "intermediate", fabricCount: 7, techniques: ["squares", "hst", "onpoint", "strips"] },

@@ -8,7 +8,7 @@ const count=(r:ReturnType<typeof calculateYardage>,f:string,label:string)=>r.fab
 const pieces=indianPuzzlePieces();
 const at=(x:number,y:number)=>pieces.filter(p=>{const c=p.points.map(([ax,ay],i)=>{const [bx,by]=p.points[(i+1)%p.points.length];return (bx-ax)*(y-ay)-(by-ay)*(x-ax);});return c.every(v=>v>1e-8)||c.every(v=>v< -1e-8);}).map(p=>p.role);
 describe("Indian Puzzle reference and real construction",()=>{
- it("registers three standard fabrics, preserves Nine Patch first and existing patterns",()=>{const p=getPattern("indian-puzzle");if(!p)throw new Error("Missing pattern");expect(countBlockFabrics(p.sections)).toBe(3);expect(p.sections.slice(0,3).map(s=>s.defaultFabric)).toEqual(["A","B","E"]);expect(PATTERNS[0].id).toBe("nine-patch");expect(PATTERNS).toHaveLength(87);expect(getPattern("eccentric-star")?.id).toBe("eccentric-star");});
+ it("registers three standard fabrics, preserves Nine Patch first and existing patterns",()=>{const p=getPattern("indian-puzzle");if(!p)throw new Error("Missing pattern");expect(countBlockFabrics(p.sections)).toBe(3);expect(p.sections.slice(0,3).map(s=>s.defaultFabric)).toEqual(["A","B","E"]);expect(PATTERNS[0].id).toBe("nine-patch");expect(PATTERNS).toHaveLength(88);expect(getPattern("eccentric-star")?.id).toBe("eccentric-star");});
  it("preserves the exact top-left corner and continuous top geese",()=>{
   expect(pieces.filter(p=>p.unit==="corner").slice(0,6).map(p=>[p.role,p.points])).toEqual([
    ["background",[[0,0],[1,0],[1,1],[0,1]]],["accent",[[1,0],[2,1],[1,1]]],["background",[[1,0],[2,0],[2,1]]],

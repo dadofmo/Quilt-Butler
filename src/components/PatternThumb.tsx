@@ -1,3 +1,4 @@
+import { UnionSquareBlock } from "./UnionSquareBlock";
 import { DakotaGoldBlock } from "./DakotaGoldBlock";
 import { SawtoothBlock } from "./SawtoothBlock";
 import { HoveringHawksBlock } from "./HoveringHawksBlock";
@@ -51,6 +52,7 @@ const C = {
 
 
 const PATTERN_ALT: Record<PatternId, string> = {
+  "union-square": "Union Square: four corner four-patches and four hourglass side units surrounding a whole centre square in four fabrics",
   "flying-dutchman": "Flying Dutchman: a four-by-four block with four background squares, eight outward-flying wing triangles and a four-triangle spinning centre star in three fabrics",
   "grecian-square": "Grecian Square: a nine-patch of four half-square-triangle corners and four two-bar side units around a whole centre square",
   "pinwheel-parlor": "Pinwheel Parlor: a four-fabric centre pinwheel inside a ring of twelve on-point diamonds, framed by corner squares, triangles and edge bars",
@@ -219,6 +221,8 @@ export function PatternThumb({ pattern, size = 96 }: Props) {
       return <svg {...common}><HoveringHawksBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "indian-puzzle":
       return <svg {...common}><IndianPuzzleBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
+    case "union-square":
+      return <svg {...common}><UnionSquareBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "flying-dutchman":
       return <svg {...common}><FlyingDutchmanBlock size={90} assignments={thumbnailAssignments(pattern)} /></svg>;
     case "grecian-square":

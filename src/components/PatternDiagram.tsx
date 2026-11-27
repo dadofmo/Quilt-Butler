@@ -1,3 +1,4 @@
+import { UnionSquareBlock } from "./UnionSquareBlock";
 import { DakotaGoldBlock } from "./DakotaGoldBlock";
 import { SawtoothBlock } from "./SawtoothBlock";
 import { HoveringHawksBlock } from "./HoveringHawksBlock";
@@ -117,6 +118,8 @@ function renderInner(
       return <IndianPuzzleBlock size={200} assignments={a} photos={photos} />;
     case "pinwheel-parlor":
       return <PinwheelParlorBlock size={200} assignments={a} photos={photos} />;
+    case "union-square":
+      return <UnionSquareBlock size={200} assignments={a} photos={photos} />;
     case "flying-dutchman":
       return <FlyingDutchmanBlock size={200} assignments={a} photos={photos} />;
     case "grecian-square":

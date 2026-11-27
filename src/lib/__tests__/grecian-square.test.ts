@@ -27,7 +27,7 @@ describe("Grecian Square reference and construction",()=>{
     const p=getPattern("grecian-square"); if(!p) throw new Error("missing");
     expect(countBlockFabrics(p.sections)).toBe(4);
     expect(PATTERNS[0].id).toBe("nine-patch");
-    expect(PATTERNS).toHaveLength(87);
+    expect(PATTERNS).toHaveLength(88);
   });
   it("matches the reference: corner fabric at outside corners, dark bars outside, light bars inside, whole centre",()=>{
     expect(GRECIAN_SQUARE_CORNERS.map(c=>c.outer)).toEqual(["top-left","top-right","bottom-left","bottom-right"]);

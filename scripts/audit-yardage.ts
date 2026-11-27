@@ -3220,6 +3220,20 @@ console.log("\n=== Flying Dutchman: nine 12-inch blocks ===");
   check("Flying Dutchman sashing bolt inches", finished.fabrics.find(x => x.fabric === "F")?.totalInches ?? -1, 12.5);
   check("Flying Dutchman border bolt inches", finished.fabrics.find(x => x.fabric === "G")?.totalInches ?? -1, 17.5);
 }
+console.log("\n=== Union Square: nine and twelve 12-inch blocks ===");
+for (const [height, n, a, b] of [[36,9,33,21],[48,12,41.5,28.5]]) {
+  const r = calculateYardage({ ...base(), pattern: "union-square", quiltWidth: 36, quiltHeight: height });
+  // 42.5 usable: 16 small squares/2.5-inch strip, 14 HST starters/3-inch
+  // strip, 7 QST starters/5.5-inch strip, 9 centres/4.5-inch strip.
+  check(`Union Square ${n} blocks background inches`,r.fabrics.find(f=>f.fabric==="A")?.totalInches ?? -1,a);
+  check(`Union Square ${n} blocks main inches`,r.fabrics.find(f=>f.fabric==="B")?.totalInches ?? -1,b);
+  for (const f of ["C","D"]) check(`Union Square ${n} blocks ${f} inches`,r.fabrics.find(x=>x.fabric===f)?.totalInches ?? -1,11);
+}
+{
+  const r = calculateYardage({ ...base(), pattern: "union-square", quiltWidth: 46, quiltHeight: 46, sashingWidth: 2, borderWidth: 3 });
+  check("Union Square sashing inches",r.fabrics.find(f=>f.fabric==="E")?.totalInches ?? -1,12.5);
+  check("Union Square border inches",r.fabrics.find(f=>f.fabric==="F")?.totalInches ?? -1,17.5);
+}
 if (failures.length === 0) {
   console.log("✅ ALL MATH CHECKS PASSED");
 } else {

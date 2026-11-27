@@ -33,7 +33,7 @@ describe("Flying Dutchman reference geometry and construction", () => {
     expect(p.layouts).toEqual(["alternating"]);
     expect(PATTERN_META["flying-dutchman"]).toEqual({ skill: "confident", fabricCount: 3, techniques: ["squares", "hst"] });
     expect(PATTERNS[0].id).toBe("nine-patch");
-    expect(PATTERNS).toHaveLength(87);
+    expect(PATTERNS).toHaveLength(88);
   });
 
   it("matches the reference cell map exactly", () => {
