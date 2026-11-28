@@ -65,7 +65,7 @@ const borderSection: PatternSection = {
 const BASE_PATTERNS: PatternDefBase[] = [
   {
     id: "union-square", name: "Union Square", hasMath: true,
-    layouts: ["alternating"],
+    layouts: ["straight"],
     intro: "A striking traditional block drafted on a 6×6 grid: a central framed square surrounded by four quarter-square hourglass units and four corner four-patches. Four adjustable fabrics create a luminous diamond star framing the centre, flanked by outward-pointing edge triangles and corner accents. Pieced with straight seams, zero templates, and zero Y-seams; optional sashing and border.",
     sections: [
       { id: "background", defaultFabric: "A", label: "Background squares & triangles", hint: "Four inner corner squares, eight corner HST halves, and eight side QST triangles." },

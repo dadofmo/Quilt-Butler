@@ -34,7 +34,7 @@ describe("Union Square approved reference and construction",()=> {
     expect(countBlockFabrics(p.sections)).toBe(4);
     expect(p.sections.map(s=>[s.id,s.defaultFabric])).toEqual([["background","A"],["main","B"],["accent","C"],["outer","D"],["sashing","E"],["border","F"]]);
     expect(p.skill).toBe("confident"); expect(p.techniques).toEqual(["squares","hst"]);
-    expect(p.layouts).toEqual(["alternating"]);
+    expect(p.layouts).toEqual(["straight"]);
   });
   it("matches all four reference corners, including both corrected bottom-left HSTs",()=> {
     // Independent points on each side of all eight diagonals, plus whole squares.
@@ -103,11 +103,13 @@ describe("Union Square approved reference and construction",()=> {
       expect(fabric?.totalInches).toBe(inches); expect(fabric?.yards).toBe(Math.ceil(inches/36*4)/4);
     }
   });
-  it("turns only finished blocks, leaving geometry and yardage unchanged",()=> {
-    expect(rotationFor("union-square","straight",0,1)).toBe(0);
-    expect(rotationFor("union-square","alternating",0,1)).toBe(90);
-    expect(rotationFor("union-square","alternating",1,1)).toBe(0);
-    expect(calculateYardage({...base,blockLayout:"alternating"}).fabrics).toEqual(calculateYardage(base).fabrics);
+  it("keeps every block straight even with a stale saved rotation, leaving yardage unchanged",()=> {
+    for (const layout of ["straight", "alternating", "barn-raising", "herringbone"] as const) {
+      for (let row = 0; row < 3; row++) for (let col = 0; col < 3; col++) {
+        expect(rotationFor("union-square",layout,row,col,3,3)).toBe(0);
+      }
+      expect(calculateYardage({...base,blockLayout:layout}).fabrics).toEqual(calculateYardage(base).fabrics);
+    }
   });
   it("hand-checks sashing, intersections, border and independently reassigned fabrics",()=> {
     const r=calculateYardage({...base,quiltWidth:46,quiltHeight:46,sashingWidth:2,borderWidth:3});

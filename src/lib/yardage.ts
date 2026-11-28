@@ -1032,7 +1032,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
       `Corner four-patches: top-left, row 1 = Fabric ${main} square / HST with Fabric ${main} in the top-right half; row 2 = HST with Fabric ${main} in the bottom-left half / Fabric ${bg} square. Sew each pair, press the pair seams in opposite directions, nest and join. Make four units; rotate this unit 90° clockwise for top-right, 180° for bottom-right, and 270° for bottom-left. The whole Fabric ${main} square always sits at the block's outer corner; the Fabric ${bg} square is nearest the centre. Each corner trims/checks at ${exact(d.unitTrim)} square UNFINISHED.`,
       `Orient the four QST units: Fabric ${accent} always points inward, touching the centre square along its full base; Fabric ${outer} lies along the block perimeter; Fabric ${bg} forms both flanks. Top side = ${outer} top / ${accent} bottom; right side = ${outer} right / ${accent} left; bottom side = ${outer} bottom / ${accent} top; left side = ${outer} left / ${accent} right.`,
       `Union Square row 1: top-left corner / top QST / top-right corner. Row 2: left QST / whole Fabric ${main} centre / right QST. Row 3: bottom-left corner / bottom QST / bottom-right corner. Sew the three units in each row with accurate 1/4" seams; press rows 1 and 3 toward the corners and row 2 toward the centre so seams nest. Pin intersections and preserve 1/4" beyond triangle points, join rows and press open. Check ${exact(d.blockTrim)} square UNFINISHED (${s.blockSize}" finished). Straight seams only; no Y-seams or templates.`,
-      `Union Square has fourfold rotational symmetry: straight set keeps all blocks facing the same way; alternating turn rotates every other block 90° clockwise. With solid fabrics both settings look identical and have identical cuts and yardage; directional fabric prints may turn.`,
+      `Union Square block setting — straight set: keep every block facing the same way as the block diagram. The block has fourfold rotational symmetry, so a quarter turn does not create a different patchwork layout.`,
     );
     if (sashWidth > 0) {
       const sash = fabric("sashing"), vertical = (blocksAcross-1)*blocksDown, horizontal = (blocksDown-1)*blocksAcross;
@@ -1040,7 +1040,7 @@ export function calculateYardage(s: PlannerState): CalcResult {
       if (count>0) addRails(reqs[sash], "Sashing strips between blocks", count, s.blockSize+SEAM, sashWidth+SEAM, s.fabricWidth);
       if (intersections>0) addSquares(reqs[sash], "Sashing intersection squares", intersections, sashWidth+SEAM, s.fabricWidth);
       notes.push(`Sashing: cut ${count} Fabric ${sash} strips at ${exact(sashWidth+SEAM)} × ${exact(s.blockSize+SEAM)} (${vertical} vertical, ${horizontal} horizontal), plus ${intersections} same-fabric intersection squares at ${exact(sashWidth+SEAM)}. Join block rows with vertical strips; piece horizontal sashing rows with intersections. No outer sashing frame. Add the optional border last.`);
-    } else notes.push("Join Union Square blocks edge to edge in the selected setting; add the optional border last.");
+    } else notes.push("Join Union Square blocks edge to edge in straight set, all facing the same way; add the optional border last.");
   } else if (s.pattern === "flying-dutchman") {
     const d = flyingDutchmanDimensions(s.blockSize), c = FLYING_DUTCHMAN_COUNTS, n = blockCount;
     const fabric = (id: string): FabricKey => {

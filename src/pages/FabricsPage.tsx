@@ -393,12 +393,12 @@ function FabricsStepInner() {
                   />
                 )}
 
-                {!isCustomPattern && pattern.layouts && pattern.layouts.length > 0 && (
+                {!isCustomPattern && pattern.layouts?.some(layout => layout !== "straight") && (
                   <BlockLayoutPicker
                     pattern={pattern.id}
                     assignments={planner.assignments}
                     photos={planner.fabricPhotos}
-                    options={["straight", ...pattern.layouts]}
+                    options={["straight", ...(pattern.layouts ?? []).filter(layout => layout !== "straight")]}
                     value={planner.blockLayout}
                     onChange={(next) => setPlanner({ blockLayout: next })}
                   />
